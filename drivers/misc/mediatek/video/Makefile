@@ -20,7 +20,7 @@ ifneq ($(filter y,$(CONFIG_MACH_MT8127) $(CONFIG_MACH_MT7623) $(CONFIG_MACH_MT85
 CONFIG_MTK_PLATFORM := mt8127
 endif
 
-ifeq (y, $(filter y, $(CONFIG_MACH_MT6580)))
+ifeq (y, $(filter y, $(CONFIG_MACH_MT6580) $(CONFIG_MACH_MT6735) $(CONFIG_MACH_MT6735M) $(CONFIG_MACH_MT6753)))
 subdir -ccflags -y += -DCOMMON_DISP_LOG
 endif
 
@@ -43,5 +43,8 @@ else
 	obj-$(CONFIG_MACH_MT6765) += common/
 	obj-$(CONFIG_MACH_MT6761) += common/
 	obj-$(CONFIG_MACH_MT6580) += common/
+	obj-$(CONFIG_MACH_MT6735) += common/
+	obj-$(CONFIG_MACH_MT6735M) += common/
+	obj-$(CONFIG_MACH_MT6753) += common/
 endif
 
