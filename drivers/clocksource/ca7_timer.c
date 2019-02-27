@@ -682,6 +682,9 @@ static int __init arch_timer_register(void)
 	}
 
 	ppi = arch_timer_ppi[arch_timer_uses_ppi];
+
+	pr_info("arch_timer_uses_ppi=%d\n", arch_timer_uses_ppi);
+
 	switch (arch_timer_uses_ppi) {
 	case VIRT_PPI:
 		err = request_percpu_irq(ppi, arch_timer_handler_virt,
@@ -845,16 +848,37 @@ static int __init arch_timer_init(void)
 		}
 	}
 
+#if defined(CONFIG_MACH_MT6580)
+	/*
+	 * MT6580 always use physical ppi,
+	 * set it as PHYS_SECURE_PPI first here, and later
+	 * we will change it again to PHYS_NONSECURE_PPI
+	 * if secure OS is enabled.
+	 */
+	arch_timer_uses_ppi = PHYS_SECURE_PPI;
+
+	pr_info("arch_timer_rate(0x%x)\n", arch_timer_rate);
+	pr_info("PPI: PHYS_SECURE=%d, PHYS_NONSECURE=%d, VIRT=%d, HYP=%d,\n",
+	     arch_timer_ppi[PHYS_SECURE_PPI],
+	     arch_timer_ppi[PHYS_NONSECURE_PPI],
+	     arch_timer_ppi[VIRT_PPI],
+	     arch_timer_ppi[HYP_PPI]);
+#endif
+
 	ret = arch_timer_register();
-	if (ret)
+	if (ret) {
+		pr_info("arch_timer_register ret=%d\n", ret);
 		return ret;
+	}
 
 	ret = arch_timer_common_init();
-	if (ret)
+	if (ret) {
+		pr_info("arch_timer_common_init ret=%d\n", ret);
 		return ret;
+	}
 
 	arch_timer_kvm_info.virtual_irq = arch_timer_ppi[VIRT_PPI];
-	
+
 	return 0;
 }
 
