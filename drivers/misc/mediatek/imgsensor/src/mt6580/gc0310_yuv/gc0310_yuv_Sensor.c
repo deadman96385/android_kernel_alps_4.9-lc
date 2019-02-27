@@ -1348,7 +1348,7 @@ UINT32 GC0310Open(void)
 
     LOG_INF("<Jet> Entry GC0310Open!!!\r\n");
 
-    Sleep(10);
+    //Sleep(10);
 
     //Read sensor ID to adjust I2C is OK?
     for(i=0;i<3;i++)
@@ -1687,7 +1687,7 @@ BOOL GC0310_set_param_effect(UINT16 para)
 
         case MEFFECT_SEPIA:
             GC0310_write_cmos_sensor(0x43 , 0x00);
-	    Sleep(50);
+	    Sleep(30);
             GC0310_write_cmos_sensor(0xda , 0xd0);
             GC0310_write_cmos_sensor(0xdb , 0x28);
             GC0310_write_cmos_sensor(0x43 , 0x02);
@@ -1699,7 +1699,7 @@ BOOL GC0310_set_param_effect(UINT16 para)
 
         case MEFFECT_SEPIAGREEN:
             GC0310_write_cmos_sensor(0x43 , 0x00);
-            Sleep(50);
+            Sleep(30);
             GC0310_write_cmos_sensor(0xda , 0xc0);
             GC0310_write_cmos_sensor(0xdb , 0xc0);
             GC0310_write_cmos_sensor(0x43 , 0x02);
@@ -1707,7 +1707,7 @@ BOOL GC0310_set_param_effect(UINT16 para)
 
         case MEFFECT_SEPIABLUE:
             GC0310_write_cmos_sensor(0x43 , 0x00);
-            Sleep(50);
+            Sleep(30);
             GC0310_write_cmos_sensor(0xda , 0x28);
             GC0310_write_cmos_sensor(0xdb , 0xa0);
             GC0310_write_cmos_sensor(0x43 , 0x02);
@@ -1715,7 +1715,7 @@ BOOL GC0310_set_param_effect(UINT16 para)
 
         case MEFFECT_MONO:
             GC0310_write_cmos_sensor(0x43 , 0x00);
-            Sleep(50);
+            Sleep(30);
             GC0310_write_cmos_sensor(0xda , 0x00);
             GC0310_write_cmos_sensor(0xdb , 0x00);
             GC0310_write_cmos_sensor(0x43 , 0x02);
