@@ -95,4 +95,13 @@ extern bool usb20_check_vbus_on(void);
 #endif
 extern bool usb_prepare_clock(bool enable);
 extern void usb_prepare_enable_clock(bool enable);
+
+/* switch charger API*/
+#ifdef CONFIG_MTK_FAN5405_SUPPORT
+extern void fan5405_set_opa_mode(u32 val);
+extern void fan5405_set_otg_pl(u32 val);
+extern void fan5405_set_otg_en(u32 val);
+extern u32 fan5405_config_interface(u8 RegNum, u8 val, u8 MASK, u8 SHIFT);
+#endif
+
 #endif

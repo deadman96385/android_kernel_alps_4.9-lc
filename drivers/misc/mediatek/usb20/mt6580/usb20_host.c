@@ -249,11 +249,22 @@ void _set_vbus(struct musb *musb, int is_on)
 
 	if (is_on && !vbus_on && vbus_inited) {
 		vbus_on = true;
+#ifdef CONFIG_MTK_FAN5405_SUPPORT
+		fan5405_set_opa_mode(1);
+		fan5405_set_otg_pl(1);
+		fan5405_set_otg_en(1);
+#else
 		DBG(0, "**** Drive VBUS HIGH KS!!!!!\n");
 		pinctrl_select_state(pinctrl, pinctrl_drvvbus_high);
+#endif
 	} else if (!is_on && vbus_on && vbus_inited) {
+#ifdef CONFIG_MTK_FAN5405_SUPPORT
+		fan5405_config_interface(0x01, 0x30, 0xff, 0x00);
+		fan5405_config_interface(0x02, 0x8e, 0xff, 0x00);
+#else
 		DBG(0, "**** Drive VBUS LOW KS!!!!!\n");
 		pinctrl_select_state(pinctrl, pinctrl_drvvbus_low);
+#endif
 		vbus_on = false;
 	}
 }
