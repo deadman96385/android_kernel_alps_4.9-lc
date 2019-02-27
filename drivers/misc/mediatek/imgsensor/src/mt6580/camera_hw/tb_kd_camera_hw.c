@@ -19,7 +19,7 @@
 #include <linux/uaccess.h>
 #include <linux/fs.h>
 #include <linux/atomic.h>
-#include "kd_camera_hw.h"
+#include "tb_kd_camera_hw.h"
 
 #include "kd_imgsensor.h"
 #include "kd_imgsensor_define.h"
@@ -28,16 +28,16 @@
 
 /******************************************************************************
  * Debug configuration
-******************************************************************************/
+ *****************************************************************************/
 #define PFX "[kd_camera_hw]"
 #define PK_DBG_NONE(fmt, arg...)    do {} while (0)
 #define PK_DBG_FUNC(fmt, arg...)    pr_debug(PFX fmt, ##arg)
 
-#define DEBUG_CAMERA_HW_K
+/* #define DEBUG_CAMERA_HW_K */
 #ifdef DEBUG_CAMERA_HW_K
 #define PK_DBG PK_DBG_FUNC
-#define PK_ERR(fmt, arg...)   pr_err(fmt, ##arg)
-#define PK_XLOG_INFO(fmt, args...) pr_debug(PFX fmt, ##arg)
+#define PK_ERR(fmt, arg...)         pr_err(fmt, ##arg)
+#define PK_XLOG_INFO(fmt, args...)  pr_debug(PFX fmt, ##arg)
 #else
 #define PK_DBG(a, ...)
 #define PK_ERR(a, ...)
@@ -185,8 +185,11 @@ int mtkcam_gpio_set(int PinIdx, int PwrType, int Val)
 }
 
 
-int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSensorName, BOOL On,
-		       char *mode_name)
+int kdCISModulePowerOn(
+	enum CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx,
+	char *currSensorName,
+	BOOL On,
+	char *mode_name)
 {
 
 	u32 pinSetIdx = 0;	/* default main sensor */
@@ -254,6 +257,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 		else if (pinSetIdx == 1)
 			ISP_MCLK2_EN(1);
 #endif
+		PK_DBG("[PowerON]pinSetIdx:%d, currSensorName: %s\n", pinSetIdx, currSensorName);
 
 		if (currSensorName && pinSetIdx == 0
 		    && (0 == strcmp(currSensorName, SENSOR_DRVNAME_OV5670_MIPI_RAW))) {
@@ -392,7 +396,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 		}
 	} else {		/* power OFF */
 
-		/* PK_DBG("[PowerOFF]pinSetIdx:%d, currSensorName:%s\n", pinSetIdx, currSensorName); */
+		PK_DBG("[PowerOFF]pinSetIdx:%d, currSensorName:%s\n", pinSetIdx, currSensorName);
 		if (pinSetIdx == 0)
 			ISP_MCLK1_EN(0);
 		else
