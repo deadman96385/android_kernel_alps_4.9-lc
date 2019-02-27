@@ -28,13 +28,13 @@ endif
 # Enable AEE
 ccflags-y += -DCMDQ_AEE_READY
 
-ifneq ($(TARGET_BUILD_VARIANT),eng)
-ccflags-y += -D_MTK_USER_
-endif
+# Enable MET
+ccflags-y += -DMET_USER_EVENT_SUPPORT
 
-ifneq ($(TARGET_BUILD_VARIANT),user)
+ifeq ($(CONFIG_MTK_ENG_BUILD),y)
 ccflags-y += -D_CMDQ_TEST_PROC_
 ccflags-y += -DCMDQ_PROFILE_LOCK
+ccflags-y += -D_CMDQ_DEBUG_
 endif
 
 # secure path
