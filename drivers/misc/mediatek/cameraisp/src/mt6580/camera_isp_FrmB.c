@@ -950,7 +950,7 @@ bool ISP_chkModuleSetting(void)
 
 	cam_ctrl_en_p1 = ISP_RD32(ISP_ADDR + 0x4);
 	flk_en = (cam_ctrl_en_p1 >> 17) & 0x01;
-	cam_ctrl_mux = ISP_RD32(ISP_ADDR + 0x18);
+	cam_ctrl_mux = ISP_RD32(ISP_ADDR + 0x74);
 	sgg_sel = (cam_ctrl_mux >> 6) & 0x03;
 	cam_ctrl_sel = ISP_RD32(ISP_ADDR + 0x18);
 	eis_sel = (cam_ctrl_sel >> 15) & 0x01;
