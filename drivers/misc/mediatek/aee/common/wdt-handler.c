@@ -14,6 +14,7 @@
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <mt-plat/aee.h>
+#include <mt-plat/mtk_ram_console.h>
 #include <linux/utsname.h>
 #include <linux/sched.h>
 #include <linux/list.h>
@@ -32,11 +33,9 @@
 #include <asm/traps.h>
 #include <mach/fiq_smp_call.h>
 #include <mach/wd_api.h>
-#ifndef __aarch64__
-#include <smp.h>
-#endif
 #include "aee-common.h"
 #include <ipanic.h>
+#include <mrdump.h>
 #include <mrdump_private.h>
 
 #undef WDT_DEBUG_VERBOSE
