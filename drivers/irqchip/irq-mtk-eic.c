@@ -33,9 +33,7 @@
 #include <linux/gpio.h>
 #include <mt-plat/sync_write.h>
 #include <mt-plat/mtk_io.h>
-#ifdef CONFIG_PINCTRL_MTK_COMMON
-#include <mt-plat/mtk_gpio.h>
-#endif
+#include <mt-plat/mt_gpio.h>
 #include <linux/printk.h>
 #define EINT_DEBUG 0
 #if (EINT_DEBUG == 1)
@@ -1825,12 +1823,9 @@ EXPORT_SYMBOL(mt_gpio_to_eint);
 static int gpio_to_eint(unsigned int gpio)
 {
 	struct pin_node *p;
-#ifdef CONFIG_PINCTRL_MTK_COMMON
 	int i = 0;
-#endif
 	int eint = -1;
 
-#ifdef CONFIG_PINCTRL_MTK_COMMON
 	/*
 	 * check if this gpio configured as builtin eint
 	 */
@@ -1848,7 +1843,6 @@ static int gpio_to_eint(unsigned int gpio)
 			}
 		}
 	}
-#endif
 	/*
 	 * if not builtin eint, just find the mapping from normal mapping table,
 	 * or just linear map with gpio if no mapping table
@@ -1914,17 +1908,8 @@ static void mt_eint_irq_ack(struct irq_data *data)
 
 static int mt_eint_get_level(unsigned int eint_num)
 {
-#ifdef CONFIG_PINCTRL_MTK_COMMON
-	int vgpio = 0;
-#ifdef CONFIG_MTK_GPIOLIB_STAND
-	vgpio = hwgpio_to_vgpio(EINT_FUNC.gpio[eint_num]);
-#else
-	vgpio = EINT_FUNC.gpio[eint_num];
-#endif
+	int vgpio = EINT_FUNC.gpio[eint_num];
 	return __gpio_get_value(vgpio);
-#else
-	return 0;
-#endif
 }
 
 static unsigned int mt_eint_flip_edge(struct eint_chip *chip,
