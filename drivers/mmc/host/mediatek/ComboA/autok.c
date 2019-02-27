@@ -212,6 +212,7 @@ enum EXD_RW_FLAG {
 
 struct autok_host {
 	u32 clk_tx;
+	u32 fifo_tune;
 };
 
 unsigned int autok_debug_level = AUTOK_DBG_RES;
@@ -631,8 +632,15 @@ static int autok_send_tune_cmd(struct msdc_host *host, unsigned int opcode,
 					0xffff << 0, 0x0b);
 				MSDC_GET_FIELD(MSDC_DBG_OUT,
 					0x7ff << 0, fifo_1k_cnt);
-				if ((fifo_1k_cnt >= MSDC_FIFO_THD_1K)
-					&& (fifo_have >= MSDC_FIFO_SZ)) {
+				if ((fifo_1k_cnt >= MSDC_FIFO_THD_1K) &&
+					(fifo_have >= MSDC_FIFO_SZ) &&
+					(host_para->fifo_tune == 1)) {
+					value = MSDC_READ32(MSDC_RXDATA);
+					value = MSDC_READ32(MSDC_RXDATA);
+					value = MSDC_READ32(MSDC_RXDATA);
+					value = MSDC_READ32(MSDC_RXDATA);
+				} else if ((fifo_have >= MSDC_FIFO_SZ) &&
+					(host_para->fifo_tune == 0)) {
 					value = MSDC_READ32(MSDC_RXDATA);
 					value = MSDC_READ32(MSDC_RXDATA);
 					value = MSDC_READ32(MSDC_RXDATA);
@@ -3797,10 +3805,18 @@ int autok_tune_latch_ck(struct msdc_host *host, unsigned int opcode,
 	unsigned int tune_time;
 	struct autok_host autok_host_para;
 	struct AUTOK_PLAT_PARA_MISC platform_para_misc;
+	struct AUTOK_PLAT_FUNC platform_para_func;
 
 	memset(&autok_host_para, 0, sizeof(struct autok_host));
 	memset(&platform_para_misc, 0, sizeof(struct AUTOK_PLAT_PARA_MISC));
+	memset(&platform_para_func, 0, sizeof(struct AUTOK_PLAT_FUNC));
 	get_platform_para_misc(platform_para_misc);
+	get_platform_func(platform_para_func);
+
+	if (platform_para_func.fifo_1k == 1)
+		autok_host_para.fifo_tune = 1;
+	else
+		autok_host_para.fifo_tune = 0;
 	MSDC_WRITE32(MSDC_INT, 0xffffffff);
 	switch (host->hw->host_function) {
 	case MSDC_EMMC:

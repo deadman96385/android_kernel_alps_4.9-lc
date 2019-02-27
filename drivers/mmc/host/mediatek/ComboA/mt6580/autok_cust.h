@@ -15,7 +15,7 @@
 
 #include <mt-plat/mtk_chip.h>
 
-#define AUTOK_VERSION                   (0x18051710)
+#define AUTOK_VERSION                   (0x18062709)
 
 struct AUTOK_PLAT_PARA_TX {
 	unsigned int chip_hw_ver;
@@ -152,6 +152,7 @@ struct AUTOK_PLAT_FUNC {
 	u8 rx_enhance;
 	u8 r1b_check;
 	u8 ddr50_fix;
+	u8 fifo_1k;
 	u8 msdc0_bypass_duty_modify;
 	u8 msdc1_bypass_duty_modify;
 	u8 msdc2_bypass_duty_modify;
@@ -282,6 +283,7 @@ struct AUTOK_PLAT_FUNC {
 		autok_para_func.rx_enhance = 0; \
 		autok_para_func.r1b_check = 0; \
 		autok_para_func.ddr50_fix = 0; \
+		autok_para_func.fifo_1k = 0; \
 		autok_para_func.msdc0_bypass_duty_modify = 0; \
 		autok_para_func.msdc1_bypass_duty_modify = 0; \
 		autok_para_func.msdc2_bypass_duty_modify = 0; \

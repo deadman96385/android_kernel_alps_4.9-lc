@@ -857,39 +857,56 @@ void msdc_pin_config_by_id(u32 id, u32 mode)
 		/* 1. don't pull CLK high;
 		 * 2. Don't toggle RST to prevent from entering boot mode
 		 */
-		if (mode == MSDC_PIN_PULL_DOWN) {
-			/* Switch MSDC0_* to
-			 * cmd:pd50k,clk:pd50k, dat:pd50k,rstb:pu50k,dsl:pd50k
-			 */
+		if (mode == MSDC_PIN_PULL_UP) {
+			/* Set pull_sel 0 up cmd/dat/rst, clk 1 down */
 			MSDC_SET_FIELD(MSDC0_PULL_SEL_CFG_BASE,
 				MSDC0_PULL_SEL_ALL_MASK, 0x100);
-		} else if (mode == MSDC_PIN_PULL_UP) {
-			/* Switch MSDC0_* to
-			 * cmd:pu10k,clk:pd50k, dat:pu10k,rstb:pu10k,dsl:pd50k
-			 */
+		} else {
+			/* Set pull_sel 1 down cmd/dat/rst/clk */
 			MSDC_WRITE32(MSDC0_PULL_SEL_CFG_SET,
 				MSDC0_PULL_SEL_ALL_MASK);
 		}
-		MSDC_SET_FIELD(MSDC0_PULL_R0_CFG_BASE,
-			MSDC0_PULL_R_ALL_MASK, 0x6FF);
-		MSDC_SET_FIELD(MSDC0_PULL_R1_CFG_BASE,
-			MSDC0_PULL_R_ALL_MASK, 0x100);
+
+		if (mode == MSDC_PIN_PULL_NONE) {
+			MSDC_SET_FIELD(MSDC0_PULL_R0_CFG_BASE,
+				MSDC0_PULL_R_ALL_MASK, 0);
+			MSDC_SET_FIELD(MSDC0_PULL_R1_CFG_BASE,
+				MSDC0_PULL_R_ALL_MASK, 0);
+		} else {
+			/* Switch MSDC0_* to
+			 * cmd:pd50k,clk:pd50k, dat:pd50k,rstb:pu50k,dsl:pd50k
+			 */
+			MSDC_SET_FIELD(MSDC0_PULL_R0_CFG_BASE,
+				MSDC0_PULL_R_ALL_MASK, 0x6FF);
+			MSDC_SET_FIELD(MSDC0_PULL_R1_CFG_BASE,
+				MSDC0_PULL_R_ALL_MASK, 0x100);
+		}
+
 	} else if (id == 1) {
-		if (mode == MSDC_PIN_PULL_DOWN) {
-			/* Switch MSDC1_* to 50K ohm PD */
+		if (mode == MSDC_PIN_PULL_UP) {
+			/* Set pull_sel 0 up cmd/dat, clk 1 down */
 			MSDC_SET_FIELD(MSDC1_PULL_SEL_CFG_BASE,
 				MSDC1_PULL_SEL_ALL_MASK, 0x01);
-		} else if (mode == MSDC_PIN_PULL_UP) {
-			/* Switch MSDC1_CLK to 50K ohm PD,
-			 * MSDC1_CMD/MSDC1_DAT* to 10K ohm PU
-			 */
+		} else {
+			/* Set pull_sel 1 down cmd/dat/clk */
 			MSDC_WRITE32(MSDC1_PULL_SEL_CFG_SET,
 				MSDC1_PULL_SEL_ALL_MASK);
 		}
-		MSDC_SET_FIELD(MSDC1_PULL_R0_CFG_BASE,
-			MSDC1_PULL_R_ALL_MASK, 0x3E);
-		MSDC_SET_FIELD(MSDC1_PULL_R1_CFG_BASE,
-			MSDC1_PULL_R_ALL_MASK, 0x01);
+
+		if (mode == MSDC_PIN_PULL_NONE) {
+			MSDC_SET_FIELD(MSDC1_PULL_R0_CFG_BASE,
+				MSDC1_PULL_R_ALL_MASK, 0);
+			MSDC_SET_FIELD(MSDC1_PULL_R1_CFG_BASE,
+				MSDC1_PULL_R_ALL_MASK, 0);
+		} else {
+			/* Switch MSDC1_CLK to 50K ohm PD,
+			 * MSDC1_CMD/MSDC1_DAT* to 10K ohm PU
+			 */
+			MSDC_SET_FIELD(MSDC1_PULL_R0_CFG_BASE,
+				MSDC1_PULL_R_ALL_MASK, 0x3E);
+			MSDC_SET_FIELD(MSDC1_PULL_R1_CFG_BASE,
+				MSDC1_PULL_R_ALL_MASK, 0x01);
+		}
 	}
 }
 #endif /*if !defined(FPGA_PLATFORM)*/
