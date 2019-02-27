@@ -62,7 +62,6 @@ extern void msdc_fpga_power(struct msdc_host *host, u32 on);
 #include <linux/clk.h>
 
 #if defined(FPGA_PLATFORM)
-extern  u32 hclks_msdc[];
 #define msdc_dump_dvfs_reg(buff, size, m, host)
 #define msdc_dump_clock_sts(buff, size, m, host)
 #define msdc_get_hclk(host, src)        MSDC_SRC_FPGA
@@ -81,21 +80,14 @@ void msdc_dump_clock_sts(char **buff, unsigned long *size,
 #define msdc_get_hclk(id, src)		hclks_msdc_all[id][src]
 
 #ifndef CONFIG_MTK_MSDC_BRING_UP_BYPASS
+extern enum cg_clk_id msdc_cg_clk_id[HOST_MAX_NUM];
 #define msdc_clk_enable(host) \
 	do { \
-		(void)clk_enable(host->clk_ctl); \
-		if (host->aes_clk_ctl) \
-			(void)clk_enable(host->aes_clk_ctl); \
-		if (host->hclk_ctl) \
-			(void)clk_enable(host->hclk_ctl); \
+		enable_clock(msdc_cg_clk_id[host->id], "SD"); \
 	} while (0)
 #define msdc_clk_disable(host) \
 	do { \
-		clk_disable(host->clk_ctl); \
-		if (host->aes_clk_ctl) \
-			clk_disable(host->aes_clk_ctl); \
-		if (host->hclk_ctl) \
-			clk_disable(host->hclk_ctl); \
+		disable_clock(msdc_cg_clk_id[host->id], "SD"); \
 	} while (0)
 #else
 #define msdc_clk_enable(host)

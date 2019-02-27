@@ -1519,7 +1519,7 @@ static int autok_pad_dly_sel(struct AUTOK_REF_INFO *pInfo)
 
 			if (pBdNext->is_fullbound) {
 				/* mode_5: rising_edge 2 boundary
-				* (not full bound), falling edge 1 full boundary
+				 * (not full bound), falling edge 1 full bd
 				 */
 				uBD_width = pBdNext->Bound_width;
 				cycle_cnt = 2 *

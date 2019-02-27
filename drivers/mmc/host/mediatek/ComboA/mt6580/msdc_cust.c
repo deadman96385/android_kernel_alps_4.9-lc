@@ -32,22 +32,20 @@
 #include "include/pmic_api_buck.h"
 
 
-struct msdc_host *mtk_msdc_host[] = { NULL, NULL, NULL};
+struct msdc_host *mtk_msdc_host[] = {NULL, NULL};
 EXPORT_SYMBOL(mtk_msdc_host);
 
-int g_dma_debug[HOST_MAX_NUM] = { 0, 0, 0};
-u32 latest_int_status[HOST_MAX_NUM] = { 0, 0, 0};
+int g_dma_debug[HOST_MAX_NUM] = {0, 0};
+u32 latest_int_status[HOST_MAX_NUM] = {0, 0};
 
 unsigned int msdc_latest_transfer_mode[HOST_MAX_NUM] = {
 	/* 0 for PIO; 1 for DMA; 3 for nothing */
 	MODE_NONE,
-	MODE_NONE,
-	MODE_NONE,
+	MODE_NONE
 };
 
 unsigned int msdc_latest_op[HOST_MAX_NUM] = {
 	/* 0 for read; 1 for write; 2 for nothing */
-	OPER_TYPE_NUM,
 	OPER_TYPE_NUM,
 	OPER_TYPE_NUM
 };
@@ -55,32 +53,27 @@ unsigned int msdc_latest_op[HOST_MAX_NUM] = {
 /* for debug zone */
 unsigned int sd_debug_zone[HOST_MAX_NUM] = {
 	0,
-	0,
 	0
 };
 /* for enable/disable register dump */
 unsigned int sd_register_zone[HOST_MAX_NUM] = {
-	1,
 	1,
 	1
 };
 /* mode select */
 u32 dma_size[HOST_MAX_NUM] = {
 	512,
-	512,
 	512
 };
 
 u32 drv_mode[HOST_MAX_NUM] = {
 	MODE_SIZE_DEP, /* using DMA or not depend on the size */
-	MODE_SIZE_DEP,
 	MODE_SIZE_DEP
 };
 
 int dma_force[HOST_MAX_NUM]; /* used for sd ioctrol */
 
 u8 msdc_clock_src[HOST_MAX_NUM] = {
-	0,
 	0,
 	0
 };
@@ -460,90 +453,53 @@ void msdc_HQA_set_voltage(struct msdc_host *host)
 /* Section 3: Clock                                           */
 /**************************************************************/
 #if !defined(FPGA_PLATFORM)
-u32 hclks_msdc0[] = { MSDC0_SRC_0, MSDC0_SRC_1};
-
-/* msdc1/2 clock source reference value is 200M */
-u32 hclks_msdc1[] = { MSDC1_SRC_0, MSDC1_SRC_1, MSDC1_SRC_2};
-
-u32 hclks_msdc3[] = { MSDC3_SRC_0, MSDC3_SRC_1, MSDC3_SRC_2, MSDC3_SRC_3,
-		      MSDC3_SRC_4, MSDC3_SRC_5, MSDC3_SRC_6, MSDC3_SRC_7};
+u32 hclks_msdc0[] = { MSDC0_SRC_0, MSDC0_SRC_1, MSDC0_SRC_2, MSDC0_SRC_3,
+		MSDC0_SRC_4, MSDC0_SRC_5, MSDC0_SRC_6, MSDC0_SRC_7};
+u32 hclks_msdc1[] = { MSDC1_SRC_0, MSDC1_SRC_1, MSDC1_SRC_2, MSDC1_SRC_3,
+		MSDC1_SRC_4, MSDC1_SRC_5, MSDC1_SRC_6, MSDC1_SRC_7};
 
 u32 *hclks_msdc_all[] = {
 	hclks_msdc0,
-	hclks_msdc1,
-	hclks_msdc3,
+	hclks_msdc1
 };
 u32 *hclks_msdc;
+
+enum cg_clk_id msdc_cg_clk_id[HOST_MAX_NUM] = {
+	MT_CG_MSDC0_SW_CG,
+	MT_CG_MSDC1_SW_CG
+};
 
 int msdc_get_ccf_clk_pointer(struct platform_device *pdev,
 	struct msdc_host *host)
 {
-	static char const * const clk_names[] = {
-		MSDC0_CLK_NAME, MSDC1_CLK_NAME, MSDC3_CLK_NAME
-	};
-	static char const * const hclk_names[] = {
-		MSDC0_HCLK_NAME, MSDC1_HCLK_NAME, MSDC3_HCLK_NAME
-	};
-
-	host->clk_ctl = devm_clk_get(&pdev->dev, clk_names[pdev->id]);
-	if  (hclk_names[pdev->id])
-		host->hclk_ctl = devm_clk_get(&pdev->dev, hclk_names[pdev->id]);
-
-	if (IS_ERR(host->clk_ctl)) {
-		pr_notice("[msdc%d] can not get clock control\n", pdev->id);
-		return 1;
-	}
-	if (clk_prepare(host->clk_ctl)) {
-		pr_notice("[msdc%d] can not prepare clock control\n", pdev->id);
-		return 1;
-	}
-
-	if (hclk_names[pdev->id] && IS_ERR(host->hclk_ctl)) {
-		pr_notice("[msdc%d] can not get clock control\n", pdev->id);
-		return 1;
-	}
-	if (hclk_names[pdev->id] && clk_prepare(host->hclk_ctl)) {
-		pr_notice("[msdc%d] can not prepare hclock control\n",
-			pdev->id);
-		return 1;
-	}
-
-#ifdef CONFIG_MTK_HW_FDE
-	if (pdev->id == 0) {
-		host->aes_clk_ctl = devm_clk_get(&pdev->dev,
-			MSDC0_AES_CLK_NAME);
-		if (IS_ERR(host->aes_clk_ctl)) {
-			pr_notice("[msdc%d] can not get aes clock control\n",
-				pdev->id);
-			WARN_ON(1);
-			return 1;
-		}
-		if (clk_prepare(host->aes_clk_ctl)) {
-			pr_notice(
-				"[msdc%d] can not prepare aes clock control\n",
-				pdev->id);
-			WARN_ON(1);
-			return 1;
-		}
-	}
-#endif
+	/* No CCF */
+	host->clk_ctl = NULL;
+	host->hclk_ctl = NULL;
 
 	return 0;
 }
 
 void msdc_select_clksrc(struct msdc_host *host, int clksrc)
 {
-	if (host->id != 0) {
-		pr_notice("[msdc%d] NOT Support switch pll souce[%s]%d\n",
-			host->id, __func__, __LINE__);
-		return;
-	}
+#if 0
+	int mux_id[] = {MT_CLKMUX_MSDC0_MUX_SEL, MT_CLKMUX_MSDC1_MUX_SEL};
+	char name[20];
+	int ori_clksrc;
+#endif
 
 	host->hclk = msdc_get_hclk(host->id, clksrc);
 	host->hw->clk_src = clksrc;
 
 	pr_notice("[%s]: msdc%d select clk_src as %d(%dKHz)\n", __func__,
 		host->id, clksrc, host->hclk/1000);
+#if 0
+	sprintf(name, "MSDC%d", host->id);
+	ori_clksrc = clkmux_get(mux_id[host->id], name);
+	if (ori_clksrc != clksrc)
+		clkmux_sel(mux_id[host->id], clksrc, name);
+#else
+	pr_notice("[%s]: msdc%d not support change clksrc\n", __func__, host->id);
+#endif
 }
 
 #include <linux/seq_file.h>
@@ -555,33 +511,12 @@ static void msdc_dump_clock_sts_core(char **buff, unsigned long *size,
 
 	if (topckgen_base) {
 		buf_ptr += sprintf(buf_ptr,
-		" topckgen [0x%p]=0x%x(should bit[1:0]=01b, bit[7]=0, bit[10:8]=001b, bit[15]=0), bit[18:16]=001b, bit[23]=0\n",
-			topckgen_base + 0x70,
-			MSDC_READ32(topckgen_base + 0x70));
+		"cg [0x10000024][bit18 for msdc1, bit17 for msdc0]=0x%x\n",
+			MSDC_READ32(topckgen_base+0x24));
 
-#ifdef CONFIG_MTK_HW_FDE
 		buf_ptr += sprintf(buf_ptr,
-		" topckgen [0x%p]=0x%x(should bit[26:24]=001b, bit[31]=0)\n",
-			topckgen_base + 0xa0,
-			MSDC_READ32(topckgen_base + 0xa0));
-#endif
-	}
-	if (infracfg_ao_base) {
-		buf_ptr += sprintf(buf_ptr,
-		" infracfg_ao [0x%p]=0x%x(should bit[2]=0b,bit[4]=0b)\n",
-			infracfg_ao_base + 0x94,
-			MSDC_READ32(infracfg_ao_base + 0x94));
-
-#ifdef CONFIG_MTK_HW_FDE
-		buf_ptr += sprintf(buf_ptr,
-		" infracfg_ao [0x%p]=0x%x(should bit[29]=0b)\n",
-			infracfg_ao_base + 0xac,
-			MSDC_READ32(infracfg_ao_base + 0xac));
-#endif
-		buf_ptr += sprintf(buf_ptr,
-		" infracfg_ao [0x%p]=0x%x(should bit[10:9]=00b)\n",
-			infracfg_ao_base + 0xc8,
-			MSDC_READ32(infracfg_ao_base + 0xc8));
+		"mux[0x10000000][bit20~22 for msdc1, bit11~13 for msdc0]=0x%x\n",
+			MSDC_READ32(topckgen_base));
 	}
 
 	*buf_ptr = '\0';
@@ -597,7 +532,7 @@ void msdc_dump_clock_sts(char **buff, unsigned long *size,
 void msdc_clk_enable_and_stable(struct msdc_host *host)
 {
 	void __iomem *base = host->base;
-	u32 div, mode, hs400_div_dis;
+	u32 div, mode;
 	u32 val;
 
 	msdc_clk_enable(host);
@@ -605,9 +540,7 @@ void msdc_clk_enable_and_stable(struct msdc_host *host)
 	val = MSDC_READ32(MSDC_CFG);
 	GET_FIELD(val, CFG_CKDIV_SHIFT, CFG_CKDIV_MASK, div);
 	GET_FIELD(val, CFG_CKMOD_SHIFT, CFG_CKMOD_MASK, mode);
-	GET_FIELD(val, CFG_CKMOD_HS400_SHIFT, CFG_CKMOD_HS400_MASK,
-			hs400_div_dis);
-	msdc_clk_stable(host, mode, div, hs400_div_dis);
+	msdc_clk_stable(host, mode, div, 0);
 }
 
 
@@ -1337,7 +1270,7 @@ int msdc_dt_init(struct platform_device *pdev, struct mmc_host *mmc)
 	}
 
 	if (topckgen_base == NULL) {
-		np = of_find_compatible_node(NULL, NULL, "mediatek,topckgen");
+		np = of_find_compatible_node(NULL, NULL, "mediatek,TOPCKGEN");
 		topckgen_base = of_iomap(np, 0);
 		pr_debug("of_iomap for topckgen base @ 0x%p\n",
 			topckgen_base);

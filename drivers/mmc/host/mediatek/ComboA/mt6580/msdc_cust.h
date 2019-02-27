@@ -11,8 +11,8 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _MSDC_CUST_MT6761_H_
-#define _MSDC_CUST_MT6761_H_
+#ifndef _MSDC_CUST_MT6580_H_
+#define _MSDC_CUST_MT6580_H_
 
 #ifdef CONFIG_FPGA_EARLY_PORTING
 #define FPGA_PLATFORM
@@ -25,7 +25,7 @@
 //#define CONFIG_MTK_MSDC_BRING_UP_BYPASS
 
 #if !defined(FPGA_PLATFORM)
-#include <dt-bindings/clock/mt6761-clk.h>
+#include <mach/mt_clkmgr.h>
 #endif
 
 #ifndef CONFIG_MTK_MSDC_BRING_UP_BYPASS
@@ -37,17 +37,7 @@
 /**************************************************************/
 /* Names used for device tree lookup */
 #define DT_COMPATIBLE_NAME      "mediatek,msdc"
-#define MSDC0_CLK_NAME          "msdc0-clock"
 
-#ifdef CONFIG_MTK_HW_FDE
-#define MSDC0_AES_CLK_NAME          "msdc0-aes-clock"
-#endif
-
-#define MSDC0_HCLK_NAME         "msdc0-hclock"
-#define MSDC1_CLK_NAME          "msdc1-clock"
-#define MSDC1_HCLK_NAME         "msdc1-hclock"
-#define MSDC3_CLK_NAME          "msdc3-clock"
-#define MSDC3_HCLK_NAME         "msdc3-hclock"
 #define MSDC0_IOCFG_NAME        "mediatek,io_cfg_lt"
 #define MSDC1_IOCFG_NAME        "mediatek,io_cfg_lb"
 
@@ -151,24 +141,24 @@
 /**************************************************************/
 /* Section 3: Clock                                           */
 /**************************************************************/
-#define MSDCPLL_FREQ            800000000
-
 /* list the other value by clock owners' clock table doc if needed */
-#define MSDC0_SRC_0             260000
-#define MSDC0_SRC_1             (MSDCPLL_FREQ/2)
+#define MSDC0_SRC_0             125000000
+#define MSDC0_SRC_1             150000000
+#define MSDC0_SRC_2             187000000
+#define MSDC0_SRC_3             178000000
+#define MSDC0_SRC_4             214000000
+#define MSDC0_SRC_5             187000000
+#define MSDC0_SRC_6             26000000
+#define MSDC0_SRC_7             208000000
 
-#define MSDC1_SRC_0             260000
-#define MSDC1_SRC_1             208000000
-#define MSDC1_SRC_2             (MSDCPLL_FREQ/4)
-
-#define MSDC3_SRC_0             260000
-#define MSDC3_SRC_1             208000000
-#define MSDC3_SRC_2             (MSDCPLL_FREQ/2)
-#define MSDC3_SRC_3             156000000
-#define MSDC3_SRC_4             182000000
-#define MSDC3_SRC_5             312000000
-#define MSDC3_SRC_6             364000000
-#define MSDC3_SRC_7             (MSDCPLL_FREQ/4)
+#define MSDC1_SRC_0             125000000
+#define MSDC1_SRC_1             150000000
+#define MSDC1_SRC_2             187000000
+#define MSDC1_SRC_3             178000000
+#define MSDC1_SRC_4             214000000
+#define MSDC1_SRC_5             187000000
+#define MSDC1_SRC_6             26000000
+#define MSDC1_SRC_7             208000000
 
 #define MSDC_SRC_FPGA           12000000
 
@@ -233,7 +223,7 @@
 #define MAX_SGMT_SZ             (MAX_DMA_CNT)
 #define MAX_SGMT_SZ_SDIO        (MAX_DMA_CNT_SDIO)
 
-#define HOST_MAX_NUM            (3)
+#define HOST_MAX_NUM            (2)
 #ifdef CONFIG_PWR_LOSS_MTK_TEST
 #define MAX_REQ_SZ              (512 * 65536)
 #else
