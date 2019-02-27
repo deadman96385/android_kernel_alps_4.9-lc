@@ -81,13 +81,13 @@ enum FH_PLL_ID {
 
 /* keep track the status of each PLL */
 /* TODO: do we need another "uint mode" for Dynamic FH */
-typedef struct {
+struct fh_pll_t {
 	unsigned int fh_status;
 	unsigned int pll_status;
 	unsigned int setting_id;
 	unsigned int curr_freq;
 	unsigned int user_defined;
-} fh_pll_t;
+};
 
 
 /* Record the owner of enable freq hopping <==TBD */
@@ -121,7 +121,7 @@ struct freqhopping_ioctl {
 };
 
 int freqhopping_config(unsigned int pll_id, unsigned long vco_freq, unsigned int enable);
-void mt_freqhopping_init(void);
+//in mt_freqhopping_init(void);
 void mt_freqhopping_pll_init(void);
 int mt_h2l_mempll(void);
 int mt_l2h_mempll(void);
@@ -158,5 +158,12 @@ int mt_dfs_mmpll(unsigned int target_freq);
  pll = {FH_ARMCA7_PLLID, FH_ARMCA15_PLLID}
 */
 int mt_dfs_armpll(unsigned int pll, unsigned int dds);
+struct mt_fh_hal_driver *mt_get_fh_hal_drv(void);
+
+#define FH_BUG_ON(x) \
+do {    \
+		if ((x)) \
+			pr_err("BUGON %s:%d %s:%d\n", __func__, __LINE__, current->comm, current->pid); \
+} while (0)
 
 #endif				/* !__MT_FREQHOPPING_H__ */
