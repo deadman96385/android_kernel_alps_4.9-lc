@@ -22,7 +22,6 @@
 
 #include <mt-plat/mtk_gpu_utility.h>
 #include <trace/events/gpu.h>
-#include <mtk_gpufreq.h>
 
 #include "ged_monitor_3D_fence.h"
 
@@ -32,6 +31,16 @@
 #include "ged_dvfs.h"
 
 #include <asm/div64.h>
+
+extern unsigned int mt_gpufreq_get_dvfs_table_num(void) __attribute__((weak));
+
+static unsigned int _get_dvfs_table_num(void)
+{
+	if (mt_gpufreq_get_dvfs_table_num)
+		return mt_gpufreq_get_dvfs_table_num();
+
+	return 1;
+}
 
 static atomic_t g_i32Count = ATOMIC_INIT(0);
 static unsigned int ged_monitor_3D_fence_debug;
@@ -173,7 +182,7 @@ GED_ERROR ged_monitor_3D_fence_add(int fence_fd)
 			unsigned int uiFreqLevelID;
 
 			if (mtk_get_bottom_gpu_freq(&uiFreqLevelID)) {
-				if (uiFreqLevelID != mt_gpufreq_get_dvfs_table_num() - 1) {
+				if (uiFreqLevelID != _get_dvfs_table_num() - 1) {
 #if 0
 #ifdef CONFIG_MTK_SCHED_TRACERS
 					if (ged_monitor_3D_fence_systrace) {
@@ -184,7 +193,7 @@ GED_ERROR ged_monitor_3D_fence_add(int fence_fd)
 #endif
 #endif
 					if (ged_monitor_3D_fence_switch)
-						mtk_set_bottom_gpu_freq(mt_gpufreq_get_dvfs_table_num() - 1);
+						mtk_set_bottom_gpu_freq(_get_dvfs_table_num() - 1);
 				}
 			}
 		}
