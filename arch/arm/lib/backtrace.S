@@ -73,14 +73,14 @@ for_each_frame:	tst	frame, mask		@ Check for address exceptions
 		sub	sv_pc, sv_pc, offset	@ Correct PC for prefetching
 		bic	sv_pc, sv_pc, mask	@ mask PC/LR for the mode
 
-		ldr	r0, __stext
+1003:		ldr	r0, __stext
 		cmp	sv_pc, r0
 		blt	.badpc
 		ldr	r0, __etext
 		cmp	sv_pc, r0
 		bhi	.badpc
 
-1003:		ldr	r2, [sv_pc, #-4]	@ if stmfd sp!, {args} exists,
+		ldr	r2, [sv_pc, #-4]	@ if stmfd sp!, {args} exists,
 		ldr	r3, .Ldsi+4		@ adjust saved 'pc' back one
 		teq	r3, r2, lsr #10		@ instruction
 		subne	r0, sv_pc, #4		@ allow for mov
