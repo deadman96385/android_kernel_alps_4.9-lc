@@ -77,7 +77,7 @@ static unsigned long __read_mostly tracing_mark_write_addr;
 /* --------------------------------------------- */
 #define MyTag "ISP"
 #define LOG_DBG(format, args...)    pr_debug(MyTag format, ##args)
-#define LOG_INF(format, args...)    pr_debug(MyTag format,  ##args)
+#define LOG_INF(format, args...)    pr_info(MyTag format,  ##args)
 #define LOG_NOTICE(format, args...) pr_notice(MyTag format,  ##args)
 #define LOG_WRN(format, args...)    pr_warn(MyTag format,  ##args)
 #define LOG_ERR(format, args...)    pr_err(MyTag format,  ##args)
@@ -916,7 +916,7 @@ static unsigned int ISP_DumpDmaDeepDbg(void)
 #define RegDump(start, end) {\
 	unsigned int i;\
 	for (i = start; i <= end; i += 0x10) {\
-		LOG_DBG(\
+		LOG_ERR(\
 		"[0x%08X %08X],[0x%08X %08X],[0x%08X %08X],[0x%08X %08X]",\
 		(unsigned int)(ISP_TPIPE_ADDR + i),\
 		(unsigned int)ISP_RD32(ISP_ADDR + i),\
