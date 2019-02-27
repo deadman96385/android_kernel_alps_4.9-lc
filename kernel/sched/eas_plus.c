@@ -15,9 +15,11 @@ static bool is_intra_domain(int prev, int target);
 static inline unsigned long task_util(struct task_struct *p);
 static int select_max_spare_capacity(struct task_struct *p, int target);
 int cpu_eff_tp = 1024;
+/*
 #ifdef CONFIG_SCHED_TUNE
 static inline int energy_diff(struct energy_env *eenv);
 #endif
+*/
 
 #ifndef cpu_isolated
 #define cpu_isolated(cpu) 0
