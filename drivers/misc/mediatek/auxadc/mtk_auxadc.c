@@ -63,7 +63,9 @@
 #include <linux/of.h>
 #include <linux/of_address.h>
 
+#if !defined(CONFIG_MTK_CLKMGR)
 static struct clk *clk_auxadc;
+#endif
 #if defined(AUXADC_CLK_CTR)
 static struct clk *clk_top_auxadc1;
 static struct clk *clk_top_auxadc2;
@@ -76,7 +78,12 @@ void __iomem *auxadc_apmix_base;
 void __iomem *auxadc_efuse_base;
 #endif
 
+#if !defined(CONFIG_MTK_CLKMGR)
 #include <linux/clk.h>
+#else
+/*#include <cust_adc.h>*//* generate by DCT Tool */
+#include <mach/mt_clkmgr.h>
+#endif
 
 #define READ_REGISTER_UINT16(reg) (*(unsigned short * const)(reg))
 #define INREG16(x)          \
@@ -292,6 +299,7 @@ static int IMM_auxadc_GetOneChannelValue(int dwChannel, int data[4],
 
 	mutex_lock(&mutex_get_cali_value);
 
+#if !defined(CONFIG_MTK_CLKMGR)
 	if (clk_auxadc) {
 		ret = clk_prepare_enable(clk_auxadc);
 		if (ret) {
@@ -304,7 +312,7 @@ static int IMM_auxadc_GetOneChannelValue(int dwChannel, int data[4],
 		mutex_unlock(&mutex_get_cali_value);
 		return -1;
 	}
-
+#endif
 	if (dwChannel == PAD_AUX_XP || dwChannel == PAD_AUX_YM)
 		mt_auxadc_disable_penirq();
 	/* step1 check con2 if auxadc is busy */
@@ -370,6 +378,7 @@ static int IMM_auxadc_GetOneChannelValue(int dwChannel, int data[4],
 		*rawdata = channel[dwChannel];
 	mt_auxadc_get_cali_data(channel[dwChannel], data, true);
 
+#if !defined(CONFIG_MTK_CLKMGR)
 	if (clk_auxadc) {
 		clk_disable_unprepare(clk_auxadc);
 	} else {
@@ -377,6 +386,7 @@ static int IMM_auxadc_GetOneChannelValue(int dwChannel, int data[4],
 		mutex_unlock(&mutex_get_cali_value);
 		return -1;
 	}
+#endif
 
 	mutex_unlock(&mutex_get_cali_value);
 
@@ -464,8 +474,10 @@ static void mt_auxadc_hal_suspend(void)
 #endif
 
 #if !defined(AUXADC_CLOCK_BY_SPM)
+#if !defined(CONFIG_MTK_CLKMGR)
 	pr_debug(TAG "auxadc suspend disable clock.\n");
 	clk_disable_unprepare(clk_auxadc);
+#endif
 #if defined(AUXADC_CLK_CTR)
 	clk_disable_unprepare(clk_top_auxadc1);
 	clk_disable_unprepare(clk_top_auxadc2);
@@ -478,14 +490,18 @@ static void mt_auxadc_hal_suspend(void)
 static void mt_auxadc_hal_resume(void)
 {
 #if !defined(AUXADC_CLOCK_BY_SPM)
+#if !defined(CONFIG_MTK_CLKMGR)
 	int ret = 0;
+#endif
 #endif
 
 	pr_debug(TAG "******** MT auxadc driver resume!! ********\n");
 #if !defined(AUXADC_CLOCK_BY_SPM)
+#if !defined(CONFIG_MTK_CLKMGR)
 	ret = clk_prepare_enable(clk_auxadc);
 	if (ret)
 		pr_err(TAG "auxadc enable auxadc clk failed.");
+#endif
 #if defined(AUXADC_CLK_CTR)
 	ret = clk_prepare_enable(clk_top_auxadc1);
 	if (ret)
@@ -1411,7 +1427,7 @@ static ssize_t show_AUXADC_channel(struct device *dev,
 					(tmp_vol[0]*1000+tmp_vol[2]),
 					g_adc_info[i].channel_name);
 			strncat(buf, tmp_buf, strlen(tmp_buf));
-			pr_info(TAG "len:%d,chn[%d]=%d mv, [%s]\n",
+			pr_err(TAG "len:%d,chn[%d]=%d mv, [%s]\n",
 					(int)strlen(buf), i,
 					(tmp_vol[0]*1000+tmp_vol[2]),
 					g_adc_info[i].channel_name);
@@ -1710,7 +1726,7 @@ static void adc_debug_init(void)
 	}
 	proc_create("dump_auxadc_status", 0644, mt_auxadc_dir,
 			&auxadc_debug_proc_fops);
-	pr_info(TAG "proc_create auxadc_debug_proc_fops\n");
+	pr_err(TAG "proc_create auxadc_debug_proc_fops\n");
 }
 
 
@@ -1724,7 +1740,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 	int of_value = 0;
 	struct device_node *node;
 
-	pr_info(TAG "******** MT AUXADC driver probe!! ********\n");
+	pr_err(TAG "******** MT AUXADC driver probe!! ********\n");
 
 	/* Integrate with NVRAM */
 	ret = alloc_chrdev_region(&auxadc_cali_devno, 0, 1,
@@ -1757,7 +1773,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 					"ADC_RFTMP");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node TEMPERATURE:%d\n", of_value);
+			pr_err(TAG "find node TEMPERATURE:%d\n", of_value);
 			used_channel_counter++;
 		}
 		ret = of_property_read_u32_array(node, "mediatek,temperature1",
@@ -1767,7 +1783,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 					"ADC_APTMP");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node TEMPERATURE1:%d\n", of_value);
+			pr_err(TAG "find node TEMPERATURE1:%d\n", of_value);
 			used_channel_counter++;
 		}
 		ret = of_property_read_u32_array(node,
@@ -1778,7 +1794,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 				"ADC_FDD_Rf_Params_Dynamic_Custom");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find adc_fdd_rf node fail:%d\n", of_value);
+			pr_err(TAG "find adc_fdd_rf node fail:%d\n", of_value);
 			used_channel_counter++;
 		}
 		ret = of_property_read_u32_array(node, "mediatek,hf_mic",
@@ -1788,7 +1804,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 					"ADC_MIC");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node HF_MIC:%d\n", of_value);
+			pr_err(TAG "find node HF_MIC:%d\n", of_value);
 			used_channel_counter++;
 		}
 		ret = of_property_read_u32_array(node, "mediatek,lcm_voltage",
@@ -1798,7 +1814,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 					"ADC_LCM_VOLTAGE");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node LCM_VOLTAGE:%d\n", of_value);
+			pr_err(TAG "find node LCM_VOLTAGE:%d\n", of_value);
 			used_channel_counter++;
 		}
 		ret = of_property_read_u32_array(node,
@@ -1808,7 +1824,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 				"ADC_BATTERY_VOLTAGE");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node BATTERY_VOLTAGE:%d\n", of_value);
+			pr_err(TAG "find node BATTERY_VOLTAGE:%d\n", of_value);
 			used_channel_counter++;
 		}
 		ret = of_property_read_u32_array(node,
@@ -1818,7 +1834,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 				"ADC_CHARGER_VOLTAGE");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node CHARGER_VOLTAGE:%d\n",
+			pr_err(TAG "find node CHARGER_VOLTAGE:%d\n",
 					of_value);
 			used_channel_counter++;
 		}
@@ -1829,7 +1845,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 					"ADC_UTMS");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node UTMS:%d\n", of_value);
+			pr_err(TAG "find node UTMS:%d\n", of_value);
 			used_channel_counter++;
 		}
 		ret = of_property_read_u32_array(node, "mediatek,ref_current",
@@ -1839,7 +1855,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 					"ADC_REF_CURRENT");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node REF_CURRENT:%d\n", of_value);
+			pr_err(TAG "find node REF_CURRENT:%d\n", of_value);
 			used_channel_counter++;
 		}
 		ret = of_property_read_u32_array(node, "mediatek,board_id",
@@ -1849,7 +1865,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 					"BOARD_ID");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node BOARD_ID:%d\n", of_value);
+			pr_err(TAG "find node BOARD_ID:%d\n", of_value);
 			used_channel_counter++;
 		}
 		ret = of_property_read_u32_array(node, "mediatek,board_id_2",
@@ -1859,7 +1875,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 					"BOARD_ID_2");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node BOARD_ID_2:%d\n", of_value);
+			pr_err(TAG "find node BOARD_ID_2:%d\n", of_value);
 			used_channel_counter++;
 		}
 		ret = of_property_read_u32_array(node, "mediatek,board_id_3",
@@ -1869,13 +1885,14 @@ static int mt_auxadc_probe(struct platform_device *dev)
 					"BOARD_ID_3");
 			g_adc_info[used_channel_counter].channel_number =
 					of_value;
-			pr_info(TAG "find node BOARD_ID_3:%d\n", of_value);
+			pr_err(TAG "find node BOARD_ID_3:%d\n", of_value);
 			used_channel_counter++;
 		}
 	} else {
 		pr_err(TAG "find node failed\n");
 	}
 
+#if !defined(CONFIG_MTK_CLKMGR)
 	clk_auxadc = devm_clk_get(&dev->dev, "auxadc-main");
 	if (IS_ERR(clk_auxadc)) {
 		pr_err(TAG "[AUXADC] devm_clk_get failed\n");
@@ -1885,6 +1902,9 @@ static int mt_auxadc_probe(struct platform_device *dev)
 	ret = clk_prepare_enable(clk_auxadc);
 	if (ret)
 		pr_err(TAG "hwEnableClock AUXADC failed.");
+
+#endif
+
 #if defined(AUXADC_CLK_CTR)
 	clk_top_auxadc1 = devm_clk_get(&dev->dev, "auxadc1");
 	if (IS_ERR(clk_top_auxadc1)) {
@@ -1921,7 +1941,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 	mt_auxadc_create_device_attr(adc_dev);
 	mt_auxadc_update_cali();
 
-	pr_info(TAG "MT AUXADC driver probe Done!\n");
+	pr_err(TAG "MT AUXADC driver probe Done!\n");
 
 	return ret;
 }
@@ -1951,6 +1971,7 @@ static int mt_auxadc_resume(struct platform_device *dev)
 
 static const struct of_device_id mt_auxadc_of_match[] = {
 	{.compatible = "mediatek,mt6757-auxadc",},
+	{.compatible = "mediatek,mt6735-auxadc",},
 	{.compatible = "mediatek,mt8167-auxadc",},
 	{.compatible = "mediatek,auxadc",},
 	{},
@@ -1973,6 +1994,7 @@ static struct platform_driver mt_auxadc_driver = {
 static int __init mt_auxadc_init(void)
 {
 	int ret;
+	pr_err(TAG "mt_auxadc_init\n");
 
 	ret = platform_driver_register(&mt_auxadc_driver);
 	if (ret) {
