@@ -52,7 +52,7 @@ unsigned long PWM_register[PWM_NUM] = {
 };
 #endif
 
-#ifndef CONFIG_MTK_FPGA
+#ifdef CONFIG_MTK_CLKMGR
 static int pwm_power_id[] = {
 	MT_CG_PWM1_FBCLK_SW_CG,
 	MT_CG_PWM2_FBCLK_SW_CG,
@@ -68,7 +68,7 @@ static int pwm_power_id[] = {
 #define PWM_CG 6
 void mt_pwm_power_on_hal(uint32_t pwm_no, bool pmic_pad, unsigned long *power_flag)
 {
-#ifndef CONFIG_MTK_FPGA
+#ifdef CONFIG_MTK_CLKMGR
 	if (0 == (*power_flag)) {
 		pr_debug("[PWM]enable_clock: main\n");
 		enable_clock(pwm_power_id[PWM_CG], "PWM");
@@ -86,7 +86,7 @@ void mt_pwm_power_on_hal(uint32_t pwm_no, bool pmic_pad, unsigned long *power_fl
 
 void mt_pwm_power_off_hal(uint32_t pwm_no, bool pmic_pad, unsigned long *power_flag)
 {
-#ifndef CONFIG_MTK_FPGA
+#ifdef CONFIG_MTK_CLKMGR
 	if (test_bit(pwm_no, power_flag)) {
 		pr_debug("[PWM]disable_clock: %d\n", pwm_no);
 		disable_clock(pwm_power_id[pwm_no], "PWM");
