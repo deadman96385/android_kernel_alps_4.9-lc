@@ -438,7 +438,7 @@ void gt1x_irq_disable(void)
 
 void gt1x_power_switch(s32 state)
 {
-#if !defined(CONFIG_MTK_LEGACY) || defined(CONFIG_ARCH_MT6580)
+#if !defined(CONFIG_MTK_LEGACY) || defined(CONFIG_MACH_MT6580)
 	int ret = 0;
 #endif
 
@@ -457,7 +457,7 @@ void gt1x_power_switch(s32 state)
 				GTP_ERROR("regulator_enable() failed!\n");
 #else
 #ifdef TPD_POWER_SOURCE_CUSTOM
-#ifdef CONFIG_ARCH_MT6580
+#ifdef CONFIG_MACH_MT6580
 			/*set 2.8v*/
 			ret = regulator_set_voltage(tpd->reg,
 					2800000, 2800000);
@@ -487,7 +487,7 @@ void gt1x_power_switch(s32 state)
 				GTP_ERROR("regulator_disable() failed!\n");
 #else
 #ifdef TPD_POWER_SOURCE_CUSTOM
-#ifdef CONFIG_ARCH_MT6580
+#ifdef CONFIG_MACH_MT6580
 			/*disable regulator*/
 			ret = regulator_disable(tpd->reg);
 			if (ret)
@@ -1018,7 +1018,7 @@ static int tpd_local_init(void)
 	}
 #endif
 #ifdef TPD_POWER_SOURCE_CUSTOM
-#ifdef CONFIG_ARCH_MT6580
+#ifdef CONFIG_MACH_MT6580
 	/*get pointer to regulator structure*/
 	tpd->reg = regulator_get(tpd->tpd_dev, "VGP1");
 	if (IS_ERR(tpd->reg))

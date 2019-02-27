@@ -23,7 +23,7 @@
 
 #include "mt_spm_internal.h"
 
-#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_ARCH_MT6580)
+#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_MACH_MT6580)
 #include "mt_vcore_dvfs.h"
 #endif
 
@@ -53,7 +53,7 @@ void __attribute__((weak)) __iomem *spm_get_i2c_base(void)
 DEFINE_SPINLOCK(__spm_lock);
 atomic_t __spm_mainpll_req = ATOMIC_INIT(0);
 
-#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_ARCH_MT6580)
+#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_MACH_MT6580)
 static const char *wakesrc_str[32] = {
 	[0] = "SPM_MERGE",
 	[1] = "LTE_PTP",
@@ -88,7 +88,7 @@ static const char *wakesrc_str[32] = {
 	[30] = "APSRC_WAKE",
 	[31] = "APSRC_SLEEP",
 };
-#else /* CONFIG_ARCH_MT6580 */
+#else /* CONFIG_MACH_MT6580 */
 static const char *wakesrc_str[32] = {
 	[0] = "SPM_MERGE",
 	[1] = "AUDIO_REQ",
@@ -181,7 +181,7 @@ void __spm_kick_im_to_fetch(const struct pcm_desc *pcmdesc)
 	u32 ptr, len, con0;
 
 	/* tell IM where is PCM code (use slave mode if code existed) */
-#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_ARCH_MT6580)
+#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_MACH_MT6580)
 	if (pcmdesc->base_dma)
 		ptr = pcmdesc->base_dma;
 	else
@@ -234,7 +234,7 @@ void __spm_set_power_control(const struct pwr_ctrl *pwrctrl)
 	/* set other SYS request mask */
 	spm_write(SPM_AP_STANBY_CON, (!pwrctrl->md_vrf18_req_mask_b << 29) |
 		  (!pwrctrl->lte_mask << 26) |
-#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_ARCH_MT6580)
+#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_MACH_MT6580)
 		  (spm_read(SPM_AP_STANBY_CON) & ASC_SRCCLKENI_MASK) |
 #else
 		  (!pwrctrl->srclkenai_mask << 25) |
@@ -338,7 +338,7 @@ void __spm_get_wakeup_status(struct wake_status *wakesta)
 	wakesta->assert_pc = spm_read(SPM_PCM_REG_DATA_INI);
 
 	/* get wakeup event */
-#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_ARCH_MT6580)
+#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_MACH_MT6580)
 	wakesta->r12 = spm_read(SPM_PCM_RESERVE3);
 #else
 	wakesta->r12 = spm_read(SPM_PCM_REG12_DATA);
@@ -358,7 +358,7 @@ void __spm_get_wakeup_status(struct wake_status *wakesta)
 	wakesta->debug_flag = spm_read(SPM_PCM_RESERVE4);
 
 	/* get special pattern (0xf0000 or 0x10000) if sleep abort */
-#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_ARCH_MT6580)
+#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_MACH_MT6580)
 	wakesta->event_reg = spm_read(SPM_PCM_PASR_DPD_2);
 #else
 	wakesta->event_reg = spm_read(SPM_PCM_EVENT_REG_STA);
@@ -438,7 +438,7 @@ wake_reason_t __spm_output_wake_reason(const struct wake_status *wakesta,
 			wr = WR_WAKE_SRC;
 		}
 	}
-#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_ARCH_MT6580)
+#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_MACH_MT6580)
 	BUG_ON(strlen(buf) >= LOG_BUF_SIZE);
 #endif
 
@@ -471,7 +471,7 @@ void __spm_dbgout_md_ddr_en(bool enable)
 	spm_write(SPM_PCM_DEBUG_CON, !!enable);
 }
 
-#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_ARCH_MT6580)
+#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_MACH_MT6580)
 u32 __spm_dpidle_sodi_set_pmic_setting(void)
 {
 	u32 vsram_vosel_on_lb = 0;
@@ -621,6 +621,6 @@ bool __init spm_set_pcm_init_flag(void)
 
 	return true;
 }
-#endif /* !defined(CONFIG_ARCH_MT6580) */
+#endif /* !defined(CONFIG_MACH_MT6580) */
 
 MODULE_DESCRIPTION("SPM-Internal Driver v0.1");

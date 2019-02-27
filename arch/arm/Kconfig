@@ -100,7 +100,7 @@ config ARM
 	  Europe.  There is an ARM Linux project with a web page at
 	  <http://www.arm.linux.org.uk/>.
 
-config ARCH_MT6580
+config MACH_MT6580
 	bool "MediaTek MT6580"
 	select GENERIC_TIME
 	select GENERIC_CLOCKEVENTS

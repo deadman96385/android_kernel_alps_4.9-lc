@@ -19,7 +19,7 @@
 #include "mt_sd.h"
 #include "msdc_hw_ett.h"
 
-#ifdef CONFIG_ARCH_MT6580
+#ifdef CONFIG_MACH_MT6580
 #ifdef MSDC_SUPPORT_SANDISK_COMBO_ETT
 struct msdc_ett_settings msdc0_ett_hs200_settings_for_sandisk[] = {
 	{0xb0, (0x7 << 7), 0x0},	/*PATCH_BIT0[MSDC_PB0_INT_DAT_LATCH_CK_SEL]*/

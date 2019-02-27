@@ -17,7 +17,7 @@
 /* MobiCore Interrupt. */
 /* Uncomment to override dts SSIQ setting */
 #if 0
-#if defined(CONFIG_ARCH_MT6580)
+#if defined(CONFIG_MACH_MT6580)
 #define MC_INTR_SSIQ	183
 #elif defined(CONFIG_ARCH_MT6752)
 #define MC_INTR_SSIQ	280
