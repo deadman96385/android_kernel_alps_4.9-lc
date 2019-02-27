@@ -1404,12 +1404,14 @@ int dpmgr_disable_event(disp_path_handle dp_handle, enum DISP_PATH_EVENT event)
 int dpmgr_check_status(disp_path_handle dp_handle)
 {
 	int i = 0;
-
-	struct ddp_path_handle *handle = (struct ddp_path_handle *) dp_handle;
-	int *modules = ddp_get_scenario_list(handle->scenario);
-	int module_num = ddp_get_module_num(handle->scenario);
+	int *modules;
+	int module_num;
+	struct ddp_path_handle *handle;
 
 	ASSERT(dp_handle != NULL);
+	handle = (struct ddp_path_handle *)dp_handle;
+	modules = ddp_get_scenario_list(handle->scenario);
+	module_num = ddp_get_module_num(handle->scenario);
 
 	DISPRCD("check status on scenario %s\n", ddp_get_scenario_name(handle->scenario));
 

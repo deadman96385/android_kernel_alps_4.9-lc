@@ -95,7 +95,7 @@
 	do {                                                           \
 		dprec_logger_pr(DPREC_LOGGER_DEBUG, fmt, ##args);      \
 		if ((g_mobilelog > 0) && (g_loglevel >= DEFAULT_LEVEL))  \
-			pr_debug("[DISP]"fmt, ##args);                 \
+			pr_info("[DISP]"fmt, ##args);                 \
 	} while (0)
 
 /*
