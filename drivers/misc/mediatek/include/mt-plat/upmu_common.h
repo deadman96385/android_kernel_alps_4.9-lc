@@ -155,9 +155,9 @@ extern unsigned int pmic_config_interface_nospinlock(unsigned int RegNum,
 	unsigned int val,
 	unsigned int MASK,
 	unsigned int SHIFT);
-#ifdef CONFIG_MTK_PMIC_COMMON
-extern unsigned short pmic_set_register_value(PMU_FLAGS_LIST_ENUM flagname,
-					      unsigned int val);
+extern unsigned short pmic_set_register_value(
+						PMU_FLAGS_LIST_ENUM flagname,
+						unsigned int val);
 extern unsigned short pmic_get_register_value(PMU_FLAGS_LIST_ENUM flagname);
 extern unsigned short pmic_set_register_value_nolock(
 						PMU_FLAGS_LIST_ENUM flagname,
@@ -167,10 +167,10 @@ extern unsigned short pmic_get_register_value_nolock(
 extern unsigned short pmic_set_register_value_nospinlock(
 						PMU_FLAGS_LIST_ENUM flagname,
 						unsigned int val);
-extern unsigned short bc11_set_register_value(PMU_FLAGS_LIST_ENUM flagname,
-					      unsigned int val);
+extern unsigned short bc11_set_register_value(
+						PMU_FLAGS_LIST_ENUM flagname,
+						unsigned int val);
 extern unsigned short bc11_get_register_value(PMU_FLAGS_LIST_ENUM flagname);
-#endif
 extern void upmu_set_reg_value(unsigned int reg, unsigned int reg_val);
 extern unsigned int upmu_get_reg_value(unsigned int reg);
 extern void pmic_lock(void);
@@ -186,6 +186,10 @@ extern void pmic_register_interrupt_callback(unsigned int intNo
 
 extern unsigned short is_battery_remove_pmic(void);
 
+extern signed int PMIC_IMM_GetCurrent(void);
+extern unsigned int PMIC_IMM_GetOneChannelValue(pmic_adc_ch_list_enum dwChannel, int deCount,
+		int trimd);
+extern void pmic_auxadc_init(void);
 extern void lockadcch3(void);
 extern void unlockadcch3(void);
 
@@ -199,9 +203,8 @@ extern int dlpt_check_power_off(void);
 extern unsigned int pmic_read_vbif28_volt(unsigned int *val);
 extern unsigned int pmic_get_vbif28_volt(void);
 extern void pmic_auxadc_debug(int index);
-extern int PMIC_IMM_GetOneChannelValue(unsigned int dwChannel,
-				       int deCount,
-				       int trimd);
+extern bool hwPowerOn(MT65XX_POWER powerId, int voltage_uv, char *mode_name);
+extern bool hwPowerDown(MT65XX_POWER powerId, char *mode_name);
 
 extern int get_battery_plug_out_status(void);
 
