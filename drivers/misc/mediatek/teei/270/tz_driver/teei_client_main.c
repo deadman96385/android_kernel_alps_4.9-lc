@@ -168,7 +168,7 @@ unsigned long bdrv_message_buff;
 unsigned long fdrv_message_buff;
 static int current_cpu_id;
 
-#if !defined(CONFIG_ARCH_MT6580) && !defined(CONFIG_ARCH_MT6570)
+#if !defined(CONFIG_MACH_MT6580) && !defined(CONFIG_ARCH_MT6570)
 static int tz_driver_cpu_callback(struct notifier_block *nfb,
 		unsigned long action, void *hcpu);
 static struct notifier_block tz_driver_cpu_notifer = {
@@ -2095,7 +2095,7 @@ static int teei_client_init(void)
 
 	IMSG_DEBUG("create the sub_thread successfully!\n");
 
-#if defined(CONFIG_ARCH_MT6580) || defined(CONFIG_ARCH_MT6570)
+#if defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570)
 	/* Core migration not supported */
 #else
 	register_cpu_notifier(&tz_driver_cpu_notifer);

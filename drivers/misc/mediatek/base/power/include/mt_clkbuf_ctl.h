@@ -30,7 +30,7 @@
 
 #include "../mt6797/mt_clkbuf_ctl.h"
 
-#elif defined(CONFIG_ARCH_MT6580)
+#elif defined(CONFIG_MACH_MT6580)
 
 #include "../../../include/mt-plat/mt6580/include/mach/mt_clkbuf_ctl.h"
 

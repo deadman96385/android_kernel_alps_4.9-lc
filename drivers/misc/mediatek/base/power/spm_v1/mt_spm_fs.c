@@ -455,7 +455,7 @@ static ssize_t golden_dump_show(struct kobject *kobj, struct kobj_attribute *att
 {
 	char *p = buf;
 
-#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_ARCH_MT6580)
+#if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_MACH_MT6580)
 	spm_golden_setting_cmp(1);
 #endif
 
@@ -469,7 +469,7 @@ static ssize_t golden_dump_show(struct kobject *kobj, struct kobj_attribute *att
 static ssize_t auto_suspend_resume_show(struct kobject *kobj, struct kobj_attribute *attr,
 					char *buf)
 {
-#if defined(CONFIG_ARCH_MT6570) || defined(CONFIG_ARCH_MT6580)
+#if defined(CONFIG_ARCH_MT6570) || defined(CONFIG_MACH_MT6580)
 	return 0; /* TODO */
 #else
 	char *p = buf;
@@ -518,7 +518,7 @@ void __attribute__ ((weak)) slp_set_auto_suspend_wakelock(bool lock)
 static ssize_t auto_suspend_resume_store(struct kobject *kobj, struct kobj_attribute *attr,
 					 const char *buf, size_t count)
 {
-#if defined(CONFIG_ARCH_MT6570) || defined(CONFIG_ARCH_MT6580)
+#if defined(CONFIG_ARCH_MT6570) || defined(CONFIG_MACH_MT6580)
 	return 0; /* TODO */
 #else
 	u32 val, pcm_sec;
