@@ -53,6 +53,7 @@ obj-$(CONFIG_MACH_MT6761) += mdpm_v1/
 obj-$(CONFIG_MACH_MT6758) += hps_v3/
 obj-$(CONFIG_MACH_MT6765) += hps_v3/
 obj-$(CONFIG_MACH_MT6761) += hps_v3/
+obj-$(CONFIG_MACH_MT6580) += cpuidle_v1/
 obj-$(CONFIG_MACH_MT6758) += cpuidle_v3/
 obj-$(CONFIG_MACH_MT6765) += cpuidle_v3/
 obj-$(CONFIG_MACH_MT6761) += cpuidle_v3/
