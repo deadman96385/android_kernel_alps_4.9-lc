@@ -42,6 +42,9 @@ obj-$(CONFIG_MTK_AUXADC)	+= auxadc/
 obj-$(CONFIG_MTK_GPT_SCHEME_SUPPORT)	+= partition/
 obj-$(CONFIG_MTK_SYSENV)	+= sysenv/
 obj-$(CONFIG_MTK_PWM)	    += pwm/
+ifeq ($(CONFIG_MTK_I2C_EXTENSION),y)
+obj-$(CONFIG_MTK_I2C)  += i2c/
+endif
 obj-$(CONFIG_MTK_VIBRATOR)	+= vibrator/
 obj-y += irtx/
 obj-$(CONFIG_MTK_MT6306_GPIO_SUPPORT) += gpio/
