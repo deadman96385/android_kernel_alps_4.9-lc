@@ -154,7 +154,8 @@ typedef struct DDP_MODULE_DRIVER {
 	int (*build_cmdq)(DISP_MODULE_ENUM module, void *cmdq_handle, CMDQ_STATE state);
 	int (*set_lcm_utils)(DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv);
 	int (*set_listener)(DISP_MODULE_ENUM module, ddp_module_notify notify);
-	int (*cmd)(DISP_MODULE_ENUM module, int msg, unsigned long arg, void *handle);
+	int (*cmd)(DISP_MODULE_ENUM module, unsigned int msg,
+			unsigned long arg, void *handle);
 	int (*ioctl)(DISP_MODULE_ENUM module, void *handle, unsigned int ioctl_cmd, unsigned long *params);
 	int (*enable_irq)(DISP_MODULE_ENUM module, void *handle, DDP_IRQ_LEVEL irq_level);
 } DDP_MODULE_DRIVER;

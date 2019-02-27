@@ -154,7 +154,8 @@ struct DDP_MODULE_DRIVER {
 	int (*build_cmdq)(enum DISP_MODULE_ENUM module, void *cmdq_handle, enum CMDQ_STATE state);
 	int (*set_lcm_utils)(enum DISP_MODULE_ENUM module, struct LCM_DRIVER *lcm_drv);
 	int (*set_listener)(enum DISP_MODULE_ENUM module, ddp_module_notify notify);
-	int (*cmd)(enum DISP_MODULE_ENUM module, int msg, unsigned long arg, void *handle);
+	int (*cmd)(enum DISP_MODULE_ENUM module, unsigned int msg,
+			unsigned long arg, void *handle);
 	int (*ioctl)(enum DISP_MODULE_ENUM module, void *handle, unsigned int ioctl_cmd, unsigned long *params);
 	int (*enable_irq)(enum DISP_MODULE_ENUM module, void *handle, enum DDP_IRQ_LEVEL irq_level);
 };

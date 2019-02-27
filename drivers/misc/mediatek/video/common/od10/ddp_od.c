@@ -778,7 +778,8 @@ void disp_od_start_read(void *cmdq)
 }
 
 
-static int disp_od_ioctl_ctlcmd(enum DISP_MODULE_ENUM module, int msg, unsigned long arg, void *cmdq)
+static int disp_od_ioctl_ctlcmd(enum DISP_MODULE_ENUM module, unsigned int msg,
+		unsigned long arg, void *cmdq)
 {
 	struct DISP_OD_CMD cmd;
 
@@ -891,7 +892,8 @@ static int disp_od_io(enum DISP_MODULE_ENUM module, void *handle,
 }
 #endif
 
-static int disp_od_ioctl(enum DISP_MODULE_ENUM module, int msg, unsigned long arg, void *cmdq)
+static int disp_od_ioctl(enum DISP_MODULE_ENUM module, unsigned int msg,
+		unsigned long arg, void *cmdq)
 {
 	switch (msg) {
 	case DISP_IOCTL_OD_CTL:
