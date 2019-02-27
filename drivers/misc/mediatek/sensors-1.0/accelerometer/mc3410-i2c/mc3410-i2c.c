@@ -168,8 +168,8 @@ struct S_LRF_CB {
 static int mc3xxx_i2c_probe(struct i2c_client *client, const struct i2c_device_id *id);
 static int mc3xxx_i2c_remove(struct i2c_client *client);
 static int _mc3xxx_i2c_auto_probe(struct i2c_client *client);
-static int mc3xxx_suspend(struct i2c_client *client, pm_message_t msg);
-static int mc3xxx_resume(struct i2c_client *client);
+static int mc3xxx_suspend(struct device *dev);
+static int mc3xxx_resume(struct device *dev);
 static int mc3xxx_local_init(void);
 static int mc3xxx_remove(void);
 static int MC3XXX_SetPowerMode(struct i2c_client *client, bool enable);
@@ -180,11 +180,11 @@ static int mc3410_flush(void);
 /*****************************************************************************
  *** STATIC VARIBLE & CONTROL BLOCK DECLARATION
  *****************************************************************************/
-static unsigned char	s_bResolution = 0x00;
-static unsigned char	s_bPCODE	  = 0x00;
-static unsigned char	s_bPCODER	 = 0x00;
-static unsigned char	s_bHWID	   = 0x00;
-static unsigned char	s_bMPOL	   = 0x00;
+static unsigned char	s_bResolution;
+static unsigned char	s_bPCODE;
+static unsigned char	s_bPCODER;
+static unsigned char	s_bHWID;
+static unsigned char	s_bMPOL;
 static int	s_nInitFlag = MC3XXX_INIT_FAIL;
 static struct acc_init_info  mc3xxx_init_info = {
 	.name   = MC3XXX_DEV_NAME,
@@ -197,12 +197,21 @@ static const struct of_device_id accel_of_match[] = {
 	{},
 };
 #endif
+#ifdef CONFIG_PM_SLEEP
+static const struct dev_pm_ops mc3xxx_i2c_pm_ops = {
+	SET_SYSTEM_SLEEP_PM_OPS(mc3xxx_suspend, mc3xxx_resume)
+};
+#endif
+
 static const struct i2c_device_id mc3xxx_i2c_id[] = { {MC3XXX_DEV_NAME, 0}, {} };
 /* static struct i2c_board_info __initdata mc3xxx_i2c_board_info = { I2C_BOARD_INFO(MC3XXX_DEV_NAME, 0x4C) }; */
 static unsigned short mc3xxx_i2c_auto_probe_addr[] = { 0x4C, 0x6C, 0x4E, 0x6D, 0x6E, 0x6F };
 static struct i2c_driver	mc3xxx_i2c_driver = {
 							.driver = {
 								  .name = MC3XXX_DEV_NAME,
+#ifdef CONFIG_PM_SLEEP
+		.pm = &mc3xxx_i2c_pm_ops,
+#endif
 						   #ifdef CONFIG_OF
 								  .of_match_table = accel_of_match,
 						   #endif
@@ -210,8 +219,6 @@ static struct i2c_driver	mc3xxx_i2c_driver = {
 							.probe  = mc3xxx_i2c_probe,
 							.remove = mc3xxx_i2c_remove,
 
-							.suspend = mc3xxx_suspend,
-							.resume  = mc3xxx_resume,
 
 							.id_table = mc3xxx_i2c_id,
 						};
@@ -327,7 +334,7 @@ static int MC3XXX_i2c_read_block(struct i2c_client *client, u8 addr, u8 *data, u
 	msgs[1].len = len;
 	msgs[1].buf = data;
 
-	err = i2c_transfer(client->adapter, msgs, sizeof(msgs)/sizeof(msgs[0]));
+	err = i2c_transfer(client->adapter, msgs, ARRAY_SIZE(msgs));
 	if (err != 2) {
 		GSE_ERR("i2c_transfer error: (%d %p %d) %d\n", addr, data, len, err);
 		err = -EIO;
@@ -1350,8 +1357,10 @@ static int MC3XXX_ReadSensorData(struct i2c_client *pt_i2c_client, char *pbBuf, 
 	}
 	_pt_i2c_obj = ((struct mc3xxx_i2c_data *) i2c_get_clientdata(pt_i2c_client));
 	if (false == mc3xxx_sensor_power) {
-		if (MC3XXX_RETCODE_SUCCESS != MC3XXX_SetPowerMode(pt_i2c_client, true))
+		if (MC3XXX_RETCODE_SUCCESS != MC3XXX_SetPowerMode(pt_i2c_client, true)) {
 			GSE_ERR("ERR: fail to set power mode!\n");
+			return MC3XXX_RETCODE_ERROR_I2C;
+		}
 	}
 
 	#ifdef _MC3XXX_SUPPORT_DOT_CALIBRATION_
@@ -1416,8 +1425,10 @@ static int MC3XXX_ReadRawData(struct i2c_client *client, char *buf)
 
 	if (mc3xxx_sensor_power == false) {
 		res = MC3XXX_SetPowerMode(client, true);
-		if (res)
+		if (res) {
 			GSE_ERR("Power on mc3xxx error %d!\n", res);
+			return MC3XXX_RETCODE_ERROR_SETUP;
+		}
 	}
 
 	#ifdef _MC3XXX_SUPPORT_APPLY_AVERAGE_AGORITHM_
@@ -1791,7 +1802,7 @@ static ssize_t store_chip_orientation(struct device_driver *ptDevDrv, const char
 		return 0;
 
 	ret = kstrtoint(pbBuf, 10, &_nDirection);
-	if (ret != 0) {
+	if (ret == 0) {
 		if (hwmsen_get_convert(_nDirection, &_pt_i2c_obj->cvt))
 			GSE_ERR("ERR: fail to set direction\n");
 	}
@@ -1921,7 +1932,7 @@ static struct driver_attribute   *mc3xxx_attr_list[] = {
 static int mc3xxx_create_attr(struct device_driver *driver)
 {
 	int idx, err = 0;
-	int num = (int)(sizeof(mc3xxx_attr_list)/sizeof(mc3xxx_attr_list[0]));
+	int num = (int)ARRAY_SIZE(mc3xxx_attr_list);
 
 	if (driver == NULL)
 		return -EINVAL;
@@ -1941,8 +1952,8 @@ static int mc3xxx_create_attr(struct device_driver *driver)
  *****************************************/
 static int mc3xxx_delete_attr(struct device_driver *driver)
 {
-	int idx , err = 0;
-	int num = (int)(sizeof(mc3xxx_attr_list)/sizeof(mc3xxx_attr_list[0]));
+	int idx, err = 0;
+	int num = (int)ARRAY_SIZE(mc3xxx_attr_list);
 
 	if (driver == NULL)
 		return -EINVAL;
@@ -2010,21 +2021,25 @@ static void MC3XXX_reset(struct i2c_client *client)
 	MC3XXX_i2c_write_block(client, MC3XXX_REG_MODE_FEATURE, _baBuf, 0x01);
 }
 
+#ifdef CONFIG_PM_SLEEP
 /*****************************************
  *** mc3xxx_suspend
  *****************************************/
-static int mc3xxx_suspend(struct i2c_client *client, pm_message_t msg)
+static int mc3xxx_suspend(struct device *dev)
 {
+	struct i2c_client *client = to_i2c_client(dev);
 	struct mc3xxx_i2c_data *obj = i2c_get_clientdata(client);
 	int err = 0;
 
 	/* GSE_LOG("mc3xxx_suspend\n"); */
 
-	if (msg.event == PM_EVENT_SUSPEND) {
 		if (obj == NULL) {
 			GSE_ERR("null pointer!!\n");
 			return -EINVAL;
 		}
+
+		if (s_nInitFlag != MC3XXX_INIT_SUCC)
+			return err;
 
 		atomic_set(&obj->suspend, 1);
 		mc3xxx_mutex_lock();
@@ -2034,15 +2049,15 @@ static int mc3xxx_suspend(struct i2c_client *client, pm_message_t msg)
 			GSE_ERR("write power control fail!!\n");
 			return err;
 		}
-	}
 	return err;
 }
 
 /*****************************************
  *** mc3xxx_resume
  *****************************************/
-static int mc3xxx_resume(struct i2c_client *client)
+static int mc3xxx_resume(struct device *dev)
 {
+	struct i2c_client *client = to_i2c_client(dev);
 	struct mc3xxx_i2c_data *obj = i2c_get_clientdata(client);
 	int err;
 
@@ -2051,6 +2066,9 @@ static int mc3xxx_resume(struct i2c_client *client)
 		GSE_ERR("null pointer!!\n");
 		return -EINVAL;
 	}
+
+	if (s_nInitFlag != MC3XXX_INIT_SUCC)
+		return 0;
 
 	mc3xxx_mutex_lock();
 	err = MC3XXX_Init(client, 0);
@@ -2069,6 +2087,7 @@ static int mc3xxx_resume(struct i2c_client *client)
 	atomic_set(&obj->suspend, 0);
 	return 0;
 }
+#endif
 
 /* if use  this typ of enable , Gsensor should report inputEvent(x, y, z ,stats, div) to HAL */
 static int mc3xxx_open_report_data(int open)
@@ -2080,7 +2099,7 @@ static int mc3xxx_open_report_data(int open)
 static int _mc3xxx_i2c_auto_probe(struct i2c_client *client)
 {
 	#define _MC3XXX_I2C_PROBE_ADDR_COUNT_	\
-		(sizeof(mc3xxx_i2c_auto_probe_addr) / sizeof(mc3xxx_i2c_auto_probe_addr[0]))
+		(ARRAY_SIZE(mc3xxx_i2c_auto_probe_addr))
 	unsigned char	_baData1Buf[2] = { 0 };
 	unsigned char	_baData2Buf[2] = { 0 };
 	int _nCount = 0;
