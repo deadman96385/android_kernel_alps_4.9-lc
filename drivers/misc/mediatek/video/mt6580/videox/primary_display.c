@@ -2673,6 +2673,8 @@ static int _disp_primary_path_check_trigger(void *data)
 {
 	int ret = 0;
 
+	set_user_nice(current, -20);
+
 	if (disp_helper_get_option(DISP_HELPER_OPTION_USE_CMDQ)) {
 		cmdqRecHandle handle = NULL;
 
@@ -2715,6 +2717,9 @@ static int _disp_primary_path_check_trigger(void *data)
 				break;
 		}
 	}
+
+	set_user_nice(current, 0);
+
 	return 0;
 }
 
@@ -2919,6 +2924,8 @@ static int _ovl_fence_release_callback(uint32_t userdata)
 	unsigned int dsi_state[10];
 	unsigned int rdma_state[50];
 
+	set_user_nice(current, -20);
+
 	mmprofile_log_ex(ddp_mmp_get_events()->session_release,
 		       MMPROFILE_FLAG_START, 1, userdata);
 
@@ -3049,6 +3056,8 @@ static int _ovl_fence_release_callback(uint32_t userdata)
 	}
 	_primary_path_unlock(__func__);
 #endif
+
+	set_user_nice(current, 0);
 
 	return ret;
 }
@@ -4716,6 +4725,8 @@ int primary_display_user_cmd(unsigned int cmd, unsigned long arg)
 	cmdqRecHandle handle = NULL;
 	int cmdqsize = 0;
 
+	set_user_nice(current, -20);
+
 	mmprofile_log_ex(ddp_mmp_get_events()->primary_display_cmd,
 		       MMPROFILE_FLAG_START, (unsigned long)handle, 0);
 
@@ -4751,6 +4762,8 @@ int primary_display_user_cmd(unsigned int cmd, unsigned long arg)
 
 		cmdqRecDestroy(handle);
 	}
+
+	set_user_nice(current, 0);
 
 	return ret;
 }
