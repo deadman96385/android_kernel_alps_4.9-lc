@@ -1139,8 +1139,8 @@ int mt_cpu_dormant_init(void)
 #endif
 
 #ifdef CONFIG_MTK_RAM_CONSOLE
-	sleep_aee_rec_cpu_dormant_va = aee_rr_rec_cpu_dormant();
-	sleep_aee_rec_cpu_dormant_pa = aee_rr_rec_cpu_dormant_pa();
+	sleep_aee_rec_cpu_dormant_va = aee_rr_rec_mtk_cpuidle_footprint_va();
+	sleep_aee_rec_cpu_dormant_pa = aee_rr_rec_mtk_cpuidle_footprint_pa();
 
 	BUG_ON(!sleep_aee_rec_cpu_dormant_va || !sleep_aee_rec_cpu_dormant_pa);
 
