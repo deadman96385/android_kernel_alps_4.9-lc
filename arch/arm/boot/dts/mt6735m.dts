@@ -1141,7 +1141,7 @@ firmware_class.path=/vendor/firmware";
 		};
 
 		PWM@0x11006000 {
-			compatible = "mediatek,PWM";
+			compatible = "mediatek,pwm";
 			reg = <0x11006000 0x1000>;
 			interrupts = <0 77 0x8>;
 		};
