@@ -13,8 +13,8 @@
 
 obj-$(CONFIG_MTK_FB) += mtkfb_console.o        \
 			disp_assert_layer.o    \
+			disp_debug.o    \
 			mtkfb.o		       \
-			mtkfb_fence.o          \
 			mtkfb_debug.o          \
 			primary_display.o      \
 			disp_lcm.o             \
@@ -24,7 +24,14 @@ obj-$(CONFIG_MTK_FB) += mtkfb_console.o        \
 			mtk_mira.o             \
 			mtk_ovl.o              \
 			disp_dts_gpio.o        \
-			disp_helper.o          
+			disp_helper.o          \
+			dpmgr_config.o       \
+			fbconfig_kdebug.o     \
+			mtkfb_fence.o
+
+#ifneq ($(CONFIG_MTK_FB), y) # already in video/common/
+#obj-y += mtkfb_dummy.o
+#endif
 
 ccflags-y +=	-I$(srctree)/drivers/misc/mediatek/video/include/                     \
 		-I$(srctree)/drivers/misc/mediatek/video/common/                      \
@@ -33,13 +40,13 @@ ccflags-y +=	-I$(srctree)/drivers/misc/mediatek/video/include/                  
 		-I$(srctree)/drivers/misc/mediatek/cmdq/v2/                           \
 		-I$(srctree)/drivers/misc/mediatek/cmdq/v2/$(MTK_PLATFORM)/           \
 		-I$(srctree)/drivers/misc/mediatek/externaldisplay/$(MTK_PLATFORM)    \
+		-I$(srctree)/drivers/misc/mediatek/sync/                              \
 		-I$(srctree)/drivers/misc/mediatek/mach/$(MTK_PLATFORM)/include/mach/ \
 		-I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)         \
 		-I$(srctree)/drivers/misc/mediatek/base/power/include/spm_v1/         \
 		-I$(srctree)/drivers/misc/mediatek/base/power/include/                \
 		-I$(srctree)/drivers/misc/mediatek/m4u/$(MTK_PLATFORM)/               \
 		-I$(srctree)/drivers/misc/mediatek/mmp/                               \
-		-I$(srctree)/drivers/misc/mediatek/sync/                              \
 		-I$(srctree)/drivers/misc/mediatek/video/$(MTK_PLATFORM)/dispsys/     \
 		-I$(srctree)/drivers/misc/mediatek/video/$(MTK_PLATFORM)/videox/      \
 
@@ -67,3 +74,4 @@ endif
 ifeq ($(CONFIG_MTK_GPU_SUPPORT), y)
 ccflags-y += -DHWGPU_SUPPORT
 endif
+ccflags-$(CONFIG_MTK_LCM_DEVICE_TREE_SUPPORT) += -DMTK_LCM_DEVICE_TREE_SUPPORT

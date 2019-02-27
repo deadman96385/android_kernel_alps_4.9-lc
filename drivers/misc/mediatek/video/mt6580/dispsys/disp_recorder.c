@@ -28,7 +28,7 @@
 
 #include "disp_log.h"
 
-#include "disp_lcm.h"
+//#include "disp_lcm.h"
 #include "disp_utils.h"
 #include "mtkfb_info.h"
 #include "mtkfb.h"
@@ -51,7 +51,9 @@
 #include "disp_recorder.h"
 #include "disp_session.h"
 #include "ddp_mmp.h"
-#include <linux/ftrace_event.h>
+#include <linux/trace_events.h>
+#include <linux/ftrace.h>
+
 
 unsigned int gCapturePriLayerEnable = 0;
 unsigned int gCaptureWdmaLayerEnable = 0;
@@ -155,13 +157,13 @@ static MMP_Event dprec_mmp_event_spy(enum DPREC_LOGGER_ENUM l)
 	return 0xffff;
 }
 
-static void dprec_to_mmp(unsigned int type_logsrc, MMP_LogType mmp_log, unsigned int data1,
+static void dprec_to_mmp(unsigned int type_logsrc, enum mmp_log_type mmp_log, unsigned int data1,
 			 unsigned data2)
 {
-	int MMP_Event = dprec_mmp_event_spy(type_logsrc);
+	int event = dprec_mmp_event_spy(type_logsrc);
 
-	if (MMP_Event < 0xffff)
-		mmprofile_log_ex(MMP_Event, mmp_log, data1, data2);
+	if (event < 0xffff)
+		mmprofile_log_ex(event, mmp_log, data1, data2);
 
 }
 
@@ -832,7 +834,7 @@ int dprec_logger_get_result_value(enum DPREC_LOGGER_ENUM source, struct fpsEx *f
 	unsigned long long avg;
 	unsigned long long count;
 	unsigned long long fps_high;
-	unsigned long fps_low;
+	unsigned long long fps_low;
 
 	spin_lock_irqsave(&gdprec_logger_spinlock, flags);
 

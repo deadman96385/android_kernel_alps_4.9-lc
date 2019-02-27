@@ -27,8 +27,8 @@ obj-$(CONFIG_MTK_FB) += \
 			ddp_mmp.o              \
 			ddp_met.o              \
 			ddp_misc.o             \
-			display_recorder.o
-			
+			disp_recorder.o
+
 ccflags-y +=	-I$(srctree)/drivers/misc/mediatek/video/include/                     \
 		-I$(srctree)/drivers/misc/mediatek/video/common/                      \
 		-I$(srctree)/drivers/misc/mediatek/video/common/rdma10/               \
