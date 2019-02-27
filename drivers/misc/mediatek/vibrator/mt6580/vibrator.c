@@ -1,25 +1,15 @@
 /*
- * Copyright (C) 2015 MediaTek Inc.
+ * Copyright (C) 2016 MediaTek Inc.
  *
- * This program is free software: you can redistribute it and/or modify
+ * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  *
  * This program is distributed in the hope that it will be useful,
-i * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See http://www.gnu.org/licenses/gpl-2.0.html for more details.
  */
-
-/******************************************************************************
- * mt6575_vibrator.c - MT6575 Android Linux Vibrator Device Driver
- *
- * Copyright 2009-2010 MediaTek Co.,Ltd.
- *
- * DESCRIPTION:
- *     This file provid the other drivers vibrator relative functions
- *
- ******************************************************************************/
 
 #include <linux/init.h>
 #include <linux/module.h>
@@ -29,28 +19,35 @@ i * but WITHOUT ANY WARRANTY; without even the implied warranty of
 #include <linux/slab.h>
 #include <linux/of.h>
 #include <linux/types.h>
-#include <mt-plat/mt_pwm.h>
+#include <linux/platform_device.h>
+#include <linux/delay.h>
+#ifdef CONFIG_MTK_PMIC
 #include <mt-plat/upmu_common.h>
+#endif
 #include "vibrator.h"
 
-struct vibrator_hw *pvib_cust = NULL;
+#define T    "vibrator"
+struct vibrator_hw *pvib_cust;
 
-static int debug_enable_vib_hal = 1;
-/* #define pr_fmt(fmt) "[vibrator]"fmt */
-#define VIB_DEBUG(format, args...) do { \
-	if (debug_enable_vib_hal) {\
-		pr_debug(format, ##args);\
-	} \
-} while (0)
+#define OC_INTR_INIT_DELAY      (3)
 
 void vibr_Enable_HW(void)
 {
+#ifdef CONFIG_MTK_PMIC
 	pmic_set_register_value(PMIC_RG_VIBR_EN, 1);	/* [bit 1]: VIBR_EN,  1=enable */
+#endif
 }
 
 void vibr_Disable_HW(void)
 {
+#ifdef CONFIG_MTK_PMIC
 	pmic_set_register_value(PMIC_RG_VIBR_EN, 0);	/* [bit 1]: VIBR_EN,  1=enable */
+#endif
+}
+
+void init_vibr_oc_handler(void (*vibr_oc_func)(void))
+{
+	pr_debug(T "vibr_oc_handler not support, skip it\n");
 }
 
 /******************************************
@@ -65,64 +62,49 @@ void vibr_Disable_HW(void)
 * 3'b110: 3.0V
 * 3'b111: 3.3V
 *******************************************/
-struct vibrator_hw *get_cust_vibrator_dtsi(void)
+void init_cust_vibrator_dtsi(struct platform_device *pdev)
 {
 	int ret;
-	struct device_node *led_node = NULL;
 
 	if (pvib_cust == NULL) {
 		pvib_cust = kmalloc(sizeof(struct vibrator_hw), GFP_KERNEL);
 		if (pvib_cust == NULL) {
-			VIB_DEBUG("get_cust_vibrator_dtsi kmalloc fail\n");
-			goto out;
+			pr_debug(T "%s kmalloc fail\n", __func__);
+			return;
 		}
-
-		led_node =
-		    of_find_compatible_node(NULL, NULL, "mediatek,vibrator");
-		if (!led_node) {
-			VIB_DEBUG("Cannot find vibrator node from dts\n");
-			kfree(pvib_cust);
-			pvib_cust = NULL;
-			goto out;
-		} else {
-			ret =
-			    of_property_read_u32(led_node, "vib_timer",
-						 &(pvib_cust->vib_timer));
-			if (!ret) {
-				VIB_DEBUG
-				    ("The vibrator timer from dts is : %d\n",
-				     pvib_cust->vib_timer);
-			} else {
-				pvib_cust->vib_timer = 25;
-			}
+		ret = of_property_read_u32(pdev->dev.of_node, "vib_timer",
+			&(pvib_cust->vib_timer));
+		if (!ret)
+			pr_debug(T "vib_timer:%d\n", pvib_cust->vib_timer);
+		else
+			pvib_cust->vib_timer = 25;
 #ifdef CUST_VIBR_LIMIT
-			ret =
-			    of_property_read_u32(led_node, "vib_limit",
-						 &(pvib_cust->vib_limit));
-			if (!ret) {
-				VIB_DEBUG
-				    ("The vibrator limit from dts is : %d\n",
-				     pvib_cust->vib_limit);
-			} else {
-				pvib_cust->vib_limit = 9;
-			}
+		ret = of_property_read_u32(pdev->dev.of_node, "vib_limit",
+			&(pvib_cust->vib_limit));
+		if (!ret)
+			pr_debug(T "vib_limit : %d\n", pvib_cust->vib_limit);
+		else
+			pvib_cust->vib_limit = 9;
 #endif
 
 #ifdef CUST_VIBR_VOL
-			ret =
-			    of_property_read_u32(led_node, "vib_vol",
-						 &(pvib_cust->vib_vol));
-			if (!ret) {
-				VIB_DEBUG("The vibrator vol from dts is : %d\n",
-					  pvib_cust->vib_vol);
-			} else {
-				pvib_cust->vib_vol = 0x05;
-			}
+		ret = of_property_read_u32(pdev->dev.of_node, "vib_vol",
+			&(pvib_cust->vib_vol));
+		if (!ret)
+			pr_debug(T "vib_vol: %d\n", pvib_cust->vib_vol);
+		else
+			pvib_cust->vib_vol = 0x05;
 #endif
-		}
+		pr_debug(T "pvib_cust = %d, %d, %d\n",
+			pvib_cust->vib_timer, pvib_cust->vib_limit,
+					pvib_cust->vib_vol);
 	}
+}
 
- out:
+struct vibrator_hw *get_cust_vibrator_dtsi(void)
+{
+	if (pvib_cust == NULL)
+		pr_debug(T "get_cust_vibrator_dtsi fail, pvib_cust is NULL\n");
 	return pvib_cust;
 }
 
@@ -131,8 +113,14 @@ void vibr_power_set(void)
 #ifdef CUST_VIBR_VOL
 	struct vibrator_hw *hw = get_cust_vibrator_dtsi();
 
-	VIB_DEBUG("vibr_init: vibrator set voltage = %d\n", hw->vib_vol);
-	pmic_set_register_value(PMIC_RG_VIBR_VOSEL, hw->vib_vol);
+	if (hw != NULL) {
+		pr_debug(T "vibr_init: set voltage = %d\n", hw->vib_vol);
+#ifdef CONFIG_MTK_PMIC
+		pmic_set_register_value(PMIC_RG_VIBR_VOSEL, hw->vib_vol);
+#endif
+	} else {
+		pr_debug("vibr_init: can not get  dtsi!\n");
+	}
 #endif
 }
 
