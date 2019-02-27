@@ -379,7 +379,7 @@ static int start_devapc(void)
 	}
 
 #ifdef DEBUGSYS_LOCK
-	set_module_apc(25, E_DOMAIN_0, E_L3);
+	set_module_apc(25, E_DOMAIN_0, E_L2);
 #endif
 	return 0;
 }
