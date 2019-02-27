@@ -147,8 +147,8 @@ static int initAF(void)
 
 	if (*g_pAF_Opened == 1) {
 
-	u16 Reg_0x85;
-	u16 Reg_0x3C;
+	u16 Reg_0x85 = 0;
+	u16 Reg_0x3C = 0;
 	u16 eepdata1 = 0, eepdata2 = 0;
 	u16 posh = 0, posl = 0, max_pos = 0, min_pos = 0, No_eeprom;
 
