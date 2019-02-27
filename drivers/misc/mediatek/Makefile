@@ -97,6 +97,7 @@ obj-$(CONFIG_MTK_GPU_SUPPORT) += gpu/
 obj-$(CONFIG_MTK_VPU_SUPPORT) += vpu/
 obj-$(CONFIG_MTK_CCU)	+= ccu/src/
 obj-$(CONFIG_MTK_RTC)	+= rtc/
+obj-$(CONFIG_MTK_PMIC)	+= power/
 obj-y += mtprintk/
 obj-$(CONFIG_MTK_XO)	+= xo/
 obj-$(CONFIG_MICROTRUST_TEE_SUPPORT) += teei/
