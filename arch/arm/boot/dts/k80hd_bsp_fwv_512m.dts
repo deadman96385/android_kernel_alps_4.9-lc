@@ -13,7 +13,6 @@
 
 /* chosen */
 &chosen {
-	bootargs = "console=tty0 console=ttyMT0,921600n1 root=/dev/ram initrd=0x84000000,0x400000 loglevel=8";
 	/* fpga may has no lk, we need to specify display info here */
 	/* fb buffer is reserved using this dts by memory node above */
 	atag,videolfb-fb_base = <0x9E800000>;
