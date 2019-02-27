@@ -28,7 +28,7 @@
 	(((x) + ((n) - 1)) & ~((n) - 1))
 
 
-unsigned long wdma_base_addr(enum DISP_MODULE_ENUM module)
+unsigned long wdma_base_addr(enum enum DISP_MODULE_ENUM module)
 {
 	switch (module) {
 	case DISP_MODULE_WDMA0:
@@ -41,7 +41,7 @@ unsigned long wdma_base_addr(enum DISP_MODULE_ENUM module)
 	return 0;
 }
 
-unsigned int wdma_index(enum DISP_MODULE_ENUM module)
+unsigned int wdma_index(enum enum DISP_MODULE_ENUM module)
 {
 	int idx = 0;
 
@@ -59,7 +59,7 @@ unsigned int wdma_index(enum DISP_MODULE_ENUM module)
 	return idx;
 }
 
-int wdma_stop(enum DISP_MODULE_ENUM module, void *handle)
+int wdma_stop(enum enum DISP_MODULE_ENUM module, void *handle)
 {
 	unsigned long base_addr = wdma_base_addr(module);
 
@@ -70,7 +70,7 @@ int wdma_stop(enum DISP_MODULE_ENUM module, void *handle)
 	return 0;
 }
 
-int wdma_reset(enum DISP_MODULE_ENUM module, void *handle)
+int wdma_reset(enum enum DISP_MODULE_ENUM module, void *handle)
 {
 	unsigned int delay_cnt = 0;
 	unsigned int idx = wdma_index(module);
@@ -95,7 +95,7 @@ int wdma_reset(enum DISP_MODULE_ENUM module, void *handle)
 	return 0;
 }
 
-unsigned int ddp_wdma_get_cur_addr(enum DISP_MODULE_ENUM module)
+unsigned int ddp_wdma_get_cur_addr(enum enum DISP_MODULE_ENUM module)
 {
 	unsigned long base_addr = wdma_base_addr(module);
 

@@ -20,9 +20,9 @@
 #include "disp_debug.h"
 #include "disp_drv_platform.h"
 
-#if defined(COMMON_DISP_LOG)
+/*#if defined(COMMON_DISP_LOG)*/
 #include "mtkfb_debug.h"
-#endif
+/*#endif*/
 
 /*
  * Display has 7 log level:

@@ -188,7 +188,7 @@ enum DP_COLOR_ENUM {
 };
 
 /* Legacy for 6589 compatible */
-#define DpColorFormat (struct DP_COLOR_ENUM)
+#define DpColorFormat (enum DP_COLOR_ENUM)
 
 
 #define eYUV_420_3P		DP_COLOR_I420

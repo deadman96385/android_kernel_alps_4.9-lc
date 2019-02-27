@@ -213,12 +213,12 @@ struct disp_output_config {
 struct disp_session_input_config {
 	unsigned int session_id;
 	unsigned int config_layer_num;
-	disp_input_config config[MAX_INPUT_CONFIG];
+	struct disp_input_config config[MAX_INPUT_CONFIG];
 };
 
 struct disp_session_output_config {
 	unsigned int session_id;
-	disp_output_config config;
+	struct disp_output_config config;
 };
 
 struct disp_session_layer_num_config {

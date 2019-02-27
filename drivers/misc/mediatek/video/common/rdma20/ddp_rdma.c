@@ -26,7 +26,7 @@
 #include "ddp_rdma_ex.h"
 
 
-unsigned long rdma_base_addr(enum DISP_MODULE_ENUM module)
+unsigned long rdma_base_addr(enum enum DISP_MODULE_ENUM module)
 {
 	switch (module) {
 	case DISP_MODULE_RDMA0:
@@ -41,7 +41,7 @@ unsigned long rdma_base_addr(enum DISP_MODULE_ENUM module)
 	return 0;
 }
 
-unsigned int rdma_index(enum DISP_MODULE_ENUM module)
+unsigned int rdma_index(enum enum DISP_MODULE_ENUM module)
 {
 	int idx = 0;
 
@@ -63,24 +63,24 @@ unsigned int rdma_index(enum DISP_MODULE_ENUM module)
 	return idx;
 }
 
-void rdma_set_target_line(enum DISP_MODULE_ENUM module, unsigned int line, void *handle)
+void rdma_set_target_line(enum enum DISP_MODULE_ENUM module, unsigned int line, void *handle)
 {
 	unsigned long base_addr = rdma_base_addr(module);
 
 	DISP_REG_SET(handle, base_addr + DISP_REG_RDMA_TARGET_LINE, line);
 }
 
-int rdma_init(enum DISP_MODULE_ENUM module, void *handle)
+int rdma_init(enum enum DISP_MODULE_ENUM module, void *handle)
 {
 	return rdma_clock_on(module, handle);
 }
 
-int rdma_deinit(enum DISP_MODULE_ENUM module, void *handle)
+int rdma_deinit(enum enum DISP_MODULE_ENUM module, void *handle)
 {
 	return rdma_clock_off(module, handle);
 }
 
-void rdma_get_address(enum DISP_MODULE_ENUM module, unsigned long *addr)
+void rdma_get_address(enum enum DISP_MODULE_ENUM module, unsigned long *addr)
 {
 	unsigned long base_addr = rdma_base_addr(module);
 
