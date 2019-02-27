@@ -36,6 +36,7 @@
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
+#include <linux/highmem.h>
 #include <mt-plat/mt_io.h>
 #include "mach/emi_mpu.h"
 
