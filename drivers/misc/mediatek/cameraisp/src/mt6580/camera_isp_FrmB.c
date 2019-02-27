@@ -796,6 +796,8 @@ static inline unsigned int ISP_GetEDBufQueWaitFrameState(signed int idx)
 	return ret;
 }
 
+static signed int ISP_DumpReg(void);
+
 /*************************************************
  *
  *************************************************/
@@ -927,11 +929,412 @@ static unsigned int ISP_DumpDmaDeepDbg(void)
 	} \
 }
 
+bool ISP_chkModuleSetting(void)
+{
+	/*check the setting; */
+	unsigned int cam_ctrl_en_p1;  /*4004 */
+	unsigned int cam_ctrl_mux; /*4074 */
+	unsigned int cam_ctrl_sel; /*4018 */
+	unsigned int cam_tg1_vf_con;  /*4414 */
+
+	unsigned int grab_width;
+	unsigned int grab_height;
+
+	unsigned int cam_tg1_sen_grab_pxl; /*4418 */
+	unsigned int cam_tg1_sen_grab_lin; /*441C */
+
+	unsigned int sgg_sel;
+	unsigned int eis_sel;
+	bool flk_en;
+	unsigned int i;
+
+	cam_ctrl_en_p1 = ISP_RD32(ISP_ADDR + 0x4);
+	flk_en = (cam_ctrl_en_p1 >> 17) & 0x01;
+	cam_ctrl_mux = ISP_RD32(ISP_ADDR + 0x18);
+	sgg_sel = (cam_ctrl_mux >> 6) & 0x03;
+	cam_ctrl_sel = ISP_RD32(ISP_ADDR + 0x18);
+	eis_sel = (cam_ctrl_sel >> 15) & 0x01;
+
+	cam_tg1_sen_grab_pxl = ISP_RD32(ISP_ADDR + 0x418);
+	cam_tg1_sen_grab_lin = ISP_RD32(ISP_ADDR + 0x41C);
+
+	cam_tg1_vf_con = ISP_RD32(ISP_ADDR + 0x414);
+
+	if (cam_tg1_vf_con & 0x01) {
+		/*Check FLK setting */
+		unsigned int cam_flk_con;  /*4770 */
+		unsigned int cam_flk_ofst; /*4774 */
+		unsigned int cam_flk_size; /*4778 */
+		unsigned int cam_flk_num;  /*477C */
+		//TBD can't find
+		//unsigned int cam_esfko_xsize; /*7370 */
+
+		unsigned int FLK_OFST_X;
+		unsigned int FLK_OFST_Y;
+		unsigned int FLK_SIZE_X;
+		unsigned int FLK_SIZE_Y;
+		unsigned int FLK_NUM_X;
+		unsigned int FLK_NUM_Y;
+
+		//unsigned int esfko_xsize;
+
+		//unsigned int cam_aao_xsize;   /*7390 */ //TBD can't find
+		//unsigned int cam_aao_ysize;   /*7394 */ //TBD can't find
+		unsigned int cam_awb_win_num; /*45BC */
+		unsigned int cam_ae_hst_ctl;  /*4650 */
+		//unsigned int cam_ae_stat_en;  /*4698 */ //TBD can't find
+
+		unsigned int AWB_W_HNUM;
+		unsigned int AWB_W_VNUM;
+		unsigned int histogramen_num;
+
+		unsigned int cam_awb_win_org; /*45B0 */
+		unsigned int cam_awb_win_siz; /*45B4 */
+		unsigned int cam_awb_win_pit; /*45B8 */
+
+		unsigned int AAO_InWidth;
+		unsigned int AAO_InHeight;
+		unsigned int AWB_W_HPIT;
+		unsigned int AWB_W_VPIT;
+		unsigned int AWB_W_HSIZ;
+		unsigned int AWB_W_VSIZ;
+		unsigned int AWB_W_HORG;
+		unsigned int AWB_W_VORG;
+
+		unsigned int tmp, rst;
+		unsigned int h_size;
+		unsigned int v_size;
+		// unsigned int afo_d_xsize, afo_d_ysize;
+		unsigned int TG_W;
+		unsigned int TG_H;
+		unsigned int AF_EN;
+		unsigned int SGG_EN;
+		unsigned int cam_tg_sen_mode, dbl_data_bus;
+		unsigned int tg_w_pxl_e, tg_w_pxl_s;
+		unsigned int tg_h_lin_e, tg_h_lin_s;
+		unsigned int cam_af_size, af_xsize, af_ysize;
+
+		unsigned int scenario;
+
+		unsigned int cam_ctl_scenario;  /*4010 */
+
+		unsigned int EIS_RP_VOFST;
+		unsigned int EIS_RP_HOFST;
+		unsigned int EIS_WIN_VSIZE;
+		unsigned int EIS_WIN_HSIZE;
+
+		unsigned int EIS_OP_HORI;
+		unsigned int EIS_OP_VERT;
+
+		unsigned int EIS_SUBG_EN;
+		unsigned int EIS_NUM_HRP;
+		unsigned int EIS_NUM_VRP;
+		unsigned int EIS_NUM_HWIN;
+		unsigned int EIS_NUM_VWIN;
+
+		unsigned int EIS_IMG_WIDTH;
+		unsigned int EIS_IMG_HEIGHT;
+
+		bool bError;
+
+		unsigned int CAM_EIS_PREP_ME_CTRL1; /*4DC0 */
+		unsigned int CAM_EIS_MB_OFFSET;     /*4DD0 */
+		unsigned int CAM_EIS_MB_INTERVAL;   /*4DD4 */
+		unsigned int CAM_EIS_IMAGE_CTRL;    /*4DE0 */
+
+		LOG_INF("ISP chk TG1");
+
+		grab_width = ((cam_tg1_sen_grab_pxl >> 16) & 0x7fff) -
+			     (cam_tg1_sen_grab_pxl & 0x7fff);
+		grab_height = ((cam_tg1_sen_grab_lin >> 16) & 0x1fff) -
+			      (cam_tg1_sen_grab_lin & 0x1fff);
+
+		//cam_esfko_xsize = ISP_RD32(ISP_ADDR + 0x3370);
+		//esfko_xsize = cam_esfko_xsize & 0xffff;
+
+		cam_flk_con = ISP_RD32(ISP_ADDR + 0x770);
+		cam_flk_ofst = ISP_RD32(ISP_ADDR + 0x774);
+		cam_flk_size = ISP_RD32(ISP_ADDR + 0x778);
+		cam_flk_num = ISP_RD32(ISP_ADDR + 0x77C);
+		FLK_OFST_X = cam_flk_ofst & 0xFFF;
+		FLK_OFST_Y = (cam_flk_ofst >> 16) & 0xFFF;
+		FLK_SIZE_X = cam_flk_size & 0xFFF;
+		FLK_SIZE_Y = (cam_flk_size >> 16) & 0xFFF;
+		FLK_NUM_X = cam_flk_num & 0x7;
+		FLK_NUM_Y = (cam_flk_num >> 4) & 0x7;
+		//if ((flk_en == 1) && (sgg_3en == 0)) //TBD, need block diagram
+		//	pr_info("HwRWCtrl:: Flicker Error: SGG3_EN should be 1 when FLK_EN = 1");
+		/*1. The window size must be multiples of 2 */
+		if ((FLK_SIZE_X % 2 != 0) || (FLK_SIZE_Y % 2 != 0) ||
+		    (FLK_SIZE_X == 0) || (FLK_SIZE_Y == 0)) {
+			/* Error */
+			pr_info("HwRWCtrl:: Flicker Error: The window size must be multiples of 2. horizontally and vertically!!");
+			pr_info("HwRWCtrl:: Flicker Error: CAM_FLK_SIZE.FLK_SIZE_X(%d) and CAM_FLK_SIZE.FLK_SIZE_Y(%d) value can't be 0!!",
+				FLK_SIZE_X, FLK_SIZE_Y);
+		}
+
+		/*Check AF setting */
+
+		// under twin case, sgg_sel won't be 0 , so , don't need to take
+		// into consideration at twin case
+		tmp = 0;
+		rst = MTRUE;
+		cam_tg_sen_mode = ISP_RD32(ISP_ADDR + 0x410);
+		TG_W = ISP_RD32(ISP_ADDR + 0x418);
+		TG_H = ISP_RD32(ISP_ADDR + 0x41C);
+		cam_af_size = ISP_RD32(ISP_ADDR + 0x6CC);
+
+		AF_EN = (cam_ctrl_en_p1 >> 16) & 0x1;
+		SGG_EN = (cam_ctrl_en_p1 >> 15) & 0x1;
+
+		//
+		tg_w_pxl_e = (TG_W >> 16) & 0x7fff;
+		tg_w_pxl_s = TG_W & 0x7fff;
+		tg_h_lin_e = (TG_H >> 16) & 0x7fff;
+		tg_h_lin_s = TG_H & 0x7fff;
+		if (tg_w_pxl_e - tg_w_pxl_s < 32) {
+			LOG_INF("tg width < 32, can't enable AF:0x%x\n",
+				(tg_w_pxl_e - tg_w_pxl_s));
+			rst = MFALSE;
+		}
+
+		// AFO and AF relaterd module enable check
+		if (SGG_EN == 0) {
+			pr_info("AF is enabled, MUST enable SGG1:0x%x\n",
+				SGG_EN);
+			rst = MFALSE;
+		}
+
+		//
+		dbl_data_bus = (cam_tg_sen_mode >> 1) & 0x1;
+		// AF image wd
+		switch (sgg_sel) {
+		case 0:
+			h_size = tg_w_pxl_e - tg_w_pxl_s;
+			v_size = tg_h_lin_e - tg_h_lin_s;
+			break;
+		case 1:
+			h_size = tg_w_pxl_e - tg_w_pxl_s + 1;
+			v_size = tg_h_lin_e - tg_h_lin_s;
+			break;
+		case 2:
+			h_size = tg_w_pxl_e - tg_w_pxl_s + 1;
+			v_size = tg_h_lin_e - tg_h_lin_s;
+			break;
+		default:
+			LOG_INF("unsupported sgg_sel:0x%x\n", sgg_sel);
+			return MFALSE;
+		}
+		af_xsize = cam_af_size & 0x3ff;
+		af_ysize = (cam_af_size >> 16) & 0x3ff;
+		if (af_xsize < 8 || af_xsize > 510 || af_ysize < 4 || af_ysize > 511) {
+			LOG_INF("af_xsize/af_ysize out of range:0x%x/0x%x\n",
+				af_xsize, af_ysize);
+			rst = MFALSE;
+		}
+/*Check AE setting */
+		{
+
+			cam_awb_win_num = ISP_RD32(ISP_ADDR + 0x5BC);
+			cam_ae_hst_ctl = ISP_RD32(ISP_ADDR + 0x650);
+
+			AWB_W_HNUM = cam_awb_win_num & 0xff;
+			AWB_W_VNUM = (cam_awb_win_num >> 16) & 0xff;
+			histogramen_num = 0;
+			for (i = 0; i < 4; i++) {
+				if ((cam_ae_hst_ctl >> i) & 0x1)
+					histogramen_num += 1;
+
+			}
+		}
+
+		/*Check AWB setting */
+
+		cam_awb_win_num = ISP_RD32(ISP_ADDR + 0x5BC);
+		cam_awb_win_siz = ISP_RD32(ISP_ADDR + 0x5B4);
+		cam_awb_win_pit = ISP_RD32(ISP_ADDR + 0x5B8);
+		cam_awb_win_org = ISP_RD32(ISP_ADDR + 0x5B0);
+
+		AAO_InWidth = grab_width;
+		AAO_InHeight = grab_height;
+
+		AWB_W_HNUM = (cam_awb_win_num & 0xff);
+		AWB_W_VNUM = ((cam_awb_win_num >> 16) & 0xff);
+
+		AWB_W_HSIZ = (cam_awb_win_siz & 0x1fff);
+		AWB_W_VSIZ = ((cam_awb_win_siz >> 16) & 0x1fff);
+
+		AWB_W_HPIT = (cam_awb_win_pit & 0x1fff);
+		AWB_W_VPIT = ((cam_awb_win_pit >> 16) & 0x1fff);
+
+		AWB_W_HORG = (cam_awb_win_org & 0x1fff);
+		AWB_W_VORG = ((cam_awb_win_org >> 16) & 0x1fff);
+		if (AAO_InWidth < (AWB_W_HNUM * AWB_W_HPIT + AWB_W_HORG)) {
+			/*Error */
+			pr_info("Error HwRWCtrl:: grab_width(%d), grab_height(%d)!!",
+				grab_width,
+				grab_height);
+			pr_info("Error HwRWCtrl:: input frame width(%d) >= AWB_W_HNUM(%d)	* AWB_W_HPIT(%d) + AWB_W_HORG(%d) !!",
+				AAO_InWidth, AWB_W_HNUM, AWB_W_HPIT,
+				AWB_W_HORG);
+		}
+		if (AAO_InHeight < (AWB_W_VNUM * AWB_W_VPIT + AWB_W_VORG)) {
+			/*Error */
+			pr_info("Error HwRWCtrl:: grab_width(%d), grab_height(%d)!!",
+				grab_width,
+				grab_height);
+			pr_info("Error HwRWCtrl:: input frame height(%d) >= AWB_W_VNUM(%d) * AWB_W_VPIT(%d) + AWB_W_VORG(%d) !!",
+				AAO_InHeight, AWB_W_VNUM, AWB_W_VPIT,
+				AWB_W_VORG);
+		}
+		if (AWB_W_HPIT < AWB_W_HSIZ || AWB_W_VPIT < AWB_W_VSIZ) {
+			/*Error */
+			pr_info("Error HwRWCtrl:: AWB_W_HPIT(%d) >= AWB_W_HSIZ(%d), AWB_W_VPIT(%d) >= AWB_W_VSIZ(%d) !!",
+				AWB_W_HPIT, AWB_W_HSIZ, AWB_W_VPIT, AWB_W_VSIZ);
+		}
+
+
+		bError = MFALSE;
+
+		cam_ctl_scenario = ISP_RD32(ISP_ADDR + 0x10);
+		scenario = (cam_ctl_scenario >> 4) & 0x7;
+
+		CAM_EIS_PREP_ME_CTRL1 = ISP_RD32(ISP_ADDR + 0xDC0);
+		CAM_EIS_MB_OFFSET = ISP_RD32(ISP_ADDR + 0xDD0);
+		CAM_EIS_MB_INTERVAL = ISP_RD32(ISP_ADDR + 0xDD4);
+		CAM_EIS_IMAGE_CTRL = ISP_RD32(ISP_ADDR + 0xDE0);
+
+		EIS_SUBG_EN = (CAM_EIS_PREP_ME_CTRL1 >> 6) & 0x1;
+		EIS_RP_VOFST = (CAM_EIS_MB_OFFSET)&0xfff;
+		EIS_RP_HOFST = (CAM_EIS_MB_OFFSET >> 16) & 0xfff;
+		EIS_WIN_VSIZE = (CAM_EIS_MB_INTERVAL)&0xfff;
+		EIS_WIN_HSIZE = (CAM_EIS_MB_INTERVAL >> 16) & 0xfff;
+
+		EIS_OP_HORI = CAM_EIS_PREP_ME_CTRL1 & 0x7;
+		EIS_OP_VERT = (CAM_EIS_PREP_ME_CTRL1 >> 3) & 0x7;
+
+		EIS_NUM_HRP = (CAM_EIS_PREP_ME_CTRL1 >> 8) & 0x1f;
+		EIS_NUM_VRP = (CAM_EIS_PREP_ME_CTRL1 >> 21) & 0xf;
+		EIS_NUM_HWIN = (CAM_EIS_PREP_ME_CTRL1 >> 25) & 0x7;
+		EIS_NUM_VWIN = (CAM_EIS_PREP_ME_CTRL1 >> 28) & 0xf;
+
+		EIS_IMG_WIDTH = (CAM_EIS_IMAGE_CTRL >> 16) & 0x1fff;
+		EIS_IMG_HEIGHT = CAM_EIS_IMAGE_CTRL & 0x1fff;
+
+
+		/*1. The max horizontal window size is 4 */
+		/*2. The max vertical window size is 8 */
+		/*3. EIS_MF_OFFSET.EIS_RP_VOFST/EIS_RP_HOFST  > 16 */
+		/*6. EIS_PREP_ME_CTRL1.EIS_NUM_HRP <= 16 */
+		/*7. EIS_PREP_ME_CTRL1.EIS_NUM_VRP <= 8 */
+		if ((EIS_NUM_VWIN > 8) || (EIS_NUM_HWIN > 4) ||
+		    (EIS_NUM_VRP > 8) || (EIS_NUM_HRP > 16) ||
+		    (EIS_RP_VOFST < 16) || (EIS_RP_HOFST <= 16)) {
+			/*Error */
+			pr_info("EIS Error, 1. The max horizontal window size is 4, EIS_NUM_HWIN(%d)!!",
+				EIS_NUM_HWIN);
+			pr_info("EIS Error, 2. The max vertical window size is 8, EIS_NUM_VWIN(%d)!!",
+				EIS_NUM_VWIN);
+			pr_info("EIS Error, 3. EIS_MF_OFFSET.EIS_RP_VOFST or EIS_RP_HOFST  > 16!!, EIS_RP_VOFST(%d), EIS_RP_HOFST(%d)",
+				EIS_RP_VOFST, EIS_RP_HOFST);
+			pr_info("EIS Error, 6. EIS_PREP_ME_CTRL1.EIS_NUM_HRP <= 16, EIS_NUM_HRP(%d)!!",
+				EIS_NUM_HRP);
+			pr_info("EIS Error, 7. EIS_PREP_ME_CTRL1.EIS_NUM_VRP <= 8, EIS_NUM_VRP(%d)!!",
+				EIS_NUM_VRP);
+		}
+		/* It's special changing HW constraint limitation for EIS
+		 *8. EIS_MB_INTERVAL.EIS_WIN_HSIZE >=
+		 * (EIS_PREP_ME_CTRL1.EIS_NUM_HRP+1)*16+1
+		 *9. EIS_MB_INTERVAL.EIS_WIN_VSIZE >=
+		 * (EIS_PREP_ME_CTRL1.EIS_NUM_VRP+1)*16+1
+		 */
+		if ((EIS_WIN_HSIZE < (((EIS_NUM_HRP + 1) << 4) + 1)) ||
+		    (EIS_WIN_VSIZE < (((EIS_NUM_VRP + 1) << 4) + 1))) {
+			/*Error */
+			pr_info("EIS Error, 8. EIS_MB_INTERVAL.EIS_WIN_HSIZE >= (EIS_PREP_ME_CTRL1.EIS_NUM_HRP+1)*16+1!!, EIS_WIN_HSIZE:%d, EIS_NUM_HRP:%d",
+				EIS_WIN_HSIZE, EIS_NUM_HRP);
+			pr_info("EIS Error, 9. EIS_MB_INTERVAL.EIS_WIN_VSIZE >=	(EIS_PREP_ME_CTRL1.EIS_NUM_VRP+1)*16+1!!, EIS_WIN_VSIZE:%d, EIS_NUM_VRP:%d",
+				EIS_WIN_VSIZE, EIS_NUM_VRP);
+		}
+/*10. (EIS_MB_OFFSET.EIS_RP_HOFST +
+ *  ((EIS_MB_INTERVAL.EIS_WIN_HSIZE-1)*
+ *	EIS_PREP_ME_CTRL1.EIS_NUM_HWIN)+EIS_PREP_ME_CTRL1.EIS_NUM_HRP*16)*
+ *	EIS_PREP_ME_CTRL1.EIS_OP_HORI < EIS_IMAGE_CTRL.WIDTH
+ *10.( EIS_MB_OFFSET.EIS_RP_VOFST +
+ *  ((EIS_MB_INTERVAL.EIS_WIN_VSIZE-1)*
+ *	EIS_PREP_ME_CTRL1.EIS_NUM_VWIN)+EIS_PREP_ME_CTRL1.EIS_NUM_VRP*16)*
+ *	EIS_PREP_ME_CTRL1.EIS_OP_VERT < EIS_IMAGE_CTRL.HEIGHT
+ */
+		if ((((EIS_RP_HOFST +
+		       ((EIS_WIN_HSIZE - 1) * (EIS_NUM_HWIN - 1)) +
+		       (EIS_NUM_HRP << 4)) *
+		      EIS_OP_HORI) >= EIS_IMG_WIDTH) ||
+		    (((EIS_RP_VOFST +
+		       ((EIS_WIN_VSIZE - 1) * (EIS_NUM_VWIN - 1)) +
+		       (EIS_NUM_VRP << 4)) *
+		      EIS_OP_VERT) >= EIS_IMG_HEIGHT)) {
+			/*Error */
+			pr_info("EIS Error, 10. (EIS_MB_OFFSET.EIS_RP_HOFST(%d) + ((EIS_MB_INTERVAL.EIS_WIN_HSIZE(%d)-1)*(EIS_PREP_ME_CTRL1.EIS_NUM_HWIN(%d)-1))+EIS_PREP_ME_CTRL1.EIS_NUM_HRP(%d)*16)*EIS_PREP_ME_CTRL1.EIS_OP_HORI(%d) < EIS_IMAGE_CTRL.WIDTH(%d)!!",
+				EIS_RP_HOFST, EIS_WIN_HSIZE, EIS_NUM_HWIN,
+				EIS_NUM_HRP, EIS_OP_HORI, EIS_IMG_WIDTH);
+			pr_info("EIS Error, 10. (EIS_MB_OFFSET.EIS_RP_VOFST(%d) + ((EIS_MB_INTERVAL.EIS_WIN_VSIZE(%d)-1)*(EIS_PREP_ME_CTRL1.EIS_NUM_VWIN(%d)-1))+EIS_PREP_ME_CTRL1.EIS_NUM_VRP(%d)*16)*EIS_PREP_ME_CTRL1.EIS_OP_VERT(%d) < EIS_IMG_HEIGHT.WIDTH(%d)!!",
+				EIS_RP_VOFST, EIS_WIN_VSIZE, EIS_NUM_VWIN,
+				EIS_NUM_VRP, EIS_OP_VERT, EIS_IMG_HEIGHT);
+		}
+
+		/*11. EISO_XISZE = 255 (after 82, EISO_XISZE = 407 in 89)
+		 *4. EIS_IMAGE_CTRL.WIDTH = EIS input image width but if
+		 *   (two_pix mode) EIS_IMAGE_CTRL.WIDTH = input image width/2
+		 *5. EIS_IMAGE_CTRL.HEIGHT = EIS input image height
+		 */
+#if 0
+		switch (eis_sel) {
+		case 0:
+			if ((scenario == 1) && (sgg_sel == 0x0)) {
+				if ((grab_width != EIS_IMG_WIDTH) ||
+				    (grab_height != EIS_IMG_HEIGHT)) {
+					bError = MTRUE;
+				}
+				/*Error */
+			} else {
+				/*Error in non-yuv sensor */
+				LOG_INF("EIS Error, Non-Yuv Sensor!!");
+                bError = MTRUE;
+			}
+			break;
+		case 1:
+			if ((TG_W !=
+			     EIS_IMG_WIDTH) ||
+			    (grab_height != EIS_IMG_HEIGHT)) {
+				bError = MTRUE;
+			}
+			/*Error */
+			break;
+		default:
+			/*Error */
+			break;
+		}
+		if (bError == MTRUE) {
+			pr_info("EIS Error, 4. EIS_IMAGE_CTRL.WIDTH = EIS input image width but if (two_pix mode) EIS_IMAGE_CTRL.WIDTH = input image width/2!!\n");
+			pr_info("EIS Error, 5. EIS_IMAGE_CTRL.HEIGHT != EIS input image height!!\n");
+			pr_info("eis_sel:%d, scenario:%d, sgg_sel:%d",
+				eis_sel, scenario, sgg_sel);
+			pr_info("EIS_IMG_WIDTH:%d, EIS_IMG_HEIGHT:%d, grab_width:%d, grab_height:%d, TG_W:%d",
+				EIS_IMG_WIDTH, EIS_IMG_HEIGHT, grab_width,
+				grab_height, TG_W);
+		}
+#endif
+		if (bError == MTRUE) {
+			ISP_DumpReg();
+		}
+	}
+
+	return MTRUE;
+}
 
 /*************************************************
  *
  *************************************************/
-static signed int ISP_DumpReg(void);
 static signed int ISP_DumpReg_FrmB(void)
 {
 	return ISP_DumpReg();
@@ -5447,6 +5850,7 @@ ISP_IRQ_INT_STATUS_FLK_ERR_ST|ISP_IRQ_INT_STATUS_LSC_ERR_ST)
 			IrqInfo.ErrMask[ISP_IRQ_TYPE_INTX]) {
 			LOG_ERR("ISP INT ERR_P1 0x%x\n",
 			IrqStatus[ISP_IRQ_TYPE_INTX]);
+			ISP_chkModuleSetting();
 			g_ISPIntErr[_IRQ] |= IrqStatus[ISP_IRQ_TYPE_INTX];
 		}
 

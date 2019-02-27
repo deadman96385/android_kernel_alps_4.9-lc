@@ -965,6 +965,14 @@ static signed int ISP_DumpReg(void)
 	ISP_RD32((void *)(ISP_ADDR + 0x580)));
 	LOG_DBG("0x%08X %08X", ISP_TPIPE_ADDR + 0x584,
 	ISP_RD32((void *)(ISP_ADDR + 0x584)));
+	LOG_DBG("0x%08X %08X", ISP_TPIPE_ADDR + 0x770,
+	ISP_RD32((void *)(ISP_ADDR + 0x770)));
+	LOG_DBG("0x%08X %08X", ISP_TPIPE_ADDR + 0x774,
+	ISP_RD32((void *)(ISP_ADDR + 0x774)));
+	LOG_DBG("0x%08X %08X", ISP_TPIPE_ADDR + 0x778,
+	ISP_RD32((void *)(ISP_ADDR + 0x778)));
+	LOG_DBG("0x%08X %08X", ISP_TPIPE_ADDR + 0x77C,
+	ISP_RD32((void *)(ISP_ADDR + 0x77C)));
 	LOG_DBG("0x%08X %08X", ISP_TPIPE_ADDR + 0x800,
 	ISP_RD32((void *)(ISP_ADDR + 0x800)));
 	LOG_DBG("0x%08X %08X", ISP_TPIPE_ADDR + 0x880,
