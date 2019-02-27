@@ -1105,6 +1105,9 @@ int msdc_dt_init(struct platform_device *pdev, struct mmc_host *mmc)
 	int id;
 
 #ifndef FPGA_PLATFORM
+	struct pinctrl *pinctrl;
+	struct pinctrl_state *pins_ins;
+
 	static char const * const ioconfig_names[] = {
 		MSDC0_IOCFG_NAME, MSDC1_IOCFG_NAME
 	};
@@ -1144,6 +1147,19 @@ int msdc_dt_init(struct platform_device *pdev, struct mmc_host *mmc)
 		infracfg_ao_base = of_iomap(np, 0);
 		pr_debug("of_iomap for infracfg_ao base @ 0x%p\n",
 			infracfg_ao_base);
+	}
+
+	if (id == 1) {
+		pinctrl = devm_pinctrl_get(&pdev->dev);
+		if (IS_ERR(pinctrl))
+			dev_err(&pdev->dev, "Can't find pinctrl!\n");
+
+		pins_ins = pinctrl_lookup_state(pinctrl, "insert_cfg");
+		if (IS_ERR(pins_ins))
+			dev_err(&pdev->dev, "Can't find pinctrl insert_cfg!\n");
+
+		pinctrl_select_state(pinctrl, pins_ins);
+		pr_debug("msdc1 pinctl select state\n");
 	}
 
 #endif

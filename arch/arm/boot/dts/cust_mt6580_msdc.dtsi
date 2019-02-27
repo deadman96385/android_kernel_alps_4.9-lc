@@ -52,6 +52,9 @@
 	no-mmc;
 	no-sdio;
 
+	pinctrl-names = "default","insert_cfg";
+	pinctrl-0 = <&mmc1_pins_insert_default>;
+	pinctrl-1 = <&mmc1_pins_insert_cfg>;
 	pinctl = <&msdc1_pins_default>;
 	pinctl_sdr104 = <&msdc1_pins_sdr104>;
 	pinctl_sdr50 = <&msdc1_pins_sdr50>;
@@ -114,6 +117,17 @@
 		cmd_edge = /bits/ 8 <MSDC_SMPL_RISING>;
 		rdata_edge = /bits/ 8 <MSDC_SMPL_RISING>;
 		wdata_edge = /bits/ 8 <MSDC_SMPL_RISING>;
+	};
+
+	mmc1_pins_insert_default: mmc1_ins_default {
+	};
+	mmc1_pins_insert_cfg: mmc1_ins_cfg {
+		pins_insert {
+			pins = <PINMUX_GPIO3__FUNC_EINT3>;
+			input-schmitt-enable =<1>;
+			slew-rate = <0>;
+			bias-pull-up =<00>;
+		};
 	};
 
 	msdc1_pins_default: msdc1@default {
