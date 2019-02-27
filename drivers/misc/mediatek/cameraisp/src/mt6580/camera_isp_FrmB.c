@@ -3067,11 +3067,18 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 					bFilled !=
 					ISP_RTBC_BUF_FILLED) {
 						bBufFilled = MFALSE;
-					}
+/*
+ * Unknown extra unbalanced deque will break FBC.
+ * To avoid this, we still return the uncertain result, but keep bFilled as
+ * old value and prevent further 'start idx mismatch' error.
+ * The FBC will recover after the error slot been enque again.
+ */
+					}else {
 						pstRTBuf_FrmB->ring_buf[
 						rt_dma].data[iBuf + i].
 						bFilled =
 						ISP_RTBC_BUF_LOCKED;
+					}
 						deque_buf.sof_cnt =
 						sof_count[out];
 						deque_buf.img_cnt =
