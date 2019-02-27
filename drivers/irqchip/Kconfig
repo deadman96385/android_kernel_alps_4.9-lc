@@ -256,6 +256,13 @@ config IRQ_MXS
 	select IRQ_DOMAIN
 	select STMP_DEVICE
 
+config MTK_EIC
+	bool
+	select IRQ_DOMAIN
+	help
+	  This option is used to enable external interrupt controller for
+	  MediaTek solutions.
+
 config MVEBU_ODMI
 	bool
 	select GENERIC_MSI_IRQ_DOMAIN
