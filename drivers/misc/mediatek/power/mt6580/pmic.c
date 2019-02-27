@@ -74,7 +74,7 @@
 #include <linux/spinlock.h>
 #include <linux/syscalls.h>
 #include <linux/time.h>
-#include <linux/wakelock.h>
+#include <linux/pm_wakeup.h>
 #include <linux/writeback.h>
 #include <linux/notifier.h>
 #include <linux/fb.h>
@@ -1812,11 +1812,7 @@ static struct task_struct *bat_percent_notify_thread;
 static bool bat_percent_notify_flag;
 static DECLARE_WAIT_QUEUE_HEAD(bat_percent_notify_waiter);
 
-#ifdef CONFIG_PM_WAKELOCKS
 struct wakeup_source bat_percent_notify_lock;
-#else
-struct wake_lock bat_percent_notify_lock;
-#endif
 
 static DEFINE_MUTEX(bat_percent_notify_mutex);
 
@@ -1885,13 +1881,7 @@ int bat_percent_notify_handler(void *unused)
 		wait_event_interruptible(bat_percent_notify_waiter,
 					 (bat_percent_notify_flag == true));
 
-#ifdef CONFIG_PM_WAKELOCKS
 		__pm_stay_awake(&bat_percent_notify_lock);
-#else
-		wake_lock(&bat_percent_notify_lock);
-#endif
-
-
 		mutex_lock(&bat_percent_notify_mutex);
 
 		bat_per_val = bat_get_ui_percentage();
@@ -1910,13 +1900,7 @@ int bat_percent_notify_handler(void *unused)
 		PMICLOG("bat_per_level=%d,bat_per_val=%d\n", g_battery_percent_level, bat_per_val);
 
 		mutex_unlock(&bat_percent_notify_mutex);
-#ifdef CONFIG_PM_WAKELOCKS
 		__pm_relax(&bat_percent_notify_lock);
-#else
-		wake_unlock(&bat_percent_notify_lock);
-#endif
-
-
 
 		hrtimer_start(&bat_percent_notify_timer, ktime, HRTIMER_MODE_REL);
 
@@ -1966,12 +1950,7 @@ static struct task_struct *dlpt_notify_thread;
 static bool dlpt_notify_flag;
 static DECLARE_WAIT_QUEUE_HEAD(dlpt_notify_waiter);
 
-#ifdef CONFIG_PM_WAKELOCKS
 struct wakeup_source dlpt_notify_lock;
-#else
-struct wake_lock dlpt_notify_lock;
-#endif
-
 static DEFINE_MUTEX(dlpt_notify_mutex);
 
 #define DLPT_NUM 16
@@ -2293,7 +2272,7 @@ int dlpt_notify_handler(void *unused)
 
 		wait_event_interruptible(dlpt_notify_waiter, (dlpt_notify_flag == true));
 
-		wake_lock(&dlpt_notify_lock);
+		__pm_stay_awake(&dlpt_notify_lock);
 		mutex_lock(&dlpt_notify_mutex);
 		/* --------------------------------- */
 
@@ -2353,7 +2332,7 @@ int dlpt_notify_handler(void *unused)
 
 		/* --------------------------------- */
 		mutex_unlock(&dlpt_notify_mutex);
-		wake_unlock(&dlpt_notify_lock);
+		__pm_relax(&dlpt_notify_lock);
 
 		hrtimer_start(&dlpt_notify_timer, ktime, HRTIMER_MODE_REL);
 
@@ -2646,22 +2625,19 @@ void auxadc_imp_int_handler_r(void)
  */
 static DEFINE_MUTEX(pmic_mutex);
 static struct task_struct *pmic_thread_handle;
-#ifdef CONFIG_PM_WAKELOCKS
 struct wakeup_source pmicThread_lock;
-#else
-struct wake_lock pmicThread_lock;
-#endif
 
 void wake_up_pmic(void)
 {
 	PMICLOG_DBG("[wake_up_pmic]\r\n");
-	wake_up_process(pmic_thread_handle);
-
-#ifdef CONFIG_PM_WAKELOCKS
-	__pm_stay_awake(&pmicThread_lock);
-#else
-	wake_lock(&pmicThread_lock);
-#endif
+	if (pmic_thread_handle != NULL) {
+		__pm_stay_awake(&pmicThread_lock);
+		wake_up_process(pmic_thread_handle);
+	} else {
+		pr_notice(PMICTAG "[%s] pmic_thread_handle not ready\n",
+			__func__);
+		return;
+	}
 }
 EXPORT_SYMBOL(wake_up_pmic);
 
@@ -2762,13 +2738,6 @@ void PMIC_EINT_SETTING(void)
 #endif
 	pmic_enable_interrupt(20, 1, "PMIC");
 
-#if 0 /* #ifdef CONFIG_MTK_LEGACY */
-/*
-	mt_eint_set_hw_debounce(g_eint_pmic_num, g_cust_eint_mt_pmic_debounce_cn);
-	mt_eint_registration(g_eint_pmic_num, g_cust_eint_mt_pmic_type, mt_pmic_eint_irq, 0);
-	mt_eint_unmask(g_eint_pmic_num);
-TBD */
-#else
 	node = of_find_compatible_node(NULL, NULL, "mediatek, pmic-eint");
 	if (node) {
 		ret = of_property_read_u32_array(node, "debounce", ints, ARRAY_SIZE(ints));
@@ -2780,12 +2749,9 @@ TBD */
 		    request_irq(g_pmic_irq, mt_pmic_eint_irq, IRQF_TRIGGER_NONE, "pmic-eint", NULL);
 		if (ret > 0)
 			PMICLOG("EINT IRQ LINENNOT AVAILABLE\n");
-
-		enable_irq(g_pmic_irq);
 		enable_irq_wake(g_pmic_irq);
 	} else
 		PMICLOG("%s can't find compatible node\n", __func__);
-#endif
 	PMICLOG("[CUST_EINT] CUST_EINT_MT_PMIC_MT6350_NUM=%d\n", g_eint_pmic_num);
 	PMICLOG("[CUST_EINT] CUST_EINT_PMIC_DEBOUNCE_CN=%d\n", g_cust_eint_mt_pmic_debounce_cn);
 	PMICLOG("[CUST_EINT] CUST_EINT_PMIC_TYPE=%d\n", g_cust_eint_mt_pmic_type);
@@ -2856,21 +2822,11 @@ static int pmic_thread_kthread(void *x)
 		mdelay(1);
 
 		mutex_unlock(&pmic_mutex);
-#ifdef CONFIG_PM_WAKELOCKS
 		__pm_relax(&pmicThread_lock);
-#else
-		wake_unlock(&pmicThread_lock);
-#endif
 
 		set_current_state(TASK_INTERRUPTIBLE);
-#if 0 /* #ifdef CONFIG_MTK_LEGACY */
-#if 0				/* TBD */
-		mt_eint_unmask(g_eint_pmic_num);	/* need fix */
-#endif
-#else
 		if (g_pmic_irq != 0)
 			enable_irq(g_pmic_irq);
-#endif
 		schedule();
 	}
 
@@ -4274,27 +4230,13 @@ static int __init pmic_mt_init(void)
 {
 	int ret;
 
-#ifdef CONFIG_PM_WAKELOCKS
 	wakeup_source_init(&pmicThread_lock, "pmicThread_lock_mt6350 wakelock");
 #ifdef BATTERY_PERCENT_PROTECT
 	wakeup_source_init(&bat_percent_notify_lock, "bat_percent_notify_lock wakelock");
-#endif
-
-#else
-	wake_lock_init(&pmicThread_lock, WAKE_LOCK_SUSPEND, "pmicThread_lock_mt6350 wakelock");
-#ifdef BATTERY_PERCENT_PROTECT
-	wake_lock_init(&bat_percent_notify_lock, WAKE_LOCK_SUSPEND,
-		       "bat_percent_notify_lock wakelock");
-#endif
-
-#endif				/* #ifdef CONFIG_PM_WAKELOCKS */
+#endif				/* #ifdef BATTERY_PERCENT_PROTECT */
 
 #ifdef DLPT_FEATURE_SUPPORT
-#ifdef CONFIG_PM_WAKELOCKS
 	wakeup_source_init(&dlpt_notify_lock, "dlpt_notify_lock wakelock");
-#else
-	wake_lock_init(&dlpt_notify_lock, WAKE_LOCK_SUSPEND, "dlpt_notify_lock wakelock");
-#endif
 #endif				/* #ifdef DLPT_FEATURE_SUPPORT */
 
 #if !defined CONFIG_MTK_LEGACY

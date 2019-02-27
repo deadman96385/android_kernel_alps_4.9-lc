@@ -22,8 +22,8 @@
 #include <linux/list.h>
 #include <linux/mutex.h>
 #include <linux/kthread.h>
-#include <linux/wakelock.h>
 #include <linux/device.h>
+#include <linux/pm_wakeup.h>
 #include <linux/kdev_t.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
@@ -80,13 +80,13 @@
 #define TURN_ON                 1
 
 signed int count_time_out = 15;
-struct wake_lock pmicAuxadc_irq_lock;
+struct wakeup_source pmicAuxadc_irq_lock;
 static DEFINE_SPINLOCK(pmic_adc_lock);
 static DEFINE_MUTEX(pmic_adc_mutex);
 
 void pmic_auxadc_init(void)
 {
-	wake_lock_init(&pmicAuxadc_irq_lock, WAKE_LOCK_SUSPEND, "pmicAuxadc irq wakelock");
+	wakeup_source_init(&pmicAuxadc_irq_lock, "pmicAuxadc irq wakelock");
 	PMICLOG("****[pmic_auxadc_init] DONE\n");
 }
 
@@ -164,7 +164,7 @@ signed int PMIC_IMM_GetCurrent(void)
 	pmic_set_register_value(PMIC_RG_VBUF_EN, 1);
 	pmic_turn_on_clock(TURN_ON);
 	udelay(30);
-	wake_lock(&pmicAuxadc_irq_lock);
+	__pm_stay_awake(&pmicAuxadc_irq_lock);
 	mutex_lock(&pmic_adc_mutex);
 	/* set 0 */
 	ret =
@@ -234,7 +234,7 @@ signed int PMIC_IMM_GetCurrent(void)
 #endif
 
 	pmic_turn_on_clock(TURN_OFF);
-	wake_unlock(&pmicAuxadc_irq_lock);
+	__pm_relax(&pmicAuxadc_irq_lock);
 	mutex_unlock(&pmic_adc_mutex);
 
 	PMICLOG
@@ -280,7 +280,7 @@ unsigned int PMIC_IMM_GetOneChannelValue(pmic_adc_ch_list_enum dwChannel, int de
 	PMIC_IMM_PollingAuxadcChannel();
 
 
-	wake_lock(&pmicAuxadc_irq_lock);
+	__pm_stay_awake(&pmicAuxadc_irq_lock);
 	mutex_lock(&pmic_adc_mutex);
 
 	if (dwChannel < 9) {
@@ -465,7 +465,7 @@ unsigned int PMIC_IMM_GetOneChannelValue(pmic_adc_ch_list_enum dwChannel, int de
 	default:
 		PMICLOG("[AUXADC] Invalid channel value(%d,%d)\n", dwChannel, trimd);
 		pmic_turn_on_clock(TURN_OFF);
-		wake_unlock(&pmicAuxadc_irq_lock);
+		__pm_relax(&pmicAuxadc_irq_lock);
 		mutex_unlock(&pmic_adc_mutex);
 		return -1;
 		break;
@@ -522,13 +522,13 @@ unsigned int PMIC_IMM_GetOneChannelValue(pmic_adc_ch_list_enum dwChannel, int de
 	default:
 		PMICLOG("[AUXADC] Invalid channel value(%d,%d)\n", dwChannel, trimd);
 		pmic_turn_on_clock(TURN_OFF);
-		wake_unlock(&pmicAuxadc_irq_lock);
+		__pm_relax(&pmicAuxadc_irq_lock);
 		mutex_unlock(&pmic_adc_mutex);
 		return -1;
 		break;
 	}
 	pmic_turn_on_clock(TURN_OFF);
-	wake_unlock(&pmicAuxadc_irq_lock);
+	__pm_relax(&pmicAuxadc_irq_lock);
 	mutex_unlock(&pmic_adc_mutex);
 #if 0
 	{
