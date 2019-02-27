@@ -796,7 +796,7 @@ static inline unsigned int ISP_GetEDBufQueWaitFrameState(signed int idx)
 	return ret;
 }
 
-static signed int ISP_DumpReg(void);
+extern signed int ISP_DumpReg(void);
 
 /*************************************************
  *
@@ -1324,9 +1324,6 @@ bool ISP_chkModuleSetting(void)
 				grab_height, TG_W);
 		}
 #endif
-		if (bError == MTRUE) {
-			ISP_DumpReg();
-		}
 	}
 
 	return MTRUE;
@@ -1337,6 +1334,7 @@ bool ISP_chkModuleSetting(void)
  *************************************************/
 static signed int ISP_DumpReg_FrmB(void)
 {
+	ISP_chkModuleSetting();
 	return ISP_DumpReg();
 }
 

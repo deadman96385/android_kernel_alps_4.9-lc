@@ -739,7 +739,7 @@ static void ISP_GetTime(unsigned int *pSec, unsigned int *pUSec)
 /*************************************************
  *
  *************************************************/
-static signed int ISP_DumpReg(void)
+signed int ISP_DumpReg(void)
 {
 	signed int Ret = 0;
 	signed int i;
