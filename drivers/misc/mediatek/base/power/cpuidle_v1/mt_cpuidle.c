@@ -1032,7 +1032,7 @@ static void get_dts_nodes_address(void)
 
 static void get_dts_nodes_irq_bit(void)
 {
-	kp_irq_bit = get_dts_node_irq_bit("mediatek,mt6580-keypad", 3, 0);
+	kp_irq_bit = get_dts_node_irq_bit("mediatek,kp", 3, 0);
 	conn_wdt_irq_bit = get_dts_node_irq_bit("mediatek,mt6580-consys", 6, 3);
 	lowbattery_irq_bit = get_dts_node_irq_bit("mediatek,mt6735-auxadc", 3, 0);
 	md1_wdt_irq_bit = get_dts_node_irq_bit("mediatek,ap_ccif0", 6, 3);
