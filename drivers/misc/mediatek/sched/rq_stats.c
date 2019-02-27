@@ -599,8 +599,10 @@ int is_heavy_task(struct task_struct *p)
 	if (task_low_priority(p->prio))
 		return 0;
 #endif
+#ifdef CONFIG_SCHED_HMP
 	if (p->se.avg.loadwop_avg >= heavy_task_threshold2)
 		return 1;
+#endif
 
 	return 0;
 }
@@ -649,12 +651,14 @@ unsigned int sched_get_nr_heavy_task_by_threshold(int cluster_id,
 			if (task_low_priority(p->prio))
 				continue;
 #endif
+#ifdef CONFIG_SCHED_HMP
 			if (p->se.avg.loadwop_avg >= threshold) {
 				is_heavy = ack_by_curcap(cpu,
 							cluster_id, clusters-1);
 				count += is_heavy ? 1 : 0;
 				__trace_out(is_heavy, cpu, p);
 			}
+#endif
 		}
 		raw_spin_unlock_irqrestore(&cpu_rq(cpu)->lock, flags);
 	}
