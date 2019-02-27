@@ -413,9 +413,9 @@ static int kpd_pdrv_probe(struct platform_device *pdev)
 #ifdef CONFIG_MTK_MRDUMP_KEY
 	mt_eint_register();
 #endif
-#ifdef CONFIG_MTK_PMIC_NEW_ARCH
+
 	long_press_reboot_function_setting();
-#endif
+
 	err = kpd_create_attr(&kpd_pdrv.driver);
 	if (err) {
 		kpd_notice("create attr file fail\n");
