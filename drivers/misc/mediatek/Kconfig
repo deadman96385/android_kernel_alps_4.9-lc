@@ -383,4 +383,13 @@ config MTK_DM_VERITY_OFF
 	bool "Disable dm-verity"
 	default n
 
+config SYSTEM_AS_ROOT
+    bool "Support system-as-root"
+    default y
+    help
+        Y means to enable system-as-root.
+        This option merges ramdisk into system image
+        All new launched projects in android P should enable it.
+        If you are not sure about this, set n
+
 endmenu    # Misc
