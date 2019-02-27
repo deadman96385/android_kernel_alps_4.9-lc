@@ -29,7 +29,10 @@
 #include <linux/compat.h>
 #endif
 
-#if IS_ENABLED(CONFIG_MACH_MT6758)
+#if IS_ENABLED(CONFIG_MACH_MT6580)
+#include <mach/mt_clkmgr.h>
+#include "smi_config_mt6580.h"
+#elif IS_ENABLED(CONFIG_MACH_MT6758)
 #include <clk-mt6758-pg.h>
 #include "smi_config_default.h"
 #elif IS_ENABLED(CONFIG_MACH_MT6761)
@@ -126,6 +129,43 @@ void __iomem *smi_mmsys_base_addr_get(void)
 	return smi_mmsys->base;
 }
 
+#if IS_ENABLED(CONFIG_MACH_MT6580)
+static int smi_enable_clock(const unsigned int reg_indx, const char *user_name)
+{
+	int ret;
+
+	ret = mt_enable_clock(MT_CG_DISP0_SMI_COMMON, user_name);
+	if (ret)
+		return ret;
+
+	switch (reg_indx) {
+	case 0:
+		return mt_enable_clock(MT_CG_DISP0_SMI_LARB0, user_name);
+	case 1:
+		return mt_enable_clock(MT_CG_LARB1_SMI_CKPDN, user_name);
+	default:
+		return 0;
+	}
+}
+
+static int smi_disable_clock(const unsigned int reg_indx, const char *user_name)
+{
+	int ret;
+
+	switch (reg_indx) {
+	case 0:
+		ret = mt_disable_clock(MT_CG_DISP0_SMI_LARB0, user_name);
+	case 1:
+		ret = mt_disable_clock(MT_CG_LARB1_SMI_CKPDN, user_name);
+	default:
+		ret = 0;
+	}
+	if (ret)
+		return ret;
+	return mt_disable_clock(MT_CG_DISP0_SMI_COMMON, user_name);
+}
+#endif
+
 /* ********************************************************
  * prepare and enable CG/MTCMOS of COMMON and specific LARB
  * reg_indx: select specific LARB or COMMON
@@ -142,6 +182,9 @@ int smi_bus_prepare_enable(const unsigned int reg_indx,
 			reg_indx, SMI_LARB_NUM);
 		return -EINVAL;
 	}
+#if IS_ENABLED(CONFIG_MACH_MT6580)
+	return smi_enable_clock(reg_indx, user_name);
+#endif
 	/* COMMON */
 	if (mtcmos)
 		ret = clk_prepare_enable(common->clks[0]);
@@ -200,6 +243,9 @@ int smi_bus_disable_unprepare(const unsigned int reg_indx,
 			reg_indx, SMI_LARB_NUM);
 		return -EINVAL;
 	}
+#if IS_ENABLED(CONFIG_MACH_MT6580)
+	return smi_disable_clock(reg_indx, user_name);
+#endif
 	/* LARB */
 	if (reg_indx < SMI_LARB_NUM) {
 		struct mtk_smi_dev *larb = larbs[reg_indx];
