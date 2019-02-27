@@ -737,7 +737,7 @@ static int mt_fh_hal_dfs_armpll(unsigned int pll, unsigned int dds)
 
 	return 0;
 }
-#if 0
+
 static int mt_fh_hal_dfs_mmpll(unsigned int target_dds)
 {				/* mmpll dfs mode */
 	unsigned long flags = 0;
@@ -805,7 +805,7 @@ static int mt_fh_hal_dfs_mmpll(unsigned int target_dds)
 
 	return 0;
 }
-#endif
+
 #if 0
 static int mt_fh_hal_dfs_vencpll(unsigned int target_freq)
 {
@@ -877,7 +877,7 @@ static int mt_fh_hal_dfs_vencpll(unsigned int target_freq)
 /* ************************************************** */
 /* mt_fh_hal_dfs_mempll() */
 /* ************************************************** */
-#if 0
+
 static int mt_fh_hal_dfs_mempll(unsigned int target_dds)
 {
 	unsigned long flags = 0;
@@ -941,7 +941,7 @@ static int mt_fh_hal_dfs_mempll(unsigned int target_dds)
 
 	return 0;
 }
-#endif
+
 #if 0
 static int mt_fh_hal_l2h_dvfs_mempll(void)
 {
@@ -1437,9 +1437,9 @@ static struct mt_fh_hal_driver g_fh_hal_drv = {
 	//.mt_l2h_mempll = NULL,
 	//.mt_h2l_mempll = NULL,
 	.mt_dfs_armpll = mt_fh_hal_dfs_armpll,
-	//.mt_dfs_mmpll = mt_fh_hal_dfs_mmpll,
+	.mt_dfs_mmpll = mt_fh_hal_dfs_mmpll,
 	//.mt_dfs_vencpll = mt_fh_hal_dfs_vencpll,	/* TODO: should set to NULL */
-	//.mt_dfs_mempll = mt_fh_hal_dfs_mempll,
+	.mt_dfs_mempll = mt_fh_hal_dfs_mempll,
 	//.mt_is_support_DFS_mode = mt_fh_hal_is_support_DFS_mode,
 	//.mt_l2h_dvfs_mempll = mt_fh_hal_l2h_dvfs_mempll,	/* TODO: should set to NULL */
 	//.mt_h2l_dvfs_mempll = mt_fh_hal_h2l_dvfs_mempll,	/* TODO: should set to NULL */

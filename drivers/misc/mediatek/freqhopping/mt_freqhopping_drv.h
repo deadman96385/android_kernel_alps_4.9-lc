@@ -31,6 +31,8 @@ struct mt_fh_hal_driver {
 	int (*mt_fh_hal_ctrl)(struct freqhopping_ioctl *, bool);
 	void (*mt_fh_hal_default_conf)(void);
 	int (*mt_dfs_armpll)(unsigned int, unsigned int);
+	int (*mt_dfs_mempll)(unsigned int);
+	int (*mt_dfs_mmpll)(unsigned int);
 	int (*mt_fh_hal_dumpregs_read)(struct seq_file *m, void *v);
 	int (*mt_fh_hal_slt_start)(void);
 	int (*mt_dfs_general_pll)(unsigned int, unsigned int);

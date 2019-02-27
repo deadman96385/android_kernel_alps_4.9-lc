@@ -428,6 +428,26 @@ int mt_dfs_armpll(unsigned int pll, unsigned int dds)
 }
 EXPORT_SYMBOL(mt_dfs_armpll);
 
+int mt_dfs_mmpll(unsigned int target_dds)
+{
+	if (!g_p_fh_hal_drv) {
+		FH_MSG("[%s]: g_p_fh_hal_drv is uninitialized.", __func__);
+		return 1;
+	}
+	return g_p_fh_hal_drv->mt_dfs_mmpll(target_dds);
+}
+EXPORT_SYMBOL(mt_dfs_mmpll);
+
+int mt_dfs_mempll(unsigned int target_dds)
+{
+	if ((!g_p_fh_hal_drv) || (!g_p_fh_hal_drv->mt_dfs_mempll)) {
+		FH_MSG("[%s]: g_p_fh_hal_drv or g_p_fh_hal_drv->mt_dfs_mempll is uninitialized.",
+		       __func__);
+		return 1;
+	}
+	return g_p_fh_hal_drv->mt_dfs_mempll(target_dds);
+}
+EXPORT_SYMBOL(mt_dfs_mempll);
 #define PROC_FH_(FOLDER) \
 	"/proc/freqhopping/"#FOLDER
 
