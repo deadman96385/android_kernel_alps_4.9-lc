@@ -110,6 +110,7 @@ extern int mt_get_data_nommu(int data, unsigned long pva);
 extern void smp(void);
 extern void amp(void);
 extern void disable_dcache_safe(bool is_inner_off);
+extern void __enable_dcache(void);
 extern void cpu_wake_up_errata_802022(void);
 extern unsigned *copy_words(volatile unsigned *destination,
 			    volatile unsigned *source, unsigned num_words);

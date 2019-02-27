@@ -20,7 +20,6 @@
 
 #include <linux/of_address.h>
 #include <linux/of.h>
-#include <linux/irqchip/mt-gic.h>
 
 #include <mt-plat/mt_dbg.h>
 #include <mt-plat/mt_io.h>
@@ -28,7 +27,6 @@
 
 #include "mt_cpuidle.h"
 #include "mt_spm.h"
-#include "smp.h"
 
 #include <mach/irqs.h>
 #include <mach/mt_spm_mtcmos.h>

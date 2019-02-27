@@ -22,7 +22,6 @@
 #include <linux/spinlock.h>
 #include <linux/interrupt.h>
 #include <linux/types.h>
-#include <mach/irqs.h>
 #include <mach/mt_clkmgr.h>
 #include <mach/mt_clkbuf_ctl.h>
 #include "mt_cpufreq.h"
