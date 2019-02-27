@@ -5654,6 +5654,7 @@ static int inet6_fill_nora(struct sk_buff *skb, struct inet6_dev *idev,
 	unsigned int flag = 1;
 	struct in6_addr addr;
 
+#ifdef CONFIG_MTK_IPV6_VZW_REQ6378
 	/*This ifi_flags refers to the dev flag in kernel,
 	 *but hereI use it as a valid flag. When ifi_flags
 	 *is zero , it means RA refesh Fail, And When
@@ -5666,7 +5667,8 @@ static int inet6_fill_nora(struct sk_buff *skb, struct inet6_dev *idev,
 	} else {
 		flag = 1;
 		pr_info("[mtk_net][vzw]RA init Fail\n");
-		}
+	}
+#endif
 
 	nlh = nlmsg_put(skb, portid, seq, event, sizeof(struct ifaddrmsg), flag);
 	if (!nlh)
@@ -5674,9 +5676,10 @@ static int inet6_fill_nora(struct sk_buff *skb, struct inet6_dev *idev,
 
 	put_ifaddrmsg(nlh, 64, 01, 01, idev->dev->ifindex);
 
-	//ipv6 address
-	//RA refresh Fail - FE80::5A5A:5A22
-	//RA init Fail - FE80::5A5A:5A23
+	/* ipv6 address
+	* RA refresh Fail - FE80::5A5A:5A22
+	* RA init Fail - FE80::5A5A:5A23
+	*/
 	addr.in6_u.u6_addr32[0] = 0x000080FE;
 	addr.in6_u.u6_addr32[1] = 0x0;
 	addr.in6_u.u6_addr32[2] = 0x5A005A00;
