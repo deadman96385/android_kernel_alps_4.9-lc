@@ -135,7 +135,6 @@ config MACH_MT6580
 	select MTK_POWER_GS
 	select MTK_CPU_STRESS
 	select MTK_IRQ_NEW_DESIGN
-	select MTK_IRQ_NEW_DESIGN_DEBUG
 	select MTK_NO_ATF
 	help
 	  This enable support for MediaTek MT6580
