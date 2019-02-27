@@ -119,7 +119,6 @@ config MACH_MT6580
 	select ARM_CRYPTO
 	select CRYPTO_AES_ARM_BS
 	select CRYPTO_SHA256_ARM
-	select MTK_SYS_CIRQ
 	select ARM_HAS_SG_CHAIN
 	select MTK_BASE_POWER
 	select MTK_EIC
