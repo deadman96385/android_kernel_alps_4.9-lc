@@ -172,7 +172,8 @@ int mau_start_monitor(int m4u_id, int m4u_slave_id, int mau_set,
 
 void *mva_get_priv(unsigned int mva);
 unsigned int m4u_do_mva_alloc(unsigned long va, unsigned int size, void *priv);
-unsigned int m4u_do_mva_alloc_fix(unsigned int mva, unsigned int size, void *priv);
+unsigned int m4u_do_mva_alloc_fix(unsigned long va, unsigned int mva, unsigned int size, void *priv);
+unsigned int m4u_do_mva_alloc_start_from(unsigned long va, unsigned int mva, unsigned int size, void *priv);
 int m4u_do_mva_free(unsigned int mva, unsigned int size);
 
 /* ================================= */
@@ -275,7 +276,7 @@ do {\
 } while (0)
     /*aee_kernel_warning(m4u_name, "[M4U] error:"string,##args); */
 
-#define M4U_PRINT_LOG_OR_SEQ(seq_file, fmt, args...) \
+#define M4U_PRINT_SEQ(seq_file, fmt, args...) \
 	do {\
 		if (seq_file)\
 			seq_printf(seq_file, fmt, ##args);\

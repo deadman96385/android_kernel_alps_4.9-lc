@@ -267,7 +267,7 @@ int config_mau(M4U_MAU_STRUCT mau)
 	int i;
 	int free_id = -1;
 	int m4u_id = m4u_port_2_m4u_id(mau.port);
-	int larb = m4u_port_2_larb_id(mau.port);
+	int larb = m4u_port_2_larbid(mau.port);
 	unsigned int MVAStart = mau.mva;
 	unsigned int MVAEnd = mau.mva + mau.size;
 
@@ -922,7 +922,7 @@ int m4u_insert_seq_range(M4U_PORT_ID port, unsigned int MVAStart, unsigned int M
 				continue;
 			} else {
 				M4ULOG_HIGH("insert range overlap!: larb=%d,module=%s\n",
-					    m4u_port_2_larb_id(port), m4u_get_port_name(port));
+					    m4u_port_2_larbid(port), m4u_get_port_name(port));
 				M4ULOG_HIGH(
 					"warning: insert tlb range is overlapped with previous ranges, current process=%s,!\n",
 					current->comm);
@@ -1046,7 +1046,7 @@ static int _m4u_config_port(int port, int virt, int sec, int dis, int dir)
 	if (m4u_index == 0) {
 		int mmu_en = 0;
 
-		larb = m4u_port_2_larb_id(port);
+		larb = m4u_port_2_larbid(port);
 		larb_port = m4u_port_2_larb_port(port);
 		larb_base = gLarbBaseAddr[larb];
 
@@ -1105,7 +1105,7 @@ int m4u_config_port(M4U_PORT_STRUCT *pM4uPort)	/* native */
 {
 	M4U_PORT_ID PortID = (pM4uPort->ePortID);
 	int m4u_index = m4u_port_2_m4u_id(PortID);
-	int larb = m4u_port_2_larb_id(PortID);
+	int larb = m4u_port_2_larbid(PortID);
 	int ret;
 
 	_m4u_port_clock_toggle(m4u_index, larb, 1);
@@ -1146,7 +1146,7 @@ int m4u_config_port_array(struct m4u_port_array *port_array)
 	for (port = 0; port < M4U_PORT_NR; port++) {
 		if (port_array->ports[port] & M4U_PORT_ATTR_EN) {
 			m4u_index = m4u_port_2_m4u_id(port);
-			larb = m4u_port_2_larb_id(port);
+			larb = m4u_port_2_larbid(port);
 			if (larb != last_larb) {
 				if (last_larb != -1)	/* clock off last larb */
 					_m4u_port_clock_toggle(last_index, last_larb, 0);
@@ -1502,7 +1502,7 @@ void m4u_print_port_status(struct seq_file *seq, int only_print_active)
 	int m4u_index, larb, larb_port;
 	unsigned long larb_base;
 
-	M4U_PRINT_LOG_OR_SEQ(seq, "m4u_print_port_status ========>\n");
+	M4U_PRINT_SEQ(seq, "m4u_print_port_status ========>\n");
 
 	smi_common_clock_on();
 	larb_clock_all_on();
@@ -1510,7 +1510,7 @@ void m4u_print_port_status(struct seq_file *seq, int only_print_active)
 	for (port = 0; port < gM4u_port_num; port++) {
 		m4u_index = m4u_port_2_m4u_id(port);
 		if (m4u_index == 0) {
-			larb = m4u_port_2_larb_id(port);
+			larb = m4u_port_2_larbid(port);
 			larb_port = m4u_port_2_larb_port(port);
 			larb_base = gLarbBaseAddr[larb];
 
@@ -1524,13 +1524,13 @@ void m4u_print_port_status(struct seq_file *seq, int only_print_active)
 		if (only_print_active && !mmu_en)
 			continue;
 
-		M4U_PRINT_LOG_OR_SEQ(seq, "%s(%d),", m4u_get_port_name(port), !!mmu_en);
+		M4U_PRINT_SEQ(seq, "%s(%d),", m4u_get_port_name(port), !!mmu_en);
 	}
 
 	larb_clock_all_off();
 	smi_common_clock_off();
 
-	M4U_PRINT_LOG_OR_SEQ(seq, "\n");
+	M4U_PRINT_SEQ(seq, "\n");
 }
 
 /*
