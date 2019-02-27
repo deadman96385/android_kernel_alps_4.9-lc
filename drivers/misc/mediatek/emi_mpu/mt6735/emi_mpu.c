@@ -843,7 +843,7 @@ static int __match_id(u32 axi_id, int tbl_idx, u32 port_ID)
 	}
 }
 
-static u32 __id2mst(u32 id)
+/*static u32 __id2mst(u32 id)
 {
 
 	int i;
@@ -861,7 +861,7 @@ static u32 __id2mst(u32 id)
 	}
 
 	return MST_INVALID;
-}
+}*/
 
 static char *__id2name(u32 id)
 {
