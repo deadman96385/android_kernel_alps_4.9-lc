@@ -20,6 +20,16 @@ include $(srctree)/drivers/misc/mediatek/gud/Makefile.include
 endif
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/$(MTK_PLATFORM)/include/trustzone/m4u
 
+ifeq ($(CONFIG_MACH_MT6735),y)
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/$(MTK_PLATFORM)/mt6735/
+endif
+ifeq ($(CONFIG_MACH_MT6735M),y)
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/$(MTK_PLATFORM)/mt6735m/
+endif
+ifeq ($(CONFIG_MACH_MT6753),y)
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/$(MTK_PLATFORM)/mt6753/
+endif
+
 ifeq ($(CONFIG_MTK_SECURE_MEM_SUPPORT),y)
 include $(srctree)/drivers/misc/mediatek/trusted_mem/Makefile.include
 endif

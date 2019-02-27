@@ -22,8 +22,9 @@
 #include <linux/list.h>
 #include <linux/mutex.h>
 #include <linux/kthread.h>
-#include <linux/wakelock.h>
+
 #include <linux/device.h>
+#include <linux/pm_wakeup.h>
 #include <linux/kdev_t.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
@@ -79,14 +80,14 @@
 #endif
 
 signed int count_time_out = 15;
-struct wake_lock pmicAuxadc_irq_lock;
+struct wakeup_source pmicAuxadc_irq_lock;
 /*static DEFINE_SPINLOCK(pmic_adc_lock);*/
 static DEFINE_MUTEX(pmic_adc_mutex);
 
 void pmic_auxadc_init(void)
 {
 	/*signed int adc_busy;*/
-	wake_lock_init(&pmicAuxadc_irq_lock, WAKE_LOCK_SUSPEND, "pmicAuxadc irq wakelock");
+	wakeup_source_init(&pmicAuxadc_irq_lock, "pmicAuxadc irq wakelock");
 
 	pmic_set_register_value(PMIC_AUXADC_AVG_NUM_LARGE, 6);	/* 1.3ms */
 	pmic_set_register_value(PMIC_AUXADC_AVG_NUM_SMALL, 2);	/* 0.8ms */
@@ -100,14 +101,14 @@ void pmic_auxadc_init(void)
 
 void pmic_auxadc_lock(void)
 {
-	wake_lock(&pmicAuxadc_irq_lock);
+	__pm_stay_awake(&pmicAuxadc_irq_lock);
 	mutex_lock(&pmic_adc_mutex);
 }
 
 void pmic_auxadc_unlock(void)
 {
 	mutex_unlock(&pmic_adc_mutex);
-	wake_unlock(&pmicAuxadc_irq_lock);
+	__pm_relax(&pmicAuxadc_irq_lock);
 }
 
 signed int PMIC_IMM_GetCurrent(void)
@@ -123,7 +124,7 @@ signed int PMIC_IMM_GetCurrent(void)
 	pmic_set_register_value(PMIC_RG_VBUF_EN, 1);
 	pmic_set_register_value(PMIC_RG_CLKSQ_EN_AUX_AP_MODE, 1);
 
-	wake_lock(&pmicAuxadc_irq_lock);
+	__pm_stay_awake(&pmicAuxadc_irq_lock);
 	mutex_lock(&pmic_adc_mutex);
 	ret = pmic_config_interface(MT6328_AUXADC_RQST0_SET, 0x3, 0xffff, 0);
 
@@ -159,7 +160,7 @@ signed int PMIC_IMM_GetCurrent(void)
 
 
 	mutex_unlock(&pmic_adc_mutex);
-	wake_unlock(&pmicAuxadc_irq_lock);
+	__pm_relax(&pmicAuxadc_irq_lock);
 
 	return ICharging;
 
@@ -215,8 +216,7 @@ unsigned int PMIC_IMM_GetOneChannelValue(pmic_adc_ch_list_enum dwChannel, int de
 
 	/*upmu_set_reg_value(0x0a44,0x010a);*/
 
-
-	wake_lock(&pmicAuxadc_irq_lock);
+	__pm_stay_awake(&pmicAuxadc_irq_lock);
 	mutex_lock(&pmic_adc_mutex);
 	/*ret=pmic_config_interface(MT6328_TOP_CLKSQ_SET,(1<<2),0xffff,0);*/
 	ret = pmic_config_interface(MT6328_AUXADC_RQST0_SET, (1 << dwChannel), 0xffff, 0);
@@ -389,7 +389,7 @@ unsigned int PMIC_IMM_GetOneChannelValue(pmic_adc_ch_list_enum dwChannel, int de
 	default:
 		PMICLOG2("[AUXADC] Invalid channel value(%d,%d)\n", dwChannel, trimd);
 		mutex_unlock(&pmic_adc_mutex);
-		wake_unlock(&pmicAuxadc_irq_lock);
+		__pm_relax(&pmicAuxadc_irq_lock);
 		return -1;
 		break;
 	}
@@ -447,13 +447,13 @@ unsigned int PMIC_IMM_GetOneChannelValue(pmic_adc_ch_list_enum dwChannel, int de
 	default:
 		PMICLOG2("[AUXADC] Invalid channel value(%d,%d)\n", dwChannel, trimd);
 		mutex_unlock(&pmic_adc_mutex);
-		wake_unlock(&pmicAuxadc_irq_lock);
+		__pm_relax(&pmicAuxadc_irq_lock);
 		return -1;
 		break;
 	}
 
 	mutex_unlock(&pmic_adc_mutex);
-	wake_unlock(&pmicAuxadc_irq_lock);
+	__pm_relax(&pmicAuxadc_irq_lock);
 	/*PMICLOG2("[AUXADC] ch=%d raw=%d data=%d\n", dwChannel, ret_data,adc_result);*/
 
 	/*return ret_data;*/
@@ -480,8 +480,7 @@ unsigned int PMIC_IMM_GetOneChannelValueMD(unsigned char dwChannel, int deCount,
 	if (dwChannel != 0 && dwChannel != 1 && dwChannel != 4 && dwChannel != 7 && dwChannel != 8)
 		return -1;
 
-
-	wake_lock(&pmicAuxadc_irq_lock);
+	__pm_relax(&pmicAuxadc_irq_lock);
 
 	mutex_lock(&pmic_adc_mutex);
 	ret = pmic_config_interface(MT6328_TOP_CLKSQ_SET, (1 << 3), 0xffff, 0);
@@ -555,7 +554,7 @@ unsigned int PMIC_IMM_GetOneChannelValueMD(unsigned char dwChannel, int deCount,
 
 	default:
 		PMICLOG2("[AUXADC] Invalid channel value(%d,%d)\n", dwChannel, trimd);
-		wake_unlock(&pmicAuxadc_irq_lock);
+		__pm_relax(&pmicAuxadc_irq_lock);
 		return -1;
 		break;
 	}
@@ -583,12 +582,11 @@ unsigned int PMIC_IMM_GetOneChannelValueMD(unsigned char dwChannel, int deCount,
 		break;
 	default:
 		PMICLOG2("[AUXADC] Invalid channel value(%d,%d)\n", dwChannel, trimd);
-		wake_unlock(&pmicAuxadc_irq_lock);
+		__pm_relax(&pmicAuxadc_irq_lock);
 		return -1;
 		break;
 	}
-
-	wake_unlock(&pmicAuxadc_irq_lock);
+	__pm_relax(&pmicAuxadc_irq_lock);
 
 	PMICLOG2("[AUXADC] PMIC_IMM_GetOneChannelValueMD ch=%d raw=%d data=%d\n", dwChannel,
 		ret_data, adc_result);

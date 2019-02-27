@@ -26,7 +26,6 @@
 #include <linux/of.h>
 /* #include <linux/leds-mt65xx.h> */
 #include <linux/workqueue.h>
-#include <linux/wakelock.h>
 #include <linux/slab.h>
 #include <linux/delay.h>
 /* #include <mach/mt_pwm.h>
@@ -86,7 +85,7 @@ static int button_flag_isink1;
 static int button_flag_isink2;
 static int button_flag_isink3;
 
-struct wake_lock leds_suspend_lock;
+struct wakeup_source leds_suspend_lock;
 
 char *leds_name[MT65XX_LED_TYPE_TOTAL] = {
 	"red",
@@ -124,7 +123,7 @@ static unsigned int backlight_PWM_div_hal = CLK_DIV1;	/* this para come from cus
 
 void mt_leds_wake_lock_init(void)
 {
-	wake_lock_init(&leds_suspend_lock, WAKE_LOCK_SUSPEND, "leds wakelock");
+	wakeup_source_init(&leds_suspend_lock, "leds wakelock");
 }
 
 unsigned int mt_get_bl_brightness(void)
@@ -1017,7 +1016,7 @@ int mt_mt65xx_blink_set(struct led_classdev *led_cdev,
 						  &nled_tmp_setting);
 				return 0;
 			} else if (!got_wake_lock) {
-				wake_lock(&leds_suspend_lock);
+				__pm_stay_awake(&leds_suspend_lock);
 				got_wake_lock = 1;
 			}
 		} else if (!led_data->delay_on && !led_data->delay_off) {	/* disable blink */
@@ -1040,7 +1039,7 @@ int mt_mt65xx_blink_set(struct led_classdev *led_cdev,
 						       0);
 				return 0;
 			} else if (got_wake_lock) {
-				wake_unlock(&leds_suspend_lock);
+				__pm_relax(&leds_suspend_lock);
 				got_wake_lock = 0;
 			}
 		}

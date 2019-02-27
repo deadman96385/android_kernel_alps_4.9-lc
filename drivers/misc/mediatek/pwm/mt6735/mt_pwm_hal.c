@@ -17,7 +17,7 @@
 
 #include <mach/mt_pwm_hal_pub.h>
 #include <mach/mt_pwm_hal.h>
-#include <mach/mt_pwm_prv.h>
+#include <mach/mtk_pwm_prv.h>
 #if !defined(CONFIG_MTK_CLKMGR)
 #include <linux/clk.h>
 #else

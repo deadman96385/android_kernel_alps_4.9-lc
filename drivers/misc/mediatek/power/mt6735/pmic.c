@@ -48,7 +48,6 @@
 #include <linux/pm_wakeup.h>  included in linux/device.h
 #else
 */
-#include <linux/wakelock.h>
 /*#endif*/
 #include <linux/device.h>
 #include <linux/kdev_t.h>
