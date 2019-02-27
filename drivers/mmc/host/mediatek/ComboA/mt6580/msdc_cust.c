@@ -382,10 +382,12 @@ int msdc_get_ccf_clk_pointer(struct platform_device *pdev,
 	host->hclk_ctl = NULL;
 
 	/* Just set default clksrc */
+	msdc_clk_enable(host);
 	sprintf(name, "MSDC%d", host->id);
 	ori_clksrc = clkmux_get(mux_id[host->id], name);
 	if (ori_clksrc != MSDC_CLKSRC_187MHZ)
 		clkmux_sel(mux_id[host->id], MSDC_CLKSRC_187MHZ, name);
+	msdc_clk_disable(host);
 
 	return 0;
 }
