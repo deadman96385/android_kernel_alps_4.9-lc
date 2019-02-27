@@ -2399,7 +2399,7 @@ static int mtk_uart_probe(struct platform_device *pdev)
 			return err;
 		}
 
-		set_uart_dma_clk(pdev->id, clk_uart0_dma);
+		/* set_uart_dma_clk(pdev->id, clk_uart0_dma); */
 		pr_debug("[UART][CCF]clk_uart0_dma:%p\n", clk_uart0_dma);
 	}
 #else
