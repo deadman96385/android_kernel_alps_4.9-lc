@@ -82,7 +82,7 @@ static int __init mt_usb2jtag_platform_init(void)
 {
 	struct mt_usb2jtag_driver *mt_usb2jtag_drv;
 
-	mt_usb2jtag_drv = get_mt_usb2jtag_drv();
+	mt_usb2jtag_drv = get_mtk_usb2jtag_drv();
 	mt_usb2jtag_drv->usb2jtag_init = mt_usb2jtag_hw_init;
 	mt_usb2jtag_drv->usb2jtag_suspend = NULL;
 	mt_usb2jtag_drv->usb2jtag_resume = NULL;

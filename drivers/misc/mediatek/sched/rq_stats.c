@@ -533,6 +533,7 @@ static void __heat_refined(int *count)
 static inline void __heat_refined(int *count) {}
 #endif
 
+#ifdef CONFIG_SCHED_HMP
 static void __trace_out(int heavy, int cpu, struct task_struct *p)
 {
 #define TRACEBUF_LEN 128
@@ -549,6 +550,7 @@ static void __trace_out(int heavy, int cpu, struct task_struct *p)
 			p->comm);
 		trace_sched_heavy_task(tracebuf);
 }
+#endif
 
 static int ack_by_curcap(int cpu, int cluster_id, int max_cluster_id)
 {
