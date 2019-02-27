@@ -18,7 +18,7 @@
 #include <linux/sched.h>
 
 #include <mt-plat/mtk_boot.h>
-#include <mtk_gpufreq.h>
+#include <mt_gpufreq.h>
 
 #ifdef CONFIG_MTK_QOS_SUPPORT
 #include <mtk_gpu_bw.h>

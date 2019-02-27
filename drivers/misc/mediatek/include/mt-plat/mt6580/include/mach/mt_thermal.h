@@ -25,7 +25,7 @@
 
 #include "mt-plat/sync_write.h"
 #include "mtk_thermal_typedefs.h"
-#include "../../../../../base/power/mt6580/mtk_gpufreq.h"
+#include "mt_gpufreq.h"
 /* #include "mach/mt6575_auxadc_hw.h" */
 
 #if !defined(CONFIG_MTK_LEGACY)
