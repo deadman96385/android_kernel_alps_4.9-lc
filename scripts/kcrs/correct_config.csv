@@ -26,6 +26,7 @@ CONFIG_ARM64_CRYPTO,PLATFORM,Calvin.Liao,,y,X,X,y,X,y
 CONFIG_ARM64_ERRATUM_836870,PLATFORM,,,X,X,X,X,X,X
 CONFIG_ARM64_ERRATUM_858921,PLATFORM,stanley.chu,new config in this commit 5f8b8d201eeb6af7904ed276106097602763aaf7,X,X,X,y,X,y
 CONFIG_ARM_CRYPTO,PROJECT,Calvin.Liao,,,y,y,,y,
+CONFIG_CRYPTO_LZ4K,PROJECT,linger.lee,ubifs,,,X,X,X,X,X,X
 CONFIG_ARM_ERRATA_858921,PLATFORM,stanley.chu,new config in this commit fec2807bf7ea34ddd06cdc7c7641416360058d7b,X,y,y,X,y,X
 CONFIG_ARM_KERNMEM_PERMS,PLATFORM,yun.hsiang,,X,y,y,X,y,X
 CONFIG_ARM_MODULE_PLTS,PLATFORM,johnson.lin,,,y,y,,y,
@@ -1170,7 +1171,6 @@ CONFIG_YAFFS_FS,PROJECT,linger.lee,,,,,,,
 CONFIG_ZISOFS,COMMON,,,y,y,y,y,y,y
 CONFIG_ZNDSWAP,PROJECT,Chinwen.Chang,gmo project config,,,,,,
 CONFIG_ZRAM_LZ4_COMPRESS,PROJECT,Chinwen.Chang,,,,,,,
-CONFIG_ZRAM_LZ4K_COMPRESS,PROJECT,Chinwen.Chang,,,,,,,
 CONFIG_ZRAM,PROJECT,Chinwen.Chang,,,,,,,
 CONFIG_ZSMALLOC,COMMON,,,y,y,y,y,y,y
 CONFIG_ZSM,PROJECT,Robbin.Chiu,new config 84a52cb60725192d8ae0c80b58c363c35484cfd4,,,,,,
