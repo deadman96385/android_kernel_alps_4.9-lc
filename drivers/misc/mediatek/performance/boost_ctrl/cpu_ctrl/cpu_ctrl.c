@@ -332,12 +332,15 @@ int cpu_ctrl_init(struct proc_dir_entry *parent)
 	};
 	mutex_init(&boost_freq);
 
+/* legacy chip don't support cpu_ctrl */
+#if !defined(CONFIG_MACH_MT6580) && !defined(CONFIG_MACH_MT6735) && !defined(CONFIG_MACH_MT6735M) && !defined(CONFIG_MACH_MT6753)
 	boost_dir = proc_mkdir("cpu_ctrl", parent);
+#else
+	boost_dir = proc_mkdir("cpu_ctrl_dummy", parent);
+#endif
 
 	if (!boost_dir)
 		pr_debug("boost_dir null\n ");
-
-
 
 	/* create procfs */
 	for (i = 0; i < ARRAY_SIZE(entries); i++) {
