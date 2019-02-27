@@ -48,6 +48,17 @@ SUPPORT_USE_DDR_TYPE := true
 SUPPORT_MMP := true
 endif
 
+ifeq ($(CONFIG_MACH_MT6735M),y)
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/$(MTK_PLATFORM)/include/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/$(MTK_PLATFORM)/include/mach/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/freqhopping/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)/
+ccflags-y += -DSMI_D2
+SUPPORT_QOS := false
+obj-y += mmdvfs_mgr.o
+endif
+
 ifeq (true, $(SUPPORT_QOS))
 obj-y += mmdvfs_pmqos.o
 endif

@@ -27,6 +27,22 @@
 int mmdvfs_scen_log_mask_get(void);
 int mmdvfs_debug_level_get(void);
 
+#define MMDVFS_LOG_TAG	"MMDVFS"
+#define MMDVFSMSG(string, args...) pr_debug("[pid=%d]"string, current->tgid, ##args)
+#define MMDVFSMSG2(string, args...) pr_debug(string, ##args)
+#define MMDVFSTMP(string, args...) pr_debug("[pid=%d]"string, current->tgid, ##args)
+#define MMDVFSERR(string, args...) \
+		do {\
+			pr_debug("error: "string, ##args); \
+			aee_kernel_warning(MMDVFS_LOG_TAG, "error: "string, ##args);  \
+		} while (0)
+
+#define _BIT_(_bit_) (unsigned)(1 << (_bit_))
+#define _BITS_(_bits_, _val_) ((((unsigned) -1 >> (31 - ((1) ? _bits_))) \
+				& ~((1U << ((0) ? _bits_)) - 1)) & ((_val_)<<((0) ? _bits_)))
+#define _BITMASK_(_bits_) (((unsigned) -1 >> (31 - ((1) ? _bits_))) & ~((1U << ((0) ? _bits_)) - 1))
+#define _GET_BITS_VAL_(_bits_, _val_) (((_val_) & (_BITMASK_(_bits_))) >> ((0) ? _bits_))
+
 /* MMDVFS extern APIs */
 extern void mmdvfs_init(struct MTK_SMI_BWC_MM_INFO *info);
 extern void mmdvfs_handle_cmd(struct MTK_MMDVFS_CMD *cmd);
@@ -123,10 +139,27 @@ extern int force_always_on_mm_clks(void);
 extern int mmdvfs_get_stable_isp_clk(void);
 extern int get_mmdvfs_clk_mux_mask(void);
 
+/* D2 plus only */
+#if defined(SMI_D2)
+extern void mt_set_vencpll_con1(int val);
+extern int clkmux_sel(int id, unsigned int clksrc, char *name);
+#endif
+
+/* D1 plus implementation only */
+extern u32 get_devinfo_with_index(u32 index);
 
 #define MMDVFS_PROFILE_UNKNOWN (0)
-#define MMDVFS_PROFILE_VIN (1)
-#define MMDVFS_PROFILE_CER (2)
+#define MMDVFS_PROFILE_R1 (1)
+#define MMDVFS_PROFILE_J1 (2)
+#define MMDVFS_PROFILE_D1 (3)
+#define MMDVFS_PROFILE_D1_PLUS (4)
+#define MMDVFS_PROFILE_D2 (5)
+#define MMDVFS_PROFILE_D2_M_PLUS (6)
+#define MMDVFS_PROFILE_D2_P_PLUS (7)
+#define MMDVFS_PROFILE_D3 (8)
+#define MMDVFS_PROFILE_E1 (9)
+#define MMDVFS_PROFILE_VIN (10)
+#define MMDVFS_PROFILE_CER (11)
 
 /* Macro used to resovling step setting ioctl command */
 #define MMDVFS_CMD_STEP_LEN (8)
@@ -158,6 +191,7 @@ int mmdvfs_set_fine_step(
 	enum MTK_SMI_BWC_SCEN smi_scenario, int mmdvfs_fine_step);
 #endif /* CONFIG_MTK_SMI_EXT */
 
+extern int mmdvfs_set_mmsys_clk(enum MTK_SMI_BWC_SCEN scenario, int mmsys_clk_mode);
 extern int mmdvfs_get_mmdvfs_profile(void);
 extern int is_mmdvfs_supported(void);
 extern enum mmdvfs_lcd_size_enum mmdvfs_get_lcd_resolution(void);
