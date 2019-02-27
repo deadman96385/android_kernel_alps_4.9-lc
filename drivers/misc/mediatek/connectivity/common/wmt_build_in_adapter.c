@@ -76,6 +76,7 @@ void wmt_export_platform_bridge_register(struct wmt_platform_bridge *cb)
 #if MTK_WCN_CMB_FOR_SDIO_1V_AUTOK
 	bridge.autok_cb = cb->autok_cb;
 #endif
+	bridge.clock_fail_dump_cb = cb->clock_fail_dump_cb;
 	CONNADP_INFO_FUNC("\n");
 }
 EXPORT_SYMBOL(wmt_export_platform_bridge_register);
@@ -109,6 +110,14 @@ int mtk_wcn_cmb_stub_1vautok_for_dvfs(void)
 }
 #endif
 
+void mtk_wcn_cmb_stub_clock_fail_dump(void)
+{
+	CONNADP_DBG_FUNC("\n");
+	if (unlikely(!bridge.clock_fail_dump_cb))
+		CONNADP_WARN_FUNC("Clock fail dump not registered\n");
+	else
+		bridge.clock_fail_dump_cb();
+}
 
 /*******************************************************************************
  * SDIO integration with platform MMC driver
