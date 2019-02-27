@@ -220,7 +220,7 @@ static int gic_set_affinity(struct irq_data *d,
 	 * no need to update when:
 	 * input mask is equal to the current setting
 	 */
-	if (cpumask_equal(d->affinity, mask_val))
+	if (cpumask_equal(irq_data_get_affinity_mask(d), mask_val))
 		return IRQ_SET_MASK_OK_NOCOPY;
 
 	/*
