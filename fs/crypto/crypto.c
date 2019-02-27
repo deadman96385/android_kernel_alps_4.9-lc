@@ -428,13 +428,6 @@ fail:
 	return res;
 }
 
-struct hie_fs fscrypt_hie = {
-	.name = "fscrypt",
-	.key_payload = fscrypt_key_payload,
-	.set_bio_context = fscrypt_set_bio_crypt_context,
-	.priv = NULL,
-};
-
 /**
  * fscrypt_init() - Set up for fs encryption.
  */
@@ -462,9 +455,6 @@ static int __init fscrypt_init(void)
 	if (!fscrypt_info_cachep)
 		goto fail_free_ctx;
 
-#ifdef CONFIG_EXT4_ENCRYPTION
-	hie_register_fs(&fscrypt_hie);
-#endif
 	return 0;
 
 fail_free_ctx:
