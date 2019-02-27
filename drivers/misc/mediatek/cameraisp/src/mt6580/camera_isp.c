@@ -449,35 +449,35 @@ enum ISP_BUF_STATUS_ENUM {
 	ISP_BUF_STATUS_READY
 };
 
-struct {
+struct ISP_USER_INFO_STRUCT {
 	pid_t Pid;
 	pid_t Tid;
-} ISP_USER_INFO_STRUCT;
+};
 
-struct {
+struct ISP_BUF_STRUCT {
 	enum ISP_BUF_STATUS_ENUM Status;
 	unsigned int Size;
 	unsigned char *pData;
-} ISP_BUF_STRUCT;
+};
 
-struct {
+struct ISP_BUF_INFO_STRUCT {
 	struct ISP_BUF_STRUCT Read;
 	struct ISP_BUF_STRUCT Write[ISP_BUF_WRITE_AMOUNT];
-} ISP_BUF_INFO_STRUCT;
+};
 
-struct {
+struct ISP_HOLD_INFO_STRUCT {
 	atomic_t HoldEnable;
 	atomic_t WriteEnable;
-	ISP_HOLD_TIME_ENUM Time;
-} ISP_HOLD_INFO_STRUCT;
+	enum ISP_HOLD_TIME_ENUM Time;
+};
 
-struct {
+struct ISP_IRQ_INFO_STRUCT {
 	unsigned int Status[ISP_IRQ_TYPE_AMOUNT];
 	unsigned int Mask[ISP_IRQ_TYPE_AMOUNT];
 	unsigned int ErrMask[ISP_IRQ_TYPE_AMOUNT];
-} ISP_IRQ_INFO_STRUCT;
+};
 
-struct {
+struct ISP_TIME_LOG_STRUCT {
 	unsigned int Vd;
 	unsigned int Expdone;
 	unsigned int WorkQueueVd;
@@ -486,9 +486,9 @@ struct {
 	unsigned int TaskletVd;
 	unsigned int TaskletExpdone;
 	unsigned int TaskletSeninf;
-} ISP_TIME_LOG_STRUCT;
+};
 
-struct {
+struct ISP_INFO_STRUCT {
 	spinlock_t SpinLockIspRef;
 	spinlock_t SpinLockIsp;
 	spinlock_t SpinLockIrq;
@@ -505,8 +505,8 @@ struct {
 	struct ISP_HOLD_INFO_STRUCT HoldInfo;
 	struct ISP_BUF_INFO_STRUCT BufInfo;
 	struct ISP_TIME_LOG_STRUCT TimeLog;
-	ISP_CALLBACK_STRUCT Callback[ISP_CALLBACK_AMOUNT];
-} ISP_INFO_STRUCT;
+	struct ISP_CALLBACK_STRUCT Callback[ISP_CALLBACK_AMOUNT];
+};
 
 
 /* m4u_callback_ret_t ISP_M4U_TranslationFault_callback
@@ -523,7 +523,7 @@ static signed int *g_pTbl_RTBuf;
 /* original pointer for kmalloc'd area as returned by kmalloc */
 static void *g_pBuf_kmalloc;
 
-static ISP_RT_BUF_STRUCT *g_pstRTBuf;
+static struct ISP_RT_BUF_STRUCT *g_pstRTBuf;
 
 static struct ISP_INFO_STRUCT g_IspInfo;
 
@@ -558,9 +558,11 @@ static signed int g_rtbc_enq_dma = _rt_dma_max_;
 static signed int g_rtbc_deq_dma = _rt_dma_max_;
 #endif
 
-static ISP_RT_BUF_INFO_STRUCT g_rt_buf_info;
-static ISP_RT_BUF_INFO_STRUCT g_ex_rt_buf_info;
-static ISP_DEQUE_BUF_INFO_STRUCT g_deque_buf;
+static struct ISP_RT_BUF_INFO_STRUCT g_rt_buf_info;
+static struct ISP_DEQUE_BUF_INFO_STRUCT g_deque_buf;
+#if defined(_rtbc_use_cq0c_)
+static struct ISP_RT_BUF_INFO_STRUCT g_ex_rt_buf_info;
+#endif
 
 static unsigned int g_prv_tstamp_s;
 static unsigned int g_prv_tstamp_us;
@@ -585,13 +587,12 @@ static unsigned int g_newImgoAddr = DEFAULT_PA;
 static unsigned int g_oldImg2oAddr = DEFAULT_PA;
 static unsigned int g_newImg2oAddr = DEFAULT_PA;
 
-struct {
+struct SENINF_DEBUG {
 	unsigned int regVal_1;
 	unsigned int regVal_2;
-} SENINF_DEBUG;
+};
 
 static struct SENINF_DEBUG g_seninfDebug[30];
-
 /*************************************************
  *
  **************************************************/
@@ -728,11 +729,11 @@ static void ISP_GetTime(unsigned int *pSec, unsigned int *pUSec)
 #define RegDump(start, end) do {\
 	unsigned int i;\
 	for (i = start; i <= end; i += 0x4) {\
-		LOG_DBG(
-		"0x%08X %08X",
-		(unsigned int)(ISP_TPIPE_ADDR + i),
-		(unsigned int)ISP_RD32(ISP_ADDR + i));
-	}
+		LOG_DBG(\
+		"0x%08X %08X",\
+		(unsigned int)(ISP_TPIPE_ADDR + i),\
+		(unsigned int)ISP_RD32(ISP_ADDR + i));\
+	}\
 } while (0)
 /*************************************************
  *
@@ -1275,7 +1276,7 @@ static signed int ISP_DumpReg(void)
 	(unsigned int)(ISP_TPIPE_ADDR + 0x4100),
 	(unsigned int)ISP_RD32(ISP_ADDR + 0x4100));
 	RegDump(0x4120, 0x4160);
-	RegDump(0x4360, 0x43f0)
+	RegDump(0x4360, 0x43f0);
 	/* seninf2 */
 	LOG_ERR(
 	"[0x%08X %08X],[0x%08X %08X]",
@@ -2337,14 +2338,14 @@ static inline void ISP_Reset(void)
 /*************************************************
  *
  *************************************************/
-static signed int ISP_ReadReg(ISP_REG_IO_STRUCT *pRegIo)
+static signed int ISP_ReadReg(struct ISP_REG_IO_STRUCT *pRegIo)
 {
 	/* unsigned int *pData = (unsigned int *)pRegIo->Data; */
-	ISP_REG_STRUCT *pData = pRegIo->pData;
+	struct ISP_REG_STRUCT *pData = pRegIo->pData;
 	unsigned int i;
 	signed int Ret = 0;
 
-	ISP_REG_STRUCT reg;
+	struct ISP_REG_STRUCT reg;
 
 	/* ====== Read Register ====== */
 
@@ -2380,7 +2381,7 @@ EXIT:
 /*************************************************
  *
  *************************************************/
-static signed int ISP_WriteRegToHw(ISP_REG_STRUCT *pReg, unsigned int Count)
+static signed int ISP_WriteRegToHw(struct ISP_REG_STRUCT *pReg, unsigned int Count)
 {
 	signed int Ret = 0;
 	unsigned int i;
@@ -2415,7 +2416,7 @@ static signed int ISP_WriteRegToHw(ISP_REG_STRUCT *pReg, unsigned int Count)
 /* Vent@20121106: Marked to remove build warning:
  * 'ISP_BufWrite_Init' defined but not used
  * [-Wunused-function]
- */
+ *
 static void ISP_BufWrite_Init(void)
 {
 		unsigned int i;
@@ -2430,6 +2431,7 @@ static void ISP_BufWrite_Init(void)
 		g_IspInfo.BufInfo.Write[i].pData = NULL;
 		}
 }
+*/
 
 /*************************************************
  *
@@ -2535,7 +2537,7 @@ static inline unsigned int ISP_BufWrite_GetAmount(void)
 /*************************************************
  *
  *************************************************/
-static bool ISP_BufWrite_Add(unsigned int Size, ISP_REG_STRUCT *pData)
+static bool ISP_BufWrite_Add(unsigned int Size, struct ISP_REG_STRUCT *pData)
 {
 	unsigned int i;
 
@@ -2695,8 +2697,8 @@ static void ISP_BufWrite_WriteToHw(void)
 		if (g_IspInfo.DebugMask & ISP_DBG_TASKLET)
 			LOG_DBG("Index(%d), BufSize(%d)", Index, BufSize);
 
-		ISP_WriteRegToHw((ISP_REG_STRUCT *) pBuf,
-		BufSize / sizeof(ISP_REG_STRUCT));
+		ISP_WriteRegToHw((struct ISP_REG_STRUCT *) pBuf,
+		BufSize / sizeof(struct ISP_REG_STRUCT));
 		ISP_BufWrite_Clear(Index);
 	}
 
@@ -2817,14 +2819,14 @@ DECLARE_TASKLET(IspTaskletSENIF, ISP_Tasklet_SENINF, 0);
 /*************************************************
  *
  *************************************************/
-static signed int ISP_WriteReg(ISP_REG_IO_STRUCT *pRegIo)
+static signed int ISP_WriteReg(struct ISP_REG_IO_STRUCT *pRegIo)
 {
 	signed int Ret = 0;
 	signed int TimeVd = 0;
 	signed int TimeExpdone = 0;
 	signed int TimeTasklet = 0;
 	/* unsigned char *pData = NULL; */
-	ISP_REG_STRUCT *pData = NULL;
+	struct ISP_REG_STRUCT *pData = NULL;
 
 	/* The maximum number of Count should equal
 	 * to PAGE_SIZE/sizeof(unsigned int)
@@ -2845,7 +2847,7 @@ static signed int ISP_WriteReg(ISP_REG_IO_STRUCT *pRegIo)
 
 	if (atomic_read(&(g_IspInfo.HoldInfo.HoldEnable))) {
 		if (ISP_BufWrite_Add((pRegIo->Count) *
-			sizeof(ISP_REG_STRUCT), pRegIo->pData)) {
+			sizeof(struct ISP_REG_STRUCT), pRegIo->pData)) {
 			/* LOG_DBG("Add write buffer OK"); */
 		} else {
 			LOG_ERR("Add write buffer fail");
@@ -2869,10 +2871,10 @@ static signed int ISP_WriteReg(ISP_REG_IO_STRUCT *pRegIo)
 		}
 	} else {
 /* pData = (unsigned char*)kmalloc((pRegIo->Count)*
- * sizeof(ISP_REG_STRUCT), GFP_ATOMIC);
+ * sizeof(struct ISP_REG_STRUCT), GFP_ATOMIC);
  */
 		pData = kmalloc((pRegIo->Count)
-		* sizeof(ISP_REG_STRUCT), GFP_ATOMIC);
+		* sizeof(struct ISP_REG_STRUCT), GFP_ATOMIC);
 		if (pData == NULL) {
 			LOG_DBG(
 			"ERROR: kmalloc failed, (process, pid, tgid)=(%s, %d, %d)",
@@ -2883,7 +2885,7 @@ static signed int ISP_WriteReg(ISP_REG_IO_STRUCT *pRegIo)
 		}
 		if (copy_from_user
 		    (pData, (void __user *)(pRegIo->pData),
-		     pRegIo->Count * sizeof(ISP_REG_STRUCT)) != 0) {
+		     pRegIo->Count * sizeof(struct ISP_REG_STRUCT)) != 0) {
 			LOG_ERR("copy_from_user failed");
 			Ret = -EFAULT;
 			goto EXIT;
@@ -2904,7 +2906,7 @@ EXIT:
 /*************************************************
  *
  *************************************************/
-static signed int ISP_SetHoldTime(ISP_HOLD_TIME_ENUM HoldTime)
+static signed int ISP_SetHoldTime(enum ISP_HOLD_TIME_ENUM HoldTime)
 {
 	LOG_DBG("HoldTime(%d)", HoldTime);
 	g_IspInfo.HoldInfo.Time = HoldTime;
@@ -2997,7 +2999,7 @@ EXIT:
 static long ISP_REF_CNT_CTRL_FUNC(unsigned long Param)
 {
 	signed int Ret = 0;
-	ISP_REF_CNT_CTRL_STRUCT ref_cnt_ctrl;
+	struct ISP_REF_CNT_CTRL_STRUCT ref_cnt_ctrl;
 	signed int imem_ref_cnt = 0;
 
 	/* add lock here */
@@ -3015,7 +3017,7 @@ static long ISP_REF_CNT_CTRL_FUNC(unsigned long Param)
 	}
 
 	if (copy_from_user(&ref_cnt_ctrl, (void __user *)
-		Param, sizeof(ISP_REF_CNT_CTRL_STRUCT)) ==
+		Param, sizeof(struct ISP_REF_CNT_CTRL_STRUCT)) ==
 	    0) {
 		if (g_IspInfo.DebugMask & ISP_DBG_REF_CNT_CTRL)
 			LOG_DBG(
@@ -3387,13 +3389,13 @@ static long ISP_Buf_CTRL_FUNC(unsigned long Param)
 	unsigned int iBuf = 0;
 	unsigned int size = 0;
 	unsigned int bWaitBufRdy = 0;
-	ISP_BUFFER_CTRL_STRUCT rt_buf_ctrl;
+	struct ISP_BUFFER_CTRL_STRUCT rt_buf_ctrl;
 	/* unsigned int buffer_exist = 0; */
 
 #if defined(_rtbc_use_cq0c_)	/* fix compile warning */
 
-	CQ_RTBC_FBC imgo_fbc;
-	CQ_RTBC_FBC img2o_fbc;
+	union CQ_RTBC_FBC imgo_fbc;
+	union CQ_RTBC_FBC img2o_fbc;
 
 	unsigned int curr_pa = 0;
 #else
@@ -3409,7 +3411,7 @@ static long ISP_Buf_CTRL_FUNC(unsigned long Param)
 	}
 
 	if (copy_from_user(&rt_buf_ctrl, (void __user *)
-		Param, sizeof(ISP_BUFFER_CTRL_STRUCT)) == 0) {
+		Param, sizeof(struct ISP_BUFFER_CTRL_STRUCT)) == 0) {
 		rt_dma = rt_buf_ctrl.buf_id;
 
 		if (g_IspInfo.DebugMask & ISP_DBG_INT) {
@@ -3453,7 +3455,7 @@ case ISP_RT_BUF_CTRL_ENQUE:
 case ISP_RT_BUF_CTRL_EXCHANGE_ENQUE:
 	if (copy_from_user(&g_rt_buf_info,
 		(void __user *)rt_buf_ctrl.data_ptr,
-		sizeof(ISP_RT_BUF_INFO_STRUCT)) == 0) {
+		sizeof(struct ISP_RT_BUF_INFO_STRUCT)) == 0) {
 		reg_val = ISP_RD32((void *)ISP_REG_ADDR_TG_VF_CON);
 /* reg_val2 = ISP_RD32(
  * ISP_REG_ADDR_TG2_VF_CON);
@@ -3466,12 +3468,12 @@ case ISP_RT_BUF_CTRL_EXCHANGE_ENQUE:
 			if (g_IspInfo.DebugMask & ISP_DBG_BUF_CTRL) {
 			LOG_DBG("[rtbc][ENQUE]:ex_data_ptr(0x%p)",
 			rt_buf_ctrl.ex_data_ptr);
-}
+			}
 
 			if (rt_buf_ctrl.ex_data_ptr != 0) {
 				if (copy_from_user(&g_ex_rt_buf_info,
 				(void __user *)rt_buf_ctrl.ex_data_ptr,
-				sizeof(ISP_RT_BUF_INFO_STRUCT)) == 0) {
+				sizeof(struct ISP_RT_BUF_INFO_STRUCT)) == 0) {
 
 				for (i = 0; i < ISP_RT_BUF_SIZE; i++) {
 				if (g_pstRTBuf->ring_buf[rt_dma].
@@ -3801,7 +3803,7 @@ case ISP_RT_BUF_CTRL_EXCHANGE_ENQUE:
 				if (copy_to_user
 				((void __user *)rt_buf_ctrl.pExtend,
 				&g_deque_buf,
-				sizeof(ISP_DEQUE_BUF_INFO_STRUCT)) != 0) {
+				sizeof(struct ISP_DEQUE_BUF_INFO_STRUCT)) != 0) {
 					LOG_ERR(
 					"[rtbc][DEQUE]:copy_to_user failed");
 					Ret = -EFAULT;
@@ -3898,7 +3900,7 @@ case ISP_RT_BUF_CTRL_EXCHANGE_ENQUE:
 			}
 #else
 			memset((char *)g_pstRTBuf, 0x00,
-			sizeof(ISP_RT_BUF_STRUCT));
+			sizeof(struct ISP_RT_BUF_STRUCT));
 			g_prv_tstamp_s = 0;
 			g_prv_tstamp_us = 0;
 
@@ -3937,8 +3939,8 @@ static signed int ISP_SOF_Buf_Get(unsigned long long sec, unsigned long usec)
 {
 #if defined(_rtbc_use_cq0c_)
 
-	CQ_RTBC_FBC imgo_fbc;
-	CQ_RTBC_FBC img2o_fbc;
+	union CQ_RTBC_FBC imgo_fbc;
+	union CQ_RTBC_FBC img2o_fbc;
 	/* (imgo_fbc.Bits.WCNT+imgo_fbc.Bits.FB_NUM-1)%
 	 * imgo_fbc.Bits.FB_NUM; //[0,1,2,...]
 	 */
@@ -4342,7 +4344,7 @@ static signed int ISP_DONE_Buf_Time(unsigned long long sec, unsigned long usec)
 /*************************************************
  *
  *************************************************/
-static signed int ISP_WaitIrq(ISP_WAIT_IRQ_STRUCT WaitIrq)
+static signed int ISP_WaitIrq(struct ISP_WAIT_IRQ_STRUCT WaitIrq)
 {
 	signed int Ret = 0, Timeout = WaitIrq.Timeout;
 	unsigned int i;
@@ -4635,12 +4637,12 @@ static __tcmfunc irqreturn_t ISP_Irq(signed int Irq, void *DeviceId)
 	unsigned int tg_pa = 0;
 	unsigned int sof_pa = 0;
 	unsigned int senifIntStA = 0, regVal = 0;
-	CQ_RTBC_FBC imgo_fbc;
-	CQ_RTBC_FBC img2o_fbc;
+	union CQ_RTBC_FBC imgo_fbc;
+	union CQ_RTBC_FBC img2o_fbc;
 	/* //// */
 	/* cam3 */
 	unsigned int j = 0, idx = 0, k = 0;
-	eISPIrq eIrq = _IRQ;
+	enum eISPIrq eIrq = _IRQ;
 	/* //// */
 
 	/* ////// */
@@ -5073,20 +5075,20 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 	bool HoldEnable = MFALSE;
 	unsigned long flags;
 	unsigned int DebugFlag[2] = { 0 }, pid = 0;
-	ISP_REG_IO_STRUCT RegIo;
-	ISP_HOLD_TIME_ENUM HoldTime;
-	ISP_WAIT_IRQ_STRUCT WaitIrq;
-	ISP_READ_IRQ_STRUCT ReadIrq;
-	ISP_CLEAR_IRQ_STRUCT ClearIrq;
+	struct ISP_REG_IO_STRUCT RegIo;
+	enum ISP_HOLD_TIME_ENUM HoldTime;
+	struct ISP_WAIT_IRQ_STRUCT WaitIrq;
+	struct ISP_READ_IRQ_STRUCT ReadIrq;
+	struct ISP_CLEAR_IRQ_STRUCT ClearIrq;
 	struct ISP_USER_INFO_STRUCT *pUserInfo;
 	unsigned int wakelock_ctrl = 0;
 	/* ////////////////////////////// */
 	/* cam 3 */
-	ISP_WAIT_IRQ_STRUCT_FRMB Irq_FrmB;
-	ISP_ED_BUFQUE_STRUCT_FRMB edQueBuf_FrmB;
+	struct ISP_WAIT_IRQ_STRUCT_FRMB Irq_FrmB;
+	struct ISP_ED_BUFQUE_STRUCT_FRMB edQueBuf_FrmB;
 	int userKey = -1;
 	/*signed int burstQNum;*/
-	ISP_REGISTER_USERKEY_STRUCT_FRMB RegUserKey_FrmB;
+	struct ISP_REGISTER_USERKEY_STRUCT_FRMB RegUserKey_FrmB;
 	/* ////////////////////////////// */
 
 	if (pFile->private_data == NULL) {
@@ -5151,7 +5153,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 		{
 			if (copy_from_user(&RegIo,
 				(void __user *)Param,
-				sizeof(ISP_REG_IO_STRUCT))
+				sizeof(struct ISP_REG_IO_STRUCT))
 			    == 0) {
 				Ret = ISP_ReadReg(&RegIo);
 			} else {
@@ -5164,7 +5166,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 		{
 			if (copy_from_user(&RegIo,
 				(void __user *)Param,
-				sizeof(ISP_REG_IO_STRUCT))
+				sizeof(struct ISP_REG_IO_STRUCT))
 			    == 0) {
 				Ret = ISP_WriteReg(&RegIo);
 			} else {
@@ -5177,7 +5179,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 		{
 			if (copy_from_user
 			    (&HoldTime, (void __user *)Param,
-			    sizeof(ISP_HOLD_TIME_ENUM)) == 0) {
+			    sizeof(enum ISP_HOLD_TIME_ENUM)) == 0) {
 				spin_lock(&(g_IspInfo.SpinLockIsp));
 				Ret = ISP_SetHoldTime(HoldTime);
 				spin_unlock(&(g_IspInfo.SpinLockIsp));
@@ -5203,7 +5205,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 		{
 			if (copy_from_user
 			    (&WaitIrq, (void __user *)Param,
-			    sizeof(ISP_WAIT_IRQ_STRUCT)) == 0) {
+			    sizeof(struct ISP_WAIT_IRQ_STRUCT)) == 0) {
 				if ((WaitIrq.Type >= ISP_IRQ_TYPE_AMOUNT) ||
 					(WaitIrq.Type < 0)) {
 					Ret = -EFAULT;
@@ -5223,7 +5225,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 		{
 			if (copy_from_user
 			    (&ReadIrq, (void __user *)Param,
-			    sizeof(ISP_READ_IRQ_STRUCT)) == 0) {
+			    sizeof(struct ISP_READ_IRQ_STRUCT)) == 0) {
 				LOG_DBG("ISP_READ_IRQ Type(%d)", ReadIrq.Type);
 
 				if ((ReadIrq.Type >= ISP_IRQ_TYPE_AMOUNT) ||
@@ -5313,7 +5315,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 
 				if (copy_to_user
 				    ((void __user *)Param, &ReadIrq,
-				     sizeof(ISP_READ_IRQ_STRUCT)) != 0) {
+				     sizeof(struct ISP_READ_IRQ_STRUCT)) != 0) {
 					LOG_ERR("copy_to_user failed");
 					Ret = -EFAULT;
 				}
@@ -5327,7 +5329,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 		{
 			if (copy_from_user
 			    (&ClearIrq, (void __user *)Param,
-			    sizeof(ISP_CLEAR_IRQ_STRUCT)) == 0) {
+			    sizeof(struct ISP_CLEAR_IRQ_STRUCT)) == 0) {
 				LOG_DBG(
 				"ISP_CLEAR_IRQ Type(%d)",
 				ClearIrq.Type);
@@ -5561,7 +5563,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 	case ISP_WAIT_IRQ_FRMB:
 		if (copy_from_user
 		    (&Irq_FrmB, (void __user *)Param,
-		    sizeof(ISP_WAIT_IRQ_STRUCT_FRMB)) == 0) {
+		    sizeof(struct ISP_WAIT_IRQ_STRUCT_FRMB)) == 0) {
 			if ((Irq_FrmB.UserInfo.UserKey >= IRQ_USER_NUM_MAX)
 			    || (Irq_FrmB.UserInfo.UserKey <= 0)) {
 				/* LOG_ERR("invalid userKey(%d), max(%d)",
@@ -5586,7 +5588,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 			/*  */
 			if (copy_to_user
 			    ((void __user *)Param, &Irq_FrmB,
-			     sizeof(ISP_WAIT_IRQ_STRUCT_FRMB)) != 0) {
+			     sizeof(struct ISP_WAIT_IRQ_STRUCT_FRMB)) != 0) {
 				LOG_ERR("copy_to_user failed");
 				Ret = -EFAULT;
 			}
@@ -5598,7 +5600,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 	case ISP_ED_QUEBUF_CTRL_FRMB:
 		if (copy_from_user
 		    (&edQueBuf_FrmB, (void __user *)Param,
-		     sizeof(ISP_ED_BUFQUE_STRUCT_FRMB)) == 0) {
+		     sizeof(struct ISP_ED_BUFQUE_STRUCT_FRMB)) == 0) {
 			edQueBuf_FrmB.processID = pUserInfo->Pid;
 			Ret = ISP_ED_BufQue_CTRL_FUNC_FRMB(edQueBuf_FrmB);
 		} else {
@@ -5663,13 +5665,13 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 	case ISP_REGISTER_IRQ_USER_KEY:
 		if (copy_from_user
 		    (&RegUserKey_FrmB, (void __user *)Param,
-		     sizeof(ISP_REGISTER_USERKEY_STRUCT_FRMB)) == 0) {
+		     sizeof(struct ISP_REGISTER_USERKEY_STRUCT_FRMB)) == 0) {
 			userKey = ISP_REGISTER_IRQ_USERKEY(
 			RegUserKey_FrmB.userName);
 			RegUserKey_FrmB.userKey = userKey;
 			if (copy_to_user
 			    ((void __user *)Param, &RegUserKey_FrmB,
-			     sizeof(ISP_REGISTER_USERKEY_STRUCT_FRMB)) != 0) {
+			     sizeof(struct ISP_REGISTER_USERKEY_STRUCT_FRMB)) != 0) {
 				LOG_ERR("query irq user key fail\n");
 			}
 			if (RegUserKey_FrmB.userKey < 0)
@@ -5680,7 +5682,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 	case ISP_MARK_IRQ_REQUEST:
 		if (copy_from_user
 		    (&Irq_FrmB, (void __user *)Param,
-		    sizeof(ISP_WAIT_IRQ_STRUCT_FRMB)) == 0) {
+		    sizeof(struct ISP_WAIT_IRQ_STRUCT_FRMB)) == 0) {
 			if ((Irq_FrmB.UserInfo.UserKey >= IRQ_USER_NUM_MAX)
 			    || (Irq_FrmB.UserInfo.UserKey < 1)) {
 				LOG_ERR(
@@ -5709,7 +5711,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 	case ISP_GET_MARK2QUERY_TIME:
 		if (copy_from_user
 		    (&Irq_FrmB, (void __user *)Param,
-		    sizeof(ISP_WAIT_IRQ_STRUCT_FRMB)) == 0) {
+		    sizeof(struct ISP_WAIT_IRQ_STRUCT_FRMB)) == 0) {
 			if ((Irq_FrmB.UserInfo.UserKey >= IRQ_USER_NUM_MAX)
 			    || (Irq_FrmB.UserInfo.UserKey < 1)) {
 				LOG_ERR(
@@ -5732,7 +5734,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 			/*  */
 			if (copy_to_user
 			    ((void __user *)Param, &Irq_FrmB,
-			     sizeof(ISP_WAIT_IRQ_STRUCT_FRMB)) != 0) {
+			     sizeof(struct ISP_WAIT_IRQ_STRUCT_FRMB)) != 0) {
 				LOG_ERR("copy_to_user failed");
 				Ret = -EFAULT;
 			}
@@ -5746,7 +5748,7 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 	case ISP_FLUSH_IRQ_REQUEST:
 		if (copy_from_user
 		    (&Irq_FrmB, (void __user *)Param,
-		    sizeof(ISP_WAIT_IRQ_STRUCT_FRMB)) == 0) {
+		    sizeof(struct ISP_WAIT_IRQ_STRUCT_FRMB)) == 0) {
 			if (!CAM_HAL_VER_IS3) {
 				LOG_ERR("only support cam3");
 				Ret = -EFAULT;
@@ -6580,9 +6582,9 @@ static signed int ISP_mmap(struct file *pFile, struct vm_area_struct *pVma)
 
 	length = (pVma->vm_end - pVma->vm_start);
 	/* at offset RT_BUF_TBL_NPAGES we map the kmalloc'd area */
-	if (pVma->vm_pgoff == RT_BUF_TBL_NPAGES)
+	if (pVma->vm_pgoff == RT_BUF_TBL_NPAGES) {
 		return mmap_kmem(pFile, pVma);
-
+	}
 		pVma->vm_page_prot = pgprot_noncached(pVma->vm_page_prot);
 		LOG_INF(
 		"pVma->vm_pgoff(0x%x),phy(0x%x),pVmapVma->vm_start(0x%x),pVma->vm_end(0x%x),length(0x%x)",
@@ -6913,7 +6915,7 @@ static signed int ISP_probe(struct platform_device *pDev)
 
 		if (Ret) {
 			dev_err(&pDev->dev,
-				"Unable to request IRQ, request_irq fail,
+				"Unable to request IRQ, request_irq fail,\
 				i=%d, irq=%d\n", i, cam_isp_dev->irq[i]);
 			return Ret;
 		}
@@ -7517,7 +7519,7 @@ static const struct file_operations fcameraio_proc_fops = {
 /*************************************************
  *
  *************************************************/
-bool ISP_RegCallback(ISP_CALLBACK_STRUCT *pCallback)
+bool ISP_RegCallback(struct ISP_CALLBACK_STRUCT *pCallback)
 {
 	if (pCallback == NULL) {
 		LOG_ERR("pCallback is null");
@@ -7539,7 +7541,7 @@ EXPORT_SYMBOL(ISP_RegCallback);
 /*************************************************
  *
  *************************************************/
-bool ISP_UnregCallback(ISP_CALLBACK_ENUM Type)
+bool ISP_UnregCallback(enum ISP_CALLBACK_ENUM Type)
 {
 	if (Type >= ISP_CALLBACK_AMOUNT) {
 		LOG_ERR(
@@ -7960,7 +7962,7 @@ static signed int __init ISP_Init(void)
 	/* round it up to the page bondary */
 	g_pTbl_RTBuf = (signed int *) ((((unsigned long)
 	g_pBuf_kmalloc) + PAGE_SIZE - 1) & PAGE_MASK);
-	g_pstRTBuf = (ISP_RT_BUF_STRUCT *) g_pTbl_RTBuf;
+	g_pstRTBuf = (struct ISP_RT_BUF_STRUCT *) g_pTbl_RTBuf;
 	g_pstRTBuf->state = ISP_RTBC_STATE_INIT;
 
 	/* mark the pages reserved */

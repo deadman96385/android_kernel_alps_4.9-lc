@@ -180,11 +180,11 @@ extern void ISP_MCLK2_GPIO_EN(bool En);
 /*************************************************
  *
  *************************************************/
-enum {
+enum ISP_IRQ_CLEAR_ENUM {
 	ISP_IRQ_CLEAR_NONE,
 	ISP_IRQ_CLEAR_WAIT,
 	ISP_IRQ_CLEAR_ALL
-} ISP_IRQ_CLEAR_ENUM;
+};
 
 enum ISP_IRQ_TYPE_ENUM {
 	ISP_IRQ_TYPE_INT,
@@ -198,38 +198,38 @@ enum ISP_IRQ_TYPE_ENUM {
 	ISP_IRQ_TYPE_AMOUNT
 };
 
-struct {
+struct ISP_WAIT_IRQ_STRUCT {
 	enum ISP_IRQ_CLEAR_ENUM Clear;
 	enum ISP_IRQ_TYPE_ENUM Type;
 	unsigned int Status;
 	unsigned int Timeout;
-} ISP_WAIT_IRQ_STRUCT;
+};
 
-struct {
+struct ISP_READ_IRQ_STRUCT {
 	enum ISP_IRQ_TYPE_ENUM Type;
 	unsigned int Status;
-} ISP_READ_IRQ_STRUCT;
+} ;
 
-struct {
+struct ISP_CLEAR_IRQ_STRUCT {
 	enum ISP_IRQ_TYPE_ENUM Type;
 	unsigned int Status;
-} ISP_CLEAR_IRQ_STRUCT;
+};
 
 enum ISP_HOLD_TIME_ENUM {
 	ISP_HOLD_TIME_VD,
 	ISP_HOLD_TIME_EXPDONE
 };
 
-struct {
+struct ISP_REG_STRUCT{
 	unsigned int Addr;	/* register's addr */
 	unsigned int Val;	/* register's value */
-} ISP_REG_STRUCT;
+};
 
-struct {
+struct ISP_REG_IO_STRUCT {
 	/* unsigned int Data;   // pointer to ISP_REG_STRUCT */
 	struct ISP_REG_STRUCT *pData;
 	unsigned int Count;	/* count */
-} ISP_REG_IO_STRUCT;
+};
 
 typedef void (*pIspCallback) (void);
 
@@ -249,10 +249,10 @@ enum ISP_CALLBACK_ENUM {
 	ISP_CALLBACK_AMOUNT
 };
 
-struct {
+struct ISP_CALLBACK_STRUCT {
 	enum ISP_CALLBACK_ENUM Type;
 	pIspCallback Func;
-} ISP_CALLBACK_STRUCT;
+};
 
 /*  */
 /* length of the two memory areas */
@@ -278,7 +278,7 @@ enum _isp_dma_enum_ {
 	_rt_dma_max_
 };
 /*  */
-struct {
+struct ISP_RT_BUF_INFO_STRUCT {
 	unsigned int memID;
 	unsigned int size;
 	long long base_vAddr;
@@ -286,14 +286,14 @@ struct {
 	unsigned int timeStampS;
 	unsigned int timeStampUs;
 	unsigned int bFilled;
-} ISP_RT_BUF_INFO_STRUCT;
+};
 /*  */
-struct {
+struct ISP_DEQUE_BUF_INFO_STRUCT{
 	unsigned int count;
 	struct ISP_RT_BUF_INFO_STRUCT data[ISP_RT_BUF_SIZE];
-} ISP_DEQUE_BUF_INFO_STRUCT;
+};
 /*  */
-struct {
+struct ISP_RT_RING_BUF_INFO_STRUCT {
 	unsigned int start;	/* current DMA accessing buffer */
 	/* total buffer number.Include Filled and empty */
 	unsigned int total_count;
@@ -307,7 +307,7 @@ struct {
 	unsigned int pre_empty_count;
 	unsigned int active;
 	struct ISP_RT_BUF_INFO_STRUCT data[ISP_RT_BUF_SIZE];
-} ISP_RT_RING_BUF_INFO_STRUCT;
+};
 /*  */
 enum ISP_RT_BUF_CTRL_ENUM {
 	ISP_RT_BUF_CTRL_ENQUE,	/* 0 */
@@ -332,13 +332,13 @@ enum ISP_RTBC_BUF_STATE_ENUM {
 	ISP_RTBC_BUF_LOCKED,	/* 2 */
 };
 /*  */
-struct {
+struct ISP_RT_BUF_STRUCT{
 	enum ISP_RTBC_STATE_ENUM state;
 	unsigned long dropCnt;
 	struct ISP_RT_RING_BUF_INFO_STRUCT ring_buf[_rt_dma_max_];
-} ISP_RT_BUF_STRUCT;
+};
 /*  */
-struct {
+struct ISP_BUFFER_CTRL_STRUCT{
 	enum ISP_RT_BUF_CTRL_ENUM ctrl;
 	enum _isp_dma_enum_ buf_id;
 	/* unsigned int            data_ptr; */
@@ -347,7 +347,7 @@ struct {
 	/* exchanged buffer */
 	struct ISP_RT_BUF_INFO_STRUCT *ex_data_ptr;
 	unsigned char *pExtend;
-} ISP_BUFFER_CTRL_STRUCT;
+};
 /*  */
 /* reference count */
 #define _use_kernel_ref_cnt_
@@ -371,11 +371,11 @@ enum ISP_REF_CNT_ID_ENUM {
 	ISP_REF_CNT_ID_MAX,
 };
 /*  */
-struct {
+struct ISP_REF_CNT_CTRL_STRUCT {
 	enum ISP_REF_CNT_CTRL_ENUM ctrl;
 	enum ISP_REF_CNT_ID_ENUM id;
 	signed int *data_ptr;
-} ISP_REF_CNT_CTRL_STRUCT;
+};
 
 
 /*************************************************
@@ -386,7 +386,7 @@ struct {
 
 #if defined(_rtbc_use_cq0c_)
 /*  */
-union _CQ_RTBC_FBC_ {
+union CQ_RTBC_FBC {
 	struct {
 		unsigned long FBC_CNT:4;
 		unsigned long DROP_INT_EN:1;
@@ -401,12 +401,12 @@ union _CQ_RTBC_FBC_ {
 		unsigned long DROP_CNT:4;
 	} Bits;
 	unsigned long Reg_val;
-} CQ_RTBC_FBC;
+};
 
-struct _cq_cmd_st_ {
+struct CQ_CMD_ST {
 	unsigned int inst;
 	unsigned int data_ptr_pa;
-} CQ_CMD_ST;
+};
 /*
  * typedef struct _cq_cmd_rtbc_st_
  * {
@@ -416,24 +416,24 @@ struct _cq_cmd_st_ {
  *     struct CQ_CMD_ST end;
  * }CQ_CMD_RTBC_ST;
  */
-struct _cq_info_rtbc_st_ {
+struct CQ_INFO_RTBC_ST {
 	struct CQ_CMD_ST imgo;
 	struct CQ_CMD_ST img2o;
 	struct CQ_CMD_ST next_cq0ci;
 	struct CQ_CMD_ST end;
 	unsigned int imgo_base_pAddr;
 	unsigned int img2o_base_pAddr;
-} CQ_INFO_RTBC_ST;
-struct _cq_ring_cmd_st_ {
+};
+struct CQ_RING_CMD_ST {
 	struct CQ_INFO_RTBC_ST cq_rtbc;
 	unsigned long next_pa;
 	struct _cq_ring_cmd_st_ *pNext;
-} CQ_RING_CMD_ST;
-struct _cq_rtbc_ring_st_ {
+};
+struct CQ_RTBC_RING_ST {
 	struct CQ_RING_CMD_ST rtbc_ring[ISP_RT_CQ0C_BUF_SIZE];
 	unsigned int imgo_ring_size;
 	unsigned int img2o_ring_size;
-} CQ_RTBC_RING_ST;
+};
 #endif
 
 
