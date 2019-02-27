@@ -55,6 +55,7 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/$(MTK_PLATFORM)/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/freqhopping/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)/
 ccflags-y += -DSMI_D2
+ccflags-y += -DMMDVFS_HOOK
 SUPPORT_QOS := false
 obj-y += mmdvfs_mgr.o
 endif
