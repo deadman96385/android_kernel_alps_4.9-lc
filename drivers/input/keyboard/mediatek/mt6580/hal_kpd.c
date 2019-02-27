@@ -11,7 +11,6 @@
  * GNU General Public License for more details.
  */
 
-#include <kpd.h>
 #include <mt-plat/aee.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
@@ -20,16 +19,9 @@
 #ifdef CONFIG_MTK_TC1_FM_AT_SUSPEND
 #include <mt_soc_afe_control.h>
 #endif
-#define KPD_DEBUG	KPD_YES
-
-#define KPD_SAY		"kpd: "
-#if KPD_DEBUG
-#define kpd_print(fmt, arg...)	pr_err(KPD_SAY fmt, ##arg)
-#define kpd_info(fmt, arg...)	pr_warn(KPD_SAY fmt, ##arg)
-#else
-#define kpd_print(fmt, arg...)	do {} while (0)
-#define kpd_info(fmt, arg...)	do {} while (0)
-#endif
+#include <kpd.h>
+#include <hal_kpd.h>
+#include <mt-plat/mtk_boot_common.h>
 
 #ifdef CONFIG_KPD_PWRKEY_USE_EINT
 static u8 kpd_pwrkey_state = !KPD_PWRKEY_POLARITY;
@@ -98,136 +90,17 @@ static void enable_kpd(int enable)
 }
 #endif
 
-void kpd_slide_qwerty_init(void)
-{
-#if KPD_HAS_SLIDE_QWERTY
-	bool evdev_flag = false;
-	bool power_op = false;
-	struct input_handler *handler;
-	struct input_handle *handle;
-
-	handle = rcu_dereference(dev->grab);
-	if (handle) {
-		handler = handle->handler;
-		if (strcmp(handler->name, "evdev") == 0)
-			return -1;
-	} else {
-		list_for_each_entry_rcu(handle, &dev->h_list, d_node) {
-			handler = handle->handler;
-			if (strcmp(handler->name, "evdev") == 0) {
-				evdev_flag = true;
-				break;
-			}
-		}
-		if (evdev_flag == false)
-			return -1;
-	}
-
-	power_op = powerOn_slidePin_interface();
-	if (!power_op)
-		kpd_print(KPD_SAY "Qwerty slide pin interface power on fail\n");
-	else
-		kpd_print("Qwerty slide pin interface power on success\n");
-
-	mt_eint_set_sens(KPD_SLIDE_EINT, KPD_SLIDE_SENSITIVE);
-	mt_eint_set_hw_debounce(KPD_SLIDE_EINT, KPD_SLIDE_DEBOUNCE);
-	mt_eint_registration(KPD_SLIDE_EINT, true, KPD_SLIDE_POLARITY, kpd_slide_eint_handler, false);
-
-	power_op = powerOff_slidePin_interface();
-	if (!power_op)
-		kpd_print(KPD_SAY "Qwerty slide pin interface power off fail\n");
-	else
-		kpd_print("Qwerty slide pin interface power off success\n");
-#endif
-}
-
 void kpd_get_keymap_state(u16 state[])
 {
-	state[0] = *(volatile u16 *)KP_MEM1;
-	state[1] = *(volatile u16 *)KP_MEM2;
-	state[2] = *(volatile u16 *)KP_MEM3;
-	state[3] = *(volatile u16 *)KP_MEM4;
-	state[4] = *(volatile u16 *)KP_MEM5;
-	kpd_print(KPD_SAY "register = %x %x %x %x %x\n", state[0], state[1], state[2], state[3], state[4]);
-
+	state[0] = readw(KP_MEM1);
+	state[1] = readw(KP_MEM2);
+	state[2] = readw(KP_MEM3);
+	state[3] = readw(KP_MEM4);
+	state[4] = readw(KP_MEM5);
+	kpd_print(KPD_SAY "register = %x %x %x %x %x\n",
+		state[0], state[1], state[2], state[3], state[4]);
 }
 
-static void kpd_factory_mode_handler(void)
-{
-	int i, j;
-	bool pressed;
-	u16 new_state[KPD_NUM_MEMS], change, mask;
-	u16 hw_keycode, linux_keycode;
-
-	for (i = 0; i < KPD_NUM_MEMS - 1; i++)
-		kpd_keymap_state[i] = 0xffff;
-	if (!kpd_dts_data.kpd_use_extend_type)
-		kpd_keymap_state[KPD_NUM_MEMS - 1] = 0x00ff;
-	else
-		kpd_keymap_state[KPD_NUM_MEMS - 1] = 0xffff;
-
-	kpd_get_keymap_state(new_state);
-
-	for (i = 0; i < KPD_NUM_MEMS; i++) {
-		change = new_state[i] ^ kpd_keymap_state[i];
-		if (!change)
-			continue;
-
-		for (j = 0; j < 16; j++) {
-			mask = 1U << j;
-			if (!(change & mask))
-				continue;
-
-			hw_keycode = (i << 4) + j;
-			/* bit is 1: not pressed, 0: pressed */
-			pressed = !(new_state[i] & mask);
-			if (kpd_show_hw_keycode) {
-				kpd_print(KPD_SAY "(%s) factory_mode HW keycode = %u\n",
-				       pressed ? "pressed" : "released", hw_keycode);
-			}
-			BUG_ON(hw_keycode >= KPD_NUM_KEYS);
-			linux_keycode = kpd_dts_data.kpd_hw_init_map[hw_keycode];
-			if (unlikely(linux_keycode == 0)) {
-				kpd_print("Linux keycode = 0\n");
-				continue;
-			}
-			input_report_key(kpd_input_dev, linux_keycode, pressed);
-			input_sync(kpd_input_dev);
-			kpd_print("factory_mode report Linux keycode = %u\n", linux_keycode);
-		}
-	}
-
-	memcpy(kpd_keymap_state, new_state, sizeof(new_state));
-	kpd_print("save new keymap state\n");
-}
-
-/********************************************************************/
-void kpd_auto_test_for_factorymode(void)
-{
-	kpd_print("Enter kpd_auto_test_for_factorymode!\n");
-
-	mdelay(1000);
-
-	kpd_factory_mode_handler();
-	kpd_print("begin kpd_auto_test_for_factorymode!\n");
-	if (pmic_get_register_value(PMIC_PWRKEY_DEB) == 1) {
-		kpd_print("power key release\n");
-	} else {
-		kpd_print("power key press\n");
-		kpd_pwrkey_pmic_handler(1);
-	}
-
-#ifdef KPD_PMIC_RSTKEY_MAP
-	if (pmic_get_register_value(PMIC_FCHRKEY_DEB) == 1) {
-		;
-	} else {
-		kpd_print("home key press\n");
-		kpd_pmic_rstkey_handler(1);
-	}
-#endif
-}
-
-/********************************************************************/
 void long_press_reboot_function_setting(void)
 {
 #ifndef EVB_PLATFORM
@@ -314,7 +187,7 @@ void kpd_wakeup_src_setting(int enable)
 }
 
 /********************************************************************/
-void kpd_init_keymap(u16 keymap[])
+void kpd_init_keymap(u32 keymap[])
 {
 	int i = 0;
 
