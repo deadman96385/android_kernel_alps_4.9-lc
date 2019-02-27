@@ -1462,6 +1462,28 @@ static int __init mt_usb_init(struct musb *musb)
 	DBG(1, "musb platform init %x\n",
 			musb_readl(musb->mregs, MUSB_HSDMA_INTR));
 
+#ifndef FPGA_PLATFORM
+	reg = regulator_get(musb->controller, "vusb33");
+	if (!IS_ERR(reg)) {
+#define	VUSB33_VOL_MIN 3300000
+#define	VUSB33_VOL_MAX 3300000
+		ret = regulator_set_voltage(reg, VUSB33_VOL_MIN, VUSB33_VOL_MAX);
+		if (ret < 0)
+			DBG(0, "regulator set vol failed: %d\n", ret);
+		else
+			DBG(0, "regulator set vol ok, <%d,%d>\n", VUSB33_VOL_MIN, VUSB33_VOL_MAX);
+		ret = regulator_enable(reg);
+		if (ret < 0) {
+			DBG(0, "regulator_enable failed: %d\n", ret);
+			regulator_put(reg);
+		} else {
+			DBG(0, "enable USB regulator\n");
+		}
+	} else {
+		DBG(0, "regulator_get failed\n");
+	}
+#endif
+
 #ifdef CONFIG_MTK_MUSB_QMU_SUPPORT
 	/* FIXME, workaround for device_qmu + host_dma */
 	musb_writel(musb->mregs,
