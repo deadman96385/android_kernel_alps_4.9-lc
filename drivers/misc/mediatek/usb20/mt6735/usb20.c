@@ -1430,6 +1430,9 @@ static int add_usb_i2c_driver(void)
 static int __init mt_usb_init(struct musb *musb)
 {
 	int ret;
+#ifndef FPGA_PLATFORM
+        struct regulator *reg = NULL;
+#endif
 
 	DBG(1, "mt_usb_init\n");
 
