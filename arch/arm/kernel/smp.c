@@ -47,6 +47,9 @@
 #include <asm/virt.h>
 #include <asm/mach/arch.h>
 #include <asm/mpu.h>
+#ifdef CONFIG_MTK_IRQ_NEW_DESIGN
+#include <hotplug.h>
+#endif
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/ipi.h>
@@ -185,7 +188,7 @@ static int platform_cpu_disable(unsigned int cpu)
 	if (smp_ops.cpu_disable)
 		return smp_ops.cpu_disable(cpu);
 
-	return 0;
+	return cpu == 0 ? -EPERM : 0;
 }
 
 int platform_can_hotplug_cpu(unsigned int cpu)
@@ -289,6 +292,10 @@ void arch_cpu_idle_dead(void)
 	unsigned int cpu = smp_processor_id();
 
 	idle_task_exit();
+
+#ifdef CONFIG_MTK_IRQ_NEW_DESIGN
+	gic_set_primask();
+#endif
 
 	local_irq_disable();
 
