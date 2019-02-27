@@ -493,6 +493,31 @@ static int freqhopping_debug_proc_init(void)
 	return 0;
 }
 
+void mt_fh_popod_save(void)
+{
+	if (!g_p_fh_hal_drv) {
+		FH_MSG("[%s]: g_p_fh_hal_drv is uninitialized.", __func__);
+		return;
+	}
+	FH_MSG("EN: %s", __func__);
+
+	g_p_fh_hal_drv->mt_fh_popod_save();
+}
+EXPORT_SYMBOL(mt_fh_popod_save);
+
+void mt_fh_popod_restore(void)
+{
+	if (!g_p_fh_hal_drv) {
+		FH_MSG("[%s]: g_p_fh_hal_drv is uninitialized.", __func__);
+		return;
+	}
+
+	FH_MSG("EN: %s", __func__);
+
+	g_p_fh_hal_drv->mt_fh_popod_restore();
+}
+EXPORT_SYMBOL(mt_fh_popod_restore);
+
 int freqhopping_config(unsigned int pll_id
 	, unsigned long vco_freq, unsigned int enable)
 {

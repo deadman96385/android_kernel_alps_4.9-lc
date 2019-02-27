@@ -966,7 +966,7 @@ static int mt_fh_hal_get_dramc(void)
 	FH_BUG_ON(1);
 	return 0;
 }
-
+#endif
 static void mt_fh_hal_popod_save(void)
 {
 	const unsigned int pll_id = FH_MAIN_PLLID;
@@ -1042,7 +1042,7 @@ static void mt_fh_hal_popod_restore(void)
 		FH_MSG("REG_FHCTL2_CFG: 0x%08x", fh_read32(reg_cfg));
 	}
 }
-
+#if 0
 static int fh_dramc_proc_read(struct seq_file *m, void *v)
 {
 	return 0;
@@ -1432,8 +1432,8 @@ static struct mt_fh_hal_driver g_fh_hal_drv = {
 	.mt_fh_lock = mt_fh_hal_lock,
 	.mt_fh_unlock = mt_fh_hal_unlock,
 	.mt_fh_get_init = mt_fh_hal_get_init,
-	//.mt_fh_popod_restore = mt_fh_hal_popod_restore,
-	//.mt_fh_popod_save = mt_fh_hal_popod_save,
+	.mt_fh_popod_restore = mt_fh_hal_popod_restore,
+	.mt_fh_popod_save = mt_fh_hal_popod_save,
 	//.mt_l2h_mempll = NULL,
 	//.mt_h2l_mempll = NULL,
 	.mt_dfs_armpll = mt_fh_hal_dfs_armpll,
