@@ -490,6 +490,7 @@ CONFIG_MTK_CHIP,COMMON,Nora.Chang,,y,y,y,y,y,y
 CONFIG_MTK_CLKMGR,PLATFORM,,,X,X,X,X,X,X
 CONFIG_MTK_CM36558,PROJECT,hongxu.zhao,new config in this commit 063ebd2dfda85d1c6ea1c0120c87fa93fc2570e8,,,,,,
 CONFIG_MTK_CM36652_NEW,PLATFORM,jy.lan,,,,,,,
+CONFIG_MTK_CM36652,PLATFORM,benjamin.chao,,,,,,,
 CONFIG_MTK_CM36686_NEW,PLATFORM,jy.lan,,,,,,,
 CONFIG_MTK_CMDQ,COMMON,dennis-yc.hsieh,,y,y,y,y,y,y
 CONFIG_MTK_CMDQ_MBOX,COMMON,dennis-yc.hsieh,,y,y,y,y,y,y
