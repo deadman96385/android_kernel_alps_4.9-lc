@@ -144,17 +144,12 @@ unsigned int reg_dump_addr_off[] = {
 #include <linux/file.h>
 #include <linux/uaccess.h>
 /* project includes */
-/* #include "mach/mt_typedefs.h" */
 #include <linux/seq_file.h>
 #include <asm/io.h>
-/*#include "mach/irqs.h"
-#include "mach/mt_irq.h"*/
 #include "mt_ptp.h"
 #include "mt_cpufreq.h"
-#include "mach/mt_thermal.h"
-/* #include "mach/mt_pmic_wrap.h"*/
+/* FIX ME #include "mach/mt_thermal.h" */
 #include "mach/mt_clkmgr.h"
-/*#include "mach/mt_freqhopping.h"*/
 #include "mt-plat/upmu_common.h"
 
 #ifdef CONFIG_OF
@@ -718,7 +713,8 @@ static int base_ops_init02(struct ptp_det *det)
 
 static int base_ops_mon_mode(struct ptp_det *det)
 {
-#ifndef CPUDVFS_WORKAROUND_FOR_GIT
+/* FIX ME */
+#if 0
 	struct TS_PTPOD ts_info;
 	thermal_bank_name ts_bank;
 
@@ -922,7 +918,8 @@ static void base_ops_set_phase(struct ptp_det *det, ptp_phase phase)
 
 static int base_ops_get_temp(struct ptp_det *det)
 {
-#ifndef CPUDVFS_WORKAROUND_FOR_GIT
+/* FIX ME */
+#if 0
 	thermal_bank_name ts_bank;
 
 	FUNC_ENTER(FUNC_LV_HELP);
@@ -1712,12 +1709,10 @@ void get_devinfo(struct ptp_devinfo *p)
 
 	FUNC_ENTER(FUNC_LV_HELP);
 
-#ifndef CPUDVFS_WORKAROUND_FOR_GIT
 	val[0] = get_devinfo_with_index(31);	/* ptp_read(0x10009180); */
 	val[1] = get_devinfo_with_index(32);	/* ptp_read(0x10009184); */
 	val[2] = get_devinfo_with_index(33);	/* ptp_read(0x10009188); */
 	val[3] = get_devinfo_with_index(34);	/* ptp_read(0x1000918C); */
-#endif
 
 	ptp_crit("val[0]=0x%x\n", val[0]);
 	ptp_crit("val[1]=0x%x\n", val[1]);

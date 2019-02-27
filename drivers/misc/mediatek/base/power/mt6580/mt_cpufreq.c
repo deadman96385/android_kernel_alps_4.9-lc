@@ -53,25 +53,14 @@
 #endif
 
 /* project includes */
-/* #include "mach/mt_typedefs.h" */
 #include <asm/io.h>
-#include "mach/mt_thermal.h"
-#include <mt-plat/mt_hotplug_strategy.h>
-/* #include "mach/mt_pmic_wrap.h" */
+/* FIX ME #include "mach/mt_thermal.h" */
+/* FIX ME #include <mt-plat/mt_hotplug_strategy.h> */
 #include "mach/mt_clkmgr.h"
 #include "mach/mt_freqhopping.h"
 #include "mt_ptp.h"
-/* #include "mach/upmu_sw.h" */
 #include <mt-plat/upmu_common.h>
-
-#ifndef __KERNEL__
-#include "freqhop_sw.h"
 #include "mt_spm.h"
-#include "clock_manager.h"
-#include "pmic.h"
-#else
-#include "mt_spm.h"
-#endif
 
 /* local includes */
 #include "mt_cpufreq.h"
@@ -1156,15 +1145,8 @@ unsigned int ckdiv1_mask = _BITMASK_(4:0);
 			p->ops->set_cur_volt(p, cur_volt);
 	} else {
 		dds = _cpu_dds_calc(target_khz);
-BUG_ON(dds & _BITMASK_(26:24));/* should not use posdiv */
-
-#if !defined(__KERNEL__) && defined(MTKDRV_FREQHOP)
-		fhdrv_dvt_dvfs_enable(ARMCA7PLL_ID, dds);
-#else				/* __KERNEL__ */
-#ifndef CPUDVFS_WORKAROUND_FOR_GIT
+		BUG_ON(dds & _BITMASK_(26:24));/* should not use posdiv */
 		mt_dfs_armpll(FH_ARMCA7_PLLID, dds);
-#endif
-#endif				/* ! __KERNEL__ */
 	}
 
 	FUNC_EXIT(FUNC_LV_LOCAL);
@@ -1730,9 +1712,8 @@ void mt_cpufreq_thermal_protect(unsigned int limited_power)
 			     p->limited_max_freq, p->limited_max_ncpu);
 
 		cpufreq_unlock(flag);	/* <- unlock */
-#ifndef CPUDVFS_WORKAROUND_FOR_GIT
-		hps_set_cpu_num_limit(LIMIT_THERMAL, p->limited_max_ncpu, 0);
-#endif
+		/* FIX ME hps_set_cpu_num_limit(LIMIT_THERMAL, p->limited_max_ncpu, 0); */
+
 		/* correct opp idx will be calcualted in _thermal_limited_verify() */
 		_mt_cpufreq_set(MT_CPU_DVFS_LITTLE, -1);
 		cpufreq_cpu_put(policy);	/* <- policy put */
@@ -2012,12 +1993,13 @@ static int _mt_cpufreq_target(struct cpufreq_policy *policy, unsigned int target
 	FUNC_ENTER(FUNC_LV_MODULE);
 
 	if (policy->cpu >= max_cpu_num
-	    || cpufreq_frequency_table_target(policy, id_to_cpu_dvfs(id)->freq_tbl_for_cpufreq,
-					      target_freq, relation, &new_opp_idx)
 	    || (id_to_cpu_dvfs(id) && id_to_cpu_dvfs(id)->dvfs_disable_by_procfs)
 	    )
 		return -EINVAL;
 
+	/* Get the opp mapping */
+	new_opp_idx = cpufreq_frequency_table_target(policy, target_freq,
+							relation);
 	_mt_cpufreq_set(id, new_opp_idx);
 
 	FUNC_EXIT(FUNC_LV_MODULE);
