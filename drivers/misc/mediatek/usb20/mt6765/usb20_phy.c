@@ -28,7 +28,11 @@
 #ifdef CONFIG_OF
 #include <linux/of_address.h>
 #endif
+#ifdef CONFIG_MTK_AEE_FEATURE
 #include <mt-plat/aee.h>
+#endif
+
+#include <mt-plat/mtk_boot_common.h>
 
 #define FRA (48)
 #define PARA (28)
@@ -250,8 +254,10 @@ bool usb_prepare_clock(bool enable)
 	DBG(1, "enable(%d), usb prepare_cnt, before(%d), after(%d)\n",
 		enable, before_cnt, atomic_read(&clk_prepare_cnt));
 
+#ifdef CONFIG_MTK_AEE_FEATURE
 	if (atomic_read(&clk_prepare_cnt) < 0)
 		aee_kernel_warning("usb20", "usb clock prepare_cnt error\n");
+#endif
 
 	return 1;
 }
@@ -766,6 +772,12 @@ void usb_phy_recover(void)
 /* BC1.2 */
 void Charger_Detect_Init(void)
 {
+	if ((get_boot_mode() == META_BOOT) ||
+		(get_boot_mode() == ADVMETA_BOOT)) {
+		DBG(0, "%s Skip\n", __func__);
+		return;
+	}
+
 	usb_prepare_enable_clock(true);
 
 	/* wait 50 usec. */
@@ -781,6 +793,12 @@ void Charger_Detect_Init(void)
 
 void Charger_Detect_Release(void)
 {
+	if ((get_boot_mode() == META_BOOT) ||
+		(get_boot_mode() == ADVMETA_BOOT)) {
+		DBG(0, "%s Skip\n", __func__);
+		return;
+	}
+
 	usb_prepare_enable_clock(true);
 
 	/* RG_USB20_BC11_SW_EN = 1'b0 */
@@ -806,7 +824,6 @@ void usb_phy_context_restore(void)
 	if (in_uart_mode)
 		usb_phy_switch_to_uart();
 #endif
-	usb_phy_savecurrent_internal();
 }
 
 #endif

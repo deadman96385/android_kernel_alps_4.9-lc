@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 MediaTek Inc.
+ * Copyright (C) 2017 MediaTek Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -14,114 +14,88 @@
 #ifndef __USB20_H__
 #define __USB20_H__
 
-#define ID_PIN_USE_EX_EINT 1
-
-#ifdef CONFIG_USB_MTK_OTG
-extern struct musb *mtk_musb;
-extern struct timer_list musb_idle_timer;
-#ifdef ID_PIN_USE_EX_EINT
-/* #define IDDIG_EINT_PIN (GPIO_OTG_IDDIG_EINT_PIN & ~(0x80000000)) */
-#define IDDIG_EINT_PIN 9
-#else
-#ifdef CONFIG_OF
-extern struct musb *mtk_musb;
-#define U2PHYDTM1  (((unsigned long)mtk_musb->xceiv->io_priv)+0x800 + 0x6c)
-#else
-#define U2PHYDTM1  (USB_SIF_BASE+0x800 + 0x6c)
-#endif
-#define ID_PULL_UP 0x0101
-#define ID_PHY_RESET 0x3d11
-#endif
-extern unsigned int mt_gpio_to_irq(unsigned int gpio);
-#endif
-
-#if defined(CONFIG_MTK_FAN5405_SUPPORT) \
-	|| defined(CONFIG_MTK_BQ24158_SUPPORT) \
-	|| defined(CONFIG_MTK_NCP1851_SUPPORT) \
-	|| defined(CONFIG_MTK_NCP1854_SUPPORT) \
-	|| defined(CONFIG_MTK_BQ24196_SUPPORT)
-#define SWITCH_CHARGER 1
-#endif
-
-#if defined(CONFIG_FPGA_EARLY_PORTING)
-#define FPGA_PLATFORM 1
+#ifdef CONFIG_FPGA_EARLY_PORTING
+#define FPGA_PLATFORM
 #endif
 
 struct mt_usb_glue {
-	struct device		*dev;
-	struct platform_device	*musb;
+	struct device *dev;
+	struct platform_device *musb;
 };
 
-/* Battery relative function */
-typedef enum {
-	CHARGER_UNKNOWN = 0,
-	STANDARD_HOST,          /* USB : 450mA */
-	CHARGING_HOST,
-	NONSTANDARD_CHARGER,    /* AC : 450mA~1A */
-	STANDARD_CHARGER,       /* AC : ~1A */
-} CHARGER_TYPE;
+#define glue_to_musb(g)         platform_get_drvdata(g->musb)
 
-extern void wake_up_bat(void);
-extern CHARGER_TYPE mt_charger_type_detection(void);
+#if CONFIG_MTK_GAUGE_VERSION == 30
+extern unsigned int upmu_get_rgs_chrdet(void);
 extern bool upmu_is_chr_det(void);
-extern kal_uint32 upmu_get_rgs_chrdet(void);
+#else
+extern bool upmu_is_chr_det(void);
+#endif
+
+extern enum charger_type mt_charger_type_detection(void);
 extern void BATTERY_SetUSBState(int usb_state);
-extern void upmu_interrupt_chrdet_int_en(kal_uint32 val);
-extern CHARGER_TYPE mt_get_charger_type(void);
-extern void __iomem *ap_uart0_base;
+extern void upmu_interrupt_chrdet_int_en(unsigned int val);
 
 /* specific USB fuctnion */
-typedef enum {
+enum CABLE_MODE {
 	CABLE_MODE_CHRG_ONLY = 0,
 	CABLE_MODE_NORMAL,
 	CABLE_MODE_HOST_ONLY,
 	CABLE_MODE_MAX
-} CABLE_MODE;
+};
+
+
+enum USB_CLK_STATE {
+	NO_CHANGE = 0,
+	ON_TO_OFF,
+	OFF_TO_ON,
+};
 
 #ifdef CONFIG_MTK_UART_USB_SWITCH
-typedef enum {
+enum PORT_MODE {
 	PORT_MODE_USB = 0,
 	PORT_MODE_UART,
 	PORT_MODE_MAX
-} PORT_MODE;
+};
 
 extern bool usb_phy_check_in_uart_mode(void);
 extern void usb_phy_switch_to_usb(void);
 extern void usb_phy_switch_to_uart(void);
 #endif
-/*add struct and enum for linux kernel 3.10 dts*/
-
-#if 0
-
-/*enum {
-usb0 = 0,
-usb_sif,
-usb_acm_temp_device,
-};*/
-#endif
-
-/* switch charger API*/
-#ifdef CONFIG_MTK_FAN5405_SUPPORT
-extern void fan5405_set_opa_mode(kal_uint32 val);
-extern void fan5405_set_otg_pl(kal_uint32 val);
-extern void fan5405_set_otg_en(kal_uint32 val);
-extern kal_uint32 fan5405_config_interface(kal_uint8 RegNum, kal_uint8 val, kal_uint8 MASK, kal_uint8 SHIFT);
-#elif defined(CONFIG_MTK_NCP1851_SUPPORT) || defined(CONFIG_MTK_BQ24196_SUPPORT)
-extern void tbl_charger_otg_vbus(kal_uint32 mode);
-#elif defined(CONFIG_MTK_BQ24261_SUPPORT)
-extern void bq24261_set_en_boost(kal_uint32 val);
-#elif defined(CONFIG_MTK_BQ24196_SUPPORT)
-extern void bq24196_set_otg_config(kal_uint32 val);
-extern void bq24196_set_boost_lim(kal_uint32 val);
-#elif defined CONFIG_MTK_NCP1854_SUPPORT
-extern void ncp1854_set_chg_en(unsigned int val);
-extern void ncp1854_set_otg_en(unsigned int val);
-#endif
 
 #ifdef FPGA_PLATFORM
-extern void USB_PHY_Write_Register8(UINT8 var,  UINT8 addr);
-extern UINT8 USB_PHY_Read_Register8(UINT8 addr);
-extern struct i2c_client *usb_i2c_client;
+extern void USB_PHY_Write_Register8(u8 var, u8 addr);
+extern u8 USB_PHY_Read_Register8(u8 addr);
 #endif
 
+extern struct clk *musb_clk;
+extern struct clk *musb_clk_top_sel;
+extern struct clk *musb_clk_univpll3_d4;
+
+#ifdef CONFIG_MTK_UART_USB_SWITCH
+
+#define RG_GPIO_SELECT (0x600)
+#define GPIO_SEL_OFFSET (4)
+#define GPIO_SEL_MASK (0x7 << GPIO_SEL_OFFSET)
+#define GPIO_SEL_UART0 (0x1 << GPIO_SEL_OFFSET)
+#define GPIO_SEL_UART1 (0x2 << GPIO_SEL_OFFSET)
+#define GET_GPIO_SEL_VAL(x) ((x & GPIO_SEL_MASK) >> GPIO_SEL_OFFSET)
+
+extern void __iomem *ap_gpio_base;
+extern bool in_uart_mode;
+#endif
+extern int usb20_phy_init_debugfs(void);
+extern enum charger_type mt_get_charger_type(void);
+#ifndef CONFIG_FPGA_EARLY_PORTING
+#include <upmu_common.h>
+#endif
+#define PHY_IDLE_MODE       0
+#define PHY_DEV_ACTIVE      1
+#define PHY_HOST_ACTIVE     2
+void set_usb_phy_mode(int mode);
+#ifdef CONFIG_USB_MTK_OTG
+extern bool usb20_check_vbus_on(void);
+#endif
+extern bool usb_prepare_clock(bool enable);
+extern void usb_prepare_enable_clock(bool enable);
 #endif

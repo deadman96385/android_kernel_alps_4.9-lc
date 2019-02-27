@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 MediaTek Inc.
+ * Copyright (C) 2017 MediaTek Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -11,46 +11,44 @@
  * GNU General Public License for more details.
  */
 
+#ifdef CONFIG_MTK_CLKMGR
 #include <mach/mt_clkmgr.h>
+#else
+#include <linux/clk.h>
+#endif
 #include <linux/jiffies.h>
 #include <linux/delay.h>
-#include <asm/io.h>
+#include <linux/io.h>
 #include <linux/spinlock.h>
-#include "mtk_musb.h"
-#include "musb_core.h"
+#include <mtk_musb.h>
+#include <musb_core.h>
 #include "usb20.h"
+#include "mtk_devinfo.h"
+
+#ifdef CONFIG_OF
+#include <linux/of_address.h>
+#endif
+#ifdef CONFIG_MTK_AEE_FEATURE
+#include <mt-plat/aee.h>
+#endif
+#include <mt-plat/mtk_boot_common.h>
 
 #define FRA (48)
 #define PARA (28)
 
-#ifdef CONFIG_MTK_UART_USB_SWITCH
-int usb_port_mode_temp = 0;
-#endif
-
 #ifdef FPGA_PLATFORM
-#include <linux/i2c.h>
-
-void USB_PHY_Write_Register8(UINT8 var,  UINT8 addr)
-{
-	char buffer[2];
-
-	buffer[0] = addr;
-	buffer[1] = var;
-	i2c_master_send(usb_i2c_client, buffer, 2);
-}
-
-UINT8 USB_PHY_Read_Register8(UINT8 addr)
-{
-	UINT8 var;
-
-	i2c_master_send(usb_i2c_client, &addr, 1);
-	i2c_master_recv(usb_i2c_client, &var, 1);
-	return var;
-}
-
 bool usb_enable_clock(bool enable)
 {
 	return true;
+}
+
+bool usb_prepare_clock(bool enable)
+{
+	return true;
+}
+
+void usb_prepare_enable_clock(bool enable)
+{
 }
 
 void usb_phy_poweron(void)
@@ -63,28 +61,6 @@ void usb_phy_savecurrent(void)
 
 void usb_phy_recover(void)
 {
-	/* usb phy initial sequence */
-	USB_PHY_Write_Register8(0x00, 0xFF);
-	USB_PHY_Write_Register8(0x04, 0x61);
-	USB_PHY_Write_Register8(0x00, 0x68);
-	USB_PHY_Write_Register8(0x00, 0x6a);
-	USB_PHY_Write_Register8(0x6e, 0x00);
-	USB_PHY_Write_Register8(0x0c, 0x1b);
-	USB_PHY_Write_Register8(0x44, 0x08);
-	USB_PHY_Write_Register8(0x55, 0x11);
-	USB_PHY_Write_Register8(0x68, 0x1a);
-	USBPHY_CLR8(0x6a, 0xff);
-
-	DBG(0, "[MUSB]addr: 0xFF, value: %x\n", USB_PHY_Read_Register8(0xFF));
-	DBG(0, "[MUSB]addr: 0x61, value: %x\n", USB_PHY_Read_Register8(0x61));
-	DBG(0, "[MUSB]addr: 0x68, value: %x\n", USB_PHY_Read_Register8(0x68));
-	DBG(0, "[MUSB]addr: 0x6a, value: %x\n", USB_PHY_Read_Register8(0x6a));
-	DBG(0, "[MUSB]addr: 0x00, value: %x\n", USB_PHY_Read_Register8(0x00));
-	DBG(0, "[MUSB]addr: 0x1b, value: %x\n", USB_PHY_Read_Register8(0x1b));
-	DBG(0, "[MUSB]addr: 0x08, value: %x\n", USB_PHY_Read_Register8(0x08));
-	DBG(0, "[MUSB]addr: 0x11, value: %x\n", USB_PHY_Read_Register8(0x11));
-	DBG(0, "[MUSB]addr: 0x1a, value: %x\n", USB_PHY_Read_Register8(0x1a));
-	DBG(0, "[MUSB]usb_phy_recover\n");
 }
 
 /* BC1.2 */
@@ -107,148 +83,241 @@ void usb_phy_context_restore(void)
 #ifdef CONFIG_MTK_UART_USB_SWITCH
 bool usb_phy_check_in_uart_mode(void)
 {
-	UINT8 usb_port_mode;
-
-	usb_enable_clock(true);
-	udelay(50);
-
-	usb_port_mode = USB_PHY_Read_Register8(0x6B);
-	usb_enable_clock(false);
-
-	if ((usb_port_mode == 0x5C) ||
-		(usb_port_mode == 0x5E))
-		return true;
-	else
-		return false;
+	return false;
 }
 
 void usb_phy_switch_to_uart(void)
 {
-
-	if (usb_phy_check_in_uart_mode())
-		return;
-
-	/* ALPS00775710 */
-	DBG(0, "force to uart mode !!\n");
-	/* ALPS00775710 */
-
-	usb_enable_clock(true);
-	udelay(50);
-
-	/* RG_USB20_BC11_SW_EN = 1'b0 */
-	USBPHY_CLR8(0x1a, 0x80);
-
-	/* Set RG_SUSPENDM to 1 */
-	USBPHY_SET8(0x68, 0x08);
-
-	/* force suspendm = 1 */
-	USBPHY_SET8(0x6a, 0x04);
-
-	/* Set ru_uart_mode to 2'b01 */
-	USBPHY_SET8(0x6B, 0x5C);
-
-	/* Set RG_UART_EN to 1 */
-	USBPHY_SET8(0x6E, 0x07);
-
-	/* Set RG_USB20_DM_100K_EN to 1 */
-	USBPHY_SET8(0x22, 0x02);
-	usb_enable_clock(false);
 }
 
 void usb_phy_switch_to_usb(void)
 {
-	usb_enable_clock(true);
-	udelay(50);
-	/* clear force_uart_en */
-	USBPHY_WRITE8(0x6B, 0x00);
-	usb_enable_clock(false);
-	usb_phy_poweron();
-	/* disable the USB clock turned on in usb_phy_poweron() */
-	usb_enable_clock(false);
 }
 #endif
 
 #else
 #include <linux/of_irq.h>
 #include <linux/of_address.h>
-#define VAL_MAX_WDITH_3		0x7
-#define OFFSET_RG_USB20_VRT_VREF_SEL 0x5
-#define SHFT_RG_USB20_VRT_VREF_SEL 4
-#define OFFSET_RG_USB20_TERM_VREF_SEL 0x5
-#define SHFT_RG_USB20_TERM_VREF_SEL 0
-static void usb_phy_tuning(void)
+#define VAL_MAX_WIDTH_2	0x3
+#define VAL_MAX_WIDTH_3	0x7
+#define OFFSET_RG_USB20_VRT_VREF_SEL 0x4
+#define SHFT_RG_USB20_VRT_VREF_SEL 12
+#define OFFSET_RG_USB20_TERM_VREF_SEL 0x4
+#define SHFT_RG_USB20_TERM_VREF_SEL 8
+#define OFFSET_RG_USB20_PHY_REV6 0x18
+#define SHFT_RG_USB20_PHY_REV6 30
+void usb_phy_tuning(void)
 {
 	static bool inited;
-	struct device_node *of_node;
-	u32 val;
+	static s32 u2_vrt_ref, u2_term_ref, u2_enhance;
+	static struct device_node *of_node;
 
-	if (inited)
+	if (!inited) {
+		u2_vrt_ref = u2_term_ref = u2_enhance = -1;
+		of_node = of_find_compatible_node(NULL,
+			NULL, "mediatek,phy_tuning");
+		if (of_node) {
+			/* value won't be updated if property not being found */
+			of_property_read_u32(of_node,
+				"u2_vrt_ref", (u32 *) &u2_vrt_ref);
+			of_property_read_u32(of_node,
+				"u2_term_ref", (u32 *) &u2_term_ref);
+			of_property_read_u32(of_node,
+				"u2_enhance", (u32 *) &u2_enhance);
+		}
+		inited = true;
+	} else if (!of_node)
 		return;
 
-	of_node = of_find_compatible_node(NULL, NULL, "mediatek,phy_tuning");
-	if (of_node) {
-		if (!of_property_read_u32(of_node, "u2_vrt_ref", (u32 *) &val)) {
-			if (val <= VAL_MAX_WDITH_3) {
-				USBPHY_CLR8(OFFSET_RG_USB20_VRT_VREF_SEL,
-						VAL_MAX_WDITH_3<<SHFT_RG_USB20_VRT_VREF_SEL);
-				USBPHY_SET8(OFFSET_RG_USB20_VRT_VREF_SEL,
-						val<<SHFT_RG_USB20_VRT_VREF_SEL);
-			}
-		}
-		if (!of_property_read_u32(of_node, "u2_term_ref", (u32 *) &val)) {
-			if (val <= VAL_MAX_WDITH_3) {
-				USBPHY_CLR8(OFFSET_RG_USB20_TERM_VREF_SEL,
-						VAL_MAX_WDITH_3<<SHFT_RG_USB20_TERM_VREF_SEL);
-				USBPHY_SET8(OFFSET_RG_USB20_TERM_VREF_SEL,
-						val<<SHFT_RG_USB20_TERM_VREF_SEL);
-			}
+	if (u2_vrt_ref != -1) {
+		if (u2_vrt_ref <= VAL_MAX_WIDTH_3) {
+			USBPHY_CLR32(OFFSET_RG_USB20_VRT_VREF_SEL,
+				VAL_MAX_WIDTH_3 << SHFT_RG_USB20_VRT_VREF_SEL);
+			USBPHY_SET32(OFFSET_RG_USB20_VRT_VREF_SEL,
+				u2_vrt_ref << SHFT_RG_USB20_VRT_VREF_SEL);
 		}
 	}
-	inited = true;
+	if (u2_term_ref != -1) {
+		if (u2_term_ref <= VAL_MAX_WIDTH_3) {
+			USBPHY_CLR32(OFFSET_RG_USB20_TERM_VREF_SEL,
+				VAL_MAX_WIDTH_3 << SHFT_RG_USB20_TERM_VREF_SEL);
+			USBPHY_SET32(OFFSET_RG_USB20_TERM_VREF_SEL,
+				u2_term_ref << SHFT_RG_USB20_TERM_VREF_SEL);
+		}
+	}
+	if (u2_enhance != -1) {
+		if (u2_enhance <= VAL_MAX_WIDTH_2) {
+			USBPHY_CLR32(OFFSET_RG_USB20_PHY_REV6,
+				VAL_MAX_WIDTH_2 << SHFT_RG_USB20_PHY_REV6);
+			USBPHY_SET32(OFFSET_RG_USB20_PHY_REV6,
+					u2_enhance<<SHFT_RG_USB20_PHY_REV6);
+		}
+	}
 }
 
-#ifdef CONFIG_MTK_UART_USB_SWITCH
-static bool in_uart_mode;
+#ifdef CONFIG_MTK_USB2JTAG_SUPPORT
+int usb2jtag_usb_init(void)
+{
+	struct device_node *node = NULL;
+	void __iomem *usb_phy_base;
+	u32 temp;
+
+	node = of_find_compatible_node(NULL, NULL, "mediatek,mt6761-usb20");
+	if (!node) {
+		pr_err("[USB2JTAG] map node @ mediatek,USB0 failed\n");
+		return -1;
+	}
+
+	usb_phy_base = of_iomap(node, 1);
+	if (!usb_phy_base) {
+		pr_err("[USB2JTAG] iomap usb_phy_base failed\n");
+		return -1;
+	}
+
+	/* rg_usb20_gpio_ctl: bit[9] = 1 */
+	temp = readl(usb_phy_base + 0x820);
+	writel(temp | (1 << 9), usb_phy_base + 0x820);
+
+	/* RG_USB20_BGR_EN: bit[0] = 1 */
+	temp = readl(usb_phy_base + 0x800);
+	writel(temp | (1 << 0), usb_phy_base + 0x800);
+
+	/* RG_USB20_BC11_SW_EN: bit[23] = 0 */
+	temp = readl(usb_phy_base + 0x818);
+	writel(temp & ~(1 << 23), usb_phy_base + 0x818);
+
+	/* wait stable */
+	mdelay(1);
+
+	iounmap(usb_phy_base);
+
+	return 0;
+}
 #endif
 
-static DEFINE_SPINLOCK(musb_reg_clock_lock);
+#ifdef CONFIG_MTK_UART_USB_SWITCH
+bool in_uart_mode;
+#endif
 
-static void enable_phy_clock(bool enable)
+void usb_prepare_enable_clock(bool enable)
 {
-	/* USB phy 48M clock , UNIVPLL_CON0[26] */
 	if (enable) {
-		enable_clock(MT_CG_UNIV_48M, "PERI_USB");
-		enable_clock(MT_CG_USB_48M, "PERI_USB");
+		usb_prepare_clock(true);
+		usb_enable_clock(true);
 	} else {
-		disable_clock(MT_CG_UNIV_48M, "PERI_USB");
-		disable_clock(MT_CG_USB_48M, "PERI_USB");
+		usb_enable_clock(false);
+		usb_prepare_clock(false);
 	}
 }
+
+DEFINE_MUTEX(prepare_lock);
+static atomic_t clk_prepare_cnt = ATOMIC_INIT(0);
+
+bool usb_prepare_clock(bool enable)
+{
+	int before_cnt = atomic_read(&clk_prepare_cnt);
+
+	mutex_lock(&prepare_lock);
+
+	if (IS_ERR_OR_NULL(musb_clk) ||
+			IS_ERR_OR_NULL(musb_clk_top_sel) ||
+			IS_ERR_OR_NULL(musb_clk_univpll3_d4)) {
+		DBG(0, "clk not ready\n");
+		mutex_unlock(&prepare_lock);
+		return 0;
+	}
+
+	if (enable) {
+
+		if (clk_prepare(musb_clk_top_sel)) {
+			DBG(0, "musb_clk_top_sel prepare fail\n");
+		} else {
+			if (clk_set_parent(musb_clk_top_sel,
+						musb_clk_univpll3_d4))
+				DBG(0, "musb_clk_top_sel set_parent fail\n");
+		}
+		if (clk_prepare(musb_clk))
+			DBG(0, "musb_clk prepare fail\n");
+
+		atomic_inc(&clk_prepare_cnt);
+	} else {
+
+		clk_unprepare(musb_clk_top_sel);
+		clk_unprepare(musb_clk);
+
+		atomic_dec(&clk_prepare_cnt);
+	}
+
+	mutex_unlock(&prepare_lock);
+
+	DBG(1, "enable(%d), usb prepare_cnt, before(%d), after(%d)\n",
+		enable, before_cnt, atomic_read(&clk_prepare_cnt));
+#ifdef CONFIG_MTK_AEE_FEATURE
+	if (atomic_read(&clk_prepare_cnt) < 0)
+		aee_kernel_warning("usb20", "usb clock prepare_cnt error\n");
+#endif
+	return 1;
+}
+
+static DEFINE_SPINLOCK(musb_reg_clock_lock);
 
 bool usb_enable_clock(bool enable)
 {
 	static int count;
-	bool res = TRUE;
+	static int real_enable = 0, real_disable;
+	static int virt_enable = 0, virt_disable;
 	unsigned long flags;
+
+	DBG(1, "enable(%d),count(%d),<%d,%d,%d,%d>\n",
+	    enable, count, virt_enable, virt_disable,
+	    real_enable, real_disable);
 
 	spin_lock_irqsave(&musb_reg_clock_lock, flags);
 
+	if (unlikely(atomic_read(&clk_prepare_cnt) <= 0)) {
+		DBG_LIMIT(1, "clock not prepare");
+		goto exit;
+	}
+
 	if (enable && count == 0) {
-		enable_phy_clock(true);
-		res = enable_clock(MT_CG_USB_SW_CG, "PERI_USB");
+		if (clk_enable(musb_clk_top_sel)) {
+			DBG(0, "musb_clk_top_sel enable fail\n");
+			goto exit;
+		}
+
+		if (clk_enable(musb_clk)) {
+			DBG(0, "musb_clk enable fail\n");
+			clk_disable(musb_clk_top_sel);
+			goto exit;
+		}
+
+		usb_hal_dpidle_request(USB_DPIDLE_FORBIDDEN);
+		real_enable++;
+
 	} else if (!enable && count == 1) {
-		res = disable_clock(MT_CG_USB_SW_CG, "PERI_USB");
-		enable_phy_clock(false);
+		clk_disable(musb_clk);
+		clk_disable(musb_clk_top_sel);
+
+		usb_hal_dpidle_request(USB_DPIDLE_ALLOWED);
+		real_disable++;
 	}
 
 	if (enable)
 		count++;
 	else
-		count = (count == 0) ? 0 : (count-1);
+		count = (count == 0) ? 0 : (count - 1);
+
+exit:
+	if (enable)
+		virt_enable++;
+	else
+		virt_disable++;
 
 	spin_unlock_irqrestore(&musb_reg_clock_lock, flags);
 
-	DBG(1, "enable(%d), count(%d) res=%d\n", enable, count, res);
+	DBG(1, "enable(%d),count(%d), <%d,%d,%d,%d>\n",
+	    enable, count, virt_enable, virt_disable,
+	    real_enable, real_disable);
 	return 1;
 }
 
@@ -259,347 +328,438 @@ static void hs_slew_rate_cal(void)
 	unsigned char value;
 	unsigned long start_time, timeout;
 	unsigned int timeout_flag = 0;
-	/* 4 s1:enable usb ring oscillator. */
-	USBPHY_WRITE8(0x15, 0x80);
+	/* enable usb ring oscillator. */
+	USBPHY_SET32(0x14, (0x1 << 15));
 
-	/* 4 s2:wait 1us. */
+	/* wait 1us. */
 	udelay(1);
 
-	/* 4 s3:enable free run clock */
-	USBPHY_WRITE8(0xf00-0x800+0x11, 0x01);
-	/* 4 s4:setting cyclecnt. */
-	USBPHY_WRITE8(0xf00-0x800+0x01, 0x04);
-	/* 4 s5:enable frequency meter */
-	USBPHY_SET8(0xf00-0x800+0x03, 0x01);
+	/* enable free run clock */
+	USBPHY_SET32(0xF10 - 0x800, (0x01 << 8));
+	/* setting cyclecnt. */
+	USBPHY_SET32(0xF00 - 0x800, (0x04 << 8));
+	/* enable frequency meter */
+	USBPHY_SET32(0xF00 - 0x800, (0x01 << 24));
 
-	/* 4 s6:wait for frequency valid. */
+	/* wait for frequency valid. */
 	start_time = jiffies;
 	timeout = jiffies + 3 * HZ;
 
-	while (!(USBPHY_READ8(0xf00-0x800+0x10)&0x1)) {
+	while (!((USBPHY_READ32(0xF10 - 0x800) & 0xFF) == 0x1)) {
 		if (time_after(jiffies, timeout)) {
 			timeout_flag = 1;
 			break;
 		}
 	}
 
-	/* 4 s7: read result. */
+	/* read result. */
 	if (timeout_flag) {
 		DBG(0, "[USBPHY] Slew Rate Calibration: Timeout\n");
 		value = 0x4;
-	} else{
-		data = USBPHY_READ32(0xf00-0x800+0x0c);
-		x = ((1024*FRA*PARA)/data);
-		value = (unsigned char)(x/1000);
-	if ((x-value*1000)/100 >= 5)
-		value += 1;
-		DBG(0, "[USBPHY]slew calibration:FM_OUT =%lu,x=%lu,value=%d\n", data, x, value);
+	} else {
+		data = USBPHY_READ32(0xF0C - 0x800);
+		x = ((1024 * FRA * PARA) / data);
+		value = (unsigned char)(x / 1000);
+		if ((x - value * 1000) / 100 >= 5)
+			value += 1;
+		DBG(1, "[USBPHY]slew calibration:FM_OUT =%lu,x=%lu,value=%d\n",
+				data, x, value);
 	}
 
-	/* 4 s8: disable Frequency and run clock. */
-	USBPHY_CLR8(0xf00-0x800+0x03, 0x01);
-	USBPHY_CLR8(0xf00-0x800+0x11, 0x01);
+	/* disable Frequency and disable free run clock. */
+	USBPHY_CLR32(0xF00 - 0x800, (0x01 << 24));
+	USBPHY_CLR32(0xF10 - 0x800, (0x01 << 8));
 
-	/* 4 s9: */
-	USBPHY_WRITE8(0x15, value<<4);
+#define MSK_RG_USB20_HSTX_SRCTRL 0x7
+	/* all clr first then set */
+	USBPHY_CLR32(0x14, (MSK_RG_USB20_HSTX_SRCTRL << 12));
+	USBPHY_SET32(0x14, ((value & MSK_RG_USB20_HSTX_SRCTRL) << 12));
 
-	/* 4 s10:disable usb ring oscillator. */
-	USBPHY_CLR8(0x15, 0x80);
+	/* disable usb ring oscillator. */
+	USBPHY_CLR32(0x14, (0x1 << 15));
 }
 
 #ifdef CONFIG_MTK_UART_USB_SWITCH
 bool usb_phy_check_in_uart_mode(void)
 {
-	UINT8 usb_port_mode;
+	u32 usb_port_mode;
 
 	usb_enable_clock(true);
 	udelay(50);
-	usb_port_mode = USBPHY_READ8(0x6B);
-	/* usb_port_mode = 1; */
+	usb_port_mode = USBPHY_READ32(0x68);
 	usb_enable_clock(false);
 
-	if ((usb_port_mode == 0x5C) ||
-		(usb_port_mode == 0x5E)) {
-		return true;
+	if (((usb_port_mode >> 30) & 0x3) == 1) {
+		DBG(0, "%s:%d - IN UART MODE : 0x%x\n",
+				__func__, __LINE__, usb_port_mode);
+		in_uart_mode = true;
+	} else {
+		DBG(0, "%s:%d - NOT IN UART MODE : 0x%x\n",
+				__func__, __LINE__, usb_port_mode);
+		in_uart_mode = false;
 	}
-
-		return false;
+	return in_uart_mode;
 }
 
 void usb_phy_switch_to_uart(void)
 {
-	if (usb_phy_check_in_uart_mode())
-		return;
+	unsigned int val = 0;
 
-	usb_enable_clock(true);
+	if (usb_phy_check_in_uart_mode()) {
+		DBG(0, "Already in UART mode.\n");
+		return;
+	}
+
 	udelay(50);
 
-	/* RG_USB20_BC11_SW_EN = 1'b0 */
-	USBPHY_CLR8(0x1a, 0x80);
+	/* RG_USB20_BC11_SW_EN 0x11F4_0818[23] = 1'b0 */
+	USBPHY_CLR32(0x18, (0x1 << 23));
 
-	/* Set RG_SUSPENDM to 1 */
-	USBPHY_SET8(0x68, 0x08);
+	/* Set RG_SUSPENDM 0x11F4_0868[3] to 1 */
+	USBPHY_SET32(0x68, (0x1 << 3));
 
-	/* force suspendm = 1 */
-	USBPHY_SET8(0x6a, 0x04);
+	/* force suspendm 0x11F4_0868[18] = 1 */
+	USBPHY_SET32(0x68, (0x1 << 18));
 
-	/* Set ru_uart_mode to 2'b01 */
-	USBPHY_SET8(0x6B, 0x5C);
+	/* Set rg_uart_mode 0x11F4_0868[31:30] to 2'b01 */
+	USBPHY_CLR32(0x68, (0x3 << 30));
+	USBPHY_SET32(0x68, (0x1 << 30));
+
+	/* force_uart_i 0x11F4_0868[29] = 0*/
+	USBPHY_CLR32(0x68, (0x1 << 29));
+
+	/* force_uart_bias_en 0x11F4_0868[28] = 1 */
+	USBPHY_SET32(0x68, (0x1 << 28));
+
+	/* force_uart_tx_oe 0x11F4_0868[27] = 1 */
+	USBPHY_SET32(0x68, (0x1 << 27));
+
+	/* force_uart_en 0x11F4_0868[26] = 1 */
+	USBPHY_SET32(0x68, (0x1 << 26));
+
+	/* RG_UART_BIAS_EN 0x11F4_086c[18] = 1 */
+	USBPHY_SET32(0x6C, (0x1 << 18));
+
+	/* RG_UART_TX_OE 0x11F4_086c[17] = 1 */
+	USBPHY_SET32(0x6C, (0x1 << 17));
 
 	/* Set RG_UART_EN to 1 */
-	USBPHY_SET8(0x6E, 0x07);
+	USBPHY_SET32(0x6C, (0x1 << 16));
 
 	/* Set RG_USB20_DM_100K_EN to 1 */
-	USBPHY_SET8(0x22, 0x02);
-	usb_enable_clock(false);
+	USBPHY_SET32(0x20, (0x1 << 17));
 
-	/*set uart rx path for K2 use*/
-	/* mtk_uart_usb_rx_sel(1, 1); */
+	/* GPIO Selection */
+	val = readl(ap_gpio_base);
+	writel(val & (~(GPIO_SEL_MASK)), ap_gpio_base);
 
-	/* GPIO Selection set UART#1 */
-	DRV_WriteReg32(ap_uart0_base + 0x118, 0x2);
+	val = readl(ap_gpio_base);
+	writel(val | (GPIO_SEL_UART0), ap_gpio_base);
+
+	in_uart_mode = true;
 }
-
 
 void usb_phy_switch_to_usb(void)
 {
-	DRV_WriteReg32(ap_uart0_base + 0x11C, 0x2);	/* clear */
-	usb_enable_clock(true);
-	udelay(50);
-	/* clear force_uart_en */
-	USBPHY_WRITE8(0x6B, 0x00);
-	usb_enable_clock(false);
-	usb_phy_poweron();
-	/* disable the USB clock turned on in usb_phy_poweron() */
-	usb_enable_clock(false);
+	unsigned int val = 0;
 
+	/* GPIO Selection */
+	val = readl(ap_gpio_base);
+	writel(val & (~(GPIO_SEL_MASK)), ap_gpio_base);
+
+	/* clear force_uart_en */
+	USBPHY_CLR32(0x68, (0x1 << 26));
+
+	/* Set rg_uart_mode 0x11F4_0868[31:30] to 2'b00 */
+	USBPHY_CLR32(0x68, (0x3 << 30));
+
+	in_uart_mode = false;
+
+	usb_phy_poweron();
 }
 #endif
 
+void set_usb_phy_mode(int mode)
+{
+	switch (mode) {
+	case PHY_DEV_ACTIVE:
+	/* VBUSVALID=1, AVALID=1, BVALID=1, SESSEND=0, IDDIG=1, IDPULLUP=1 */
+		USBPHY_CLR32(0x6C, (0x10<<0));
+		USBPHY_SET32(0x6C, (0x2F<<0));
+		USBPHY_SET32(0x6C, (0x3F<<8));
+		break;
+	case PHY_HOST_ACTIVE:
+	/* VBUSVALID=1, AVALID=1, BVALID=1, SESSEND=0, IDDIG=0, IDPULLUP=1 */
+		USBPHY_CLR32(0x6c, (0x12<<0));
+		USBPHY_SET32(0x6c, (0x2d<<0));
+		USBPHY_SET32(0x6c, (0x3f<<8));
+		break;
+	case PHY_IDLE_MODE:
+	/* VBUSVALID=0, AVALID=0, BVALID=0, SESSEND=1, IDDIG=0, IDPULLUP=1 */
+		USBPHY_SET32(0x6c, (0x11<<0));
+		USBPHY_CLR32(0x6c, (0x2e<<0));
+		USBPHY_SET32(0x6c, (0x3f<<8));
+		break;
+	default:
+		DBG(0, "mode error %d\n", mode);
+	}
+	DBG(0, "force PHY to mode %d, 0x6c=%x\n", mode, USBPHY_READ32(0x6c));
+}
+
+void usb_rev6_setting(int value)
+{
+	static int direct_return;
+
+	if (direct_return)
+		return;
+
+	/* RG_USB20_PHY_REV[7:0] = 8'b01000000 */
+	USBPHY_CLR32(0x18, (0xFF << 24));
+
+	if (value)
+		USBPHY_SET32(0x18, (value << 24));
+	else
+		direct_return = 1;
+}
+
+/* M17_USB_PWR Sequence 20160603.xls */
 void usb_phy_poweron(void)
 {
-
-	#ifdef CONFIG_MTK_UART_USB_SWITCH
-	if (usb_phy_check_in_uart_mode())
+#ifdef CONFIG_MTK_UART_USB_SWITCH
+	if (in_uart_mode) {
+		DBG(0, "At UART mode. No usb_phy_poweron\n");
 		return;
-	#endif
-
-	/* 4 s1: enable USB MAC clock. */
-	usb_enable_clock(true);
-
-	/* 4 s2: wait 50 usec for PHY3.3v/1.8v stable. */
+	}
+#endif
+	/* wait 50 usec for PHY3.3v/1.8v stable. */
 	udelay(50);
 
-	/* 4 s3: swtich to USB function. (system register, force ip into usb mode. */
-	USBPHY_CLR8(0x6b, 0x04);
-	USBPHY_CLR8(0x6e, 0x01);
-	USBPHY_CLR8(0x21, 0x03);
-	/* USBPHY_CLR8(0x21, 0x01); */
+	/*
+	 * force_uart_en	1'b0		0x68 26
+	 * RG_UART_EN		1'b0		0x6c 16
+	 * rg_usb20_gpio_ctl	1'b0		0x20 09
+	 * usb20_gpio_mode	1'b0		0x20 08
+	 * RG_USB20_BC11_SW_EN	1'b0		0x18 23
+	 * rg_usb20_dp_100k_mode 1'b1		0x20 18
+	 * USB20_DP_100K_EN	1'b0		0x20 16
+	 * RG_USB20_DM_100K_EN	1'b0		0x20 17
+	 * RG_USB20_OTG_VBUSCMP_EN	1'b1	0x18 20
+	 * force_suspendm		1'b0	0x68 18
+	 */
 
-	/* 4 s4: RG_USB20_BC11_SW_EN 1'b0 */
-	USBPHY_CLR8(0x1a, 0x80);
+	/* force_uart_en, 1'b0 */
+	USBPHY_CLR32(0x68, (0x1 << 26));
+	/* RG_UART_EN, 1'b0 */
+	USBPHY_CLR32(0x6c, (0x1 << 16));
+	/* rg_usb20_gpio_ctl, 1'b0, usb20_gpio_mode, 1'b0 */
+	USBPHY_CLR32(0x20, ((0x1 << 9) | (0x1 << 8)));
 
-	/* 5 s5: RG_USB20_DP_100K_EN 1'b0, RG_USB20_DM_100K_EN 1'b0 */
-	USBPHY_SET8(0x22, 0x04);
-	USBPHY_CLR8(0x22, 0x03);
+	/* RG_USB20_BC11_SW_EN, 1'b0 */
+	USBPHY_CLR32(0x18, (0x1 << 23));
 
-	/*OTG enable*/
-	USBPHY_SET8(0x1a, 0x10);
-	/* 6 s6: release force suspendm. */
-	USBPHY_CLR8(0x6a, 0x04);
+	/* rg_usb20_dp_100k_mode, 1'b1 */
+	USBPHY_SET32(0x20, (0x1 << 18));
+	/* USB20_DP_100K_EN 1'b0, RG_USB20_DM_100K_EN, 1'b0 */
+	USBPHY_CLR32(0x20, ((0x1 << 16) | (0x1 << 17)));
 
-	/* 6-1. PASS RX sensitivity HQA requirement */
-	USBPHY_SET8(0x18, 0x06);
+	/* RG_USB20_OTG_VBUSCMP_EN, 1'b1 */
+	USBPHY_SET32(0x18, (0x1 << 20));
 
-	/* 7 s7: wait for 800 usec. */
+	/* force_suspendm, 1'b0 */
+	USBPHY_CLR32(0x68, (0x1 << 18));
+
+	/* RG_USB20_PHY_REV[7:0] = 8'b01000000 */
+	USBPHY_CLR32(0x18, (0xFF << 24));
+	USBPHY_SET32(0x18, (0x40 << 24));
+
+	/* wait for 800 usec. */
 	udelay(800);
-
-	/* 8 s8: enter device mode */
-	USBPHY_CLR8(0x6c, 0x10);
-	USBPHY_SET8(0x6c, 0x2F);
-	USBPHY_SET8(0x6d, 0x3F);
 
 	DBG(0, "usb power on success\n");
 }
 
-#ifdef CONFIG_MTK_UART_USB_SWITCH
-static bool skipDisableUartMode;
-#endif
-
+/* M17_USB_PWR Sequence 20160603.xls */
 static void usb_phy_savecurrent_internal(void)
 {
-
-	/* 4 1. swtich to USB function. (system register, force ip into usb mode. */
-
-	#ifdef CONFIG_MTK_UART_USB_SWITCH
-	if (!usb_phy_check_in_uart_mode()) {
-		/* 4 s1: enable USB MAC clock. */
-		usb_enable_clock(true);
-
-		/* 4 s2: wait 50 usec for PHY3.3v/1.8v stable. */
-		udelay(50);
-
-		USBPHY_CLR8(0x6b, 0x04);
-		USBPHY_CLR8(0x6e, 0x01);
-
-		USBPHY_CLR8(0x21, 0x03);
-
-		/* 4 2. force suspendm. */
-		/* USBPHY_CLR8(0x6a, 0x04); */
-		USBPHY_SET8(0x6a, 0x04);
-		USBPHY_SET8(0x68, 0x08);
-		usb_enable_clock(false);
-	} else {
-		if (skipDisableUartMode)
-			skipDisableUartMode = false;
-		else
-			return;
+#ifdef CONFIG_MTK_UART_USB_SWITCH
+	if (in_uart_mode) {
+		DBG(0, "At UART mode. No usb_phy_savecurrent_internal\n");
+		return;
 	}
-	#else
-	USBPHY_CLR8(0x6b, 0x04);
-	USBPHY_CLR8(0x6e, 0x01);
-	USBPHY_CLR8(0x21, 0x03);
+#endif
+	/*
+	 * force_uart_en	1'b0		0x68 26
+	 * RG_UART_EN		1'b0		0x6c 16
+	 * rg_usb20_gpio_ctl	1'b0		0x20 09
+	 * usb20_gpio_mode	1'b0		0x20 08
 
-	/* 4 2. release force suspendm. */
-	/* USBPHY_CLR8(0x6a, 0x04); */
-	USBPHY_SET8(0x6a, 0x04);
-	USBPHY_SET8(0x68, 0x08);
-	#endif
+	 * RG_USB20_BC11_SW_EN	1'b0		0x18 23
+	 * RG_USB20_OTG_VBUSCMP_EN	1'b0	0x18 20
+	 * RG_SUSPENDM		1'b1		0x68 03
+	 * force_suspendm	1'b1		0x68 18
 
-	/* 4 3. RG_DPPULLDOWN./RG_DMPULLDOWN. */
-	USBPHY_SET8(0x68, 0xc0);
-	/* 4 4. RG_XCVRSEL[1:0] =2'b01. */
-	USBPHY_CLR8(0x68, 0x30);
-	USBPHY_SET8(0x68, 0x10);
-	/* 4 5. RG_TERMSEL = 1'b1 */
-	USBPHY_SET8(0x68, 0x04);
-	/* 4 6. RG_DATAIN[3:0]=4'b0000 */
-	USBPHY_CLR8(0x69, 0x3c);
-	/* 4 7.force_dp_pulldown, force_dm_pulldown, force_xcversel,force_termsel. */
-	USBPHY_SET8(0x6a, 0xba);
+	 * RG_DPPULLDOWN	1'b1		0x68 06
+	 * RG_DMPULLDOWN	1'b1		0x68 07
+	 * RG_XCVRSEL[1:0]	2'b01		0x68 [04-05]
+	 * RG_TERMSEL		1'b1		0x68 02
+	 * RG_DATAIN[3:0]	4'b0000		0x68 [10-13]
+	 * force_dp_pulldown	1'b1		0x68 20
+	 * force_dm_pulldown	1'b1		0x68 21
+	 * force_xcversel	1'b1		0x68 19
+	 * force_termsel	1'b1		0x68 17
+	 * force_datain		1'b1		0x68 23
 
-	/* 4 8.RG_USB20_BC11_SW_EN 1'b0 */
-	USBPHY_CLR8(0x1a, 0x80);
-	/* 4 9.RG_USB20_OTG_VBUSSCMP_EN 1'b0 */
-	USBPHY_CLR8(0x1a, 0x10);
-	/* 4 10. delay 800us. */
+	 * RG_SUSPENDM		1'b0		0x68 03
+	 */
+	/* force_uart_en, 1'b0 */
+	USBPHY_CLR32(0x68, (0x1 << 26));
+	/* RG_UART_EN, 1'b0 */
+	USBPHY_CLR32(0x6c, (0x1 << 16));
+	/* rg_usb20_gpio_ctl, 1'b0, usb20_gpio_mode, 1'b0 */
+	USBPHY_CLR32(0x20, (0x1 << 9));
+	USBPHY_CLR32(0x20, (0x1 << 8));
+
+	/* RG_USB20_BC11_SW_EN, 1'b0 */
+	USBPHY_CLR32(0x18, (0x1 << 23));
+	/* RG_USB20_OTG_VBUSCMP_EN, 1'b0 */
+	USBPHY_CLR32(0x18, (0x1 << 20));
+
+	/* RG_SUSPENDM, 1'b1 */
+	USBPHY_SET32(0x68, (0x1 << 3));
+	/* force_suspendm, 1'b1 */
+	USBPHY_SET32(0x68, (0x1 << 18));
+
+	/* RG_DPPULLDOWN, 1'b1, RG_DMPULLDOWN, 1'b1 */
+	USBPHY_SET32(0x68, ((0x1 << 6) | (0x1 << 7)));
+
+	/* RG_XCVRSEL[1:0], 2'b01. */
+	USBPHY_CLR32(0x68, (0x3 << 4));
+	USBPHY_SET32(0x68, (0x1 << 4));
+	/* RG_TERMSEL, 1'b1 */
+	USBPHY_SET32(0x68, (0x1 << 2));
+	/* RG_DATAIN[3:0], 4'b0000 */
+	USBPHY_CLR32(0x68, (0xF << 10));
+
+	/* force_dp_pulldown, 1'b1, force_dm_pulldown, 1'b1,
+	 * force_xcversel, 1'b1, force_termsel, 1'b1, force_datain, 1'b1
+	 */
+	USBPHY_SET32(0x68, ((0x1 << 20) | (0x1 << 21) |
+				(0x1 << 19) | (0x1 << 17) | (0x1 << 23)));
+
 	udelay(800);
-	/* 4 11. rg_usb20_pll_stable = 1 */
-	USBPHY_CLR8(0x68, 0x08);
-	/* USBPHY_SET8(0x63, 0x02); */
 
-/* ALPS00427972, implement the analog register formula */
-	/* printk("%s: USBPHY_READ8(0x05) = 0x%x\n", __func__, USBPHY_READ8(0x05)); */
-	/* printk("%s: USBPHY_READ8(0x07) = 0x%x\n", __func__, USBPHY_READ8(0x07)); */
-/* ALPS00427972, implement the analog register formula */
+	/* RG_SUSPENDM, 1'b0 */
+	USBPHY_CLR32(0x68, (0x1 << 3));
 
 	udelay(1);
-	/* 4 12.  force suspendm = 1. */
-	/* USBPHY_SET8(0x6a, 0x04); */
-	/* 4 13.  wait 1us */
-	udelay(1);
 
-	/* force enter device mode */
-	/* USBPHY_CLR8(0x6c, 0x10); */
-	/* USBPHY_SET8(0x6c, 0x2E); */
-	/* USBPHY_SET8(0x6d, 0x3E); */
+	set_usb_phy_mode(PHY_IDLE_MODE);
 }
 
 void usb_phy_savecurrent(void)
 {
 	usb_phy_savecurrent_internal();
-	/* 4 14. turn off internal 48Mhz PLL. */
-	usb_enable_clock(false);
 	DBG(0, "usb save current success\n");
 }
 
+/* M17_USB_PWR Sequence 20160603.xls */
 void usb_phy_recover(void)
 {
+	unsigned int efuse_val = 0;
 
-	/* 4 1. turn on USB reference clock. */
-	usb_enable_clock(true);
-	/* 4 2. wait 50 usec. */
+#ifdef CONFIG_MTK_UART_USB_SWITCH
+	if (in_uart_mode) {
+		DBG(0, "At UART mode. No usb_phy_recover\n");
+		return;
+	}
+#endif
+
+	/* wait 50 usec. */
 	udelay(50);
 
-	#ifdef CONFIG_MTK_UART_USB_SWITCH
-	if (!usb_phy_check_in_uart_mode()) {
-		/* clean PUPD_BIST_EN */
-		/* PUPD_BIST_EN = 1'b0 */
-		/* PMIC will use it to detect charger type */
-	USBPHY_CLR8(0x1d, 0x10);
+	/*
+	 * 04.force_uart_en	1'b0 0x68 26
+	 * 04.RG_UART_EN		1'b0 0x6C 16
+	 * 04.rg_usb20_gpio_ctl	1'b0 0x20 09
+	 * 04.usb20_gpio_mode	1'b0 0x20 08
 
-	/* 4 3. force_uart_en = 1'b0 */
-	USBPHY_CLR8(0x6b, 0x04);
-	/* 4 4. RG_UART_EN = 1'b0 */
-	USBPHY_CLR8(0x6e, 0x1);
-	/* 4 5. release force suspendm. */
-	USBPHY_CLR8(0x6a, 0x04);
-	USBPHY_CLR8(0x22, 0x02);
+	 * 05.force_suspendm	1'b0 0x68 18
 
-	skipDisableUartMode = false;
-	} else {
-		/* if (!skipDisableUartMode) */
-			return;
-	}
-	#else
+	 * 06.RG_DPPULLDOWN	1'b0 0x68 06
+	 * 07.RG_DMPULLDOWN	1'b0 0x68 07
+	 * 08.RG_XCVRSEL[1:0]	2'b00 0x68 [04:05]
+	 * 09.RG_TERMSEL		1'b0 0x68 02
+	 * 10.RG_DATAIN[3:0]	4'b0000 0x68 [10:13]
+	 * 11.force_dp_pulldown	1'b0 0x68 20
+	 * 12.force_dm_pulldown	1'b0 0x68 21
+	 * 13.force_xcversel	1'b0 0x68 19
+	 * 14.force_termsel	1'b0 0x68 17
+	 * 15.force_datain	1'b0 0x68 23
+	 * 16.RG_USB20_BC11_SW_EN	1'b0 0x18 23
+	 * 17.RG_USB20_OTG_VBUSCMP_EN	1'b1 0x18 20
+	 */
+
 	/* clean PUPD_BIST_EN */
 	/* PUPD_BIST_EN = 1'b0 */
 	/* PMIC will use it to detect charger type */
-	USBPHY_CLR8(0x1d, 0x10);
+	/* NEED?? USBPHY_CLR8(0x1d, 0x10);*/
+	USBPHY_CLR32(0x1c, (0x1 << 12));
 
-	/* 4 3. force_uart_en = 1'b0 */
-	USBPHY_CLR8(0x6b, 0x04);
-	/* 4 4. RG_UART_EN = 1'b0 */
-	USBPHY_CLR8(0x6e, 0x1);
-	/* 4 5. force_uart_en = 1'b0 */
-	USBPHY_CLR8(0x6a, 0x04);
+	/* force_uart_en, 1'b0 */
+	USBPHY_CLR32(0x68, (0x1 << 26));
+	/* RG_UART_EN, 1'b0 */
+	USBPHY_CLR32(0x6C, (0x1 << 16));
+	/* rg_usb20_gpio_ctl, 1'b0, usb20_gpio_mode, 1'b0 */
+	USBPHY_CLR32(0x20, (0x1 << 9));
+	USBPHY_CLR32(0x20, (0x1 << 8));
 
-	USBPHY_CLR8(0x21, 0x03);
-	#endif
+	/* force_suspendm, 1'b0 */
+	USBPHY_CLR32(0x68, (0x1 << 18));
 
-	/* 4 6. RG_DPPULLDOWN = 1'b0 */
-	USBPHY_CLR8(0x68, 0x40);
-	/* 4 7. RG_DMPULLDOWN = 1'b0 */
-	USBPHY_CLR8(0x68, 0x80);
-	/* 4 8. RG_XCVRSEL = 2'b00 */
-	USBPHY_CLR8(0x68, 0x30);
-	/* 4 9. RG_TERMSEL = 1'b0 */
-	USBPHY_CLR8(0x68, 0x04);
-	/* 4 10. RG_DATAIN[3:0] = 4'b0000 */
-	USBPHY_CLR8(0x69, 0x3c);
+	/* RG_DPPULLDOWN, 1'b0, RG_DMPULLDOWN, 1'b0 */
+	USBPHY_CLR32(0x68, ((0x1 << 6) | (0x1 << 7)));
 
-	/* 4 11. force_dp_pulldown = 1b'0 */
-	USBPHY_CLR8(0x6a, 0x10);
-	/* 4 12. force_dm_pulldown = 1b'0 */
-	USBPHY_CLR8(0x6a, 0x20);
-	/* 4 13. force_xcversel = 1b'0 */
-	USBPHY_CLR8(0x6a, 0x08);
-	/* 4 14. force_termsel = 1b'0 */
-	USBPHY_CLR8(0x6a, 0x02);
-	/* 4 15. force_datain = 1b'0 */
-	USBPHY_CLR8(0x6a, 0x80);
+	/* RG_XCVRSEL[1:0], 2'b00. */
+	USBPHY_CLR32(0x68, (0x3 << 4));
 
-	/* 4 16. RG_USB20_BC11_SW_EN 1'b0 */
-	USBPHY_CLR8(0x1a, 0x80);
-	/* 4 17. RG_USB20_OTG_VBUSSCMP_EN 1'b1 */
-	USBPHY_SET8(0x1a, 0x10);
-	/* 18. PASS RX sensitivity HQA requirement */
-	USBPHY_CLR8(0x18, 0x08);
-	USBPHY_SET8(0x18, 0x06);
+	/* RG_TERMSEL, 1'b0 */
+	USBPHY_CLR32(0x68, (0x1 << 2));
+	/* RG_DATAIN[3:0], 4'b0000 */
+	USBPHY_CLR32(0x68, (0xF << 10));
 
-	/* 4 18. wait 800 usec. */
+	/* force_dp_pulldown, 1'b0, force_dm_pulldown, 1'b0,
+	 * force_xcversel, 1'b0, force_termsel, 1'b0, force_datain, 1'b0
+	 */
+	USBPHY_CLR32(0x68, ((0x1 << 20) | (0x1 << 21) |
+				(0x1 << 19) | (0x1 << 17) | (0x1 << 23)));
+
+	/* RG_USB20_BC11_SW_EN, 1'b0 */
+	USBPHY_CLR32(0x18, (0x1 << 23));
+	/* RG_USB20_OTG_VBUSCMP_EN, 1'b1 */
+	USBPHY_SET32(0x18, (0x1 << 20));
+
+	/* RG_USB20_PHY_REV[7:0] = 8'b01000000 */
+	usb_rev6_setting(0x40);
+
+	/* wait 800 usec. */
 	udelay(800);
 
-	/* force enter device mode, k2 need? */
-	USBPHY_CLR8(0x6c, 0x10);
-	USBPHY_SET8(0x6c, 0x2F);
-	USBPHY_SET8(0x6d, 0x3F);
+	/* force enter device mode */
+	set_usb_phy_mode(PHY_DEV_ACTIVE);
 
-	#if defined(MTK_HDMI_SUPPORT)
-	USBPHY_SET8(0x05, 0x05);
-	USBPHY_SET8(0x05, 0x50);
-	#endif
 	hs_slew_rate_cal();
+
+	/* M_ANALOG8[4:0] => RG_USB20_INTR_CAL[4:0] */
+	efuse_val = (get_devinfo_with_index(107) & (0x1f<<0)) >> 0;
+	if (efuse_val) {
+		DBG(0, "apply efuse setting, RG_USB20_INTR_CAL=0x%x\n",
+			efuse_val);
+		USBPHY_CLR32(0x04, (0x1F<<19));
+		USBPHY_SET32(0x04, (efuse_val<<19));
+	}
+
+	/* disc threshold to max, RG_USB20_DISCTH[7:4], dft:1000, MAX:1111 */
+	USBPHY_SET32(0x18, (0xf0<<0));
 
 	usb_phy_tuning();
 
@@ -609,22 +769,42 @@ void usb_phy_recover(void)
 /* BC1.2 */
 void Charger_Detect_Init(void)
 {
-	/* turn on USB reference clock. */
-	usb_enable_clock(true);
+	if ((get_boot_mode() == META_BOOT) ||
+		(get_boot_mode() == ADVMETA_BOOT)) {
+		DBG(0, "%s Skip\n", __func__);
+		return;
+	}
+
+	usb_prepare_enable_clock(true);
+
 	/* wait 50 usec. */
 	udelay(50);
+
 	/* RG_USB20_BC11_SW_EN = 1'b1 */
-	USBPHY_SET8(0x1a, 0x80);
+	USBPHY_SET32(0x18, (0x1 << 23));
+
+	usb_prepare_enable_clock(false);
+
 	DBG(0, "Charger_Detect_Init\n");
 }
 
 void Charger_Detect_Release(void)
 {
+	if ((get_boot_mode() == META_BOOT) ||
+		(get_boot_mode() == ADVMETA_BOOT)) {
+		DBG(0, "%s Skip\n", __func__);
+		return;
+	}
+
+	usb_prepare_enable_clock(true);
+
 	/* RG_USB20_BC11_SW_EN = 1'b0 */
-	USBPHY_CLR8(0x1a, 0x80);
+	USBPHY_CLR32(0x18, (0x1 << 23));
+
 	udelay(1);
-	/* 4 14. turn off internal 48Mhz PLL. */
-	usb_enable_clock(false);
+
+	usb_prepare_enable_clock(false);
+
 	DBG(0, "Charger_Detect_Release\n");
 }
 
@@ -641,7 +821,6 @@ void usb_phy_context_restore(void)
 	if (in_uart_mode)
 		usb_phy_switch_to_uart();
 #endif
-	usb_phy_savecurrent_internal();
 }
 
 #endif
