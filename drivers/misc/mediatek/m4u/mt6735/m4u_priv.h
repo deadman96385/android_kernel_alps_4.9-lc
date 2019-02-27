@@ -46,7 +46,7 @@
 #define MMP_Event unsigned int
 #else
 #include <mmprofile.h>
-
+#include <mmprofile_function.h>
 extern void MMProfileEnable(int enable);
 extern void MMProfileStart(int start);
 
@@ -168,7 +168,8 @@ void *mva_get_priv_ext(unsigned int mva);
 int mva_foreach_priv(mva_buf_fn_t *fn, void *data);
 void *mva_get_priv(unsigned int mva);
 unsigned int m4u_do_mva_alloc(unsigned long va, unsigned int size, void *priv);
-unsigned int m4u_do_mva_alloc_fix(unsigned int mva, unsigned int size, void *priv);
+unsigned int m4u_do_mva_alloc_fix(unsigned long va, unsigned int mva, unsigned int size, void *priv);
+unsigned int m4u_do_mva_alloc_start_from(unsigned long va, unsigned int mva, unsigned int size, void *priv);
 int m4u_do_mva_free(unsigned int mva, unsigned int size);
 
 /* ================================= */
@@ -268,7 +269,7 @@ extern int gM4U_log_to_uart;
 } while (0)
 /*aee_kernel_warning(m4u_name, "[M4U] error:"string,##args); */
 
-#define M4U_PRINT_LOG_OR_SEQ(seq_file, fmt, args...) \
+#define M4U_PRINT_SEQ(seq_file, fmt, args...) \
 	do {\
 		if (seq_file)\
 			seq_printf(seq_file, fmt, ##args);\
