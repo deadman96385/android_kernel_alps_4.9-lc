@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
- 
+
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/stat.h>
@@ -155,11 +155,11 @@ static struct device_attribute device_attrs[] = {
 	__ATTR_RO(stat),
 	__ATTR_RO(info),
 	__ATTR(test, (0660), test_show, test_store),
-	__ATTR(state, S_IRUGO, tee_show_state, NULL),
-	__ATTR(name, S_IRUGO, name_show, NULL),
-	__ATTR(refcount, S_IRUGO, refcount_show, NULL),
-	__ATTR(type, S_IRUGO, type_show, NULL),
-	__ATTR(conf, S_IRUGO, conf_show, NULL),
+	__ATTR(state, 0444, tee_show_state, NULL),
+	__ATTR(name, 0444, name_show, NULL),
+	__ATTR(refcount, 0444, refcount_show, NULL),
+	__ATTR(type, 0444, type_show, NULL),
+	__ATTR(conf, 0444, conf_show, NULL),
 };
 
 void tee_init_sysfs(struct tee *tee)

@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
- 
+
 #include <linux/types.h>
 #include <linux/completion.h>
 #include <linux/slab.h>

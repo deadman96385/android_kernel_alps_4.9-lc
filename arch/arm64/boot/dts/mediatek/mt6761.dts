@@ -213,6 +213,11 @@ initrd=0x45000000,0x200000 loglevel=8 androidboot.selinux=permissive";
 			size = <0 0x500000>;
 			alloc-ranges = <0 0x40000000 0 0x50000000>;
 		};
+
+#ifdef CONFIG_WATCHDATA_TEE_SUPPORT
+		#include "watchtrust.dtsi"
+#endif
+
 	};
 
 	/* Microtrust SW IRQ number 188(220) ~ 193(225) */

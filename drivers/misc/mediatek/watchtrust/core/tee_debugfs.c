@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
- 
+
 #include <linux/kernel.h>
 #include <linux/debugfs.h>
 #include <linux/device.h>
@@ -50,7 +50,7 @@ void tee_create_debug_dir(struct tee *tee)
 	if (!tee->dbg_dir)
 		goto error_create_file;
 
-	entry = debugfs_create_file("log", S_IRUGO, tee->dbg_dir,
+	entry = debugfs_create_file("log", 0444, tee->dbg_dir,
 				    tee, &log_tee_ops);
 	if (!entry)
 		goto error_create_file;
@@ -81,8 +81,4 @@ void tee_init_debugfs(void)
 
 void tee_exit_debugfs(void)
 {
-/*
-*	if (tee_debugfs_dir)
-*		debugfs_remove(tee_debugfs_dir);
-*/
 }

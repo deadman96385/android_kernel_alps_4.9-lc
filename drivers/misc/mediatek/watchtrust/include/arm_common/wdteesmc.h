@@ -10,26 +10,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
- 
+
 #ifndef __WDTEESMC_H__
 #define __WDTEESMC_H__
 #include <linux/version.h>
 /*
  ** wd tz_driver smc cmd
  */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0))
 #define TEESMC_RV(func_num) \
 	((1U << 31) | \
 	 ((0) << 30) | \
 	 (62 << 24) | \
 	 ((func_num) & 0xffff))
-#else
-#define TEESMC_RV(func_num) \
-	((1 << 31) | \
-	 ((0) << 30) | \
-	 (62 << 24) | \
-	 ((func_num) & 0xffff))
-#endif
 #define SMC_CMD_WDTZ_INIT_FINISH  TEESMC_RV(0)
 #define SMC_CMD_NORMAL  TEESMC_RV(1)
 #define SMC_CMD_SECURE  TEESMC_RV(2)
