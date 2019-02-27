@@ -30,7 +30,7 @@
 #include <asm/stacktrace.h>
 #include <asm/memory.h>
 #include <asm/traps.h>
-#include <asm/fiq_smp_call.h>
+#include <mach/fiq_smp_call.h>
 #include <mach/wd_api.h>
 #ifndef __aarch64__
 #include <smp.h>
