@@ -29,6 +29,7 @@ struct mt_usb_glue {
 extern unsigned int upmu_get_rgs_chrdet(void);
 extern bool upmu_is_chr_det(void);
 #else
+extern unsigned int upmu_get_rgs_chrdet(void); /* for build pass */
 extern bool upmu_is_chr_det(void);
 #endif
 
