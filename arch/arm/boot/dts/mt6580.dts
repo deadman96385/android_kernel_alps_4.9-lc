@@ -768,7 +768,7 @@ firmware_class.path=/vendor/firmware loop.max_part=7";
 		};
 
 		touch: touch@0 {
-			compatible = "mediatek,mt6580-touch";
+			compatible = "mediatek,touch";
 			vtouch-supply = <&mt_pmic_vgp1_ldo_reg>;
 		};
 		accdet: accdet {
