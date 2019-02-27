@@ -2613,8 +2613,10 @@ static int nl80211_dump_interface(struct sk_buff *skb, struct netlink_callback *
 			continue;
 		}
 
+#if 0
 		if (filter_wiphy >= 0 && filter_wiphy != rdev->wiphy_idx)
 			continue;
+#endif
 
 		if_idx = 0;
 
