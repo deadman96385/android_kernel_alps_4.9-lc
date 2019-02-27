@@ -29,18 +29,15 @@
 #include <linux/io.h>
 #include <linux/spinlock.h>
 #include <linux/sched.h>
-#include <linux/wakelock.h>
+#include <linux/pm_wakeup.h>
 #ifdef CONFIG_OF
 #include <linux/of.h>
 #include <linux/of_irq.h>
 #include <linux/of_address.h>
 #endif
-#ifdef CONFIG_MTK_CLKMGR
 #include <mach/mt_clkmgr.h>
-#endif
-#include <mach/irqs.h>
-#include "mt_spi.h"
-#include "mt_spi_hal.h"
+#include "mtk_spi.h"
+#include "mtk_spi_hal.h"
 
 #if (defined(CONFIG_MTK_FPGA))
 #define  CONFIG_MT_SPI_FPGA_ENABLE
@@ -72,7 +69,7 @@ struct mt_spi_t {
 	void __iomem *regs;
 	int irq;
 	int running;
-	struct wake_lock wk_lock;
+	struct wakeup_source wk_lock;
 	struct mt_chip_conf *config;
 	struct spi_master *master;
 
@@ -746,7 +743,7 @@ static void mt_spi_msg_done(struct mt_spi_t *ms, struct spi_message *msg, int st
 		disable_clk();
 		/* schedule_work(&mt_spi_msgdone_workqueue); */
 
-		wake_unlock(&ms->wk_lock);
+		__pm_relax(&ms->wk_lock);
 	} else
 		mt_spi_next_message(ms);
 }
@@ -802,7 +799,7 @@ static int mt_spi_transfer(struct spi_device *spidev, struct spi_message *msg)
 	master = spidev->master;
 	ms = spi_master_get_devdata(master);
 
-	/* wake_lock(&ms->wk_lock); */
+	/* __pm_stay_awake(&ms->wk_lock); */
 	SPI_DBG("enter,start add msg:0x%p\n", msg);
 
 	if (unlikely(!msg)) {
@@ -864,7 +861,7 @@ static int mt_spi_transfer(struct spi_device *spidev, struct spi_message *msg)
 	list_add_tail(&msg->queue, &ms->queue);
 	SPI_DBG("add msg %p to queue\n", msg);
 	if (!ms->cur_transfer) {
-		wake_lock(&ms->wk_lock);
+		__pm_stay_awake(&ms->wk_lock);
 		spi_gpio_set(ms);
 		enable_clk();
 		mt_spi_next_message(ms);
@@ -1208,6 +1205,8 @@ static int mt_spi_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, " device %s: alloc spi master fail.\n", dev_name(&pdev->dev));
 		goto out;
 	}
+
+	master->dev.of_node = pdev->dev.of_node;
 	/* hardware can only connect 1 slave.if you want to multiple, using gpio CS */
 	master->num_chipselect = 2;
 
@@ -1229,7 +1228,7 @@ static int mt_spi_probe(struct platform_device *pdev)
 	ms->running = IDLE;
 	ms->cur_transfer = NULL;
 	ms->next_transfer = NULL;
-	wake_lock_init(&ms->wk_lock, WAKE_LOCK_SUSPEND, "spi_wakelock");
+	wakeup_source_init(&ms->wk_lock, "spi_wakelock");
 
 	spin_lock_init(&ms->lock);
 	INIT_LIST_HEAD(&ms->queue);
