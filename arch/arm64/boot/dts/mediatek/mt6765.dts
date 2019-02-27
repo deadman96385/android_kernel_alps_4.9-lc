@@ -288,10 +288,6 @@ initrd=0x45000000,0x200000 loglevel=8 androidboot.selinux=permissive loop.max_pa
 		};
 #endif
 
-#ifdef CONFIG_WATCHDATA_TEE_SUPPORT
-#include "watchtrust.dtsi"
-#endif
-
 	};
 
 	cpu_dbgapb: cpu_dbgapb@0d410000 {
