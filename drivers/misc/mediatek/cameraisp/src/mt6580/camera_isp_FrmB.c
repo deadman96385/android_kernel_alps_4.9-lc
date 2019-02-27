@@ -916,7 +916,7 @@ static unsigned int ISP_DumpDmaDeepDbg(void)
 #define RegDump(start, end) {\
 	unsigned int i;\
 	for (i = start; i <= end; i += 0x10) {\
-		LOG_ERR(\
+		LOG_INF(\
 		"[0x%08X %08X],[0x%08X %08X],[0x%08X %08X],[0x%08X %08X]",\
 		(unsigned int)(ISP_TPIPE_ADDR + i),\
 		(unsigned int)ISP_RD32(ISP_ADDR + i),\
@@ -1932,7 +1932,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 	== 0) {
 		reg_val = ISP_RD32(ISP_REG_ADDR_TG_VF_CON);
 /* reg_val2 = ISP_RD32(ISP_REG_ADDR_TG2_VF_CON); */
-	LOG_ERR("[rtbc][ENQUE]:dma:(%d),bufIdx(%d),base_pAddr(0x%x),base_vAddr(0x%llx)",
+	LOG_INF("[rtbc][ENQUE]:dma:(%d),bufIdx(%d),base_pAddr(0x%x),base_vAddr(0x%llx)",
 			rt_dma, rt_buf_info.bufIdx,
 			rt_buf_info.base_pAddr,
 			rt_buf_info.base_vAddr
@@ -3086,8 +3086,8 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 						/*  */
 					if (bBufFilled == MFALSE) {
 						LOG_ERR(
-						"deque buf:d(%d) is not filled.",
-						rt_dma);
+						"deque buf:d(%d)[%d] is not filled.",
+						rt_dma, iBuf + i);
 					}
 /* LOG_INF("RTBC_DBG7 d_dma_%d:%d %d %d\n",rt_dma,
  * pstRTBuf_FrmB->ring_buf[rt_dma].data[0].bFilled,
@@ -3096,7 +3096,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
  */
 					if (IspInfo_FrmB.DebugMask &
 						ISP_DBG_BUF_CTRL) {
-						LOG_ERR(
+						LOG_INF(
 						"[rtbc][DEQUE](%d):d(%d)/id(0x%x)/bs(0x%x)/va(0x%llx)/pa(0x%x)/t(%d.%d)/img(%d,%d,%d,%d,%d,%d,%d,%d)/m(0x%x)/fc(%d)/hrz(%d,%d,%d,%d,%d,%d),dmao(%d,%d,%d,%d),lm#(0x%x)",
 						iBuf + i, rt_dma,
 						deque_buf.data[i].memID,
@@ -3167,7 +3167,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 					timeStampS),
 					(int)(deque_buf.data[i].
 					timeStampUs));
-					ISP_DumpReg_FrmB();
+					//ISP_DumpReg_FrmB();
 						}
 					}
 					prv_tstamp_s[rt_dma] =

@@ -756,6 +756,8 @@ signed int ISP_DumpReg(void)
 
 	/* for tpipe main start */
 	LOG_INF("start MT");
+	RegDump(0x0, 0x14C);
+#if 0
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x000,
 	ISP_RD32((void *)(ISP_ADDR + 0x000)));
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x004,
@@ -773,7 +775,6 @@ signed int ISP_DumpReg(void)
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x020,
 	ISP_RD32((void *)(ISP_ADDR + 0x020)));
 
-#if 1				/* it may touch ReadClear register */
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x024,
 	ISP_RD32((void *)(ISP_ADDR + 0x024)));
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x028,
@@ -786,14 +787,7 @@ signed int ISP_DumpReg(void)
 	ISP_RD32((void *)(ISP_ADDR + 0x034)));
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x038,
 	ISP_RD32((void *)(ISP_ADDR + 0x038)));
-#else
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x024, 0);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x028, 0);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x02C, 0);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x030, 0);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x034, 0);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x038, 0);
-#endif
+
 	/* Tile setting */
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x050,
 	ISP_RD32((void *)(ISP_ADDR + 0x050)));
@@ -803,20 +797,7 @@ signed int ISP_DumpReg(void)
 	ISP_RD32((void *)(ISP_ADDR + 0x078)));
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x07C,
 	ISP_RD32((void *)(ISP_ADDR + 0x07C)));
-#if 0				/* WO */
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x080,
-	ISP_RD32((void *)(ISP_ADDR + 0x080)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x084,
-	ISP_RD32((void *)(ISP_ADDR + 0x084)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x088,
-	ISP_RD32((void *)(ISP_ADDR + 0x088)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x08C,
-	ISP_RD32((void *)(ISP_ADDR + 0x08C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x090,
-	ISP_RD32((void *)(ISP_ADDR + 0x090)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x094,
-	ISP_RD32((void *)(ISP_ADDR + 0x094)));
-#endif
+
 	/* cq0 base */
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x0A8,
 	ISP_RD32((void *)(ISP_ADDR + 0x0A8)));
@@ -855,6 +836,7 @@ signed int ISP_DumpReg(void)
 	ISP_RD32((void *)(ISP_ADDR + 0x148)));
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x14C,
 	ISP_RD32((void *)(ISP_ADDR + 0x14C)));
+#endif
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x204,
 	ISP_RD32((void *)(ISP_ADDR + 0x204)));
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x20C,
@@ -1128,117 +1110,6 @@ signed int ISP_DumpReg(void)
 	ISP_RD32((void *)(ISP_ADDR + 0xDA8)));
 	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0xDAC,
 	ISP_RD32((void *)(ISP_ADDR + 0xDAC)));
-#if 0
-	ISP_WR32((void *)(ISP_ADDR + 0x4618), 0x0000FFFF);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4010,
-	ISP_RD32((void *)(ISP_ADDR + 0x4010)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4014,
-	ISP_RD32((void *)(ISP_ADDR + 0x4014)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4018,
-	ISP_RD32((void *)(ISP_ADDR + 0x4018)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x401C,
-	ISP_RD32((void *)(ISP_ADDR + 0x401C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4020,
-	ISP_RD32((void *)(ISP_ADDR + 0x4020)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4024,
-	ISP_RD32((void *)(ISP_ADDR + 0x4024)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4028,
-	ISP_RD32((void *)(ISP_ADDR + 0x4028)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x402C,
-	ISP_RD32((void *)(ISP_ADDR + 0x402C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4100,
-	ISP_RD32((void *)(ISP_ADDR + 0x4100)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4104,
-	ISP_RD32((void *)(ISP_ADDR + 0x4104)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4108,
-	ISP_RD32((void *)(ISP_ADDR + 0x4108)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x410C,
-	ISP_RD32((void *)(ISP_ADDR + 0x410C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4120,
-	ISP_RD32((void *)(ISP_ADDR + 0x4120)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x412C,
-	ISP_RD32((void *)(ISP_ADDR + 0x412C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x420C,
-	ISP_RD32((void *)(ISP_ADDR + 0x420C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4234,
-	ISP_RD32((void *)(ISP_ADDR + 0x4234)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4240,
-	ISP_RD32((void *)(ISP_ADDR + 0x4240)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4300,
-	ISP_RD32((void *)(ISP_ADDR + 0x4300)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4304,
-	ISP_RD32((void *)(ISP_ADDR + 0x4304)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4600,
-	ISP_RD32((void *)(ISP_ADDR + 0x4600)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4604,
-	ISP_RD32((void *)(ISP_ADDR + 0x4604)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4608,
-	ISP_RD32((void *)(ISP_ADDR + 0x4608)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x460C,
-	ISP_RD32((void *)(ISP_ADDR + 0x460C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4610,
-	ISP_RD32((void *)(ISP_ADDR + 0x4610)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4614,
-	ISP_RD32((void *)(ISP_ADDR + 0x4614)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4618,
-	ISP_RD32((void *)(ISP_ADDR + 0x4618)));
-	ISP_WR32((void *)(ISP_ADDR + 0x461C), 0x10);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x461C,
-	ISP_RD32((void *)(ISP_ADDR + 0x461C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4620,
-	ISP_RD32((void *)(ISP_ADDR + 0x4620)));
-	ISP_WR32((void *)(ISP_ADDR + 0x461C), 0x11);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x461C,
-	ISP_RD32((void *)(ISP_ADDR + 0x461C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4620,
-	ISP_RD32((void *)(ISP_ADDR + 0x4620)));
-	ISP_WR32((void *)(ISP_ADDR + 0x461C), 0x12);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x461C,
-	ISP_RD32((void *)(ISP_ADDR + 0x461C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4620,
-	ISP_RD32((void *)(ISP_ADDR + 0x4620)));
-	ISP_WR32((void *)(ISP_ADDR + 0x461C), 0x10);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x461C,
-	ISP_RD32((void *)(ISP_ADDR + 0x461C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4620,
-	ISP_RD32((void *)(ISP_ADDR + 0x4620)));
-	ISP_WR32((void *)(ISP_ADDR + 0x461C), 0x11);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x461C,
-	ISP_RD32((void *)(ISP_ADDR + 0x461C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4620,
-	ISP_RD32((void *)(ISP_ADDR + 0x4620)));
-	ISP_WR32((void *)(ISP_ADDR + 0x461C), 0x12);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x461C,
-	ISP_RD32((void *)(ISP_ADDR + 0x461C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4620,
-	ISP_RD32((void *)(ISP_ADDR + 0x4620)));
-	ISP_WR32((void *)(ISP_ADDR + 0x461C), 0x10);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x461C,
-	ISP_RD32((void *)(ISP_ADDR + 0x461C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4620,
-	ISP_RD32((void *)(ISP_ADDR + 0x4620)));
-	ISP_WR32((void *)(ISP_ADDR + 0x461C), 0x11);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x461C,
-	ISP_RD32((void *)(ISP_ADDR + 0x461C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4620,
-	ISP_RD32((void *)(ISP_ADDR + 0x4620)));
-	ISP_WR32((void *)(ISP_ADDR + 0x461C), 0x12);
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x461C,
-	ISP_RD32((void *)(ISP_ADDR + 0x461C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4620,
-	ISP_RD32((void *)(ISP_ADDR + 0x4620)));
-
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4618,
-	ISP_RD32((void *)(ISP_ADDR + 0x4618)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4624,
-	ISP_RD32((void *)(ISP_ADDR + 0x4624)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4628,
-	ISP_RD32((void *)(ISP_ADDR + 0x4628)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x462C,
-	ISP_RD32((void *)(ISP_ADDR + 0x462C)));
-	LOG_INF("0x%08X %08X", ISP_TPIPE_ADDR + 0x4630,
-	ISP_RD32((void *)(ISP_ADDR + 0x4630)));
-#endif
 
 	/* Mipi source */
 	LOG_INF(
@@ -1278,7 +1149,7 @@ signed int ISP_DumpReg(void)
 		(unsigned int)ISP_RD32(ISP_ADDR + 0x4BBC));
 
 	/* seninf1 */
-	LOG_ERR(
+	LOG_INF(
 	"[0x%08X %08X],[0x%08X %08X]",
 	(unsigned int)(ISP_TPIPE_ADDR + 0x4008),
 	(unsigned int)ISP_RD32(ISP_ADDR + 0x4008),
@@ -1287,7 +1158,7 @@ signed int ISP_DumpReg(void)
 	RegDump(0x4120, 0x4160);
 	RegDump(0x4360, 0x43f0);
 	/* seninf2 */
-	LOG_ERR(
+	LOG_INF(
 	"[0x%08X %08X],[0x%08X %08X]",
 	(unsigned int)(ISP_TPIPE_ADDR + 0x4008),
 	(unsigned int)ISP_RD32(ISP_ADDR + 0x4008),
