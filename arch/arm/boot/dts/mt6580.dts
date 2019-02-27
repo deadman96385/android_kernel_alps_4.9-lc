@@ -37,13 +37,13 @@ firmware_class.path=/vendor/firmware";
 
 	msdc0:msdc@11120000 {
 		compatible = "mediatek,msdc";
-		reg = <0 0x11230000 0 0x10000>;
+		reg = <0 0x11120000 0 0x10000>;
 		interrupts = <GIC_SPI 38 IRQ_TYPE_LEVEL_LOW>;
 	};
 
 	msdc1:msdc@11130000 {
 		compatible = "mediatek,msdc";
-		reg = <0 0x11240000 0 0x10000>;
+		reg = <0 0x11130000 0 0x10000>;
 		interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
 	};
 
