@@ -29,8 +29,6 @@
 
 #include "mtk_sd.h"
 #include "dbg.h"
-#include "include/pmic_api_buck.h"
-
 
 struct msdc_host *mtk_msdc_host[] = {NULL, NULL};
 EXPORT_SYMBOL(mtk_msdc_host);
