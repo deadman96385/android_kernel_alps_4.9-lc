@@ -216,7 +216,15 @@ int __cpu_disable(void)
 	ret = platform_cpu_disable(cpu);
 	if (ret)
 		return ret;
+	{
+		unsigned long flags;
 
+		/*
+		 * we disable irq here to ensure target all feature
+		 * did not bother this cpu after status as offline
+		 */
+		local_irq_save(flags);
+	}
 	/*
 	 * Take this CPU offline.  Once we clear this, we can't return,
 	 * and we must not schedule until we're ready to give up the cpu.
