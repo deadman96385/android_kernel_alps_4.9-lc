@@ -15,6 +15,7 @@
 #define __H_DDP_MMP__
 
 #include "mmprofile.h"
+#include "mmprofile_function.h"
 #include "ddp_info.h"
 
 struct DDP_MMP_Events_t{

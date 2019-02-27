@@ -18,6 +18,7 @@
 #include "ddp_mmp.h"
 #include "ddp_dump.h"
 #include "mmprofile.h"
+#include "mmprofile_function.h"
 #include "disp_log.h"
 
 #define dprec_string_max_length         512

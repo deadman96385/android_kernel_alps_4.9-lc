@@ -18,6 +18,7 @@
 #include "ddp_dump.h"
 #include "disp_log.h"
 #include "mmprofile.h"
+#include "mmprofile_function.h"
 
 #define LP_CUST_DISABLE (0)
 #define LOW_POWER_MODE (1)
