@@ -22,7 +22,13 @@
 #include <linux/of_fdt.h>
 #include <asm/setup.h>
 #include <linux/lockdep.h>
+
+#if 0
 #include <linux/irqchip/mt-gic.h>
+#else
+#include <linux/irqchip/mtk-gic-extend.h>
+#endif
+
 #include <mt-plat/mt_cirq.h>
 #include "mt_spm_sleep.h"
 #include "mach/mt_clkmgr.h"

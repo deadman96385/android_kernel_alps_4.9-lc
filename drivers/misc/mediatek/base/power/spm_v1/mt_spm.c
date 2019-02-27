@@ -18,7 +18,13 @@
 #include <linux/smp.h>
 #include <linux/delay.h>
 #include <linux/atomic.h>
+
+#if 0
 #include <linux/irqchip/mt-gic.h>
+#else
+#include <linux/irqchip/mtk-gic-extend.h>
+#endif
+
 #include <mt-plat/aee.h>
 #include <mt-plat/mt_chip.h>
 #include <mach/mt_spm_mtcmos_internal.h>

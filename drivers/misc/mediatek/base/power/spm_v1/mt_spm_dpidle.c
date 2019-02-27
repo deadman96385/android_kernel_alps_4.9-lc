@@ -18,7 +18,12 @@
 #include <linux/delay.h>
 #include <linux/of_fdt.h>
 #include <linux/lockdep.h>
+
+#if 0
 #include <linux/irqchip/mt-gic.h>
+#else
+#include <linux/irqchip/mtk-gic-extend.h>
+#endif
 
 #ifdef CONFIG_OF
 #include <linux/of.h>
