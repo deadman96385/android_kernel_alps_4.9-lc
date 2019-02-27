@@ -148,7 +148,7 @@ unsigned int reg_dump_addr_off[] = {
 #include <asm/io.h>
 #include "mt_ptp.h"
 #include "mt_cpufreq.h"
-/* FIX ME #include "mach/mt_thermal.h" */
+#include "mach/mt_thermal.h"
 #include "mach/mt_clkmgr.h"
 #include "mt-plat/upmu_common.h"
 
@@ -713,8 +713,7 @@ static int base_ops_init02(struct ptp_det *det)
 
 static int base_ops_mon_mode(struct ptp_det *det)
 {
-/* FIX ME */
-#if 0
+#if 1
 	struct TS_PTPOD ts_info;
 	thermal_bank_name ts_bank;
 
@@ -918,8 +917,7 @@ static void base_ops_set_phase(struct ptp_det *det, ptp_phase phase)
 
 static int base_ops_get_temp(struct ptp_det *det)
 {
-/* FIX ME */
-#if 0
+#if 1
 	thermal_bank_name ts_bank;
 
 	FUNC_ENTER(FUNC_LV_HELP);
