@@ -204,6 +204,8 @@ bool usb_prepare_clock(bool enable)
 	return true;
 }
 
+/* FIXME */
+#if 0
 static DEFINE_SPINLOCK(musb_reg_clock_lock);
 static void enable_phy_clock(bool enable)
 {
@@ -216,9 +218,12 @@ static void enable_phy_clock(bool enable)
 		disable_clock(MT_CG_USB_48M, "PERI_USB");
 	}
 }
+#endif
 
 bool usb_enable_clock(bool enable)
 {
+	/* FIXME */
+#if 0
 	static int count;
 	bool res = true;
 	unsigned long flags;
@@ -241,6 +246,7 @@ bool usb_enable_clock(bool enable)
 	spin_unlock_irqrestore(&musb_reg_clock_lock, flags);
 
 	DBG(1, "enable(%d), count(%d) res=%d\n", enable, count, res);
+#endif
 	return 1;
 }
 
