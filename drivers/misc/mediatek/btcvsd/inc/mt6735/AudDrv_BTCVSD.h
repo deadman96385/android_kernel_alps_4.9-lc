@@ -108,10 +108,10 @@ typedef struct {
 	kal_uint32 u4BufferSize;	/*TX packetbuf size*/
 } BT_SCO_TX_T;
 
-typedef struct {
+struct time_buffer_info {
 	unsigned long long uDataCountEquiTime;
 	unsigned long long uTimestampUS;
-} TIME_BUFFER_INFO_T;
+};
 
 CVSD_MEMBLOCK_T BT_CVSD_Mem;
 
