@@ -59,7 +59,13 @@ ifneq (,$(filter $(CONFIG_MACH_MT6580), y))
 obj-y += mt_gpt.o
 obj-y += ca7_timer.o
 else
+ifneq (,$(filter $(CONFIG_MACH_MT6735) $(CONFIG_MACH_MT6735M) $(CONFIG_MACH_MT6753), y))
+obj-y += mt_gpt.o
+obj-y += ca53_timer.o
+obj-y += mt_cpuxgpt.o
+else
 obj-$(CONFIG_ARM_ARCH_TIMER)		+= arm_arch_timer.o
+endif
 endif
 obj-$(CONFIG_ARM_GLOBAL_TIMER)		+= arm_global_timer.o
 obj-$(CONFIG_ARMV7M_SYSTICK)		+= armv7m_systick.o
