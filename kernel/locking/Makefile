@@ -19,6 +19,7 @@ endif
 ifeq ($(CONFIG_LOCKDEP),y)
 ccflags-y += -DMTK_ENHANCE_LOCKDEP_PROC
 ccflags-y += -DMTK_LOCK_DEBUG_NEW_DEPENDENCY
+ccflags-y += -DMTK_LOCK_MONITOR
 endif
 
 obj-$(CONFIG_DEBUG_MUTEXES) += mutex-debug.o
