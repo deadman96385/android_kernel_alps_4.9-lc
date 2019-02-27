@@ -814,6 +814,38 @@ static int __init arch_timer_common_init(void)
 	return arch_timer_arch_init();
 }
 
+int localtimer_set_next_event(unsigned long evt)
+{
+	if (arch_timer_uses_ppi == VIRT_PPI)
+		arch_timer_set_next_event_virt(evt, NULL);
+	else
+		arch_timer_set_next_event_phys(evt, NULL);
+	/* save_localtimer_info(evt, 1); */
+	return 0;
+}
+EXPORT_SYMBOL(localtimer_set_next_event);
+
+unsigned long localtimer_get_counter(void)
+{
+	unsigned long evt;
+
+	if (arch_timer_uses_ppi == VIRT_PPI)
+		evt = arch_timer_reg_read(ARCH_TIMER_VIRT_ACCESS, ARCH_TIMER_REG_TVAL, NULL);
+	else
+		evt = arch_timer_reg_read(ARCH_TIMER_PHYS_ACCESS, ARCH_TIMER_REG_TVAL, NULL);
+	return evt;
+}
+EXPORT_SYMBOL(localtimer_get_counter);
+
+u64 localtimer_get_phy_count(void)
+{
+	u64 cval = 0;
+
+	cval = arch_timer_read_counter();
+	return cval;
+}
+EXPORT_SYMBOL(localtimer_get_phy_count);
+
 static int __init arch_timer_init(void)
 {
 	int ret;
