@@ -186,7 +186,7 @@ void mt_irq_set_sens(unsigned int irq, unsigned int sens)
 	unsigned long flags;
 	u32 config;
 
-	if (irq < (NR_GIC_SGI + NR_GIC_PPI)) {
+	if (irq < NR_GIC_SGI) {
 		pr_err("Fail to set sensitivity of interrupt %d\n", irq);
 		return;
 	}
@@ -327,7 +327,7 @@ void mt_irq_set_polarity(unsigned int irq, unsigned int polarity)
 	u32 offset, reg_index, value;
 
 	if (irq < (NR_GIC_SGI + NR_GIC_PPI)) {
-		pr_err("Fail to set polarity of interrupt %d\n", irq);
+		/* pr_debug("Fail to set polarity of interrupt %d\n", irq); */
 		return;
 	}
 
@@ -1657,6 +1657,9 @@ int __init mt_gic_of_init(struct device_node *node, struct device_node *parent)
 	int irq_base;
 	struct irq_domain *domain;
 	struct resource res;
+#ifdef CONFIG_MTK_IRQ_NEW_DESIGN
+	unsigned int i;
+#endif
 
 	GIC_DIST_BASE = of_iomap(node, 0);
 	WARN(!GIC_DIST_BASE, "unable to map gic dist registers\n");
@@ -1685,7 +1688,16 @@ int __init mt_gic_of_init(struct device_node *node, struct device_node *parent)
 	set_smp_cross_call(irq_raise_softirq);
 #endif
 
+
 	mt_init_irq();
+
+#ifdef CONFIG_MTK_IRQ_NEW_DESIGN
+	for (i = 0; i <= CONFIG_NR_CPUS-1; ++i) {
+		INIT_LIST_HEAD(&(irq_need_migrate_list[i].list));
+		spin_lock_init(&(irq_need_migrate_list[i].lock));
+	}
+#endif
+
 
 	return 0;
 }

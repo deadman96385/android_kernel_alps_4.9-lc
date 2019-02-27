@@ -164,7 +164,7 @@ config MACH_MT6735
 	select MTK_SYS_CIRQ
 	select MTK_EIC
 	select MTK_GPIO
-	select MTK_GIC
+	select MTK_IRQ
 	select COMMON_CLK if !MTK_CLKMGR
 	select CPU_IDLE
 	select PINCTRL
@@ -201,7 +201,6 @@ config MACH_MT6735M
 	select MTK_SYS_CIRQ
 	select MTK_EIC
 	select MTK_GPIO
-	select MTK_GIC
 	select MTK_IRQ
 	select ARM_HAS_SG_CHAIN
 	select PINCTRL
@@ -216,7 +215,6 @@ config MACH_MT6735M
 	select CRYPTO_SHA2_ARM_CE
 	select ARM_ERRATA_836870
 	select MTK_IRQ_NEW_DESIGN
-	select MTK_IRQ_NEW_DESIGN_DEBUG
 	select MTK_POWER_GS
 	select MTK_CPU_STRESS
 	help
@@ -469,9 +467,9 @@ config ARCH_MULTIPLATFORM
 	select COMMON_CLK
 	select GENERIC_CLOCKEVENTS
 	select MIGHT_HAVE_PCI
-	select MULTI_IRQ_HANDLER if !MACH_MT6580
+	select MULTI_IRQ_HANDLER if !(MACH_MT6580 || MACH_MT6735M)
 	select PCI_DOMAINS if PCI
-	select SPARSE_IRQ if !MACH_MT6580
+	select SPARSE_IRQ if !(MACH_MT6580 || MACH_MT6735M)
 	select USE_OF
 
 config ARM_SINGLE_ARMV7M
