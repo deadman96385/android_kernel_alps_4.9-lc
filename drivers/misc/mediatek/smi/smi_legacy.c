@@ -32,6 +32,9 @@
 #if IS_ENABLED(CONFIG_MACH_MT6580)
 #include <mach/mt_clkmgr.h>
 #include "smi_config_mt6580.h"
+#elif IS_ENABLED(CONFIG_MACH_MT6735M)
+#include <mach/mt_clkmgr.h>
+#include "smi_config_mt6735m.h"
 #elif IS_ENABLED(CONFIG_MACH_MT6758)
 #include <clk-mt6758-pg.h>
 #include "smi_config_default.h"
@@ -129,7 +132,7 @@ void __iomem *smi_mmsys_base_addr_get(void)
 	return smi_mmsys->base;
 }
 
-#if IS_ENABLED(CONFIG_MACH_MT6580)
+#if IS_ENABLED(CONFIG_MACH_MT6580) || IS_ENABLED(CONFIG_MACH_MT6735M)
 static int smi_enable_clock(const unsigned int reg_indx, const char *user_name)
 {
 	int ret;
@@ -142,7 +145,13 @@ static int smi_enable_clock(const unsigned int reg_indx, const char *user_name)
 	case 0:
 		return mt_enable_clock(MT_CG_DISP0_SMI_LARB0, user_name);
 	case 1:
+#if IS_ENABLED(CONFIG_MACH_MT6580)
 		return mt_enable_clock(MT_CG_LARB1_SMI_CKPDN, user_name);
+#else /* IS_ENABLED(CONFIG_MACH_MT6735M) */
+		return mt_enable_clock(MT_CG_VDEC1_LARB, user_name);
+	case 2:
+		return mt_enable_clock(MT_CG_IMAGE_LARB2_SMI, user_name);
+#endif
 	default:
 		return 0;
 	}
@@ -156,7 +165,13 @@ static int smi_disable_clock(const unsigned int reg_indx, const char *user_name)
 	case 0:
 		ret = mt_disable_clock(MT_CG_DISP0_SMI_LARB0, user_name);
 	case 1:
+#if IS_ENABLED(CONFIG_MACH_MT6580)
 		ret = mt_disable_clock(MT_CG_LARB1_SMI_CKPDN, user_name);
+#else /* IS_ENABLED(CONFIG_MACH_MT6735M) */
+		ret = mt_disable_clock(MT_CG_VDEC1_LARB, user_name);
+	case 2:
+		ret = mt_disable_clock(MT_CG_IMAGE_LARB2_SMI, user_name);
+#endif
 	default:
 		ret = 0;
 	}
@@ -182,7 +197,7 @@ int smi_bus_prepare_enable(const unsigned int reg_indx,
 			reg_indx, SMI_LARB_NUM);
 		return -EINVAL;
 	}
-#if IS_ENABLED(CONFIG_MACH_MT6580)
+#if IS_ENABLED(CONFIG_MACH_MT6580) || IS_ENABLED(CONFIG_MACH_MT6735M)
 	return smi_enable_clock(reg_indx, user_name);
 #endif
 	/* COMMON */
@@ -243,7 +258,7 @@ int smi_bus_disable_unprepare(const unsigned int reg_indx,
 			reg_indx, SMI_LARB_NUM);
 		return -EINVAL;
 	}
-#if IS_ENABLED(CONFIG_MACH_MT6580)
+#if IS_ENABLED(CONFIG_MACH_MT6580) || IS_ENABLED(CONFIG_MACH_MT6735M)
 	return smi_disable_clock(reg_indx, user_name);
 #endif
 	/* LARB */
@@ -330,7 +345,7 @@ static int smi_larb_bw_thrt_enable(const unsigned int reg_indx)
 	return 0;
 }
 
-#if !IS_ENABLED(CONFIG_MACH_MT6580)
+#if !IS_ENABLED(CONFIG_MACH_MT6580) && !IS_ENABLED(CONFIG_MACH_MT6735M)
 static unsigned int smi_clk_subsys_larbs(enum subsys_id sys)
 {
 #if IS_ENABLED(CONFIG_MACH_MT6758)
@@ -399,7 +414,7 @@ static void smi_clk_subsys_after_on(enum subsys_id sys)
 static struct pg_callbacks smi_clk_subsys_handle = {
 	.after_on = smi_clk_subsys_after_on
 };
-#endif /* !IS_ENABLED(CONFIG_MACH_MT6580) */
+#endif /* !IS_ENABLED(CONFIG_MACH_MT6580) && !IS_ENABLED(CONFIG_MACH_MT6735M) */
 
 LIST_HEAD(cb_list);
 /* ********************************************
@@ -1370,7 +1385,7 @@ int smi_register(struct platform_driver *drv)
 		return ret;
 	}
 
-#if !IS_ENABLED(CONFIG_MACH_MT6580)
+#if !IS_ENABLED(CONFIG_MACH_MT6580) && !IS_ENABLED(CONFIG_MACH_MT6735M)
 	register_pg_callback(&smi_clk_subsys_handle);
 #endif
 #ifdef MMDVFS_HOOK

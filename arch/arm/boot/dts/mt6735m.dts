@@ -1034,13 +1034,15 @@ firmware_class.path=/vendor/firmware";
 		};
 
 		smi_larb0@14016000 {
-			compatible = "mediatek,smi_larb0";
+			cell-index = <0>;
+			compatible = "mediatek,smi_larb0", "mediatek,smi_larb";
 			reg = <0x14016000 0x1000>;
 			interrupts = <GIC_SPI 176 IRQ_TYPE_LEVEL_LOW>;
 		};
 
 		smi_larb2@15001000 {
-			compatible = "mediatek,smi_larb2";
+			cell-index = <2>;
+			compatible = "mediatek,smi_larb2", "mediatek,smi_larb";
 			reg = <0x15001000 0x1000>;
 			interrupts = <GIC_SPI 178 IRQ_TYPE_LEVEL_LOW>;
 		};
@@ -1051,11 +1053,14 @@ firmware_class.path=/vendor/firmware";
 				<0x14016000 0x1000>,  /* LARB 0 */
 				<0x16010000 0x1000>,  /* LARB 1 */
 				<0x15001000 0x1000>;  /* LARB 2 */
+			nr_larbs = <3>;
+			mmsys_config = <&mmsys_config>;
 		};
 
 		smi_larb1@16010000 {
-			compatible = "mediatek,smi_larb1";
-			reg = <0x16010000 0x10000>;
+			cell-index = <1>;
+			compatible = "mediatek,smi_larb1", "mediatek,smi_larb";
+			reg = <0x16010000 0x1000>;
 			interrupts = <GIC_SPI 177 IRQ_TYPE_LEVEL_LOW>;
 		};
 
@@ -1503,7 +1508,7 @@ firmware_class.path=/vendor/firmware";
 			clock-frequency = <450000000>;
 		};
 
-		mmsys_config@14000000 {
+		mmsys_config: mmsys_config@14000000 {
 			compatible = "mediatek,mmsys_config";
 			reg = <0x14000000 0x1000>;
 			interrupts = <GIC_SPI 206 IRQ_TYPE_LEVEL_LOW>;
