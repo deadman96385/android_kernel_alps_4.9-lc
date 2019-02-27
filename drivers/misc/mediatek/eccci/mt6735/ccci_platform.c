@@ -53,7 +53,7 @@ int Is_MD_EMI_voilation(void)
 /* =================================================== */
 /* MPU Region defination */
 /* =================================================== */
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 #define MPU_REGION_ID_SEC_OS        0
 #define MPU_REGION_ID_ATF           1
 #define MPU_REGION_ID_MD1_SEC_SMEM  2
@@ -161,7 +161,7 @@ void ccci_clear_md_region_protection(struct ccci_modem *md)
 		rom_mem_mpu_id = MPU_REGION_ID_MD1_ROM;
 		rw_mem_mpu_id = MPU_REGION_ID_MD1_RW;
 		break;
-#ifndef CONFIG_ARCH_MT6735M
+#ifndef CONFIG_MACH_MT6735M
 	case MD_SYS2:
 		rom_mem_mpu_id = MPU_REGION_ID_MD2_ROM;
 		rw_mem_mpu_id = MPU_REGION_ID_MD2_RW;
@@ -346,7 +346,7 @@ void ccci_set_mem_access_protection(struct ccci_modem *md)
 		rw_mem_mpu_attr = MPU_ACCESS_PERMISSON_MD1_RW_ATTR;
 		shr_mem_mpu_attr = MPU_ACCESS_PERMISSON_MD1_SMEM_ATTR;
 		break;
-#ifndef CONFIG_ARCH_MT6735M
+#ifndef CONFIG_MACH_MT6735M
 	case MD_SYS3:
 		img_info = &md->img_info[IMG_MD];
 		md_layout = &md->mem_layout;

@@ -156,7 +156,7 @@ int dpmgr_path_get_mutex(disp_path_handle dp_handle);
  * return module enum.
  * dp_handle: disp path handle.
 */
-DISP_MODULE_ENUM dpmgr_path_get_dst_module(disp_path_handle dp_handle);
+enum DISP_MODULE_ENUM dpmgr_path_get_dst_module(disp_path_handle dp_handle);
 
 
 /* set dst module, the default dst module maybe not right, so set real dst module on this path.
@@ -168,7 +168,7 @@ DISP_MODULE_ENUM dpmgr_path_get_dst_module(disp_path_handle dp_handle);
  *        DISP_MODULE_DSIDUAL(DISP_MODULE_DSI0+DISP_MODULE_DSI1)
 *         DISP_MODULE_DPI
 */
-int dpmgr_path_set_dst_module(disp_path_handle dp_handle, DISP_MODULE_ENUM dst_module);
+int dpmgr_path_set_dst_module(disp_path_handle dp_handle, enum DISP_MODULE_ENUM dst_module);
 
 /* set mode type(sof source): cmd or video mode.
  * return 0.
@@ -245,7 +245,7 @@ int dpmgr_path_reset(disp_path_handle dp_handle, int encmdq);
  * dp_handle: disp path handle.
  * encmdq: 1 use command queue, 0 not.
 */
-int dpmgr_path_config(disp_path_handle dp_handle, disp_ddp_path_config *config, void *cmdq_handle);
+int dpmgr_path_config(disp_path_handle dp_handle, struct disp_ddp_path_config *config, void *cmdq_handle);
 
 
 /* path flush, this will enable mutex
@@ -439,7 +439,7 @@ int dpmgr_path_enable_irq(disp_path_handle dp_handle, void *cmdq_handle, DDP_IRQ
  * return  pointer to last config
  * dp_handle: disp path handle.
 */
-disp_ddp_path_config *dpmgr_path_get_last_config(disp_path_handle dp_handle);
+struct disp_ddp_path_config *dpmgr_path_get_last_config(disp_path_handle dp_handle);
 
 void dpmgr_get_input_address(disp_path_handle dp_handle, unsigned long *addr);
 
@@ -480,7 +480,7 @@ int dpmgr_path_dsi_on(disp_path_handle dp_handle, void *cmdq_handle, unsigned in
 
 int dpmgr_path_dsi_off(disp_path_handle dp_handle, void *cmdq_handle, unsigned int level);
 
-int dpmgr_module_notify(DISP_MODULE_ENUM module, DISP_PATH_EVENT event);
+int dpmgr_module_notify(enum DISP_MODULE_ENUM module, DISP_PATH_EVENT event);
 #ifdef CONFIG_SINGLE_PANEL_OUTPUT
 /*dpmgr_reset_module_handle, reset moudle path handle for single panel*/
 int dpmgr_reset_module_handle(disp_path_handle dp_handle);

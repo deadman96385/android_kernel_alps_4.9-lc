@@ -39,7 +39,7 @@ typedef struct {
 
 #if 0
 typedef struct {
-	DISP_MODULE_ENUM module;
+	enum DISP_MODULE_ENUM module;
 	unsigned int timeout_ms;	/* timeout, unit is ms */
 } disp_wait_irq_struct;
 #endif
@@ -58,7 +58,7 @@ typedef struct {
 	int layer;
 
 	unsigned long addr;
-	DpColorFormat fmt;
+	enum DP_COLOR_ENUM fmt;
 
 	int x;
 	int y;
@@ -302,12 +302,12 @@ struct device *disp_get_device(void);
 /* 0 : disable AAL event, 1 : enable AAL event */
 #define DISP_IOCTL_AAL_EVENTCTL    _IOW(DISP_IOCTL_MAGIC, 15 , int)
 /* Get AAL statistics data. */
-#define DISP_IOCTL_AAL_GET_HIST    _IOR(DISP_IOCTL_MAGIC, 16 , DISP_AAL_HIST)
+#define DISP_IOCTL_AAL_GET_HIST    _IOR(DISP_IOCTL_MAGIC, 16 , struct DISP_AAL_HIST)
 /* Update AAL setting */
-#define DISP_IOCTL_AAL_SET_PARAM   _IOW(DISP_IOCTL_MAGIC, 17 , DISP_AAL_PARAM)
-#define DISP_IOCTL_AAL_INIT_REG    _IOW(DISP_IOCTL_MAGIC, 18 , DISP_AAL_INITREG)
-#define DISP_IOCTL_SET_GAMMALUT    _IOW(DISP_IOCTL_MAGIC, 23 , DISP_GAMMA_LUT_T)
-#define DISP_IOCTL_SET_CCORR       _IOW(DISP_IOCTL_MAGIC, 24 , DISP_CCORR_COEF_T)
+#define DISP_IOCTL_AAL_SET_PARAM   _IOW(DISP_IOCTL_MAGIC, 17 , struct DISP_AAL_PARAM)
+#define DISP_IOCTL_AAL_INIT_REG    _IOW(DISP_IOCTL_MAGIC, 18 , struct DISP_AAL_INITREG)
+#define DISP_IOCTL_SET_GAMMALUT    _IOW(DISP_IOCTL_MAGIC, 23 , struct DISP_GAMMA_LUT_T)
+#define DISP_IOCTL_SET_CCORR       _IOW(DISP_IOCTL_MAGIC, 24 , struct DISP_CCORR_COEF_T)
 
 /* Add for PQ transition control */
 /* 0 : disable CCORR event, 1 : enable CCORR event */
@@ -323,8 +323,8 @@ struct device *disp_get_device(void);
 /* #define DISP_IOCTL_G_WAIT_REQUEST  _IOR     (DISP_IOCTL_MAGIC , 40 , DDPIOCTL_DdpkBitbltConfig) */
 /* #define DISP_IOCTL_T_INFORM_DONE   _IOW     (DISP_IOCTL_MAGIC , 41 , DDPIOCTL_DdpkBitbltInformDone) */
 
-#define DISP_IOCTL_SET_CLKON        _IOW(DISP_IOCTL_MAGIC, 50 , DISP_MODULE_ENUM)
-#define DISP_IOCTL_SET_CLKOFF       _IOW(DISP_IOCTL_MAGIC, 51 , DISP_MODULE_ENUM)
+#define DISP_IOCTL_SET_CLKON        _IOW(DISP_IOCTL_MAGIC, 50 , enum DISP_MODULE_ENUM)
+#define DISP_IOCTL_SET_CLKOFF       _IOW(DISP_IOCTL_MAGIC, 51 , enum DISP_MODULE_ENUM)
 
 #define DISP_IOCTL_MUTEX_CONTROL    _IOW(DISP_IOCTL_MAGIC, 55 , int)	/* also defined in atci_pq_cmd.h */
 #define DISP_IOCTL_GET_LCMINDEX     _IOR(DISP_IOCTL_MAGIC, 56 , int)

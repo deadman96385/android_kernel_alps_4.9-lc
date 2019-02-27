@@ -43,7 +43,7 @@
 /* #include "mach/mt_cpufreq.h" */
 /* #include "mach/mt_gpufreq.h" */
 #include "mt_cpuidle.h"
-#include "mt_clkbuf_ctl.h"
+#include "mtk_clkbuf_ctl.h"
 /* #include "mach/mt_clkbuf_ctl.h" */
 /* #include "mach/mt_chip.h" */
 #include "mt-plat/mtk_rtc.h"
@@ -141,7 +141,7 @@ static unsigned int abist_meter(int val)
 }
 
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 const char *ckgen_array[] = {
 	"hf_faxi_ck", "hd_faxi_ck", "hf_fdpi0_ck", "hf_fddrphycfg_ck", "hf_fmm_ck",
 	"f_fpwm_ck", "hf_fvdec_ck", "hf_fmfg_ck", "hf_fcamtg_ck", "f_fuart_ck",

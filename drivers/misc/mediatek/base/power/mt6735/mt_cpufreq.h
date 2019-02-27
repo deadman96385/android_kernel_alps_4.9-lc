@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 /* configs */
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 #ifndef __KERNEL__
 #include "mt6311.h"
 #else
@@ -123,7 +123,7 @@ enum pmic_wrap_phase_id {
 };
 
 /* IDX mapping */
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 enum {
 	IDX_NM_VCORE_TRANS4,		/* 0 *//* PMIC_WRAP_PHASE_NORMAL */
 	IDX_NM_VCORE_TRANS3,		/* 1 */
@@ -138,7 +138,7 @@ enum {
 
 	NR_IDX_NM,
 };
-#else	/* !CONFIG_ARCH_MT6735M */
+#else	/* !CONFIG_MACH_MT6735M */
 enum {
 	IDX_NM_NOT_USED1,		/* 0 *//* PMIC_WRAP_PHASE_NORMAL */
 	IDX_NM_NOT_USED2,		/* 1 */
@@ -178,7 +178,7 @@ enum {
 	IDX_DI_VRF18_0_PWR_ON,		/* 7 */
 	IDX_DI_VSRAM_NORMAL,		/* 8 */
 	IDX_DI_VRF18_0_SHUTDOWN,	/* 9 */
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	IDX_DI_VCORE_IDLE_LPM,		/* 10 */
 	IDX_DI_VSRAM_SLEEP_FOR_TURBO,	/* 11 */
 	IDX_DI_VSRAM_NORMAL_FOR_TURBO,	/* 12 */

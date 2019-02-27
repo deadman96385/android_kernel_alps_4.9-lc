@@ -229,7 +229,7 @@ struct t_dsi_context {
 	bool enable;
 	volatile struct DSI_REGS regBackup;
 	unsigned int cmdq_size;
-	LCM_DSI_PARAMS dsi_params;
+	struct LCM_DSI_PARAMS dsi_params;
 };
 
 struct t_dsi_context _dsi_context[DSI_INTERFACE_NUM];
@@ -261,7 +261,7 @@ static int dsi_currect_mode;
 
 static int dsi_force_config;
 
-static void _DSI_INTERNAL_IRQ_Handler(DISP_MODULE_ENUM module, unsigned int param)
+static void _DSI_INTERNAL_IRQ_Handler(enum DISP_MODULE_ENUM module, unsigned int param)
 {
 	int i = 0;
 	struct DSI_INT_STATUS_REG status;
@@ -317,7 +317,7 @@ static void _DSI_INTERNAL_IRQ_Handler(DISP_MODULE_ENUM module, unsigned int para
 }
 
 
-static DSI_STATUS DSI_Reset(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+static DSI_STATUS DSI_Reset(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 	int i = 0;
 	unsigned int irq_en[2];
@@ -348,7 +348,7 @@ static DSI_STATUS DSI_Reset(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 	return DSI_STATUS_OK;
 }
 
-static int _dsi_is_video_mode(DISP_MODULE_ENUM module)
+static int _dsi_is_video_mode(enum DISP_MODULE_ENUM module)
 {
 	if (DSI_REG[0]->DSI_MODE_CTRL.MODE == CMD_MODE)
 		return 0;
@@ -356,7 +356,7 @@ static int _dsi_is_video_mode(DISP_MODULE_ENUM module)
 		return 1;
 }
 
-static DSI_STATUS DSI_SetMode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned int mode)
+static DSI_STATUS DSI_SetMode(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned int mode)
 {
 	int i = 0;
 
@@ -368,7 +368,7 @@ static DSI_STATUS DSI_SetMode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsig
 }
 
 #if 0 /*apply this function might encounter function not declare*/
-static void DSI_WaitForNotBusy(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+static void DSI_WaitForNotBusy(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 	int i = 0;
 	unsigned int count = 0;
@@ -407,7 +407,7 @@ static void DSI_WaitForNotBusy(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 
 /* function defined but not used*/
 #if 0
-	static DSI_STATUS DSI_SetVdoFrmMode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+	static DSI_STATUS DSI_SetVdoFrmMode(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 					    unsigned int mode) {
 		int i = 0;
 
@@ -419,7 +419,7 @@ static void DSI_WaitForNotBusy(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 		return DSI_STATUS_OK;
 	}
 #endif
-static DSI_STATUS DSI_SetSwitchMode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+static DSI_STATUS DSI_SetSwitchMode(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 					    unsigned int mode) {
 		int i = 0;
 
@@ -440,7 +440,7 @@ static DSI_STATUS DSI_SetSwitchMode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 
 /*function defined but not  used*/
 #if 0
-static DSI_STATUS DSI_SetBypassRack(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+static DSI_STATUS DSI_SetBypassRack(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 					    unsigned int bypass) {
 		int i = 0;
 
@@ -458,7 +458,7 @@ static DSI_STATUS DSI_SetBypassRack(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 	}
 #endif
 
-DSI_STATUS DSI_DisableClk(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+DSI_STATUS DSI_DisableClk(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 #if 0
 		int i = 0;
@@ -524,7 +524,7 @@ void DSI_sw_clk_trail_cmdq(int module_idx, cmdqRecHandle cmdq)
 	}
 
 
-void DSI_lane0_ULP_mode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enter)
+void DSI_lane0_ULP_mode(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enter)
 {
 		int i = 0;
 
@@ -559,7 +559,7 @@ void DSI_lane0_ULP_mode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enter)
 	}
 
 
-void DSI_clk_ULP_mode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enter)
+void DSI_clk_ULP_mode(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enter)
 {
 		int i = 0;
 
@@ -586,7 +586,7 @@ void DSI_clk_ULP_mode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enter)
 		}
 	}
 
-bool DSI_clk_HS_state(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+bool DSI_clk_HS_state(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 	struct DSI_PHY_LCCON_REG tmpreg;
 
@@ -594,7 +594,7 @@ bool DSI_clk_HS_state(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 	return tmpreg.LC_HS_TX_EN ? true : false;
 }
 
-void DSI_clk_HSLP_mode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+void DSI_clk_HSLP_mode(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 		int i = 0;
 
@@ -611,7 +611,7 @@ void DSI_manual_enter_HS(cmdqRecHandle cmdq)
 {
 		DSI_OUTREGBIT(cmdq, struct DSI_PHY_LCCON_REG, DSI_REG[0]->DSI_PHY_LCCON, LC_HS_TX_EN, 1);
 	}
-	void DSI_clk_HS_mode(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enter)
+	void DSI_clk_HS_mode(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enter)
 {
 		int i = 0;
 
@@ -664,7 +664,7 @@ const char *_dsi_cmd_mode_parse_state(unsigned int state)
 		}
 	}
 
-DSI_STATUS DSI_DumpRegisters(DISP_MODULE_ENUM module, int level)
+DSI_STATUS DSI_DumpRegisters(enum DISP_MODULE_ENUM module, int level)
 {
 		uint32_t i;
 
@@ -756,7 +756,7 @@ DSI_STATUS DSI_DumpRegisters(DISP_MODULE_ENUM module, int level)
 		return DSI_STATUS_OK;
 }
 
-int DSI_WaitVMDone(DISP_MODULE_ENUM module)
+int DSI_WaitVMDone(enum DISP_MODULE_ENUM module)
 {
 		int i = 0;
 		static const long WAIT_TIMEOUT = 2 * HZ;	/* 2 sec */
@@ -783,7 +783,7 @@ int DSI_WaitVMDone(DISP_MODULE_ENUM module)
 		return 0;
 	}
 
-static void DSI_WaitForNotBusy(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+static void DSI_WaitForNotBusy(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 		int i = 0;
 		unsigned int count = 0;
@@ -849,7 +849,7 @@ static void DSI_WaitForNotBusy(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 #endif
 }
 
-DSI_STATUS DSI_SleepOut(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+DSI_STATUS DSI_SleepOut(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 		int i = 0;
 		/* wake_up_prd *1024*cycle time > 1ms */
@@ -868,7 +868,7 @@ DSI_STATUS DSI_SleepOut(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 }
 
 
-DSI_STATUS DSI_Wakeup(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+DSI_STATUS DSI_Wakeup(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 		int i = 0;
 		int ret = 0;
@@ -905,7 +905,7 @@ DSI_STATUS DSI_Wakeup(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 		return DSI_STATUS_OK;
 }
 
-DSI_STATUS DSI_BackupRegisters(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+DSI_STATUS DSI_BackupRegisters(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 		int i = 0;
 		volatile struct DSI_REGS *regs = NULL;
@@ -955,7 +955,7 @@ DSI_STATUS DSI_BackupRegisters(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 		return DSI_STATUS_OK;
 }
 
-DSI_STATUS DSI_RestoreRegisters(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+DSI_STATUS DSI_RestoreRegisters(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 	int i = 0;
 	volatile struct DSI_REGS *regs = NULL;
@@ -1004,7 +1004,7 @@ DSI_STATUS DSI_RestoreRegisters(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 	return DSI_STATUS_OK;
 }
 
-DSI_STATUS DSI_BIST_Pattern_Test(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enable,
+DSI_STATUS DSI_BIST_Pattern_Test(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enable,
 					 unsigned int color)
 {
 	int i = 0;
@@ -1046,8 +1046,8 @@ DSI_STATUS DSI_BIST_Pattern_Test(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bo
 	return 0;
 }
 
-void DSI_Config_VDO_Timing(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
-				   LCM_DSI_PARAMS *dsi_params)
+void DSI_Config_VDO_Timing(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+				   struct LCM_DSI_PARAMS *dsi_params)
 {
 	int i = 0;
 	unsigned int line_byte;
@@ -1114,7 +1114,7 @@ void DSI_Config_VDO_Timing(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 	}
 }
 
-void DSI_Set_LFR(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned int mode,
+void DSI_Set_LFR(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned int mode,
 			 unsigned int type, unsigned int enable, unsigned int skip_num)
 {
 	/* LFR_MODE 0 disable,1 static mode ,2 dynamic mode 3,both */
@@ -1137,7 +1137,7 @@ void DSI_Set_LFR(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned int mode,
 	}
 }
 
-void DSI_LFR_UPDATE(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+void DSI_LFR_UPDATE(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 	unsigned int i = 0;
 
@@ -1150,7 +1150,7 @@ void DSI_LFR_UPDATE(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 	}
 }
 
-int _dsi_ps_type_to_bpp(LCM_PS_TYPE ps)
+int _dsi_ps_type_to_bpp(enum LCM_PS_TYPE ps)
 {
 	switch (ps) {
 	case LCM_PACKED_PS_16BIT_RGB565:
@@ -1167,8 +1167,8 @@ int _dsi_ps_type_to_bpp(LCM_PS_TYPE ps)
 	return -1;
 }
 
-DSI_STATUS DSI_PS_Control(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
-				  LCM_DSI_PARAMS *dsi_params, int w, int h)
+DSI_STATUS DSI_PS_Control(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+				  struct LCM_DSI_PARAMS *dsi_params, int w, int h)
 {
 	int i = 0;
 	unsigned int ps_sel_bitvalue = 0;
@@ -1223,8 +1223,8 @@ DSI_STATUS DSI_PS_Control(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 	return DSI_STATUS_OK;
 }
 
-DSI_STATUS DSI_TXRX_Control(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
-				    LCM_DSI_PARAMS *dsi_params)
+DSI_STATUS DSI_TXRX_Control(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+				    struct LCM_DSI_PARAMS *dsi_params)
 {
 	int i = 0;
 	unsigned int lane_num_bitvalue = 0;
@@ -1281,7 +1281,7 @@ DSI_STATUS DSI_TXRX_Control(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 	return DSI_STATUS_OK;
 }
 
-int MIPITX_IsEnabled(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+int MIPITX_IsEnabled(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 	int i = 0;
 	int ret = 0;
@@ -1295,8 +1295,8 @@ int MIPITX_IsEnabled(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 	return ret;
 }
 
-void DSI_PHY_clk_setting(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
-				 LCM_DSI_PARAMS *dsi_params)
+void DSI_PHY_clk_setting(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+				 struct LCM_DSI_PARAMS *dsi_params)
 {
 #ifdef CONFIG_FPGA_EARLY_PORTING
 #if 0
@@ -1565,8 +1565,8 @@ void DSI_PHY_clk_setting(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 
 
 
-void DSI_PHY_TIMCONFIG(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
-			       LCM_DSI_PARAMS *dsi_params)
+void DSI_PHY_TIMCONFIG(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+			       struct LCM_DSI_PARAMS *dsi_params)
 {
 	int i = 0;
 #if 0
@@ -1730,7 +1730,7 @@ void DSI_PHY_TIMCONFIG(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 }
 
 
-void DSI_PHY_clk_switch(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, int on)
+void DSI_PHY_clk_switch(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, int on)
 {
 	int i = 0;
 
@@ -1793,7 +1793,7 @@ void DSI_PHY_clk_switch(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, int on)
 	}
 }
 
-DSI_STATUS DSI_EnableClk(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+DSI_STATUS DSI_EnableClk(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 #if 0
 	DISPFUNC();
@@ -1805,7 +1805,7 @@ DSI_STATUS DSI_EnableClk(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 	return DSI_STATUS_OK;
 }
 
-DSI_STATUS DSI_Start(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+DSI_STATUS DSI_Start(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 #if 0
 	int i = 0;
@@ -1827,7 +1827,7 @@ DSI_STATUS DSI_Start(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 	return DSI_STATUS_OK;
 }
 
-void DSI_Set_VM_CMD(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+void DSI_Set_VM_CMD(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 	int i = 0;
 
@@ -1847,7 +1847,7 @@ void DSI_Set_VM_CMD(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 	}
 }
 
-DSI_STATUS DSI_EnableVM_CMD(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
+DSI_STATUS DSI_EnableVM_CMD(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 {
 	int i = 0;
 
@@ -1866,7 +1866,7 @@ DSI_STATUS DSI_EnableVM_CMD(DISP_MODULE_ENUM module, cmdqRecHandle cmdq)
 }
 
 /* / return value: the data length we got */
-uint32_t DSI_dcs_read_lcm_reg_v2(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, uint8_t cmd,
+uint32_t DSI_dcs_read_lcm_reg_v2(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, uint8_t cmd,
 			       uint8_t *buffer, uint8_t buffer_size)
 {
 	int d = 0;
@@ -2040,7 +2040,7 @@ uint32_t DSI_dcs_read_lcm_reg_v2(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, ui
 }
 
 
-void DSI_set_null(DISP_MODULE_ENUM module, void *cmdq, unsigned cmd, unsigned char count,
+void DSI_set_null(enum DISP_MODULE_ENUM module, void *cmdq, unsigned cmd, unsigned char count,
 		  unsigned char *para_list, unsigned char force_update) {
 	uint32_t i = 0;
 	int d = 0;
@@ -2088,7 +2088,7 @@ void DSI_set_null(DISP_MODULE_ENUM module, void *cmdq, unsigned cmd, unsigned ch
 	}
 }
 
-void DSI_set_cmdq_V2(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned cmd,
+void DSI_set_cmdq_V2(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned cmd,
 		     unsigned char count, unsigned char *para_list,
 		     unsigned char force_update) {
 	uint32_t i = 0;
@@ -2283,7 +2283,7 @@ void DSI_set_cmdq_V2(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned cmd,
 	}
 }
 
-void DSI_set_cmdq_V2_DCS(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned cmd,
+void DSI_set_cmdq_V2_DCS(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned cmd,
 		     unsigned char count, unsigned char *para_list,
 		     unsigned char force_update) {
 	uint32_t i = 0;
@@ -2399,7 +2399,7 @@ void DSI_set_cmdq_V2_DCS(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned c
 	}
 }
 
-void DSI_set_cmdq_V2_generic(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned cmd,
+void DSI_set_cmdq_V2_generic(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned cmd,
 		     unsigned char count, unsigned char *para_list,
 		     unsigned char force_update) {
 	uint32_t i = 0;
@@ -2511,8 +2511,8 @@ void DSI_set_cmdq_V2_generic(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsign
 	}
 }
 
-void DSI_set_cmdq_subV3(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
-		     LCM_setting_table_V3 *para_tbl, unsigned int size,
+void DSI_set_cmdq_subV3(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+		     struct LCM_setting_table_V3 *para_tbl, unsigned int size,
 		     unsigned char force_update, int d)
 {
 #if 1
@@ -2680,10 +2680,10 @@ void DSI_set_cmdq_subV3(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 			}
 
 			if (force_update) {
-				MMProfileLog(MTKFB_MMP_Events.DSICmd, MMProfileFlagStart);
+				mmprofile_log(MTKFB_MMP_Events.DSICmd, MMPROFILE_FLAG_START);
 				DSI_Start(module, cmdq);
 				DSI_WaitForNotBusy(module, cmdq);
-				MMProfileLog(MTKFB_MMP_Events.DSICmd, MMProfileFlagEnd);
+				mmprofile_log(MTKFB_MMP_Events.DSICmd, MMPROFILE_FLAG_END);
 			}
 		}
 	} while (++index < size);
@@ -2691,8 +2691,8 @@ void DSI_set_cmdq_subV3(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 #endif
 }
 
-void DSI_set_cmdq_V3(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
-		     LCM_setting_table_V3 *para_tbl, unsigned int size,
+void DSI_set_cmdq_V3(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+		     struct LCM_setting_table_V3 *para_tbl, unsigned int size,
 		     unsigned char force_update)
 {
 #if 1
@@ -2708,7 +2708,7 @@ void DSI_set_cmdq_V3(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 
 
 
-void DSI_set_cmdq(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned int *pdata,
+void DSI_set_cmdq(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned int *pdata,
 		  unsigned int queue_size, unsigned char force_update)
 {
 	/* DISPFUNC(); */
@@ -2786,7 +2786,7 @@ void DSI_set_cmdq(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, unsigned int *pda
 }
 
 
-void DSI_set_rar(DISP_MODULE_ENUM module, void *cmdq)
+void DSI_set_rar(enum DISP_MODULE_ENUM module, void *cmdq)
 {
 	int i = 0;
 	struct DSI_PHY_LD0CON_REG phy_ld0con;
@@ -2804,14 +2804,14 @@ void DSI_set_rar(DISP_MODULE_ENUM module, void *cmdq)
 	}
 }
 
-void _copy_dsi_params(LCM_DSI_PARAMS *src, LCM_DSI_PARAMS *dst)
+void _copy_dsi_params(struct LCM_DSI_PARAMS *src, struct LCM_DSI_PARAMS *dst)
 {
-	memcpy((LCM_DSI_PARAMS *) dst, (LCM_DSI_PARAMS *) src, sizeof(LCM_DSI_PARAMS));
+	memcpy((struct LCM_DSI_PARAMS *) dst, (struct LCM_DSI_PARAMS *) src, sizeof(struct LCM_DSI_PARAMS));
 }
 
 
 
-int DSI_Send_ROI(DISP_MODULE_ENUM module, void *handle, unsigned int x, unsigned int y,
+int DSI_Send_ROI(enum DISP_MODULE_ENUM module, void *handle, unsigned int x, unsigned int y,
 		 unsigned int width, unsigned int height)
 {
 	unsigned int x0 = x;
@@ -2981,17 +2981,17 @@ void DSI_set_cmdq_V2_generic_Wrapper_DSIDual(unsigned cmd, unsigned char count,
 	DSI_set_cmdq_V2_generic(DISP_MODULE_DSIDUAL, NULL, cmd, count, para_list, force_update);
 }
 
-void DSI_set_cmdq_V3_Wrapper_DSI0(LCM_setting_table_V3 *para_tbl, unsigned int size,
+void DSI_set_cmdq_V3_Wrapper_DSI0(struct LCM_setting_table_V3 *para_tbl, unsigned int size,
 				  unsigned char force_update) {
 	DSI_set_cmdq_V3(DISP_MODULE_DSI0, NULL, para_tbl, size, force_update);
 }
 
-void DSI_set_cmdq_V3_Wrapper_DSI1(LCM_setting_table_V3 *para_tbl, unsigned int size,
+void DSI_set_cmdq_V3_Wrapper_DSI1(struct LCM_setting_table_V3 *para_tbl, unsigned int size,
 				  unsigned char force_update) {
 	DSI_set_cmdq_V3(DISP_MODULE_DSI1, NULL, para_tbl, size, force_update);
 }
 
-void DSI_set_cmdq_V3_Wrapper_DSIDual(LCM_setting_table_V3 *para_tbl, unsigned int size,
+void DSI_set_cmdq_V3_Wrapper_DSIDual(struct LCM_setting_table_V3 *para_tbl, unsigned int size,
 				     unsigned char force_update) {
 	DSI_set_cmdq_V3(DISP_MODULE_DSIDUAL, NULL, para_tbl, size, force_update);
 }
@@ -3026,9 +3026,9 @@ unsigned int DSI_dcs_read_lcm_reg_v2_wrapper_DSIDUAL(uint8_t cmd, uint8_t *buffe
 	return DSI_dcs_read_lcm_reg_v2(DISP_MODULE_DSIDUAL, NULL, cmd, buffer, buffer_size);
 }
 
-static LCM_UTIL_FUNCS lcm_utils_dsi0;
-static LCM_UTIL_FUNCS lcm_utils_dsi1;
-static LCM_UTIL_FUNCS lcm_utils_dsidual;
+static struct LCM_UTIL_FUNCS lcm_utils_dsi0;
+static struct LCM_UTIL_FUNCS lcm_utils_dsi1;
+static struct LCM_UTIL_FUNCS lcm_utils_dsidual;
 
 long lcd_enp_bias_setting(unsigned int value)
 {
@@ -3054,9 +3054,9 @@ long lcd_enp_bias_setting_by_name(bool bOn, char *pinName)
 	return ret;
 }
 
-int ddp_dsi_set_lcm_utils(DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv)
+int ddp_dsi_set_lcm_utils(enum DISP_MODULE_ENUM module, struct LCM_DRIVER *lcm_drv)
 {
-	LCM_UTIL_FUNCS *utils = NULL;
+	struct LCM_UTIL_FUNCS *utils = NULL;
 
 	if (lcm_drv == NULL) {
 		DISPERR("lcm_drv is null\n");
@@ -3081,66 +3081,66 @@ int ddp_dsi_set_lcm_utils(DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv)
 	if (module == DISP_MODULE_DSI0) {
 		utils->dsi_set_cmdq = DSI_set_cmdq_wrapper_DSI0;
 		utils->dsi_set_cmdq_V2 = DSI_set_cmdq_V2_Wrapper_DSI0;
-		utils->dsi_set_cmdq_V2_DCS = DSI_set_cmdq_V2_DCS_Wrapper_DSI0;
-		utils->dsi_set_cmdq_V2_generic = DSI_set_cmdq_V2_generic_Wrapper_DSI0;
+		/* utils->dsi_set_cmdq_V2_DCS = DSI_set_cmdq_V2_DCS_Wrapper_DSI0;*/
+		/* utils->dsi_set_cmdq_V2_generic = DSI_set_cmdq_V2_generic_Wrapper_DSI0;*/
 		utils->dsi_set_cmdq_V3 = DSI_set_cmdq_V3_Wrapper_DSI0;
 		utils->dsi_set_null = DSI_set_null_Wrapper_DSI0;
 		utils->dsi_dcs_read_lcm_reg_v2 = DSI_dcs_read_lcm_reg_v2_wrapper_DSI0;
 		utils->dsi_set_cmdq_V22 = DSI_set_cmdq_V2_DSI0;
-		utils->dsi_set_cmdq_V22_DCS = DSI_set_cmdq_V2_DCS_DSI0;
-		utils->dsi_set_cmdq_V22_generic = DSI_set_cmdq_V2_generic_DSI0;
+		/* utils->dsi_set_cmdq_V22_DCS = DSI_set_cmdq_V2_DCS_DSI0; */
+		/* utils->dsi_set_cmdq_V22_generic = DSI_set_cmdq_V2_generic_DSI0; */
 	} else if (module == DISP_MODULE_DSI1) {
 		utils->dsi_set_cmdq = DSI_set_cmdq_wrapper_DSI1;
 		utils->dsi_set_cmdq_V2 = DSI_set_cmdq_V2_Wrapper_DSI1;
-		utils->dsi_set_cmdq_V2_DCS = DSI_set_cmdq_V2_DCS_Wrapper_DSI1;
-		utils->dsi_set_cmdq_V2_generic = DSI_set_cmdq_V2_generic_Wrapper_DSI1;
+		/* utils->dsi_set_cmdq_V2_DCS = DSI_set_cmdq_V2_DCS_Wrapper_DSI1;*/
+		/* utils->dsi_set_cmdq_V2_generic = DSI_set_cmdq_V2_generic_Wrapper_DSI1;*/
 		utils->dsi_set_cmdq_V3 = DSI_set_cmdq_V3_Wrapper_DSI1;
 		utils->dsi_set_null = DSI_set_null_Wrapper_DSI1;
 		utils->dsi_dcs_read_lcm_reg_v2 = DSI_dcs_read_lcm_reg_v2_wrapper_DSI1;
 		utils->dsi_set_cmdq_V22 = DSI_set_cmdq_V2_DSI1;
-		utils->dsi_set_cmdq_V22_DCS = DSI_set_cmdq_V2_DCS_DSI1;
-		utils->dsi_set_cmdq_V22_generic = DSI_set_cmdq_V2_generic_DSI1;
+		/* utils->dsi_set_cmdq_V22_DCS = DSI_set_cmdq_V2_DCS_DSI1; */
+		/* utils->dsi_set_cmdq_V22_generic = DSI_set_cmdq_V2_generic_DSI1; */
 	} else if (module == DISP_MODULE_DSIDUAL) {
 		/* TODO: Ugly workaround, hope we can found better resolution */
-		LCM_PARAMS lcm_param;
+		struct LCM_PARAMS lcm_param;
 
 		lcm_drv->get_params(&lcm_param);
 		if (lcm_param.lcm_cmd_if == LCM_INTERFACE_DSI0) {
 			utils->dsi_set_cmdq = DSI_set_cmdq_wrapper_DSI0;
 			utils->dsi_set_cmdq_V2 = DSI_set_cmdq_V2_Wrapper_DSI0;
-			utils->dsi_set_cmdq_V2_DCS = DSI_set_cmdq_V2_DCS_Wrapper_DSI0;
-			utils->dsi_set_cmdq_V2_generic = DSI_set_cmdq_V2_generic_Wrapper_DSI0;
+			/* utils->dsi_set_cmdq_V2_DCS = DSI_set_cmdq_V2_DCS_Wrapper_DSI0; */
+			/* utils->dsi_set_cmdq_V2_generic = DSI_set_cmdq_V2_generic_Wrapper_DSI0; */
 			utils->dsi_set_cmdq_V3 = DSI_set_cmdq_V3_Wrapper_DSI0;
 			utils->dsi_set_null = DSI_set_null_Wrapper_DSI0;
 			utils->dsi_dcs_read_lcm_reg_v2 =
 				DSI_dcs_read_lcm_reg_v2_wrapper_DSI0;
 			utils->dsi_set_cmdq_V22 = DSI_set_cmdq_V2_DSI0;
-			utils->dsi_set_cmdq_V22_DCS = DSI_set_cmdq_V2_DCS_DSI0;
-			utils->dsi_set_cmdq_V22_generic = DSI_set_cmdq_V2_generic_DSI0;
+			/* utils->dsi_set_cmdq_V22_DCS = DSI_set_cmdq_V2_DCS_DSI0; */
+			/* utils->dsi_set_cmdq_V22_generic = DSI_set_cmdq_V2_generic_DSI0; */
 		} else if (lcm_param.lcm_cmd_if == LCM_INTERFACE_DSI1) {
 			utils->dsi_set_cmdq = DSI_set_cmdq_wrapper_DSI1;
 			utils->dsi_set_cmdq_V2 = DSI_set_cmdq_V2_Wrapper_DSI1;
-			utils->dsi_set_cmdq_V2_DCS = DSI_set_cmdq_V2_DCS_Wrapper_DSI1;
-			utils->dsi_set_cmdq_V2_generic = DSI_set_cmdq_V2_generic_Wrapper_DSI1;
+			/* utils->dsi_set_cmdq_V2_DCS = DSI_set_cmdq_V2_DCS_Wrapper_DSI1; */
+			/* utils->dsi_set_cmdq_V2_generic = DSI_set_cmdq_V2_generic_Wrapper_DSI1; */
 			utils->dsi_set_cmdq_V3 = DSI_set_cmdq_V3_Wrapper_DSI1;
 			utils->dsi_set_null = DSI_set_null_Wrapper_DSI1;
 			utils->dsi_dcs_read_lcm_reg_v2 =
 				DSI_dcs_read_lcm_reg_v2_wrapper_DSI1;
 			utils->dsi_set_cmdq_V22 = DSI_set_cmdq_V2_DSI1;
-			utils->dsi_set_cmdq_V22_DCS = DSI_set_cmdq_V2_DCS_DSI1;
-			utils->dsi_set_cmdq_V22_generic = DSI_set_cmdq_V2_generic_DSI1;
+			/* utils->dsi_set_cmdq_V22_DCS = DSI_set_cmdq_V2_DCS_DSI1; */
+			/* utils->dsi_set_cmdq_V22_generic = DSI_set_cmdq_V2_generic_DSI1; */
 		} else {
 			utils->dsi_set_cmdq = DSI_set_cmdq_wrapper_DSIDual;
 			utils->dsi_set_cmdq_V2 = DSI_set_cmdq_V2_Wrapper_DSIDual;
-			utils->dsi_set_cmdq_V2_DCS = DSI_set_cmdq_V2_DCS_Wrapper_DSIDual;
-			utils->dsi_set_cmdq_V2_generic = DSI_set_cmdq_V2_generic_Wrapper_DSIDual;
+			/* utils->dsi_set_cmdq_V2_DCS = DSI_set_cmdq_V2_DCS_Wrapper_DSIDual; */
+			/* utils->dsi_set_cmdq_V2_generic = DSI_set_cmdq_V2_generic_Wrapper_DSIDual; */
 			utils->dsi_set_cmdq_V3 = DSI_set_cmdq_V3_Wrapper_DSIDual;
 			utils->dsi_set_null = DSI_set_null_Wrapper_DSIDual;
 			utils->dsi_dcs_read_lcm_reg_v2 =
 				DSI_dcs_read_lcm_reg_v2_wrapper_DSIDUAL;
 			utils->dsi_set_cmdq_V22 = DSI_set_cmdq_V2_DSIDual;
-			utils->dsi_set_cmdq_V22_DCS = DSI_set_cmdq_V2_DCS_DSIDual;
-			utils->dsi_set_cmdq_V22_generic = DSI_set_cmdq_V2_generic_DSIDual;
+			/* utils->dsi_set_cmdq_V22_DCS = DSI_set_cmdq_V2_DCS_DSIDual; */
+			/* utils->dsi_set_cmdq_V22_generic = DSI_set_cmdq_V2_generic_DSIDual; */
 		}
 	}
 #ifndef CONFIG_FPGA_EARLY_PORTING
@@ -3155,7 +3155,8 @@ int ddp_dsi_set_lcm_utils(DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv)
 	utils->set_gpio_mode = 0;
 	utils->set_gpio_dir = 0;
 	utils->set_gpio_pull_enable = 0;
-	utils->set_gpio_lcd_enp_bias_ByName = lcd_enp_bias_setting_by_name;
+    /* FIX ME for k49 compatiblility */
+	/* utils->set_gpio_lcd_enp_bias_ByName = lcd_enp_bias_setting_by_name; */
 #endif
 #endif
 
@@ -3170,7 +3171,7 @@ static int dsi1_te_enable;
 /*static int dsidual_te_enable = 0;*/
 
 
-void DSI_ChangeClk(DISP_MODULE_ENUM module, uint32_t clk)
+void DSI_ChangeClk(enum DISP_MODULE_ENUM module, uint32_t clk)
 {
 	int i = 0;
 
@@ -3178,7 +3179,7 @@ void DSI_ChangeClk(DISP_MODULE_ENUM module, uint32_t clk)
 		return;
 
 	for (i = DSI_MODULE_BEGIN(module); i <= DSI_MODULE_END(module); i++) {
-		LCM_DSI_PARAMS *dsi_params = &_dsi_context[i].dsi_params;
+		struct LCM_DSI_PARAMS *dsi_params = &_dsi_context[i].dsi_params;
 
 		dsi_params->PLL_CLOCK = clk;
 		DSI_WaitForNotBusy(module, NULL);
@@ -3187,7 +3188,7 @@ void DSI_ChangeClk(DISP_MODULE_ENUM module, uint32_t clk)
 	}
 }
 
-int ddp_dsi_init(DISP_MODULE_ENUM module, void *cmdq)
+int ddp_dsi_init(enum DISP_MODULE_ENUM module, void *cmdq)
 {
 	DSI_STATUS ret = DSI_STATUS_OK;
 	int i = 0;
@@ -3295,12 +3296,12 @@ int ddp_dsi_init(DISP_MODULE_ENUM module, void *cmdq)
 	return DSI_STATUS_OK;
 }
 
-int ddp_dsi_deinit(DISP_MODULE_ENUM module, void *cmdq_handle)
+int ddp_dsi_deinit(enum DISP_MODULE_ENUM module, void *cmdq_handle)
 {
 	return 0;
 }
 
-void _dump_dsi_params(LCM_DSI_PARAMS *dsi_config)
+void _dump_dsi_params(struct LCM_DSI_PARAMS *dsi_config)
 {
 	if (dsi_config) {
 		switch (dsi_config->mode) {
@@ -3346,8 +3347,8 @@ void _dump_dsi_params(LCM_DSI_PARAMS *dsi_config)
 	}
 }
 
-static void DSI_PHY_CLK_LP_PerLine_config(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
-					  LCM_DSI_PARAMS *dsi_params) {
+static void DSI_PHY_CLK_LP_PerLine_config(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
+					  struct LCM_DSI_PARAMS *dsi_params) {
 	int i;
 	struct DSI_PHY_TIMCON0_REG timcon0;	/* LPX */
 	struct DSI_PHY_TIMCON2_REG timcon2;	/* CLK_HS_TRAIL, CLK_HS_ZERO */
@@ -3359,7 +3360,7 @@ static void DSI_PHY_CLK_LP_PerLine_config(DISP_MODULE_ENUM module, cmdqRecHandle
 	struct DSI_PSCTRL_REG ps;
 	uint32_t hstx_ckl_wc, new_hstx_ckl_wc;
 	uint32_t v_a, v_b, v_c, lane_num;
-	LCM_DSI_MODE_CON dsi_mode;
+	enum LCM_DSI_MODE_CON dsi_mode;
 
 	for (i = DSI_MODULE_BEGIN(module); i <= DSI_MODULE_END(module); i++) {
 		lane_num = dsi_params->LANE_NUM;
@@ -3461,10 +3462,10 @@ static void DSI_PHY_CLK_LP_PerLine_config(DISP_MODULE_ENUM module, cmdqRecHandle
 
 }
 
-int ddp_dsi_config(DISP_MODULE_ENUM module, disp_ddp_path_config *config, void *cmdq)
+int ddp_dsi_config(enum DISP_MODULE_ENUM module, struct disp_ddp_path_config *config, void *cmdq)
 {
 	int i = 0;
-	LCM_DSI_PARAMS *dsi_config = &(config->dispif_config.dsi);
+	struct LCM_DSI_PARAMS *dsi_config = &(config->dispif_config.dsi);
 
 	if (!config->dst_dirty) {
 		if (atomic_read(&PMaster_enable) == 0)
@@ -3540,7 +3541,7 @@ done:
 	return 0;
 }
 
-int ddp_dsi_start(DISP_MODULE_ENUM module, void *cmdq)
+int ddp_dsi_start(enum DISP_MODULE_ENUM module, void *cmdq)
 {
 	int i = 0;
 
@@ -3569,7 +3570,7 @@ int ddp_dsi_start(DISP_MODULE_ENUM module, void *cmdq)
 	return 0;
 }
 
-int ddp_dsi_stop(DISP_MODULE_ENUM module, void *cmdq_handle)
+int ddp_dsi_stop(enum DISP_MODULE_ENUM module, void *cmdq_handle)
 {
 	int i = 0;
 	unsigned int tmp = 0;
@@ -3614,7 +3615,7 @@ int ddp_dsi_stop(DISP_MODULE_ENUM module, void *cmdq_handle)
 }
 
 /*TUI will use the api*/
-int dsi_enable_irq(DISP_MODULE_ENUM module, void *handle, unsigned int enable)
+int dsi_enable_irq(enum DISP_MODULE_ENUM module, void *handle, unsigned int enable)
 {
 	 if (module == DISP_MODULE_DSI0)
 		DSI_OUTREGBIT(handle, struct DSI_INT_ENABLE_REG, DSI_REG[0]->DSI_INTEN, FRAME_DONE_INT_EN, enable);
@@ -3622,10 +3623,10 @@ int dsi_enable_irq(DISP_MODULE_ENUM module, void *handle, unsigned int enable)
 	return 0;
 }
 
-int ddp_dsi_switch_lcm_mode(DISP_MODULE_ENUM module, void *params)
+int ddp_dsi_switch_lcm_mode(enum DISP_MODULE_ENUM module, void *params)
 {
 	int i = 0;
-	LCM_DSI_MODE_SWITCH_CMD lcm_cmd = *((LCM_DSI_MODE_SWITCH_CMD *) (params));
+	struct LCM_DSI_MODE_SWITCH_CMD lcm_cmd = *((struct LCM_DSI_MODE_SWITCH_CMD *) (params));
 	int mode = (int)(lcm_cmd.mode);
 
 	if (dsi_currect_mode == mode) {
@@ -3663,10 +3664,10 @@ int ddp_dsi_switch_lcm_mode(DISP_MODULE_ENUM module, void *params)
 	return 0;
 }
 
-int ddp_dsi_switch_mode(DISP_MODULE_ENUM module, void *cmdq_handle, void *params)
+int ddp_dsi_switch_mode(enum DISP_MODULE_ENUM module, void *cmdq_handle, void *params)
 {
 	int i = 0;
-	LCM_DSI_MODE_SWITCH_CMD lcm_cmd = *((LCM_DSI_MODE_SWITCH_CMD *) (params));
+	struct LCM_DSI_MODE_SWITCH_CMD lcm_cmd = *((struct LCM_DSI_MODE_SWITCH_CMD *) (params));
 	int mode = (int)(lcm_cmd.mode);
 
 	if (dsi_currect_mode == mode) {
@@ -3749,7 +3750,7 @@ int ddp_dsi_switch_mode(DISP_MODULE_ENUM module, void *cmdq_handle, void *params
 	return 0;
 }
 
-int ddp_dsi_clk_on(DISP_MODULE_ENUM module, void *cmdq_handle, unsigned int level)
+int ddp_dsi_clk_on(enum DISP_MODULE_ENUM module, void *cmdq_handle, unsigned int level)
 {
 	int ret = 0;
 #ifndef CONFIG_MTK_CLKMGR
@@ -3778,7 +3779,7 @@ int ddp_dsi_clk_on(DISP_MODULE_ENUM module, void *cmdq_handle, unsigned int leve
 	return ret;
 }
 
-int ddp_dsi_clk_off(DISP_MODULE_ENUM module, void *cmdq_handle, unsigned int level)
+int ddp_dsi_clk_off(enum DISP_MODULE_ENUM module, void *cmdq_handle, unsigned int level)
 {
 	int ret = 0;
 
@@ -3808,7 +3809,7 @@ int ddp_dsi_clk_off(DISP_MODULE_ENUM module, void *cmdq_handle, unsigned int lev
 	return ret;
 }
 
-int ddp_dsi_ioctl(DISP_MODULE_ENUM module, void *cmdq_handle, unsigned int ioctl_cmd,
+int ddp_dsi_ioctl(enum DISP_MODULE_ENUM module, void *cmdq_handle, unsigned int ioctl_cmd,
 		  unsigned long *params) {
 	int ret = 0;
 	/* DISPFUNC(); */
@@ -3907,7 +3908,7 @@ int ddp_dsi_ioctl(DISP_MODULE_ENUM module, void *cmdq_handle, unsigned int ioctl
 	return ret;
 }
 
-int ddp_dsi_trigger(DISP_MODULE_ENUM module, void *cmdq)
+int ddp_dsi_trigger(enum DISP_MODULE_ENUM module, void *cmdq)
 {
 	int i = 0;
 	unsigned int data_array[16];
@@ -3921,7 +3922,7 @@ int ddp_dsi_trigger(DISP_MODULE_ENUM module, void *cmdq)
 	return 0;
 }
 
-int ddp_dsi_reset(DISP_MODULE_ENUM module, void *cmdq_handle)
+int ddp_dsi_reset(enum DISP_MODULE_ENUM module, void *cmdq_handle)
 {
 	DSI_Reset(module, cmdq_handle);
 
@@ -3929,7 +3930,7 @@ int ddp_dsi_reset(DISP_MODULE_ENUM module, void *cmdq_handle)
 }
 
 
-int ddp_dsi_power_on(DISP_MODULE_ENUM module, void *cmdq_handle)
+int ddp_dsi_power_on(enum DISP_MODULE_ENUM module, void *cmdq_handle)
 {
 	int i = 0;
 	int ret = 0;
@@ -4037,7 +4038,7 @@ int ddp_dsi_power_on(DISP_MODULE_ENUM module, void *cmdq_handle)
 }
 
 
-int ddp_dsi_power_off(DISP_MODULE_ENUM module, void *cmdq_handle)
+int ddp_dsi_power_off(enum DISP_MODULE_ENUM module, void *cmdq_handle)
 {
 	int i = 0;
 	int ret = 0;
@@ -4119,7 +4120,7 @@ int ddp_dsi_power_off(DISP_MODULE_ENUM module, void *cmdq_handle)
 }
 
 
-int ddp_dsi_is_busy(DISP_MODULE_ENUM module)
+int ddp_dsi_is_busy(enum DISP_MODULE_ENUM module)
 {
 	int i = 0;
 	int busy = 0;
@@ -4137,12 +4138,12 @@ int ddp_dsi_is_busy(DISP_MODULE_ENUM module)
 	return busy;
 }
 
-int ddp_dsi_is_idle(DISP_MODULE_ENUM module)
+int ddp_dsi_is_idle(enum DISP_MODULE_ENUM module)
 {
 	return !ddp_dsi_is_busy(module);
 }
 
-static const char *dsi_mode_spy(LCM_DSI_MODE_CON mode)
+static const char *dsi_mode_spy(enum LCM_DSI_MODE_CON mode)
 {
 	switch (mode) {
 	case CMD_MODE:
@@ -4158,7 +4159,7 @@ static const char *dsi_mode_spy(LCM_DSI_MODE_CON mode)
 	}
 }
 
-void dsi_analysis(DISP_MODULE_ENUM module)
+void dsi_analysis(enum DISP_MODULE_ENUM module)
 {
 	int i = 0;
 
@@ -4187,19 +4188,19 @@ void dsi_analysis(DISP_MODULE_ENUM module)
 	}
 }
 
-int ddp_dsi_dump(DISP_MODULE_ENUM module, int level)
+int ddp_dsi_dump(enum DISP_MODULE_ENUM module, int level)
 {
 	dsi_analysis(module);
 	DSI_DumpRegisters(module, level);
 	return 0;
 }
 
-int ddp_dsi_build_cmdq(DISP_MODULE_ENUM module, void *cmdq_trigger_handle, CMDQ_STATE state)
+int ddp_dsi_build_cmdq(enum DISP_MODULE_ENUM module, void *cmdq_trigger_handle, CMDQ_STATE state)
 {
 	int ret = 0;
 	int i = 0;
 	int dsi_i = 0;
-	LCM_DSI_PARAMS *dsi_params = NULL;
+	struct LCM_DSI_PARAMS *dsi_params = NULL;
 	DSI_T0_INS t0;
 	struct DSI_RX_DATA_REG read_data0;
 
@@ -4365,7 +4366,7 @@ int ddp_dsi_build_cmdq(DISP_MODULE_ENUM module, void *cmdq_trigger_handle, CMDQ_
 				}
 			}
 
-			MMProfileLogEx(ddp_mmp_get_events()->esd_rdlcm, MMProfileFlagPulse,
+			mmprofile_log_ex(ddp_mmp_get_events()->esd_rdlcm, MMPROFILE_FLAG_PULSE,
 				       AS_UINT32(&read_data0),
 				       AS_UINT32(&(dsi_params->lcm_esd_check_table[i])));
 
@@ -4552,7 +4553,7 @@ DDP_MODULE_DRIVER ddp_driver_dsidual = {
 };
 
 
-const LCM_UTIL_FUNCS PM_lcm_utils_dsi0 = {
+const struct LCM_UTIL_FUNCS PM_lcm_utils_dsi0 = {
 	.set_reset_pin = lcm_set_reset_pin,
 	.udelay = lcm_udelay,
 	.mdelay = lcm_mdelay,
@@ -4602,10 +4603,10 @@ void PanelMaster_set_CC(uint32_t dsi_index, uint32_t enable)
 	}
 }
 
-void PanelMaster_DSI_set_timing(uint32_t dsi_index, MIPI_TIMING timing)
+void PanelMaster_DSI_set_timing(uint32_t dsi_index, struct MIPI_TIMING timing)
 {
 	uint32_t hbp_byte;
-	LCM_DSI_PARAMS *dsi_params;
+	struct LCM_DSI_PARAMS *dsi_params;
 	int fbconfig_dsiTmpBufBpp = 0;
 
 	if (_dsi_context[dsi_index].dsi_params.data_format.format == LCM_DSI_FORMAT_RGB565)
@@ -4981,7 +4982,7 @@ int32_t DSI_ssc_enable(uint32_t dsi_index, uint32_t en)
 	return 0;
 }
 
-uint32_t PanelMaster_get_dsi_timing(uint32_t dsi_index, MIPI_SETTING_TYPE type)
+uint32_t PanelMaster_get_dsi_timing(uint32_t dsi_index, enum MIPI_SETTING_TYPE type)
 {
 	uint32_t dsi_val;
 	struct DSI_REGS *dsi_reg;
@@ -5057,7 +5058,7 @@ uint32_t PanelMaster_get_dsi_timing(uint32_t dsi_index, MIPI_SETTING_TYPE type)
 	case HBP:
 		{
 			struct DSI_HBP_WC_REG tmp_hbp;
-			LCM_DSI_PARAMS *dsi_params;
+			struct LCM_DSI_PARAMS *dsi_params;
 
 			dsi_params = get_dsi_params_handle(dsi_index);
 			OUTREG32(&tmp_hbp, AS_UINT32(&dsi_reg->DSI_HBP_WC));

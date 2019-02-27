@@ -31,7 +31,7 @@
 #include "mt_spm_mtcmos.h"
 #include "mt_clkmgr.h"
 /*
-#if defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735M)
 #include <mt_soc_afe_control.h>
 #endif
 */
@@ -44,7 +44,7 @@
 #define SLP_SUSPEND_LOG_EN          1
 #else
 /*
-#if defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735M)
 #define SLP_SLEEP_DPIDLE_EN         1
 #else
 */
@@ -96,11 +96,11 @@ static bool slp_check_mtcmos_pll = 1;
 
 static u32 slp_spm_flags = {
 
-#if defined(CONFIG_ARCH_MT6735)
+#if defined(CONFIG_MACH_MT6735)
 		0
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 		0
-#elif defined(CONFIG_ARCH_MT6753)
+#elif defined(CONFIG_MACH_MT6753)
 #ifdef SPM_LEGACY_SUSPEND
 	SPM_CPU_PDN_DIS |
 	SPM_INFRA_PDN_DIS |
@@ -227,7 +227,7 @@ static int slp_suspend_ops_enter(suspend_state_t state)
 {
 	int ret = 0;
 /*
-	#if defined(CONFIG_ARCH_MT6735M)
+	#if defined(CONFIG_MACH_MT6735M)
 		int fm_radio_is_playing = 0;
 			if (ConditionEnterSuspend() == true)
 				fm_radio_is_playing = 0;
@@ -280,7 +280,7 @@ static int slp_suspend_ops_enter(suspend_state_t state)
 #endif
 
 /*
-#if defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735M)
 #if SLP_SLEEP_DPIDLE_EN
 		if ((slp_ck26m_on) || (fm_radio_is_playing))
 			slp_wake_reason = spm_go_to_sleep_dpidle(slp_spm_deepidle_flags, slp_spm_data);

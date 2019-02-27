@@ -55,7 +55,7 @@ typedef enum {
 extern unsigned int mutex_start_irq_cnt;
 extern unsigned int mutex_done_irq_cnt;
 
-char *ddp_get_fmt_name(DISP_MODULE_ENUM module, unsigned int fmt);
-int ddp_dump_analysis(DISP_MODULE_ENUM module);
-int ddp_dump_reg(DISP_MODULE_ENUM module);
+char *ddp_get_fmt_name(enum DISP_MODULE_ENUM module, unsigned int fmt);
+int ddp_dump_analysis(enum DISP_MODULE_ENUM module);
+int ddp_dump_reg(enum DISP_MODULE_ENUM module);
 #endif

@@ -24,7 +24,7 @@
 #include <mach/mt_secure_api.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
-#include <mt_dramc.h>
+#include <mtk_dramc.h>
 
 /* #define DCM_DEFAULT_ALL_OFF */
 
@@ -732,7 +732,7 @@ int dcm_emi(ENUM_EMI_DCM on)
 	return 0;
 }
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 /** 0x10213640	DDRPHY_MEMPLL_DIVIDER
  * 15	15	R_COMB_M_CK_CG_EN -> 0:Disable, 1: Enable
  * 17	17	R_MEMPLL3_CKOUT_CG_EN
@@ -763,7 +763,7 @@ int dcm_ddrphy(ENUM_DDRPHY_DCM on)
 
 	return 0;
 }
-#endif				/* CONFIG_ARCH_MT6753 */
+#endif				/* CONFIG_MACH_MT6753 */
 
 /** 0x1020655c	EFUSE_REG_DCM_ON
  * 0	0	DCM_ON
@@ -794,13 +794,13 @@ enum {
 	DRAMC_DCM,
 	TOPCKG_DCM,
 	EFUSE_DCM,
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 	DDRPHY_DCM,
 
 	NR_DCM = 9,
-#else				/* !CONFIG_ARCH_MT6753 */
+#else				/* !CONFIG_MACH_MT6753 */
 	NR_DCM = 8,
-#endif				/* CONFIG_ARCH_MT6753 */
+#endif				/* CONFIG_MACH_MT6753 */
 };
 
 enum {
@@ -812,18 +812,18 @@ enum {
 	DRAMC_DCM_TYPE = (1U << 5),
 	TOPCKG_DCM_TYPE = (1U << 6),
 	EFUSE_DCM_TYPE = (1U << 7),
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 	DDRPHY_DCM_TYPE = (1U << 8),
 
 	NR_DCM_TYPE = 9,
-#else				/* !CONFIG_ARCH_MT6753 */
+#else				/* !CONFIG_MACH_MT6753 */
 	NR_DCM_TYPE = 8,
-#endif				/* CONFIG_ARCH_MT6753 */
+#endif				/* CONFIG_MACH_MT6753 */
 };
 
 /* Do not do infra DCM ON/OFF here due to H/W limitation. Do it on preloader
  * instead */
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 #define ALL_DCM_TYPE  (ARMCORE_DCM_TYPE | MCUSYS_DCM_TYPE | INFRA_DCM_TYPE | \
 		       PERI_DCM_TYPE | EMI_DCM_TYPE | DRAMC_DCM_TYPE | \
 		       TOPCKG_DCM_TYPE | EFUSE_DCM_TYPE | DDRPHY_DCM_TYPE)
@@ -831,7 +831,7 @@ enum {
 #define INIT_DCM_TYPE  (ARMCORE_DCM_TYPE | MCUSYS_DCM_TYPE | /*INFRA_DCM_TYPE |*/ \
 		       PERI_DCM_TYPE | /* EMI_DCM_TYPE | DRAMC_DCM_TYPE |*/ \
 		       TOPCKG_DCM_TYPE | EFUSE_DCM_TYPE /*| DDRPHY_DCM_TYPE */)
-#else				/* !CONFIG_ARCH_MT6753 */
+#else				/* !CONFIG_MACH_MT6753 */
 #define ALL_DCM_TYPE  (ARMCORE_DCM_TYPE | MCUSYS_DCM_TYPE | INFRA_DCM_TYPE | \
 		       PERI_DCM_TYPE | EMI_DCM_TYPE | DRAMC_DCM_TYPE | \
 		       TOPCKG_DCM_TYPE | EFUSE_DCM_TYPE)
@@ -839,7 +839,7 @@ enum {
 #define INIT_DCM_TYPE  (ARMCORE_DCM_TYPE | MCUSYS_DCM_TYPE | /*INFRA_DCM_TYPE |*/ \
 		       PERI_DCM_TYPE | /* EMI_DCM_TYPE | DRAMC_DCM_TYPE |*/ \
 		       TOPCKG_DCM_TYPE | EFUSE_DCM_TYPE)
-#endif				/* CONFIG_ARCH_MT6753 */
+#endif				/* CONFIG_MACH_MT6753 */
 
 
 typedef struct _dcm {
@@ -917,7 +917,7 @@ static DCM dcm_array[NR_DCM_TYPE] = {
 	 .default_state = EFUSE_DCM_ON,
 	 .disable_refcnt = 0,
 	 },
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 	{
 	 .typeid = DDRPHY_DCM_TYPE,
 	 .name = "DDRPHY_DCM",
@@ -926,7 +926,7 @@ static DCM dcm_array[NR_DCM_TYPE] = {
 	 .default_state = DDRPHY_DCM_ON,
 	 .disable_refcnt = 0,
 	 },
-#endif				/* CONFIG_ARCH_MT6753 */
+#endif				/* CONFIG_MACH_MT6753 */
 };
 
 /*****************************************

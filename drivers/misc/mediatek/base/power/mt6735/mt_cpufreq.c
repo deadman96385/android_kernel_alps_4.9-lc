@@ -86,7 +86,7 @@
 /*=============================================================*/
 /* Macro definition											*/
 /*=============================================================*/
-#if defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735M)
 #define PMIC_WRAP_DVFS_ADR0			 ((unsigned long)(PMIC_WRAP_BASE+0xE8))
 #define PMIC_WRAP_DVFS_WDATA0		   ((unsigned long)(PMIC_WRAP_BASE+0xEC))
 #define PMIC_WRAP_DVFS_ADR1			 ((unsigned long)(PMIC_WRAP_BASE+0xF0))
@@ -219,7 +219,7 @@
 #define NR_PMIC_WRAP_CMD 16	/* num of pmic wrap cmd (fixed value) */
 
 /* DVFS OPP table */
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 #define CPU_DVFS_FREQ0_1 (1248000)	/* KHz */
 #define CPU_DVFS_FREQ0   (1144000)	/* KHz */
 #define CPU_DVFS_FREQ1_1 (1092000)	/* KHz */
@@ -302,7 +302,7 @@ enum turbo_mode {
 /* Power table */
 /* Notice: Each table MUST has 8 element to avoid ptpod error */
 #define NR_MAX_OPP_TBL  8
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 #define NR_MAX_CPU	  8
 #else
 #define NR_MAX_CPU	  4
@@ -317,7 +317,7 @@ enum turbo_mode {
 
 
 /* PMIC 5A throttle (only for MT6753) */
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 #define PMIC_5A_THRO_MAX_CPU_CORE_NUM   6
 #define PMIC_5A_THRO_MAX_CPU_FREQ	   1144000
 #endif
@@ -578,7 +578,7 @@ static int _mt_cpufreq_pdrv_remove(struct platform_device *pdev);
 static struct pmic_wrap_setting pw = {
 	.phase = NR_PMIC_WRAP_PHASE,	/* invalid setting for init */
 	.addr = {{0, 0} },
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 	.set[PMIC_WRAP_PHASE_NORMAL] = {
 		._[IDX_NM_VCORE_TRANS4] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(121250),},
 		._[IDX_NM_VCORE_TRANS3] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(118125),},
@@ -596,7 +596,7 @@ static struct pmic_wrap_setting pw = {
 	.set[PMIC_WRAP_PHASE_NORMAL] = {
 		._[IDX_NM_NOT_USED1] = {0, 0,},
 		._[IDX_NM_NOT_USED2] = {0, 0,},
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		._[IDX_NM_VCORE_HPM] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(125000),},
 		._[IDX_NM_VCORE_TRANS2] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(121250),},
 		._[IDX_NM_VCORE_TRANS1] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(118125),},
@@ -615,7 +615,7 @@ static struct pmic_wrap_setting pw = {
 	.set[PMIC_WRAP_PHASE_SUSPEND] = {
 		._[IDX_SP_VPROC_PWR_ON] = {MT6328_PMIC_VPROC_EN_ADDR, _BITS_(0:0, 1),},
 		._[IDX_SP_VPROC_SHUTDOWN] = {MT6328_PMIC_VPROC_EN_ADDR, _BITS_(0:0, 0),},
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		._[IDX_SP_VCORE_HPM] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(125000),},
 		._[IDX_SP_VCORE_TRANS2] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(121250),},
 		._[IDX_SP_VCORE_TRANS1] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(118125),},
@@ -635,7 +635,7 @@ static struct pmic_wrap_setting pw = {
 	.set[PMIC_WRAP_PHASE_DEEPIDLE] = {
 		._[IDX_DI_VPROC_NORMAL] = {MT6328_PMIC_VPROC_VOSEL_CTRL_ADDR, _BITS_(1:1, 1),},
 		._[IDX_DI_VPROC_SLEEP] = {MT6328_PMIC_VPROC_VOSEL_CTRL_ADDR, _BITS_(1:1, 0),},
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		._[IDX_DI_VCORE_HPM] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(125000),},
 		._[IDX_DI_VCORE_TRANS2] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(121250),},
 		._[IDX_DI_VCORE_TRANS1] = {MT6328_PMIC_VCORE1_VOSEL_ON_ADDR, VOLT_TO_PMIC_VAL(118125),},
@@ -698,7 +698,7 @@ static struct mt_cpu_dvfs cpu_dvfs[] = {
 };
 
 /* DVFS table */
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 /* CPU LEVEL 0, 1.5GHz segment */
 static struct mt_cpu_freq_info opp_tbl_e1_0[] = {
 	OP(CPU_DVFS_FREQ0, 125000),
@@ -727,7 +727,7 @@ static struct opp_tbl_info opp_tbls[] = {
 	[CPU_LEVEL_0] = {opp_tbl_e1_0, ARRAY_SIZE(opp_tbl_e1_0)},
 	[CPU_LEVEL_1] = {opp_tbl_e1_1, ARRAY_SIZE(opp_tbl_e1_1)},
 };
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 /* CPU LEVEL 0, 1.2GHz segment */
 static struct mt_cpu_freq_info opp_tbl_e1_0[] = {
 	OP(CPU_DVFS_FREQ0, 125000),
@@ -852,7 +852,7 @@ static struct opp_tbl_info opp_tbls[] = {
 #endif
 
 /* CPU on/off callback */
-#if defined(CONFIG_ARCH_MT6753) || defined(CONFIG_CPU_DVFS_TURBO_MODE)
+#if defined(CONFIG_MACH_MT6753) || defined(CONFIG_CPU_DVFS_TURBO_MODE)
 static unsigned int num_online_cpus_delta;
 #endif
 static struct notifier_block __refdata _mt_cpufreq_cpu_notifier = {
@@ -949,13 +949,13 @@ bool is_in_cpufreq = 0;		/* used in MCDI */
 static cpuVoltsampler_func g_pCpuVoltSampler;
 
 /* for PMIC 5A throttle */
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 static bool pmic_5A_throttle_enable;
 static bool pmic_5A_throttle_on;
 #endif
 
 /* only for 37T */
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 static bool use_fix_lkg_tbl;
 #endif
 
@@ -977,7 +977,7 @@ register_battery_percent_notify(void (*battery_percent_callback) (BATTERY_PERCEN
 	cpufreq_err("%s doesn't exist\n", __func__);
 }
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 static bool is_need_5A_throttle(struct mt_cpu_dvfs *p, unsigned int cur_freq, unsigned int cur_core_num)
 {
 	if (pmic_5A_throttle_enable && pmic_5A_throttle_on
@@ -1019,7 +1019,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 
 	cpufreq_info("@%s: efuse cpu_spd_bond = 0x%x\n", __func__, cpu_spd_bond);
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	{
 		unsigned int efuse_spare2 = _GET_BITS_VAL_(21:20, get_devinfo_with_index(5));
 
@@ -1035,7 +1035,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 
 		cpufreq_info("@%s: segment_code = 0x%x\n", __func__, segment_code);
 
-#if defined(CONFIG_ARCH_MT6735) && defined(CONFIG_MTK_EFUSE_DOWNGRADE)
+#if defined(CONFIG_MACH_MT6735) && defined(CONFIG_MTK_EFUSE_DOWNGRADE)
 		return CPU_LEVEL_4;	/* SW config 37T to 35M+ */
 #endif
 
@@ -1043,7 +1043,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 		case 0x41:
 		case 0x42:
 		case 0x43:
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 			use_fix_lkg_tbl = true;
 #endif
 			return CPU_LEVEL_3;	/* 37T: 1.45G */
@@ -1055,7 +1055,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 		case 0x51:
 		case 0x54:
 		case 0x55:
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 			use_fix_lkg_tbl = true;
 #endif
 			return CPU_LEVEL_1;	/* 37: 1.3G */
@@ -1074,7 +1074,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 
 	/* No efuse,  use clock-frequency from device tree to determine CPU table type! */
 	if (cpu_spd_bond == 0) {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		if (cpu_speed >= 1500 && cpu_dvfs_is_extbuck_valid())
 			lv = CPU_LEVEL_0;	/* 1.5G */
 		else if (cpu_speed >= 1300)
@@ -1084,7 +1084,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 					cpu_speed);
 			lv = CPU_LEVEL_1;
 		}
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 		if (cpu_speed >= 1150)
 			lv = CPU_LEVEL_0;	/* 1.15G */
 		else if (cpu_speed >= 1000)
@@ -1094,7 +1094,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 					cpu_speed);
 			lv = CPU_LEVEL_1;
 		}
-#else	/* CONFIG_ARCH_MT6735 */
+#else	/* CONFIG_MACH_MT6735 */
 		if (cpu_speed >= 1500)
 			lv = CPU_LEVEL_0;	/* 1.5G */
 		else if (cpu_speed >= 1300)
@@ -1112,7 +1112,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 
 	/* no DT, we should check efuse for CPU speed HW bounding */
 	switch (cpu_spd_bond) {
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 	case 1:
 	case 2:
 	case 3:
@@ -1125,7 +1125,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 	default:
 		lv = CPU_LEVEL_1;	/* 1G */
 		break;
-#else	/* !CONFIG_ARCH_MT6735M */
+#else	/* !CONFIG_MACH_MT6735M */
 	case 1:
 	case 2:
 		lv = CPU_LEVEL_0;	/* 1.5G */
@@ -1137,7 +1137,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 	case 5:
 	case 6:
 	case 7:
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 		lv = CPU_LEVEL_2;	/* 1.1G */
 		break;
 #endif
@@ -1162,7 +1162,7 @@ static unsigned int _mt_cpufreq_get_cpu_level(void)
 		break;
 	case CHIP_MT6735M:
 	case CHIP_MT6735P:
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 		lv = CPU_LEVEL_1;	/* D2 1.1G */
 #else
 		lv = CPU_LEVEL_2;	/* D1 1.1G */
@@ -1206,7 +1206,7 @@ static int _mt_cpufreq_set_spm_dvfs_ctrl_volt(u32 value)
 	spm_write(SPM_POWERON_CONFIG_SET, (SPM_PROJECT_CODE << 16) | (1U << 0));
 
 	ap_dvfs_con = spm_read(SPM_AP_DVFS_CON_SET);
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	/* 6753 has 16 PWRAP commands */
 	spm_write(SPM_AP_DVFS_CON_SET, (ap_dvfs_con & ~(0xF)) | value);
 #else
@@ -1459,7 +1459,7 @@ static int _mt_cpufreq_set_limit_by_pwr_budget(unsigned int budget)
 
 	for (ncpu = possible_cpu; ncpu > 0; ncpu--) {
 		for (i = 0; i < p->nr_opp_tbl * possible_cpu; i++) {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 			if (is_need_5A_throttle(p, p->power_tbl[i].cpufreq_khz,
 						p->power_tbl[i].cpufreq_ncpu))
 				continue;
@@ -1491,7 +1491,7 @@ static unsigned int _mt_cpufreq_get_limited_core_num(unsigned int budget)
 
 	for (ncpu = possible_cpu; ncpu > 0; ncpu--) {
 		for (i = 0; i < p->nr_opp_tbl * possible_cpu; i++) {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 			if (is_need_5A_throttle(p, p->power_tbl[i].cpufreq_khz,
 						p->power_tbl[i].cpufreq_ncpu))
 				continue;
@@ -1580,7 +1580,7 @@ void mt_cpufreq_set_power_limit_by_pbm(unsigned int limited_power)
 	cpufreq_ver("@%s: limited power from PBM = %d\n", __func__, p->limited_power_by_pbm);
 
 	if (!p->limited_power_by_pbm && !p->limited_power_by_thermal) {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		if (p->cpu_level == CPU_LEVEL_1) {
 			/* give a large budget to find the first safe limit combination */
 			_mt_cpufreq_set_limit_by_pwr_budget(99999);
@@ -2006,7 +2006,7 @@ static void _mt_cpufreq_dfs_by_set_armpll(struct mt_cpu_dvfs *p, unsigned int dd
 #endif
 }
 
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 /*
  * CPU freq scaling (only freqhopping)
  */
@@ -2237,7 +2237,7 @@ static void _mt_cpufreq_set_cur_freq(struct mt_cpu_dvfs *p, unsigned int cur_khz
 		}
 
 		cur_volt = p->ops->get_cur_volt(p);
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 		/* Raise to 1.25V directly to avoid armpll_divider timing violation issue (only for 6735) */
 		if (cur_volt < 125000)
 			p->ops->set_cur_volt(p, 125000);
@@ -2847,7 +2847,7 @@ static int _mt_cpufreq_get_idx_by_freq(struct mt_cpu_dvfs *p, unsigned int targe
 	return new_opp_idx;
 }
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 static bool is_limit_modified_by_5A_throttle;
 #endif
 
@@ -2874,7 +2874,7 @@ static int _mt_cpufreq_power_limited_verify(struct mt_cpu_dvfs *p, int new_opp_i
 #endif
 		return new_opp_idx;
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	if (is_need_5A_throttle(p, p->limited_max_freq, p->limited_max_ncpu)) {
 		cpufreq_ver("@%s: modify limited max freq and ncpu due to 5A limit enabled!\n", __func__);
 		p->limited_max_freq = PMIC_5A_THRO_MAX_CPU_FREQ;
@@ -3037,7 +3037,7 @@ static unsigned int _mt_cpufreq_calc_new_opp_idx(struct mt_cpu_dvfs *p, int new_
 
 	/* for ptpod init */
 	if (p->dvfs_disable_by_ptpod) {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		/* idx 2 for Vboot = 1.2V */
 		new_opp_idx = 2;
 #else
@@ -3046,7 +3046,7 @@ static unsigned int _mt_cpufreq_calc_new_opp_idx(struct mt_cpu_dvfs *p, int new_
 #endif
 		cpufreq_info("%s(): for ptpod init, idx = %d\n", __func__, new_opp_idx);
 	}
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	if (is_need_5A_throttle(p, cpu_dvfs_get_freq_by_idx(p, new_opp_idx),
 				num_online_cpus() + num_online_cpus_delta)) {
 		idx = _mt_cpufreq_get_idx_by_freq(p, PMIC_5A_THRO_MAX_CPU_FREQ, CPUFREQ_RELATION_H);
@@ -3131,7 +3131,7 @@ static int __cpuinit _mt_cpufreq_cpu_CB(struct notifier_block *nfb, unsigned lon
 	dev = get_cpu_device(cpu);
 
 	if (dev) {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		cpufreq_ver("@%s():%d, num_online_cpus_delta = %d\n",
 				__func__, __LINE__, num_online_cpus_delta);
 
@@ -3223,16 +3223,16 @@ static int _mt_cpufreq_sync_opp_tbl_idx(struct mt_cpu_dvfs *p)
 	return ret;
 }
 
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 unsigned int leakage_data[NR_MAX_OPP_TBL] = {638, 594, 535, 424, 344, 279, 227, 183};
 #endif
 
 static void _mt_cpufreq_power_calculation(struct mt_cpu_dvfs *p, int oppidx, int ncpu)
 {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 #define CA53_REF_POWER		2456	/* mW  */
 #define CA53_REF_FREQ		  1300000	/* KHz */
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 #define CA53_REF_POWER		988	/* mW  */
 #define CA53_REF_FREQ		  1000000	/* KHz */
 #else
@@ -3251,7 +3251,7 @@ static void _mt_cpufreq_power_calculation(struct mt_cpu_dvfs *p, int oppidx, int
 	p_dynamic = CA53_REF_POWER;
 
 	/* TODO: Use temp=65 to calculate leakage? check this! */
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 	if (use_fix_lkg_tbl)
 		p_leakage = leakage_data[oppidx];
 	else
@@ -3276,7 +3276,7 @@ static void _mt_cpufreq_power_calculation(struct mt_cpu_dvfs *p, int oppidx, int
 
 static int _mt_cpufreq_setup_power_table(struct mt_cpu_dvfs *p)
 {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	static const unsigned int pwr_tbl_cgf[NR_MAX_CPU] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 #else
 	static const unsigned int pwr_tbl_cgf[NR_MAX_CPU] = { 0, 0, 0, 0 };
@@ -3519,7 +3519,7 @@ void mt_cpufreq_thermal_protect(unsigned int limited_power)
 
 		/* no limited */
 		if (0 == limited_power) {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 			if (p->cpu_level == CPU_LEVEL_1) {
 				/* give a large budget to find the first safe limit combination */
 				_mt_cpufreq_set_limit_by_pwr_budget(99999);
@@ -3563,7 +3563,7 @@ void mt_cpufreq_thermal_5A_limit(bool enable)
 
 	cpufreq_info("%s(): PMIC 5A limit = %d\n", __func__, enable);
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	{
 		struct mt_cpu_dvfs *p = id_to_cpu_dvfs(MT_CPU_DVFS_LITTLE);
 
@@ -3591,7 +3591,7 @@ static void _mt_cpufreq_calc_power_throttle_idx(struct mt_cpu_dvfs *p)
 	else if ((p->pwr_thro_mode & PWR_THRO_MODE_LBAT_819MHZ)
 		 || (p->pwr_thro_mode & PWR_THRO_MODE_BAT_PER_819MHZ)) {
 		switch (p->cpu_level) {
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 		case CPU_LEVEL_0:
 		case CPU_LEVEL_1:
 			p->idx_pwr_thro_max_opp = 3;
@@ -3605,7 +3605,7 @@ static void _mt_cpufreq_calc_power_throttle_idx(struct mt_cpu_dvfs *p)
 		case CPU_LEVEL_1:
 			p->idx_pwr_thro_max_opp = 4;
 			break;
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 		case CPU_LEVEL_2:
 			p->idx_pwr_thro_max_opp = 1;
 			break;
@@ -3622,7 +3622,7 @@ static void _mt_cpufreq_calc_power_throttle_idx(struct mt_cpu_dvfs *p)
 		}
 	} else if (p->pwr_thro_mode & PWR_THRO_MODE_BAT_OC_1040MHZ) {
 		switch (p->cpu_level) {
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 		case CPU_LEVEL_0:
 		case CPU_LEVEL_2:
 		case CPU_LEVEL_3:
@@ -3636,7 +3636,7 @@ static void _mt_cpufreq_calc_power_throttle_idx(struct mt_cpu_dvfs *p)
 		case CPU_LEVEL_1:
 			p->idx_pwr_thro_max_opp = 3;
 			break;
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 		case CPU_LEVEL_2:
 			p->idx_pwr_thro_max_opp = 0;
 			break;
@@ -3693,7 +3693,7 @@ static void _mt_cpufreq_power_throttle_bat_per_CB(BATTERY_PERCENT_LEVEL level)
 
 		cpufreq_unlock(flags);
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		switch (level) {
 		case BATTERY_PERCENT_LEVEL_1:
 			/* Limit CPU core num to 4 */
@@ -3746,7 +3746,7 @@ static void _mt_cpufreq_power_throttle_bat_oc_CB(BATTERY_OC_LEVEL level)
 
 		cpufreq_unlock(flags);
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		switch (level) {
 		case BATTERY_OC_LEVEL_1:
 			/* Limit CPU core num to 4 */
@@ -3800,7 +3800,7 @@ void _mt_cpufreq_power_throttle_low_bat_CB(LOW_BATTERY_LEVEL level)
 
 		cpufreq_unlock(flags);
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		switch (level) {
 		case LOW_BATTERY_LEVEL_1:
 		case LOW_BATTERY_LEVEL_2:
@@ -3913,7 +3913,7 @@ static int _mt_cpufreq_init(struct cpufreq_policy *policy)
 
 		p->cpu_level = lv;
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		/* check 5A throttle */
 		if (p->cpu_level == CPU_LEVEL_1 && !cpu_dvfs_is_extbuck_valid()) {
 			pmic_5A_throttle_enable = true;
@@ -3976,7 +3976,7 @@ static int _mt_cpufreq_init(struct cpufreq_policy *policy)
 		p->limited_power_by_pbm = 0;
 #endif
 		p->limited_power_by_thermal = 0;
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		if (p->cpu_level == CPU_LEVEL_1) {
 			/* give a large budget to find the first safe limit combination */
 			_mt_cpufreq_set_limit_by_pwr_budget(99999);
@@ -4007,7 +4007,7 @@ static int _mt_cpufreq_init(struct cpufreq_policy *policy)
 #endif
 	}
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	/* save VSRAM_VOSEL_OFFSET and DELTA init value to deepidle CMD8 */
 	mt_cpufreq_set_pmic_cmd(PMIC_WRAP_PHASE_DEEPIDLE,
 				IDX_DI_VSRAM_NORMAL,
@@ -4220,7 +4220,7 @@ static int _mt_cpufreq_pdrv_probe(struct platform_device *pdev)
 		/* fix at max freq(FY) and do not enable DVFS */
 		pmic_set_register_value(PMIC_VPROC_VOSEL_ON, VOLT_TO_PMIC_VAL(125000));
 		udelay(300);
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 		_mt_cpufreq_dfs_by_set_armpll(p, _mt_cpufreq_cpu_dds_calc(CPU_DVFS_FREQ2), 8);
 #else
 		_mt_cpufreq_dfs_by_set_armpll(p, _mt_cpufreq_cpu_dds_calc(CPU_DVFS_FREQ1), 8);
@@ -4297,7 +4297,7 @@ int mt_cpufreq_pdrv_probe(void)
 
 #ifdef __MTK_SLT_
 	/* modify SLT DVFS table for HV/NV/LV */
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 #if defined(SLT_VMAX)
 	cpu_dvfs[MT_CPU_DVFS_LITTLE].opp_tbl[0].cpufreq_volt = 131250;
 #elif defined(SLT_VMIN)
@@ -4305,7 +4305,7 @@ int mt_cpufreq_pdrv_probe(void)
 #else
 	cpu_dvfs[MT_CPU_DVFS_LITTLE].opp_tbl[0].cpufreq_volt = 125000;
 #endif
-#else	/* !CONFIG_ARCH_MT6735M */
+#else	/* !CONFIG_MACH_MT6735M */
 #if defined(SLT_VMAX)
 	cpu_dvfs[MT_CPU_DVFS_LITTLE].opp_tbl[0].cpufreq_volt = 126875;
 #elif defined(SLT_VMIN)
@@ -4884,7 +4884,7 @@ static ssize_t cpufreq_limited_by_thermal_proc_write(struct file *file, const ch
 }
 
 /* PMIC 5A limit */
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 static int cpufreq_5A_throttle_enable_proc_show(struct seq_file *m, void *v)
 {
 	seq_printf(m, "cpufreq PMIC 5A throttle enable = %d\n", pmic_5A_throttle_enable);
@@ -5145,7 +5145,7 @@ static ssize_t cpufreq_freq_proc_write(struct file *file, const char __user *buf
 				cpufreq_lock(flags);
 				cur_freq = p->ops->get_cur_phy_freq(p);
 				if (freq != cur_freq) {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 					if (is_need_5A_throttle(p, freq, num_online_cpus() + num_online_cpus_delta)) {
 						cpufreq_warn("@%s: frequency %dKHz over 5A limit!\n", __func__, freq);
 						p->ops->set_cur_freq(p, cur_freq, PMIC_5A_THRO_MAX_CPU_FREQ);
@@ -5308,7 +5308,7 @@ PROC_FOPS_RW(cpufreq_limited_by_hevc);
 PROC_FOPS_RW(cpufreq_limited_by_pbm);
 #endif
 PROC_FOPS_RW(cpufreq_limited_by_thermal);
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 PROC_FOPS_RW(cpufreq_5A_throttle_enable);
 #endif
 PROC_FOPS_RW(cpufreq_limited_max_freq_by_user);
@@ -5341,7 +5341,7 @@ static int _mt_cpufreq_create_procfs(void)
 		PROC_ENTRY(cpufreq_stress_test),
 		PROC_ENTRY(cpufreq_fix_freq_in_es),
 		PROC_ENTRY(cpufreq_limited_by_thermal),
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		PROC_ENTRY(cpufreq_5A_throttle_enable),
 #endif
 #ifndef DISABLE_PBM_FEATURE

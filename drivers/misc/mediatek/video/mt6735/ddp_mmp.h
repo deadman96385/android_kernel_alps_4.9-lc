@@ -19,6 +19,30 @@
 #include "ddp_ovl.h"
 #include "mmprofile_internal.h"
 
+enum MMP_PixelFormat {
+	MMProfileBitmapRGB565 = 1,
+	MMProfileBitmapRGB888,
+	MMProfileBitmapRGBA8888,
+	MMProfileBitmapBGR888,
+	MMProfileBitmapBGRA8888,
+	MMProfileBitmapMax = 0xFFFFFFFF
+};
+
+typedef struct {
+	unsigned int data1;         /* data1 (user defined) */
+	unsigned int data2;         /* data2 (user defined) */
+	unsigned int width;         /* image width */
+	unsigned int height;        /* image height */
+	enum MMP_PixelFormat format;     /* image pixel format */
+	unsigned int start_pos;     /* start offset of image data (base on pData) */
+	unsigned int bpp;           /* bits per pixel */
+	int pitch;                  /* image pitch (bytes per line) */
+	unsigned int data_size;     /* image data size (bytes) */
+	unsigned int down_sample_x; /* horizontal down sample rate (>=1) */
+	unsigned int down_sample_y; /* vertical down sample rate (>=1) */
+	void *pData;                /* image buffer address */
+} MMP_MetaDataBitmap_t;
+
 typedef struct {
 	MMP_Event DDP;
 	MMP_Event layerParent;
@@ -127,12 +151,12 @@ typedef struct {
 DDP_MMP_Events_t *ddp_mmp_get_events(void);
 void init_ddp_mmp_events(void);
 void ddp_mmp_init(void);
-void ddp_mmp_ovl_layer(OVL_CONFIG_STRUCT *pLayer, unsigned int down_sample_x,
+void ddp_mmp_ovl_layer(struct OVL_CONFIG_STRUCT *pLayer, unsigned int down_sample_x,
 		       unsigned int down_sample_y,
 		       unsigned int session /*1:primary, 2:external, 3:memory */);
-void ddp_mmp_wdma_layer(WDMA_CONFIG_STRUCT *wdma_layer, unsigned int wdma_num,
+void ddp_mmp_wdma_layer(struct WDMA_CONFIG_STRUCT *wdma_layer, unsigned int wdma_num,
 			unsigned int down_sample_x, unsigned int down_sample_y);
-void ddp_mmp_rdma_layer(RDMA_CONFIG_STRUCT *rdma_layer, unsigned int rdma_num,
+void ddp_mmp_rdma_layer(struct RDMA_CONFIG_STRUCT *rdma_layer, unsigned int rdma_num,
 			unsigned int down_sample_x, unsigned int down_sample_y);
 
 /* TODO: FIXME */

@@ -33,7 +33,7 @@
 
 static unsigned int rdma_fps[RDMA_INSTANCES] = { 60, 60 };
 
-static enum RDMA_INPUT_FORMAT rdma_input_format_convert(DpColorFormat fmt)
+static enum RDMA_INPUT_FORMAT rdma_input_format_convert(enum DP_COLOR_ENUM fmt)
 {
 	enum RDMA_INPUT_FORMAT rdma_fmt = RDMA_INPUT_FORMAT_RGB565;
 
@@ -426,10 +426,10 @@ void rdma_set_ultra(unsigned int idx, unsigned int width, unsigned int height, u
 static int rdma_config(DISP_MODULE_ENUM module,
 		       enum RDMA_MODE mode,
 		       unsigned long address,
-		       DpColorFormat inFormat,
+		       enum DP_COLOR_ENUM inFormat,
 		       unsigned pitch,
 		       unsigned width,
-		       unsigned height, unsigned ufoe_enable, DISP_BUFFER_TYPE sec, void *handle)
+		       unsigned height, unsigned ufoe_enable, enum DISP_BUFFER_TYPE sec, void *handle)
 {
 
 	unsigned int output_is_yuv = 0;
@@ -680,11 +680,11 @@ static inline enum RDMA_MODE rdma_config_mode(unsigned long address)
 	return address ? RDMA_MODE_MEMORY : RDMA_MODE_DIRECT_LINK;
 }
 
-static int do_rdma_config_l(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig, void *handle)
+static int do_rdma_config_l(DISP_MODULE_ENUM module, struct disp_ddp_path_config *pConfig, void *handle)
 {
-	RDMA_CONFIG_STRUCT *r_config = &pConfig->rdma_config;
+	struct RDMA_CONFIG_STRUCT *r_config = &pConfig->rdma_config;
 	enum RDMA_MODE mode = rdma_config_mode(r_config->address);
-	LCM_PARAMS *lcm_param = &(pConfig->dispif_config);
+	struct LCM_PARAMS *lcm_param = &(pConfig->dispif_config);
 	unsigned int width = pConfig->dst_dirty ? pConfig->dst_w : r_config->width;
 	unsigned int height = pConfig->dst_dirty ? pConfig->dst_h : r_config->height;
 
@@ -702,12 +702,12 @@ static int do_rdma_config_l(DISP_MODULE_ENUM module, disp_ddp_path_config *pConf
 	return 0;
 }
 
-static int setup_rdma_sec(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig, void *handle)
+static int setup_rdma_sec(DISP_MODULE_ENUM module, struct disp_ddp_path_config *pConfig, void *handle)
 {
 	static int rdma_is_sec[RDMA_INSTANCES];
 	CMDQ_ENG_ENUM cmdq_engine;
 	int rdma_idx = rdma_index(module);
-	DISP_BUFFER_TYPE security = pConfig->rdma_config.security;
+	enum DISP_BUFFER_TYPE security = pConfig->rdma_config.security;
 	enum RDMA_MODE mode = rdma_config_mode(pConfig->rdma_config.address);
 
 	cmdq_engine = rdma_idx == 0 ? CMDQ_ENG_DISP_RDMA0 : CMDQ_ENG_DISP_RDMA1;
@@ -765,7 +765,7 @@ static int setup_rdma_sec(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig
 
 
 
-static int rdma_config_l(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig, void *handle)
+static int rdma_config_l(DISP_MODULE_ENUM module, struct disp_ddp_path_config *pConfig, void *handle)
 {
 	if (pConfig->dst_dirty || pConfig->rdma_dirty) {
 		setup_rdma_sec(module, pConfig, handle);

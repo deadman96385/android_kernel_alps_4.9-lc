@@ -59,9 +59,9 @@ int ddp_mutex_disable(int mutex_id, DDP_SCENARIO_ENUM scenario, void *handle);
 void ddp_check_mutex(int mutex_id, DDP_SCENARIO_ENUM scenario, DDP_MODE mode);
 int ddp_mutex_reset(int mutex_id, void *handle);
 
-int ddp_mutex_add_module(int mutex_id, DISP_MODULE_ENUM module, void *handle);
+int ddp_mutex_add_module(int mutex_id, enum DISP_MODULE_ENUM module, void *handle);
 
-int ddp_mutex_remove_module(int mutex_id, DISP_MODULE_ENUM module, void *handle);
+int ddp_mutex_remove_module(int mutex_id, enum DISP_MODULE_ENUM module, void *handle);
 
 int ddp_mutex_Interrupt_enable(int mutex_id, void *handle);
 
@@ -70,14 +70,14 @@ int ddp_mutex_Interrupt_disable(int mutex_id, void *handle);
 int ddp_mutex_hw_dcm_on(int mutex_idx, void *handle);
 int ddp_mutex_hw_dcm_off(int mutex_idx, void *handle);
 
-DISP_MODULE_ENUM ddp_get_dst_module(DDP_SCENARIO_ENUM scenario);
-int ddp_set_dst_module(DDP_SCENARIO_ENUM scenario, DISP_MODULE_ENUM dst_module);
+enum DISP_MODULE_ENUM ddp_get_dst_module(DDP_SCENARIO_ENUM scenario);
+int ddp_set_dst_module(DDP_SCENARIO_ENUM scenario, enum DISP_MODULE_ENUM dst_module);
 
 int *ddp_get_scenario_list(DDP_SCENARIO_ENUM ddp_scenario);
 
-int ddp_insert_module(DDP_SCENARIO_ENUM ddp_scenario, DISP_MODULE_ENUM place,
-		      DISP_MODULE_ENUM module);
-int ddp_remove_module(DDP_SCENARIO_ENUM ddp_scenario, DISP_MODULE_ENUM module);
+int ddp_insert_module(DDP_SCENARIO_ENUM ddp_scenario, enum DISP_MODULE_ENUM place,
+		      enum DISP_MODULE_ENUM module);
+int ddp_remove_module(DDP_SCENARIO_ENUM ddp_scenario, enum DISP_MODULE_ENUM module);
 
 int ddp_is_scenario_on_primary(DDP_SCENARIO_ENUM scenario);
 
@@ -95,6 +95,6 @@ int ddp_insert_config_allow_rec(void *handle);
 int ddp_insert_config_dirty_rec(void *handle);
 
 int disp_get_dst_module(DDP_SCENARIO_ENUM scenario);
-int ddp_is_module_in_scenario(DDP_SCENARIO_ENUM ddp_scenario, DISP_MODULE_ENUM module);
+int ddp_is_module_in_scenario(DDP_SCENARIO_ENUM ddp_scenario, enum DISP_MODULE_ENUM module);
 
 #endif

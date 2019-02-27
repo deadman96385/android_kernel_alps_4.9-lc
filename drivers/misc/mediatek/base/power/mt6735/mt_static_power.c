@@ -18,10 +18,10 @@
 #include <linux/module.h>
 #endif
 
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 #include "mt_spower_data.h"
 #else
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 #include "mt_spower_data_d3.h"
 #else
 #include "mt_spower_data_d2.h"

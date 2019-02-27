@@ -46,7 +46,7 @@ typedef struct {
 
 } GPIO_REGS;
 
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 /* Denali2 */
 #define MAX_GPIO_PIN (197+1)
 #else

@@ -14,7 +14,7 @@
 #ifndef __CUST_VIBRATOR_H__
 #define __CUST_VIBRATOR_H__
 
-
+#include <linux/platform_device.h>
 #define CUST_VIBR_LIMIT
 #define CUST_VIBR_VOL
 
@@ -39,4 +39,6 @@ struct vibrator_hw {
 #endif
 };
 
+void init_cust_vibrator_dtsi(struct platform_device *pdev);
+void init_vibr_oc_handler(void (*vibr_oc_func)(void));
 #endif

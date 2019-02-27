@@ -27,7 +27,7 @@ typedef struct {
 typedef struct {
 	s8 width;
 } PIN_width;
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 /* Denali2 */
 
 #define IOCFG_0_BASE (0x800)
@@ -5061,7 +5061,7 @@ PIN_offset RDSEL_offset[] = {
 /* 197 */ {-1} };
 
 
-/* #elif defined(CONFIG_ARCH_MT6753) */
+/* #elif defined(CONFIG_MACH_MT6753) */
 /* Denali3 */
 
 #else

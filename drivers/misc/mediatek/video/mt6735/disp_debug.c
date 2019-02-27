@@ -161,7 +161,7 @@ MTKFB_LAYER_DBG_OPTIONS mtkfb_layer_dbg_opt[DDP_OVL_LAYER_MUN];
 /* --------------------------------------------------------------------------- */
 static void process_dbg_debug(const char *opt)
 {
-	static disp_session_config config;
+	static struct disp_session_config config;
 	unsigned long int enable = 0;
 	char *p;
 	char *buf = dbg_buf + strlen(dbg_buf);
@@ -677,7 +677,7 @@ void ddp_process_dbg_opt(const char *opt)
 			pr_err("DISP/%s: errno %d\n", __func__, ret);
 
 		if (level) {
-			disp_pwm_id_t pwm_id = DISP_PWM0;
+			enum disp_pwm_id_t pwm_id = DISP_PWM0;
 
 			if (opt[3] == '1')
 				pwm_id = DISP_PWM1;
@@ -1140,7 +1140,7 @@ void _debug_fps_meter(unsigned long mva, unsigned long va, unsigned int w, unsig
 /* Debug FileSystem Routines */
 /* --------------------------------------------------------------------------- */
 
-char *disp_get_fmt_name(DP_COLOR_ENUM color)
+char *disp_get_fmt_name(enum DP_COLOR_ENUM color)
 {
 	switch (color) {
 	case DP_COLOR_FULLG8:

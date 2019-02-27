@@ -45,7 +45,7 @@ int _is_lcm_inited(disp_lcm_handle *plcm)
 	return 0;
 }
 
-LCM_PARAMS *_get_lcm_params_by_handle(disp_lcm_handle *plcm)
+struct LCM_PARAMS *_get_lcm_params_by_handle(disp_lcm_handle *plcm)
 {
 	if (plcm)
 		return plcm->params;
@@ -54,7 +54,7 @@ LCM_PARAMS *_get_lcm_params_by_handle(disp_lcm_handle *plcm)
 	return NULL;
 }
 
-LCM_DRIVER *_get_lcm_driver_by_handle(disp_lcm_handle *plcm)
+struct LCM_DRIVER *_get_lcm_driver_by_handle(disp_lcm_handle *plcm)
 {
 	if (plcm)
 		return plcm->drv;
@@ -65,8 +65,8 @@ LCM_DRIVER *_get_lcm_driver_by_handle(disp_lcm_handle *plcm)
 
 void _dump_lcm_info(disp_lcm_handle *plcm)
 {
-	LCM_DRIVER *l = NULL;
-	LCM_PARAMS *p = NULL;
+	struct LCM_DRIVER *l = NULL;
+	struct LCM_PARAMS *p = NULL;
 	char str_buf[128];
 	int buf_len = 128;
 	int buf_pos = 0;
@@ -228,14 +228,14 @@ int disp_of_getprop_u8(const struct device_node *np, const char *propname, u8 *o
 	return len;
 }
 
-void parse_lcm_params_dt_node(struct device_node *np, LCM_PARAMS *lcm_params)
+void parse_lcm_params_dt_node(struct device_node *np, struct LCM_PARAMS *lcm_params)
 {
 	if (!lcm_params) {
 		pr_err("%s:%d, ERROR: Error access to LCM_PARAMS(NULL)\n", __FILE__, __LINE__);
 		return;
 	}
 
-	memset(lcm_params, 0x0, sizeof(LCM_PARAMS));
+	memset(lcm_params, 0x0, sizeof(struct LCM_PARAMS));
 
 	disp_of_getprop_u32(np, "lcm_params-types", &lcm_params->type);
 	disp_of_getprop_u32(np, "lcm_params-resolution", &lcm_params->width);
@@ -850,7 +850,7 @@ int check_lcm_node_from_DT(void)
 	return 0;
 }
 
-void load_lcm_resources_from_DT(LCM_DRIVER *lcm_drv)
+void load_lcm_resources_from_DT(struct LCM_DRIVER *lcm_drv)
 {
 	char lcm_node[128] = { 0 };
 	struct device_node *np = NULL;
@@ -891,7 +891,7 @@ void load_lcm_resources_from_DT(LCM_DRIVER *lcm_drv)
 }
 #endif
 
-disp_lcm_handle *disp_lcm_probe(char *plcm_name, LCM_INTERFACE_ID lcm_id, int is_lcm_inited)
+disp_lcm_handle *disp_lcm_probe(char *plcm_name, enum LCM_INTERFACE_ID lcm_id, int is_lcm_inited)
 {
 	int lcmindex = 0;
 	bool isLCMFound = false;
@@ -901,8 +901,8 @@ disp_lcm_handle *disp_lcm_probe(char *plcm_name, LCM_INTERFACE_ID lcm_id, int is
 	bool isLCMDtFound = false;
 #endif
 
-	LCM_DRIVER *lcm_drv = NULL;
-	LCM_PARAMS *lcm_param = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_PARAMS *lcm_param = NULL;
 	disp_lcm_handle *plcm = NULL;
 
 	DISPMSG("%s\n", __func__);
@@ -981,7 +981,7 @@ disp_lcm_handle *disp_lcm_probe(char *plcm_name, LCM_INTERFACE_ID lcm_id, int is
 	}
 
 	plcm = kzalloc(sizeof(uint8_t *) * sizeof(disp_lcm_handle), GFP_KERNEL);
-	lcm_param = kzalloc(sizeof(uint8_t *) * sizeof(LCM_PARAMS), GFP_KERNEL);
+	lcm_param = kzalloc(sizeof(uint8_t *) * sizeof(struct LCM_PARAMS), GFP_KERNEL);
 	if (plcm && lcm_param) {
 		plcm->params = lcm_param;
 		plcm->drv = lcm_drv;
@@ -1033,7 +1033,7 @@ FAIL:
 
 int disp_lcm_init(disp_lcm_handle *plcm, int force)
 {
-	LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
 
 	DISPMSG("%s\n", __func__);
 	if (_is_lcm_inited(plcm)) {
@@ -1059,7 +1059,7 @@ int disp_lcm_init(disp_lcm_handle *plcm, int force)
 	return -1;
 }
 
-LCM_PARAMS *disp_lcm_get_params(disp_lcm_handle *plcm)
+struct LCM_PARAMS *disp_lcm_get_params(disp_lcm_handle *plcm)
 {
 	/* DISPFUNC(); */
 
@@ -1069,7 +1069,7 @@ LCM_PARAMS *disp_lcm_get_params(disp_lcm_handle *plcm)
 		return NULL;
 }
 
-LCM_INTERFACE_ID disp_lcm_get_interface_id(disp_lcm_handle *plcm)
+enum LCM_INTERFACE_ID disp_lcm_get_interface_id(disp_lcm_handle *plcm)
 {
 	DISPFUNC();
 
@@ -1081,7 +1081,7 @@ LCM_INTERFACE_ID disp_lcm_get_interface_id(disp_lcm_handle *plcm)
 
 int disp_lcm_update(disp_lcm_handle *plcm, int x, int y, int w, int h, int force)
 {
-	LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
 
 	DISPDBG("%s\n", __func__);
 	if (_is_lcm_inited(plcm)) {
@@ -1108,7 +1108,7 @@ int disp_lcm_update(disp_lcm_handle *plcm, int x, int y, int w, int h, int force
 /* return 0: esd check pass */
 int disp_lcm_esd_check(disp_lcm_handle *plcm)
 {
-	LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
 
 	DISPFUNC();
 	if (_is_lcm_inited(plcm)) {
@@ -1128,7 +1128,7 @@ int disp_lcm_esd_check(disp_lcm_handle *plcm)
 
 int disp_lcm_esd_recover(disp_lcm_handle *plcm)
 {
-	LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
 
 	DISPFUNC();
 	if (_is_lcm_inited(plcm)) {
@@ -1152,7 +1152,7 @@ int disp_lcm_esd_recover(disp_lcm_handle *plcm)
 
 int disp_lcm_suspend(disp_lcm_handle *plcm)
 {
-	LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
 
 	DISPFUNC();
 	if (_is_lcm_inited(plcm)) {
@@ -1179,7 +1179,7 @@ int disp_lcm_suspend(disp_lcm_handle *plcm)
 
 int disp_lcm_resume(disp_lcm_handle *plcm)
 {
-	LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
 
 	DISPFUNC();
 	if (_is_lcm_inited(plcm)) {
@@ -1209,7 +1209,7 @@ int disp_lcm_resume(disp_lcm_handle *plcm)
 #endif
 int disp_lcm_set_backlight(disp_lcm_handle *plcm, int level)
 {
-	LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
 
 	DISPFUNC();
 	if (_is_lcm_inited(plcm)) {
@@ -1231,7 +1231,7 @@ int disp_lcm_set_backlight(disp_lcm_handle *plcm, int level)
 
 
 
-int disp_lcm_ioctl(disp_lcm_handle *plcm, LCM_IOCTL ioctl, unsigned int arg)
+int disp_lcm_ioctl(disp_lcm_handle *plcm, enum LCM_IOCTL ioctl, unsigned int arg)
 {
 	return 0;
 }
@@ -1247,7 +1247,7 @@ int disp_lcm_is_inited(disp_lcm_handle *plcm)
 unsigned int disp_lcm_ATA(disp_lcm_handle *plcm)
 {
 	unsigned int ret = 0;
-	LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
 
 	DISPFUNC();
 	if (_is_lcm_inited(plcm)) {
@@ -1268,8 +1268,8 @@ unsigned int disp_lcm_ATA(disp_lcm_handle *plcm)
 
 void *disp_lcm_switch_mode(disp_lcm_handle *plcm, int mode)
 {
-	LCM_DRIVER *lcm_drv = NULL;
-	LCM_DSI_MODE_SWITCH_CMD *lcm_cmd = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_DSI_MODE_SWITCH_CMD *lcm_cmd = NULL;
 
 	if (_is_lcm_inited(plcm)) {
 		if (plcm->params->dsi.switch_mode_enable == 0) {
@@ -1278,7 +1278,7 @@ void *disp_lcm_switch_mode(disp_lcm_handle *plcm, int mode)
 		}
 		lcm_drv = plcm->drv;
 		if (lcm_drv->switch_mode) {
-			lcm_cmd = (LCM_DSI_MODE_SWITCH_CMD *) lcm_drv->switch_mode(mode);
+			lcm_cmd = (struct LCM_DSI_MODE_SWITCH_CMD *) lcm_drv->switch_mode(mode);
 			lcm_cmd->cmd_if = (unsigned int)(plcm->params->lcm_cmd_if);
 		} else {
 			DISPERR("FATAL ERROR, lcm_drv->switch_mode is null\n");
@@ -1295,7 +1295,7 @@ void *disp_lcm_switch_mode(disp_lcm_handle *plcm, int mode)
 int disp_lcm_is_video_mode(disp_lcm_handle *plcm)
 {
 	/* DISPFUNC(); */
-	LCM_PARAMS *lcm_param = NULL;
+	struct LCM_PARAMS *lcm_param = NULL;
 
 	if (_is_lcm_inited(plcm))
 		lcm_param = plcm->params;
@@ -1334,7 +1334,7 @@ int disp_lcm_is_video_mode(disp_lcm_handle *plcm)
 
 int disp_lcm_set_cmd(disp_lcm_handle *plcm, void *handle, int *lcm_cmd, unsigned int cmd_num)
 {
-	LCM_DRIVER *lcm_drv = NULL;
+	struct LCM_DRIVER *lcm_drv = NULL;
 
 	DISPFUNC();
 	if (_is_lcm_inited(plcm)) {

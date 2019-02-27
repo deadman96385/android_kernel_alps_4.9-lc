@@ -473,7 +473,7 @@ static void ddp_disconnect_path_l(int *module_list, void *handle)
 }
 
 
-static MUTEX_SOF ddp_get_mutex_sof(DISP_MODULE_ENUM dest_module, DDP_MODE ddp_mode)
+static MUTEX_SOF ddp_get_mutex_sof(enum DISP_MODULE_ENUM dest_module, DDP_MODE ddp_mode)
 {
 	MUTEX_SOF mode = SOF_SINGLE;
 
@@ -636,7 +636,7 @@ static void ddp_print_scenario(DDP_SCENARIO_ENUM scenario)
 	DISPMSG("scenario %s have modules: %s\n", ddp_get_scenario_name(scenario), path);
 }
 
-static int ddp_find_module_index(DDP_SCENARIO_ENUM ddp_scenario, DISP_MODULE_ENUM module)
+static int ddp_find_module_index(DDP_SCENARIO_ENUM ddp_scenario, enum DISP_MODULE_ENUM module)
 {
 	int i = 0;
 
@@ -650,7 +650,7 @@ static int ddp_find_module_index(DDP_SCENARIO_ENUM ddp_scenario, DISP_MODULE_ENU
 }
 
 /* set display interface when kernel init */
-int ddp_set_dst_module(DDP_SCENARIO_ENUM scenario, DISP_MODULE_ENUM dst_module)
+int ddp_set_dst_module(DDP_SCENARIO_ENUM scenario, enum DISP_MODULE_ENUM dst_module)
 {
 	int i = 0;
 
@@ -689,9 +689,9 @@ int ddp_set_dst_module(DDP_SCENARIO_ENUM scenario, DISP_MODULE_ENUM dst_module)
 	return 0;
 }
 
-DISP_MODULE_ENUM ddp_get_dst_module(DDP_SCENARIO_ENUM ddp_scenario)
+enum DISP_MODULE_ENUM ddp_get_dst_module(DDP_SCENARIO_ENUM ddp_scenario)
 {
-	DISP_MODULE_ENUM module_name = DISP_MODULE_UNKNOWN;
+	enum DISP_MODULE_ENUM module_name = DISP_MODULE_UNKNOWN;
 	int module_num = ddp_get_module_num_l(module_list_scenario[ddp_scenario]) - 1;
 
 	if (module_num >= 0)
@@ -709,7 +709,7 @@ int *ddp_get_scenario_list(DDP_SCENARIO_ENUM ddp_scenario)
 	return module_list_scenario[ddp_scenario];
 }
 
-int ddp_is_module_in_scenario(DDP_SCENARIO_ENUM ddp_scenario, DISP_MODULE_ENUM module)
+int ddp_is_module_in_scenario(DDP_SCENARIO_ENUM ddp_scenario, enum DISP_MODULE_ENUM module)
 {
 	int i = 0;
 
@@ -721,8 +721,8 @@ int ddp_is_module_in_scenario(DDP_SCENARIO_ENUM ddp_scenario, DISP_MODULE_ENUM m
 	return 0;
 }
 
-int ddp_insert_module(DDP_SCENARIO_ENUM ddp_scenario, DISP_MODULE_ENUM place,
-		      DISP_MODULE_ENUM module)
+int ddp_insert_module(DDP_SCENARIO_ENUM ddp_scenario, enum DISP_MODULE_ENUM place,
+		      enum DISP_MODULE_ENUM module)
 {
 	int i = DDP_ENING_NUM - 1;
 	int idx = ddp_find_module_index(ddp_scenario, place);
@@ -762,7 +762,7 @@ int ddp_insert_module(DDP_SCENARIO_ENUM ddp_scenario, DISP_MODULE_ENUM place,
 	return 0;
 }
 
-int ddp_remove_module(DDP_SCENARIO_ENUM ddp_scenario, DISP_MODULE_ENUM module)
+int ddp_remove_module(DDP_SCENARIO_ENUM ddp_scenario, enum DISP_MODULE_ENUM module)
 {
 	int i = 0;
 	int idx = ddp_find_module_index(ddp_scenario, module);
@@ -880,7 +880,7 @@ int ddp_mutex_reset(int mutex_id, void *handle)
 	return 0;
 }
 
-int ddp_mutex_add_module(int mutex_id, DISP_MODULE_ENUM module, void *handle)
+int ddp_mutex_add_module(int mutex_id, enum DISP_MODULE_ENUM module, void *handle)
 {
 	int value = 0;
 
@@ -895,7 +895,7 @@ int ddp_mutex_add_module(int mutex_id, DISP_MODULE_ENUM module, void *handle)
 	return 0;
 }
 
-int ddp_mutex_remove_module(int mutex_id, DISP_MODULE_ENUM module, void *handle)
+int ddp_mutex_remove_module(int mutex_id, enum DISP_MODULE_ENUM module, void *handle)
 {
 	int value = 0;
 

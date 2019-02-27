@@ -18,6 +18,12 @@
 #include "ddp_mmp.h"
 #include "ddp_dump.h"
 
+/* FIXME: remove when MMP ready */
+#ifndef SUPPORT_MMPROFILE
+#undef MMProfileLogEx
+#define MMProfileLogEx(...)
+#endif
+
 extern unsigned int gResetRDMAEnable;
 extern unsigned int gOVLBackground;
 extern unsigned int gEnableIRQ;
@@ -66,6 +72,6 @@ unsigned int ddp_debug_irq_log_level(void);
 int ddp_mem_test(void);
 int ddp_lcd_test(void);
 
-char *disp_get_fmt_name(DP_COLOR_ENUM color);
+char *disp_get_fmt_name(enum DP_COLOR_ENUM color);
 
 #endif				/* __DDP_DEBUG_H__ */

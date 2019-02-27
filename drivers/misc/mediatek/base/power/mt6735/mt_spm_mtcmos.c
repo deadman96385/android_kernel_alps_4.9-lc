@@ -1147,9 +1147,9 @@ void spm_mtcmos_noncpu_unlock(unsigned long *flags)
 #define MFG_PROT_MASK        ((0x1<<14))	/* bit 14 */
 #define CONN_PROT_MASK       ((0x1<<2) | (0x1<<8))	/* bit 2, 8 */
 
-#if defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735M)
 /* #define MD_PWRON_BY_CPU */
-#elif defined(CONFIG_ARCH_MT6753)
+#elif defined(CONFIG_MACH_MT6753)
 #define MD_PWRON_BY_CPU
 #else
 /* #define MD_PWRON_BY_CPU */

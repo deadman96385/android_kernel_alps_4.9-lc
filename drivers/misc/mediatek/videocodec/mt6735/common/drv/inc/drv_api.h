@@ -16,13 +16,18 @@
 
 #include "val_types_private.h"
 
+typedef void VAL_VOID_T;
+typedef unsigned long VAL_ULONG_T;
+typedef unsigned long VAL_HANDLE_T;
+typedef unsigned int VAL_UINT32_T;
+typedef signed int VAL_INT32_T;
 /* ============================================================= */
 /* For driver */
 
 typedef struct {
 	VAL_VOID_T *pvHandle;	/* HW vcodec handle */
-	VAL_TIME_T rLockedTime;
-	VAL_DRIVER_TYPE_T eDriverType;
+	struct VAL_TIME_T rLockedTime;
+	enum VAL_DRIVER_TYPE_T eDriverType;
 } VAL_VCODEC_HW_LOCK_T;
 
 typedef struct {
@@ -40,7 +45,7 @@ typedef struct {
 #define VCODEC_MULTIPLE_INSTANCE_NUM_x_10 (VCODEC_MULTIPLE_INSTANCE_NUM * 10)
 
 /* spinlock : OalHWContextLock */
-extern VAL_VCODEC_OAL_HW_CONTEXT_T oal_hw_context[VCODEC_MULTIPLE_INSTANCE_NUM];
+extern struct VAL_VCODEC_OAL_HW_CONTEXT_T oal_hw_context[VCODEC_MULTIPLE_INSTANCE_NUM];
 /* mutex : NonCacheMemoryListLock */
 extern VAL_NON_CACHE_MEMORY_LIST_T grNonCacheMemoryList[VCODEC_MULTIPLE_INSTANCE_NUM_x_10];
 
@@ -55,10 +60,10 @@ extern VAL_UINT32_T gu4EncISRCount;	/* spinlock : EncISRCountLock */
 
 VAL_INT32_T search_HWLockSlot_ByTID(VAL_ULONG_T ulpa, VAL_UINT32_T curr_tid);
 VAL_INT32_T search_HWLockSlot_ByHandle(VAL_ULONG_T ulpa, VAL_HANDLE_T handle);
-VAL_VCODEC_OAL_HW_CONTEXT_T *setCurr_HWLockSlot(VAL_ULONG_T ulpa, VAL_UINT32_T tid);
-VAL_VCODEC_OAL_HW_CONTEXT_T *setCurr_HWLockSlot_Thread_ID(VAL_VCODEC_THREAD_ID_T a_prVcodecThreadID,
+struct VAL_VCODEC_OAL_HW_CONTEXT_T *setCurr_HWLockSlot(VAL_ULONG_T ulpa, VAL_UINT32_T tid);
+struct VAL_VCODEC_OAL_HW_CONTEXT_T *setCurr_HWLockSlot_Thread_ID(struct VAL_VCODEC_THREAD_ID_T a_prVcodecThreadID,
 							  VAL_UINT32_T *a_prIndex);
-VAL_VCODEC_OAL_HW_CONTEXT_T *freeCurr_HWLockSlot(VAL_ULONG_T ulpa);
+struct VAL_VCODEC_OAL_HW_CONTEXT_T *freeCurr_HWLockSlot(VAL_ULONG_T ulpa);
 void Add_NonCacheMemoryList(VAL_ULONG_T a_ulKVA,
 			    VAL_ULONG_T a_ulKPA,
 			    VAL_ULONG_T a_ulSize,

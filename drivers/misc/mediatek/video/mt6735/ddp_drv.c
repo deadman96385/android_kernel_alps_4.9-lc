@@ -547,7 +547,7 @@ static int disp_is_intr_enable(DISP_REG_ENUM module)
 
 m4u_callback_ret_t disp_m4u_callback(int port, unsigned int mva, void *data)
 {
-	DISP_MODULE_ENUM module = DISP_MODULE_OVL0;
+	enum DISP_MODULE_ENUM module = DISP_MODULE_OVL0;
 
 	DISPERR("fault call port=%d, mva=0x%x, data=0x%p\n", port, mva, data);
 	switch (port) {

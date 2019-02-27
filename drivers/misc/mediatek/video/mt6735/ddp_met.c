@@ -36,7 +36,7 @@
 
 unsigned int met_tag_on = 0;
 
-static const char *const parse_color_format(DpColorFormat fmt)
+static const char *const parse_color_format(enum DP_COLOR_ENUM fmt)
 {
 	switch (fmt) {
 	case eBGR565:
@@ -174,7 +174,7 @@ static void ddp_err_irq_met_tag(const char *name)
 	met_tag_oneshot(DDP_IRQ_EER_ID, name, 0);
 }
 
-static void met_irq_handler(DISP_MODULE_ENUM module, unsigned int reg_val)
+static void met_irq_handler(enum DISP_MODULE_ENUM module, unsigned int reg_val)
 {
 	int index = 0;
 	char tag_name[30] = { '\0' };

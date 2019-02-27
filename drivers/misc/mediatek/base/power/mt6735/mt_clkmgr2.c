@@ -33,7 +33,7 @@
 #include <mach/mt_clkmgr.h>
 /* #include <mach/mt_dcm.h> */
 #include <mach/mt_spm_mtcmos.h>
-#include <mach/mt_freqhopping.h>
+#include <mach/mtk_freqhopping.h>
 /* #include <mach/mt_gpufreq.h> */
 /* #include <mach/irqs.h> */
 

@@ -1549,7 +1549,7 @@ static s32 mt_i2c_probe(struct platform_device *pdev)
 	case 3:
 		i2c->pdn = MT_CG_PERI_I2C3;
 		break;
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	case 4:
 		i2c->pdn = MT_CG_PERI_I2C4;
 		break;
@@ -1581,7 +1581,7 @@ static s32 mt_i2c_probe(struct platform_device *pdev)
 		i2c->clk_main = devm_clk_get(&pdev->dev, "i2c3-main");
 		i2c->clk_dma = devm_clk_get(&pdev->dev, "i2c3-dma");
 		break;
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	case 4:
 		i2c->clk_main = devm_clk_get(&pdev->dev, "i2c4-main");
 		i2c->clk_dma = devm_clk_get(&pdev->dev, "i2c4-dma");

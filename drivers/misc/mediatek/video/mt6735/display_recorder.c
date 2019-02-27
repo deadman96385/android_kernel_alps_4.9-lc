@@ -141,7 +141,7 @@ static void dprec_to_mmp(unsigned int type_logsrc, MMP_LogType mmp_log, unsigned
 	int MMP_Event = dprec_mmp_event_spy(type_logsrc);
 
 	if (MMP_Event < MMProfileMaxEventCount)  /* if (MMP_Event < 0xffff) */
-		MMProfileLogEx(MMP_Event, mmp_log, data1, data2);
+		mmprofile_log_ex(MMP_Event, mmp_log, data1, data2);
 
 }
 
@@ -338,7 +338,7 @@ void dprec_logger_trigger(unsigned int type_logsrc, unsigned int val1, unsigned 
 	dprec_logger *l;
 	unsigned long long time;
 
-	dprec_to_mmp(type_logsrc, MMProfileFlagPulse, val1, val2);
+	dprec_to_mmp(type_logsrc, MMPROFILE_FLAG_PULSE, val1, val2);
 
 	spin_lock_irqsave(&gdprec_logger_spinlock, flags);
 	time = get_current_time_us();
@@ -405,7 +405,7 @@ void dprec_logger_start(unsigned int type_logsrc, unsigned int val1, unsigned in
 	dprec_logger *l;
 	unsigned long long time;
 
-	dprec_to_mmp(type_logsrc, MMProfileFlagStart, val1, val2);
+	dprec_to_mmp(type_logsrc, MMPROFILE_FLAG_START, val1, val2);
 	spin_lock_irqsave(&gdprec_logger_spinlock, flags);
 	l = &logger[source];
 	time = get_current_time_us();
@@ -431,7 +431,7 @@ void dprec_logger_done(unsigned int type_logsrc, unsigned int val1, unsigned int
 	dprec_logger *l;
 	unsigned long long time;
 
-	dprec_to_mmp(type_logsrc, MMProfileFlagEnd, val1, val2);
+	dprec_to_mmp(type_logsrc, MMPROFILE_FLAG_END, val1, val2);
 
 	spin_lock_irqsave(&gdprec_logger_spinlock, flags);
 	l = &logger[source];
@@ -468,11 +468,11 @@ void dprec_logger_event_init(dprec_logger_event *p, char *name, uint32_t level,
 	if (p) {
 		scnprintf(p->name, sizeof(p->name) / sizeof(p->name[0]), name);
 		if (mmp_root)
-			p->mmp = MMProfileRegisterEvent(*mmp_root, name);
+			p->mmp = mmprofile_register_event(*mmp_root, name);
 		else
-			p->mmp = MMProfileRegisterEvent(ddp_mmp_get_events()->DDP, name);
+			p->mmp = mmprofile_register_event(ddp_mmp_get_events()->DDP, name);
 
-		MMProfileEnableEventRecursive(p->mmp, 1);
+		mmprofile_enable_event_recursive(p->mmp, 1);
 
 		p->level = level;
 
@@ -517,7 +517,7 @@ static inline void mmp_kernel_trace_end(void)
 
 void dprec_logger_frame_seq_begin(unsigned int session_id, unsigned frm_sequence)
 {
-	unsigned device_type = DISP_SESSION_TYPE(session_id);
+	unsigned device_type = enum DISP_SESSION_TYPE(session_id);
 
 	if (frm_sequence <= 0 || session_id <= 0)
 		return;
@@ -538,7 +538,7 @@ void dprec_logger_frame_seq_begin(unsigned int session_id, unsigned frm_sequence
 
 void dprec_logger_frame_seq_end(unsigned int session_id, unsigned frm_sequence)
 {
-	unsigned device_type = DISP_SESSION_TYPE(session_id);
+	unsigned device_type = enum DISP_SESSION_TYPE(session_id);
 
 	if (frm_sequence <= 0 || session_id <= 0)
 		return;
@@ -573,7 +573,7 @@ void dprec_start(dprec_logger_event *event, unsigned int val1, unsigned int val2
 {
 	if (event) {
 		if (event->level & DPREC_LOGGER_LEVEL_MMP)
-			MMProfileLogEx(event->mmp, MMProfileFlagStart, val1, val2);
+			mmprofile_log_ex(event->mmp, MMPROFILE_FLAG_START, val1, val2);
 
 		if (event->level & DPREC_LOGGER_LEVEL_LOGGER) {
 			unsigned long flags = 0;
@@ -616,7 +616,7 @@ void dprec_done(dprec_logger_event *event, unsigned int val1, unsigned int val2)
 {
 	if (event) {
 		if (event->level & DPREC_LOGGER_LEVEL_MMP)
-			MMProfileLogEx(event->mmp, MMProfileFlagEnd, val1, val2);
+			mmprofile_log_ex(event->mmp, MMPROFILE_FLAG_END, val1, val2);
 
 		if (event->level & DPREC_LOGGER_LEVEL_LOGGER) {
 			unsigned long flags = 0;
@@ -661,7 +661,7 @@ void dprec_trigger(dprec_logger_event *event, unsigned int val1, unsigned int va
 {
 	if (event) {
 		if (event->level & DPREC_LOGGER_LEVEL_MMP)
-			MMProfileLogEx(event->mmp, MMProfileFlagPulse, val1, val2);
+			mmprofile_log_ex(event->mmp, MMPROFILE_FLAG_PULSE, val1, val2);
 
 		if (event->level & DPREC_LOGGER_LEVEL_LOGGER) {
 			unsigned long flags = 0;
@@ -719,7 +719,7 @@ void dprec_submit(dprec_logger_event *event, unsigned int val1, unsigned int val
 {
 	if (event) {
 		if (event->level & DPREC_LOGGER_LEVEL_MMP)
-			MMProfileLogEx(event->mmp, MMProfileFlagPulse, val1, val2);
+			mmprofile_log_ex(event->mmp, MMPROFILE_FLAG_PULSE, val1, val2);
 
 		if (event->level & DPREC_LOGGER_LEVEL_LOGGER)
 			;
@@ -763,7 +763,7 @@ void dprec_logger_submit(unsigned int type_logsrc, unsigned long long period,
 
 	spin_unlock_irqrestore(&gdprec_logger_spinlock, flags);
 
-	dprec_to_mmp(type_logsrc, MMProfileFlagPulse, (unsigned int)l->period_max_frame, fence_idx);
+	dprec_to_mmp(type_logsrc, MMPROFILE_FLAG_PULSE, (unsigned int)l->period_max_frame, fence_idx);
 }
 
 static unsigned long long ts_dprec_reset;
@@ -921,7 +921,7 @@ void dprec_stub_event(DISP_PATH_EVENT event)
 	/* DISP_REG_SET(NULL,DISP_REG_CONFIG_MUTEX_INTEN,0xffffffff); */
 	if (event == DISP_PATH_EVENT_IF_VSYNC) {
 		vsync_cnt++;
-		/* MMProfileLogEx(ddp_mmp_get_events()->vsync_count, MMProfileFlagPulse, vsync_cnt, 0); */
+		/* mmprofile_log_ex(ddp_mmp_get_events()->vsync_count, MMPROFILE_FLAG_PULSE, vsync_cnt, 0); */
 		dprec_start(&dprec_vsync_irq_event, 0, 0);
 		dprec_done(&dprec_vsync_irq_event, 0, 0);
 	}
@@ -979,7 +979,7 @@ int dprec_handle_option(unsigned int option)
 	return 0;
 }
 
-int dprec_mmp_dump_ovl_layer(OVL_CONFIG_STRUCT *ovl_layer, unsigned int l,
+int dprec_mmp_dump_ovl_layer(struct OVL_CONFIG_STRUCT *ovl_layer, unsigned int l,
 			     unsigned int session /*1:primary, 2:external, 3:memory */)
 {
 	if (gCapturePriLayerEnable) {
@@ -996,7 +996,7 @@ int dprec_mmp_dump_ovl_layer(OVL_CONFIG_STRUCT *ovl_layer, unsigned int l,
 int dprec_mmp_dump_wdma_layer(void *wdma_layer, unsigned int wdma_num)
 {
 	if (gCaptureWdmaLayerEnable)
-		ddp_mmp_wdma_layer((WDMA_CONFIG_STRUCT *)wdma_layer, wdma_num, gCapturePriLayerDownX,
+		ddp_mmp_wdma_layer((struct WDMA_CONFIG_STRUCT *)wdma_layer, wdma_num, gCapturePriLayerDownX,
 				   gCapturePriLayerDownY);
 
 	return -1;
@@ -1005,7 +1005,7 @@ int dprec_mmp_dump_wdma_layer(void *wdma_layer, unsigned int wdma_num)
 int dprec_mmp_dump_rdma_layer(void *rdma_layer, unsigned int rdma_num)
 {
 	if (gCaptureWdmaLayerEnable)
-		ddp_mmp_rdma_layer((RDMA_CONFIG_STRUCT *)rdma_layer, rdma_num, gCapturePriLayerDownX,
+		ddp_mmp_rdma_layer((struct RDMA_CONFIG_STRUCT *)rdma_layer, rdma_num, gCapturePriLayerDownX,
 				   gCapturePriLayerDownY);
 
 	return -1;
@@ -1421,7 +1421,7 @@ int dprec_handle_option(unsigned int option)
 	return 0;
 }
 
-int dprec_mmp_dump_ovl_layer(OVL_CONFIG_STRUCT *ovl_layer, unsigned int l,
+int dprec_mmp_dump_ovl_layer(struct OVL_CONFIG_STRUCT *ovl_layer, unsigned int l,
 			     unsigned int session /*1:primary, 2:external, 3:memory */)
 {
 	return 0;

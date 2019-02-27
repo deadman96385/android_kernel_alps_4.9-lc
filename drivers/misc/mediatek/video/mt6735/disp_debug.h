@@ -208,7 +208,7 @@ unsigned int ddp_dump_reg_to_buf(unsigned int start_module, unsigned long *addr)
 void sub_debug_init(void);
 void sub_debug_deinit(void);
 unsigned int ddp_dump_lcm_param_to_buf(unsigned int start_module, unsigned long *addr);
-char *disp_get_fmt_name(DP_COLOR_ENUM color);
+char *disp_get_fmt_name(enum DP_COLOR_ENUM color);
 
 #endif				/* __MTKFB_DEBUG_H */
 

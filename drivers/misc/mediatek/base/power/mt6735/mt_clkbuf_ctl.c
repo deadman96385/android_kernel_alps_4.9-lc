@@ -32,7 +32,7 @@
 
 #include "mt_spm.h"
 #include "mt_spm_sleep.h"
-#include "mt_clkbuf_ctl.h"
+#include "mtk_clkbuf_ctl.h"
 
 DEFINE_MUTEX(clk_buf_ctrl_lock);
 

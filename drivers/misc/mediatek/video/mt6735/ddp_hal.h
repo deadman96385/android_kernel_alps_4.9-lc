@@ -23,7 +23,7 @@
 #define DISP_MUTEX_MDP_COUNT  (5)
 
 /* DISP MODULE */
-typedef enum {
+enum DISP_MODULE_ENUM {
 	DISP_MODULE_OVL0 = 0,
 	DISP_MODULE_OVL1,
 	DISP_MODULE_RDMA0,
@@ -58,7 +58,7 @@ typedef enum {
 	DISP_MODULE_SMI_COMMON,
 	DISP_MODULE_UNKNOWN,	/* 20 */
 	DISP_MODULE_NUM
-} DISP_MODULE_ENUM;
+};
 
 typedef enum {
 	DISP_REG_OVL0,
@@ -144,7 +144,7 @@ typedef enum {
 
 
 typedef struct module_map_s {
-	DISP_MODULE_ENUM module;
+	enum DISP_MODULE_ENUM module;
 	int bit;
 } module_map_t;
 

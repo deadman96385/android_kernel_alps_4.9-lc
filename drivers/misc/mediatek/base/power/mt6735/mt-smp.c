@@ -154,7 +154,7 @@ int __cpuinit mt_smp_boot_secondary(unsigned int cpu, struct task_struct *idle)
 		spm_mtcmos_ctrl_cpu3(STA_POWER_ON, 1);
 		break;
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	case 4:
 		#ifdef CONFIG_MTK_FPGA
 		mt_reg_sync_writel(SLAVE4_MAGIC_NUM, SLAVE4_MAGIC_REG);
@@ -207,7 +207,7 @@ int __cpuinit mt_smp_boot_secondary(unsigned int cpu, struct task_struct *idle)
 		#endif
 		spm_mtcmos_ctrl_cpu7(STA_POWER_ON, 1);
 		break;
-#endif /* CONFIG_ARCH_MT6753 */
+#endif /* CONFIG_MACH_MT6753 */
 
 	default:
 		break;

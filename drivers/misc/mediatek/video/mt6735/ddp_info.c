@@ -23,7 +23,7 @@
 #include "ddp_wdma.h"
 #include "ddp_wdma_ex.h"
 
-char *ddp_get_module_name(DISP_MODULE_ENUM module)
+char *ddp_get_module_name(enum DISP_MODULE_ENUM module)
 {
 	switch (module) {
 	case DISP_MODULE_UFOE:
@@ -161,7 +161,7 @@ char *ddp_get_reg_module_name(DISP_REG_ENUM module)
 	}
 }
 
-int ddp_get_module_max_irq_bit(DISP_MODULE_ENUM module)
+int ddp_get_module_max_irq_bit(enum DISP_MODULE_ENUM module)
 {
 	switch (module) {
 	case DISP_MODULE_UFOE:

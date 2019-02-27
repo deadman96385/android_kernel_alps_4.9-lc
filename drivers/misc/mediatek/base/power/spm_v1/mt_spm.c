@@ -143,7 +143,7 @@ void __iomem *scp_i2c0_base;
 void __iomem *scp_i2c1_base;
 void __iomem *scp_i2c2_base;
 void __iomem *i2c4_base;
-#include <mt_dramc.h> /* for ucDram_Register_Read () */
+#include <mtk_dramc.h> /* for ucDram_Register_Read () */
 #if defined(CONFIG_MACH_MT6753)
 void __iomem *_mcucfg_base;
 void __iomem *_mcucfg_phys_base;

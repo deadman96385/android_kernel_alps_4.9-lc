@@ -65,8 +65,8 @@ static unsigned int dal_bg_color = RGB888_To_RGB565(DAL_COLOR_RED);
 /* extern struct mutex OverlaySettingMutex; */
 /* extern atomic_t OverlaySettingDirtyFlag; */
 /* extern atomic_t OverlaySettingApplied; */
-/* extern OVL_CONFIG_STRUCT cached_layer_config[DDP_OVL_LAYER_MUN]; */
-/* extern disp_session_input_config *captured_session_input; */
+/* extern struct OVL_CONFIG_STRUCT cached_layer_config[DDP_OVL_LAYER_MUN]; */
+/* extern struct disp_session_input_config *captured_session_input; */
 
 /* DECLARE_MUTEX(dal_sem); */
 DEFINE_SEMAPHORE(dal_sem);
@@ -180,7 +180,7 @@ DAL_STATUS DAL_Dynamic_Change_FB_Layer(unsigned int isAEEEnabled)
 		/* change ui layer from DISP_DEFAULT_UI_LAYER_ID to DISP_CHANGED_UI_LAYER_ID */
 		memcpy((void *)(&cached_layer_config[DISP_CHANGED_UI_LAYER_ID]),
 		       (void *)(&cached_layer_config[DISP_DEFAULT_UI_LAYER_ID]),
-		       sizeof(OVL_CONFIG_STRUCT));
+		       sizeof(struct OVL_CONFIG_STRUCT));
 		ui_layer_tdshp = cached_layer_config[DISP_DEFAULT_UI_LAYER_ID].isTdshp;
 		cached_layer_config[DISP_DEFAULT_UI_LAYER_ID].isTdshp = 0;
 		/* change global variable value, else error-check will find layer 2, 3 enable tdshp together */
@@ -189,11 +189,11 @@ DAL_STATUS DAL_Dynamic_Change_FB_Layer(unsigned int isAEEEnabled)
 	} else {
 		memcpy((void *)(&cached_layer_config[DISP_DEFAULT_UI_LAYER_ID]),
 		       (void *)(&cached_layer_config[DISP_CHANGED_UI_LAYER_ID]),
-		       sizeof(OVL_CONFIG_STRUCT));
+		       sizeof(struct OVL_CONFIG_STRUCT));
 		cached_layer_config[DISP_DEFAULT_UI_LAYER_ID].isTdshp = ui_layer_tdshp;
 		FB_LAYER = DISP_DEFAULT_UI_LAYER_ID;
 		memset((void *)(&cached_layer_config[DISP_CHANGED_UI_LAYER_ID]), 0,
-		       sizeof(OVL_CONFIG_STRUCT));
+		       sizeof(struct OVL_CONFIG_STRUCT));
 	}
 
 	/* no matter memcpy or memset, layer ID should not be changed */
@@ -217,7 +217,7 @@ DAL_STATUS DAL_Clean(void)
 	if (NULL == mfc_handle)
 		return DAL_STATUS_NOT_READY;
 
-	MMProfileLogEx(ddp_mmp_get_events()->dal_clean, MMProfileFlagStart, 0, 0);
+	mmprofile_log_ex(ddp_mmp_get_events()->dal_clean, MMPROFILE_FLAG_START, 0, 0);
 
 	if (down_interruptible(&dal_sem)) {
 		pr_debug("DISP/DAL " "Can't get semaphore in %s()\n", __func__);
@@ -236,8 +236,8 @@ DAL_STATUS DAL_Clean(void)
 
 	/* TODO: if dal_shown=false, and 3D enabled, mtkfb may disable UI layer, please modify 3D driver */
 	if (isAEEEnabled == 1) {
-		disp_session_input_config *session_input;
-		disp_input_config input;
+		struct disp_session_input_config *session_input;
+		struct disp_input_config input;
 		int layer_id;
 
 		session_input = &captured_session_input[DISP_SESSION_PRIMARY - 1];
@@ -277,7 +277,7 @@ DAL_STATUS DAL_Clean(void)
 
 	up(&dal_sem);
 
-	MMProfileLogEx(ddp_mmp_get_events()->dal_clean, MMProfileFlagEnd, 0, 0);
+	mmprofile_log_ex(ddp_mmp_get_events()->dal_clean, MMPROFILE_FLAG_END, 0, 0);
 	return ret;
 }
 EXPORT_SYMBOL(DAL_Clean);
@@ -308,8 +308,8 @@ DAL_STATUS DAL_Printf(const char *fmt, ...)
 	va_list args;
 	uint i;
 	DAL_STATUS ret = DAL_STATUS_OK;
-	disp_session_input_config *session_input;
-	disp_input_config input;
+	struct disp_session_input_config *session_input;
+	struct disp_input_config input;
 	int layer_id;
 	MFC_STATUS r;
 
@@ -321,7 +321,7 @@ DAL_STATUS DAL_Printf(const char *fmt, ...)
 	if (NULL == fmt)
 		return DAL_STATUS_INVALID_ARGUMENT;
 
-	MMProfileLogEx(ddp_mmp_get_events()->dal_printf, MMProfileFlagStart, 0, 0);
+	mmprofile_log_ex(ddp_mmp_get_events()->dal_printf, MMPROFILE_FLAG_START, 0, 0);
 
 	if (down_interruptible(&dal_sem)) {
 		pr_debug("DISP/DAL " "Can't get semaphore in %s()\n",  __func__);
@@ -394,7 +394,7 @@ DAL_STATUS DAL_Printf(const char *fmt, ...)
 
 	up(&dal_sem);
 
-	MMProfileLogEx(ddp_mmp_get_events()->dal_printf, MMProfileFlagEnd, 0, 0);
+	mmprofile_log_ex(ddp_mmp_get_events()->dal_printf, MMPROFILE_FLAG_END, 0, 0);
 
 	return ret;
 }

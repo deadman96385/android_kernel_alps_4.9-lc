@@ -100,7 +100,7 @@ void ovl_set_status(DISP_OVL1_STATUS status)
 {
 	DISPMSG("cascade, set_ovl1 from %s to %s!\n", ovl_get_status_name(ovl1_status),
 	       ovl_get_status_name(status));
-	MMProfileLogEx(ddp_mmp_get_events()->ovl1_status, MMProfileFlagPulse, ovl1_status, status);
+	mmprofile_log_ex(ddp_mmp_get_events()->ovl1_status, MMPROFILE_FLAG_PULSE, ovl1_status, status);
 	ovl1_status = status;	/* atomic operation */
 }
 
@@ -487,7 +487,7 @@ static int ovl_layer_config(DISP_MODULE_ENUM module, unsigned int layer,
 			    unsigned int dst_alpha,
 			    unsigned int constant_color,
 			    unsigned int yuv_range,
-			    DISP_BUFFER_TYPE sec, unsigned int is_engine_sec, void *handle,
+			    enum DISP_BUFFER_TYPE sec, unsigned int is_engine_sec, void *handle,
 			    bool is_memory,
 			    unsigned int roi_w, unsigned int roi_h)
 {
@@ -932,7 +932,7 @@ void ovl_get_info(int idx, void *data)
 	}
 }
 
-static int ovl_check_input_param(OVL_CONFIG_STRUCT *config)
+static int ovl_check_input_param(struct OVL_CONFIG_STRUCT *config)
 {
 	if ((config->addr == 0 && config->source == 0) || config->dst_w == 0 || config->dst_h == 0) {
 		DISPERR("ovl parameter invalidate, addr=%lx, w=%d, h=%d\n",
@@ -961,7 +961,7 @@ void ovl_reset_by_cmdq(void *handle, DISP_MODULE_ENUM module)
 }
 
 static int ovl_is_sec[2];
-static int ovl_config_l(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig, void *handle)
+static int ovl_config_l(DISP_MODULE_ENUM module, struct disp_ddp_path_config *pConfig, void *handle)
 {
 	int i = 0;
 	unsigned int layer_min = 0;
@@ -1113,7 +1113,7 @@ static int ovl_config_l(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig, 
 					pConfig->ovl_config[i].src_pitch,
 					pConfig->ovl_config[i].dst_x, pConfig->ovl_config[i].dst_y,
 					pConfig->ovl_config[i].dst_w, pConfig->ovl_config[i].dst_h);
-			MMProfileLogEx(ddp_mmp_get_events()->ovl_enable, MMProfileFlagPulse,
+			mmprofile_log_ex(ddp_mmp_get_events()->ovl_enable, MMPROFILE_FLAG_PULSE,
 				       ((module - DISP_MODULE_OVL0) << 4) + (i % 4),
 				       pConfig->ovl_config[i].addr);
 		} else {
@@ -1121,8 +1121,8 @@ static int ovl_config_l(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig, 
 			if (DISP_REG_GET(DISP_REG_OVL_SRC_CON + (module - DISP_MODULE_OVL0) * DISP_OVL_INDEX_OFFSET) &
 			    (0x1 << i))
 				/* DISPPR_FENCE("disable L%d.\n",i%4); */
-				MMProfileLogEx(ddp_mmp_get_events()->ovl_disable,
-					       MMProfileFlagPulse,
+				mmprofile_log_ex(ddp_mmp_get_events()->ovl_disable,
+					       MMPROFILE_FLAG_PULSE,
 					       ((module - DISP_MODULE_OVL0) << 4) + (i % 4), 0);
 
 		}

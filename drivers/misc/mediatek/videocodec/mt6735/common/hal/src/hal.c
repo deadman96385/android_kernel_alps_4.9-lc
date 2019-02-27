@@ -13,6 +13,8 @@
 
 #include "hal_api.h"
 
+typedef void VAL_VOID_T;
+
 VAL_RESULT_T eHalInit(VAL_HANDLE_T *a_phHalHandle)
 {
 	return VAL_RESULT_NO_ERROR;

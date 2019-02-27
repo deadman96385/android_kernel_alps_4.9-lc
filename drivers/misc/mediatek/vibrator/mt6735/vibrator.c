@@ -19,10 +19,11 @@
 #include <linux/slab.h>
 #include <linux/of.h>
 #include <linux/types.h>
-#include <mt-plat/mt_pwm.h>
+#include <mt-plat/mtk_pwm.h>
 #include <mt-plat/upmu_common.h>
 #include "vibrator.h"
 
+#define T    "vibrator"
 struct vibrator_hw *pvib_cust = NULL;
 
 static int debug_enable_vib_hal = 1;
@@ -43,6 +44,10 @@ void vibr_Disable_HW(void)
 	pmic_set_register_value(PMIC_RG_VIBR_EN, 0);	/* [bit 1]: VIBR_EN,  1=enable */
 }
 
+void init_vibr_oc_handler(void (*vibr_oc_func)(void))
+{
+	pr_debug(T "vibr_oc_handler not support, skip it\n");
+}
 /******************************************
 * Set RG_VIBR_VOSEL	Output voltage select
 *  hw->vib_vol:  Voltage selection
@@ -55,6 +60,45 @@ void vibr_Disable_HW(void)
 * 3'b110: 3.0V
 * 3'b111: 3.3V
 *******************************************/
+void init_cust_vibrator_dtsi(struct platform_device *pdev)
+{
+	int ret;
+
+	if (pvib_cust == NULL) {
+		pvib_cust = kmalloc(sizeof(struct vibrator_hw), GFP_KERNEL);
+		if (pvib_cust == NULL) {
+			pr_debug(T "%s kmalloc fail\n", __func__);
+			return;
+		}
+		ret = of_property_read_u32(pdev->dev.of_node, "vib_timer",
+			&(pvib_cust->vib_timer));
+		if (!ret)
+			pr_debug(T "vib_timer:%d\n", pvib_cust->vib_timer);
+		else
+			pvib_cust->vib_timer = 25;
+#ifdef CUST_VIBR_LIMIT
+		ret = of_property_read_u32(pdev->dev.of_node, "vib_limit",
+			&(pvib_cust->vib_limit));
+		if (!ret)
+			pr_debug(T "vib_limit : %d\n", pvib_cust->vib_limit);
+		else
+			pvib_cust->vib_limit = 9;
+#endif
+
+#ifdef CUST_VIBR_VOL
+		ret = of_property_read_u32(pdev->dev.of_node, "vib_vol",
+			&(pvib_cust->vib_vol));
+		if (!ret)
+			pr_debug(T "vib_vol: %d\n", pvib_cust->vib_vol);
+		else
+			pvib_cust->vib_vol = 0x05;
+#endif
+		pr_debug(T "pvib_cust = %d, %d, %d\n",
+			pvib_cust->vib_timer, pvib_cust->vib_limit,
+					pvib_cust->vib_vol);
+	}
+}
+
 struct vibrator_hw *get_cust_vibrator_dtsi(void)
 {
 	int ret;

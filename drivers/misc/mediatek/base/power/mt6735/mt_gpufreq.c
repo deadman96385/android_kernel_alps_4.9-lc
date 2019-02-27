@@ -74,7 +74,7 @@
 /**************************
  * GPU DVFS OPP table setting
  ***************************/
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 #define GPU_DVFS_FREQ0	 (598000)	/* KHz */
 #define GPU_DVFS_FREQ1	 (448500)	/* KHz */
 #define GPU_DVFS_FREQ2	 (299000)	/* KHz */
@@ -82,7 +82,7 @@
 
 #define GPU_DVFS_VOLT0	 (125000)	/* mV x 100 */
 #define GPU_DVFS_VOLT1	 (115000)	/* mV x 100 */
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 #define GPU_DVFS_FREQ0_0   (650000)	/* KHz */
 #define GPU_DVFS_FREQ0	 (549250)	/* KHz */
 #define GPU_DVFS_FREQ0_P   (497250)   /* KHz */
@@ -159,7 +159,7 @@ static struct mt_gpufreq_table_info *mt_gpufreqs_default;
 /***************************
  * GPU DVFS OPP Table
  ****************************/
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 /* LV0: 600MHz */
 static struct mt_gpufreq_table_info mt_gpufreq_opp_tbl_e1_0[] = {
 	GPUOP(GPU_DVFS_FREQ0, GPU_DVFS_VOLT0),
@@ -172,7 +172,7 @@ static struct mt_gpufreq_table_info mt_gpufreq_opp_tbl_e1_1[] = {
 	GPUOP(GPU_DVFS_FREQ1, GPU_DVFS_VOLT1),
 	GPUOP(GPU_DVFS_FREQ2, GPU_DVFS_VOLT1),
 };
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 /* LV0: add 550MHz for HD */
 static struct mt_gpufreq_table_info mt_gpufreq_opp_tbl_e1_0[] = {
 	GPUOP(GPU_DVFS_FREQ0, GPU_DVFS_VOLT0),
@@ -231,7 +231,7 @@ static bool mt_gpufreq_ready;
 
 /* In default settiing, freq_table[0] is max frequency, freq_table[num-1] is min frequency,*/
 const unsigned int g_gpufreq_max_id = 0;
-#if defined(CONFIG_ARCH_MT6735M) && defined(MT_GPUFREQ_VCOREFS_ENABLED)
+#if defined(CONFIG_MACH_MT6735M) && defined(MT_GPUFREQ_VCOREFS_ENABLED)
 static const unsigned int g_gpufreq_max_id_vcorefs_off = 1;
 #endif
 
@@ -381,7 +381,7 @@ static unsigned int _mt_gpufreq_get_dvfs_table_type(void)
 	gpufreq_info("@%s: mmpll_spd_bond = 0x%x\n", __func__, mt_gpufreq_dvfs_mmpll_spd_bond);
 	gpufreq_info("@%s: gpu_550m_enable = %d\n", __func__, gpu_550m_enable);
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 	{
 		unsigned int efuse_spare2 = (get_devinfo_with_index(5) >> 20) & 0x3;
 
@@ -397,7 +397,7 @@ static unsigned int _mt_gpufreq_get_dvfs_table_type(void)
 
 		gpufreq_info("@%s: segment_code = 0x%x\n", __func__, segment_code);
 
-#if defined(CONFIG_ARCH_MT6735) && defined(CONFIG_MTK_EFUSE_DOWNGRADE)
+#if defined(CONFIG_MACH_MT6735) && defined(CONFIG_MTK_EFUSE_DOWNGRADE)
 		return 3;	/* SW config 37T to 35M+ */
 #endif
 
@@ -410,7 +410,7 @@ static unsigned int _mt_gpufreq_get_dvfs_table_type(void)
 			return 3;	/* 37M: 550M */
 		case 0x4A:
 		case 0x4B:
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 			if (mt_gpufreq_dvfs_mmpll_spd_bond == 5)
 				return 4;
 #endif
@@ -433,7 +433,7 @@ static unsigned int _mt_gpufreq_get_dvfs_table_type(void)
 	}
 #endif
 
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 #ifndef MT_GPUFREQ_VCOREFS_ENABLED
 	return 1;	/* no 550MHz if Vcore DVFS not built-in */
 #endif
@@ -456,7 +456,7 @@ static unsigned int _mt_gpufreq_get_dvfs_table_type(void)
 	switch (mt_gpufreq_dvfs_mmpll_spd_bond) {
 	case 1:
 	case 2:
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 	case 3:	/* 600M */
 	case 4:	/* 550M */
 		if (gpu_550m_enable)
@@ -647,9 +647,9 @@ static unsigned int _mt_gpufreq_volt_to_pmic_wrap(unsigned int volt)
 static void _mt_gpufreq_power_calculation(unsigned int idx, unsigned int freq, unsigned int volt,
 					  unsigned int temp)
 {
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 #define GPU_ACT_REF_POWER		1088	/* mW  */
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 #define GPU_ACT_REF_POWER		360		/* mW  */
 #else
 #define GPU_ACT_REF_POWER		720		/* mW  */
@@ -890,7 +890,7 @@ static int _mt_gpufreq_set_cur_volt(unsigned int new_oppidx)
 
 #ifdef MT_GPUFREQ_VCOREFS_ENABLED
 	switch (mt_gpufreqs[new_oppidx].gpufreq_khz) {
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 	case GPU_DVFS_FREQ0_P:
 	case GPU_DVFS_FREQ0_0:
 	case GPU_DVFS_FREQ0:
@@ -898,14 +898,14 @@ static int _mt_gpufreq_set_cur_volt(unsigned int new_oppidx)
 		break;
 #else
 	case GPU_DVFS_FREQ0:
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 	case GPU_DVFS_FREQ0_1:
 #endif
 		g_last_gpu_dvs_result = vcorefs_request_dvfs_opp(KIR_GPU, OPPI_PERF);
 		break;
 #endif
 	case GPU_DVFS_FREQ1:
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 		g_last_gpu_dvs_result = vcorefs_request_dvfs_opp(KIR_GPU, OPPI_LOW_PWR);
 #else
 		g_last_gpu_dvs_result = vcorefs_request_dvfs_opp(KIR_GPU, OPPI_PERF);
@@ -1636,7 +1636,7 @@ int mt_gpufreq_target(unsigned int idx)
 					mt_gpufreqs[g_limited_max_id].gpufreq_khz);
 		}
 	}
-#if defined(CONFIG_ARCH_MT6735M) && defined(MT_GPUFREQ_VCOREFS_ENABLED)
+#if defined(CONFIG_MACH_MT6735M) && defined(MT_GPUFREQ_VCOREFS_ENABLED)
 	/************************************************
 	* If 550MHz is exist, mask it when vcorefs is disabled
 	*************************************************/
@@ -1934,15 +1934,15 @@ static int _mt_gpufreq_pdrv_probe(struct platform_device *pdev)
 		_mt_setup_gpufreqs_table(mt_gpufreq_opp_tbl_e1_0, ARRAY_SIZE(mt_gpufreq_opp_tbl_e1_0));
 	else if (mt_gpufreq_dvfs_table_type == 1)	/* 450M */
 		_mt_setup_gpufreqs_table(mt_gpufreq_opp_tbl_e1_1, ARRAY_SIZE(mt_gpufreq_opp_tbl_e1_1));
-#ifdef CONFIG_ARCH_MT6735M
+#ifdef CONFIG_MACH_MT6735M
 	else if (mt_gpufreq_dvfs_table_type == 4)	/* 500M */
 		_mt_setup_gpufreqs_table(mt_gpufreq_opp_tbl_e1_4, ARRAY_SIZE(mt_gpufreq_opp_tbl_e1_4));
 #endif
-#ifndef CONFIG_ARCH_MT6753
+#ifndef CONFIG_MACH_MT6753
 	else if (mt_gpufreq_dvfs_table_type == 2)    /* for 35+/37+ */
 		_mt_setup_gpufreqs_table(mt_gpufreq_opp_tbl_e1_2, ARRAY_SIZE(mt_gpufreq_opp_tbl_e1_2));
 #endif
-#ifdef CONFIG_ARCH_MT6735
+#ifdef CONFIG_MACH_MT6735
 	else if (mt_gpufreq_dvfs_table_type == 3)    /* for 37+ simulate 35+ */
 		_mt_setup_gpufreqs_table(mt_gpufreq_opp_tbl_e1_3, ARRAY_SIZE(mt_gpufreq_opp_tbl_e1_3));
 #endif
@@ -2526,7 +2526,7 @@ static ssize_t mt_gpufreq_opp_freq_proc_write(struct file *file, const char __us
 		if (fixed_freq == 0) {
 			mt_gpufreq_keep_opp_frequency_state = false;
 		} else {
-#if defined(CONFIG_ARCH_MT6735M) && defined(MT_GPUFREQ_VCOREFS_ENABLED)
+#if defined(CONFIG_MACH_MT6735M) && defined(MT_GPUFREQ_VCOREFS_ENABLED)
 			/************************************************
 			* If 550MHz is exist, mask it when vcorefs is disabled
 			*************************************************/
@@ -2604,7 +2604,7 @@ static ssize_t mt_gpufreq_opp_max_freq_proc_write(struct file *file, const char 
 		if (max_freq == 0) {
 			mt_gpufreq_opp_max_frequency_state = false;
 		} else {
-#if defined(CONFIG_ARCH_MT6735M) && defined(MT_GPUFREQ_VCOREFS_ENABLED)
+#if defined(CONFIG_MACH_MT6735M) && defined(MT_GPUFREQ_VCOREFS_ENABLED)
 			/************************************************
 			* If 550MHz is exist, mask it when vcorefs is disabled
 			*************************************************/

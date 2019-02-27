@@ -29,14 +29,14 @@ extern "C" {
 #endif
 
 
-extern const LCM_UTIL_FUNCS PM_lcm_utils_dsi0;
+extern const struct LCM_UTIL_FUNCS PM_lcm_utils_dsi0;
 extern void DSI_manual_enter_HS(cmdqRecHandle cmdq);
 extern void DSI_sw_clk_trail_cmdq(int module_idx, cmdqRecHandle cmdq);
 
 void DSI_ForceConfig(int forceconfig);
 int DSI_set_roi(int x, int y);
 int DSI_check_roi(void);
-int dsi_enable_irq(DISP_MODULE_ENUM module, void *handle, unsigned int enable);
+int dsi_enable_irq(enum DISP_MODULE_ENUM module, void *handle, unsigned int enable);
 
 /* --------------------------------------------------------------------------- */
 
@@ -178,19 +178,19 @@ int dsi_enable_irq(DISP_MODULE_ENUM module, void *handle, unsigned int enable);
 	} DSI_INTERFACE_ID;
 
 
-	void DSI_ChangeClk(DISP_MODULE_ENUM module, uint32_t clk);
+	void DSI_ChangeClk(enum DISP_MODULE_ENUM module, uint32_t clk);
 	int32_t DSI_ssc_enable(uint32_t dsi_idx, uint32_t en);
 	uint32_t PanelMaster_get_CC(uint32_t dsi_idx);
 	void PanelMaster_set_CC(uint32_t dsi_index, uint32_t enable);
-	uint32_t PanelMaster_get_dsi_timing(uint32_t dsi_index, MIPI_SETTING_TYPE type);
+	uint32_t PanelMaster_get_dsi_timing(uint32_t dsi_index, enum MIPI_SETTING_TYPE type);
 	uint32_t PanelMaster_get_TE_status(uint32_t dsi_idx);
-	void PanelMaster_DSI_set_timing(uint32_t dsi_index, MIPI_TIMING timing);
+	void PanelMaster_DSI_set_timing(uint32_t dsi_index, struct MIPI_TIMING timing);
 	unsigned int PanelMaster_set_PM_enable(unsigned int value);
-	uint32_t DSI_dcs_read_lcm_reg_v2(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, uint8_t cmd,
+	uint32_t DSI_dcs_read_lcm_reg_v2(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, uint8_t cmd,
 				       uint8_t *buffer, uint8_t buffer_size);
 	void *get_dsi_params_handle(uint32_t dsi_idx);
 
-	DSI_STATUS DSI_BIST_Pattern_Test(DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enable,
+	DSI_STATUS DSI_BIST_Pattern_Test(enum DISP_MODULE_ENUM module, cmdqRecHandle cmdq, bool enable,
 				 unsigned int color);
 
 	extern DDP_MODULE_DRIVER ddp_driver_dsi0;

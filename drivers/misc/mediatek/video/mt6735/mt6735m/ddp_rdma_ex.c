@@ -33,7 +33,7 @@
 
 static unsigned int rdma_fps[RDMA_INSTANCES] = { 60, 60 };
 
-static enum RDMA_INPUT_FORMAT rdma_input_format_convert(DpColorFormat fmt)
+static enum RDMA_INPUT_FORMAT rdma_input_format_convert(enum DP_COLOR_ENUM fmt)
 {
 	enum RDMA_INPUT_FORMAT rdma_fmt = RDMA_INPUT_FORMAT_RGB565;
 
@@ -236,7 +236,7 @@ static char *rdma_intput_format_name(enum RDMA_INPUT_FORMAT fmt, int swap)
 	return "unknown";
 }
 
-int rdma_enable_irq(DISP_MODULE_ENUM module, void *handle, DDP_IRQ_LEVEL irq_level)
+int rdma_enable_irq(enum DISP_MODULE_ENUM module, void *handle, DDP_IRQ_LEVEL irq_level)
 {
 	unsigned int idx = rdma_index(module);
 
@@ -258,7 +258,7 @@ int rdma_enable_irq(DISP_MODULE_ENUM module, void *handle, DDP_IRQ_LEVEL irq_lev
 	return 0;
 }
 
-int rdma_start(DISP_MODULE_ENUM module, void *handle)
+int rdma_start(enum DISP_MODULE_ENUM module, void *handle)
 {
 	unsigned int idx = rdma_index(module);
 
@@ -269,7 +269,7 @@ int rdma_start(DISP_MODULE_ENUM module, void *handle)
 	return 0;
 }
 
-int rdma_stop(DISP_MODULE_ENUM module, void *handle)
+int rdma_stop(enum DISP_MODULE_ENUM module, void *handle)
 {
 	unsigned int idx = rdma_index(module);
 
@@ -280,7 +280,7 @@ int rdma_stop(DISP_MODULE_ENUM module, void *handle)
 	return 0;
 }
 
-int rdma_reset(DISP_MODULE_ENUM module, void *handle)
+int rdma_reset(enum DISP_MODULE_ENUM module, void *handle)
 {
 	unsigned int delay_cnt = 0;
 	int ret = 0;
@@ -397,13 +397,13 @@ void rdma_set_ultra(unsigned int idx, unsigned int width, unsigned int height, u
 }
 
 /* fixme: spec has no RDMA format, fix enum definition here */
-static int rdma_config(DISP_MODULE_ENUM module,
+static int rdma_config(enum DISP_MODULE_ENUM module,
 		       enum RDMA_MODE mode,
 		       unsigned long address,
-		       DpColorFormat inFormat,
+		       enum DP_COLOR_ENUM inFormat,
 		       unsigned pitch,
 		       unsigned width,
-		       unsigned height, unsigned ufoe_enable, DISP_BUFFER_TYPE sec, void *handle)
+		       unsigned height, unsigned ufoe_enable, enum DISP_BUFFER_TYPE sec, void *handle)
 {
 
 	unsigned int output_is_yuv = 0;
@@ -501,7 +501,7 @@ static int rdma_config(DISP_MODULE_ENUM module,
 	return 0;
 }
 
-int rdma_clock_on(DISP_MODULE_ENUM module, void *handle)
+int rdma_clock_on(enum DISP_MODULE_ENUM module, void *handle)
 {
 	unsigned int idx = rdma_index(module);
 #ifdef ENABLE_CLK_MGR
@@ -523,7 +523,7 @@ int rdma_clock_on(DISP_MODULE_ENUM module, void *handle)
 	return 0;
 }
 
-int rdma_clock_off(DISP_MODULE_ENUM module, void *handle)
+int rdma_clock_off(enum DISP_MODULE_ENUM module, void *handle)
 {
 	unsigned int idx = rdma_index(module);
 #ifdef ENABLE_CLK_MGR
@@ -545,7 +545,7 @@ int rdma_clock_off(DISP_MODULE_ENUM module, void *handle)
 	return 0;
 }
 
-void rdma_dump_reg(DISP_MODULE_ENUM module)
+void rdma_dump_reg(enum DISP_MODULE_ENUM module)
 {
 	unsigned int idx = rdma_index(module);
 
@@ -606,7 +606,7 @@ void rdma_dump_reg(DISP_MODULE_ENUM module)
 		DISP_REG_GET(DISP_REG_RDMA_OUT_LINE_CNT + DISP_RDMA_INDEX_OFFSET * idx));
 }
 
-void rdma_dump_analysis(DISP_MODULE_ENUM module)
+void rdma_dump_analysis(enum DISP_MODULE_ENUM module)
 {
 	unsigned int idx = rdma_index(module);
 
@@ -633,7 +633,7 @@ void rdma_dump_analysis(DISP_MODULE_ENUM module)
 		rdma_targetline_irq_cnt[idx]);
 }
 
-static int rdma_dump(DISP_MODULE_ENUM module, int level)
+static int rdma_dump(enum DISP_MODULE_ENUM module, int level)
 {
 	rdma_dump_analysis(module);
 	rdma_dump_reg(module);
@@ -657,11 +657,11 @@ static inline enum RDMA_MODE rdma_config_mode(unsigned long address)
 	return address ? RDMA_MODE_MEMORY : RDMA_MODE_DIRECT_LINK;
 }
 
-static int do_rdma_config_l(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig, void *handle)
+static int do_rdma_config_l(enum DISP_MODULE_ENUM module, struct disp_ddp_path_config *pConfig, void *handle)
 {
-	RDMA_CONFIG_STRUCT *r_config = &pConfig->rdma_config;
+	struct RDMA_CONFIG_STRUCT *r_config = &pConfig->rdma_config;
 	enum RDMA_MODE mode = rdma_config_mode(r_config->address);
-	LCM_PARAMS *lcm_param = &(pConfig->dispif_config);
+	struct LCM_PARAMS *lcm_param = &(pConfig->dispif_config);
 	unsigned int width = pConfig->dst_dirty ? pConfig->dst_w : r_config->width;
 	unsigned int height = pConfig->dst_dirty ? pConfig->dst_h : r_config->height;
 
@@ -679,12 +679,12 @@ static int do_rdma_config_l(DISP_MODULE_ENUM module, disp_ddp_path_config *pConf
 	return 0;
 }
 
-static int setup_rdma_sec(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig, void *handle)
+static int setup_rdma_sec(enum DISP_MODULE_ENUM module, struct disp_ddp_path_config *pConfig, void *handle)
 {
 	static int rdma_is_sec[RDMA_INSTANCES];
 	CMDQ_ENG_ENUM cmdq_engine;
 	int rdma_idx = rdma_index(module);
-	DISP_BUFFER_TYPE security = pConfig->rdma_config.security;
+	enum DISP_BUFFER_TYPE security = pConfig->rdma_config.security;
 	enum RDMA_MODE mode = rdma_config_mode(pConfig->rdma_config.address);
 
 	cmdq_engine = rdma_idx == 0 ? CMDQ_ENG_DISP_RDMA0 : CMDQ_ENG_DISP_RDMA1;
@@ -742,7 +742,7 @@ static int setup_rdma_sec(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig
 
 
 
-static int rdma_config_l(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig, void *handle)
+static int rdma_config_l(enum DISP_MODULE_ENUM module, struct disp_ddp_path_config *pConfig, void *handle)
 {
 	if (pConfig->dst_dirty || pConfig->rdma_dirty) {
 		setup_rdma_sec(module, pConfig, handle);

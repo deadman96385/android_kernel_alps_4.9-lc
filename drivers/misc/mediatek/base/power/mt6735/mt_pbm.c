@@ -17,7 +17,6 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/kobject.h>
-#include <linux/wakelock.h>
 #include <linux/kthread.h>
 #include <linux/atomic.h>
 #include <linux/mutex.h>

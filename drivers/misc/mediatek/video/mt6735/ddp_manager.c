@@ -79,8 +79,8 @@ typedef struct {
 	DDP_IRQ_EVENT_MAPPING irq_event_map[DISP_PATH_EVENT_NUM];
 	DPMGR_WQ_HANDLE wq_list[DISP_PATH_EVENT_NUM];
 	DDP_SCENARIO_ENUM scenario;
-	DISP_MODULE_ENUM mem_module;
-	disp_ddp_path_config last_config;
+	enum DISP_MODULE_ENUM mem_module;
+	struct disp_ddp_path_config last_config;
 } ddp_path_handle_t, *ddp_path_handle;
 
 typedef struct {
@@ -211,7 +211,7 @@ static int path_top_clock_on(void)
 	return 0;
 }
 
-static int module_power_off(DISP_MODULE_ENUM module)
+static int module_power_off(enum DISP_MODULE_ENUM module)
 {
 	if (module == DISP_MODULE_DSI0)
 		return 0;
@@ -225,7 +225,7 @@ static int module_power_off(DISP_MODULE_ENUM module)
 	return 0;
 }
 
-static int module_power_on(DISP_MODULE_ENUM module)
+static int module_power_on(enum DISP_MODULE_ENUM module)
 {
 	if (module == DISP_MODULE_DSI0) {
 		/*bypass dsi */
@@ -240,16 +240,16 @@ static int module_power_on(DISP_MODULE_ENUM module)
 	return 0;
 }
 
-static ddp_path_handle find_handle_by_module(DISP_MODULE_ENUM module)
+static ddp_path_handle find_handle_by_module(enum DISP_MODULE_ENUM module)
 {
 	return _get_context()->module_path_table[module];
 }
 
-int dpmgr_module_notify(DISP_MODULE_ENUM module, DISP_PATH_EVENT event)
+int dpmgr_module_notify(enum DISP_MODULE_ENUM module, DISP_PATH_EVENT event)
 {
 	ddp_path_handle handle = find_handle_by_module(module);
 
-	MMProfileLogEx(ddp_mmp_get_events()->primary_display_aalod_trigger, MMProfileFlagPulse,
+	mmprofile_log_ex(ddp_mmp_get_events()->primary_display_aalod_trigger, MMPROFILE_FLAG_PULSE,
 		       module, 0);
 	return dpmgr_signal_event(handle, event);
 }
@@ -409,7 +409,7 @@ int dpmgr_modify_path(disp_path_handle dp_handle, DDP_SCENARIO_ENUM new_scenario
 {
 	int i = 0;
 	int module_name = 0;
-	DISP_MODULE_ENUM module[DISP_MODULE_NUM] = { 0 };
+	enum DISP_MODULE_ENUM module[DISP_MODULE_NUM] = { 0 };
 	ddp_path_handle handle;
 	DDP_MANAGER_CONTEXT *content;
 	DDP_SCENARIO_ENUM old_scenario;
@@ -532,7 +532,7 @@ int dpmgr_path_memout_clock(disp_path_handle dp_handle, int clock_switch)
 int dpmgr_path_add_memout(disp_path_handle dp_handle, ENGINE_DUMP engine, void *cmdq_handle)
 {
 	ddp_path_handle handle;
-	DISP_MODULE_ENUM wdma;
+	enum DISP_MODULE_ENUM wdma;
 	DDP_MANAGER_CONTEXT *context;
 
 	ASSERT(dp_handle != NULL);
@@ -574,7 +574,7 @@ int dpmgr_path_add_memout(disp_path_handle dp_handle, ENGINE_DUMP engine, void *
 int dpmgr_path_remove_memout(disp_path_handle dp_handle, void *cmdq_handle)
 {
 	ddp_path_handle handle;
-	DISP_MODULE_ENUM wdma;
+	enum DISP_MODULE_ENUM wdma;
 	DDP_MANAGER_CONTEXT *context;
 
 	ASSERT(dp_handle != NULL);
@@ -785,7 +785,7 @@ int dpmgr_path_enable_cascade(disp_path_handle dp_handle, void *cmdq_handle)
 	if (ovl_get_status() != DDP_OVL1_STATUS_PRIMARY && ovl_get_status() != DDP_OVL1_STATUS_SUB_REQUESTING)
 		ovl_set_status(DDP_OVL1_STATUS_PRIMARY);
 
-	MMProfileLogEx(ddp_mmp_get_events()->cascade_enable, MMProfileFlagPulse, 0, 0);
+	mmprofile_log_ex(ddp_mmp_get_events()->cascade_enable, MMPROFILE_FLAG_PULSE, 0, 0);
 
 	return 0;
 }
@@ -843,7 +843,7 @@ int dpmgr_path_disable_cascade(disp_path_handle dp_handle, void *cmdq_handle)
 			ddp_modules_driver[DISP_MODULE_OVL1]->deinit(DISP_MODULE_OVL1, cmdq_handle);
 	}
 
-	MMProfileLogEx(ddp_mmp_get_events()->cascade_disable, MMProfileFlagPulse, 0, 0);
+	mmprofile_log_ex(ddp_mmp_get_events()->cascade_disable, MMPROFILE_FLAG_PULSE, 0, 0);
 	return 0;
 }
 
@@ -857,7 +857,7 @@ int dpmgr_path_release_8_layer_fence(void)
 	return 0;
 }
 
-int dpmgr_path_set_dst_module(disp_path_handle dp_handle, DISP_MODULE_ENUM dst_module)
+int dpmgr_path_set_dst_module(disp_path_handle dp_handle, enum DISP_MODULE_ENUM dst_module)
 {
 	ddp_path_handle handle;
 
@@ -879,10 +879,10 @@ int dpmgr_path_get_mutex(disp_path_handle dp_handle)
 	return handle->hwmutexid;
 }
 
-DISP_MODULE_ENUM dpmgr_path_get_dst_module(disp_path_handle dp_handle)
+enum DISP_MODULE_ENUM dpmgr_path_get_dst_module(disp_path_handle dp_handle)
 {
 	ddp_path_handle handle;
-	DISP_MODULE_ENUM dst_module;
+	enum DISP_MODULE_ENUM dst_module;
 
 	ASSERT(dp_handle != NULL);
 	handle = (ddp_path_handle) dp_handle;
@@ -1207,7 +1207,7 @@ int dpmgr_path_reset(disp_path_handle dp_handle, int encmdq)
 }
 
 #ifdef OVL_CASCADE_SUPPORT
-static int dpmgr_layer_num(disp_ddp_path_config *config)
+static int dpmgr_layer_num(struct disp_ddp_path_config *config)
 {
 	int i = 0;
 	int max_layer = 0;
@@ -1223,7 +1223,7 @@ static int dpmgr_layer_num(disp_ddp_path_config *config)
 }
 #endif
 
-static unsigned int dpmgr_is_PQ(DISP_MODULE_ENUM module)
+static unsigned int dpmgr_is_PQ(enum DISP_MODULE_ENUM module)
 {
 	unsigned int isPQ = 0;
 
@@ -1245,7 +1245,7 @@ static unsigned int dpmgr_is_PQ(DISP_MODULE_ENUM module)
 }
 
 
-int dpmgr_path_config(disp_path_handle dp_handle, disp_ddp_path_config *config, void *cmdq_handle)
+int dpmgr_path_config(disp_path_handle dp_handle, struct disp_ddp_path_config *config, void *cmdq_handle)
 {
 	int i = 0;
 	int module_name;
@@ -1261,7 +1261,7 @@ int dpmgr_path_config(disp_path_handle dp_handle, disp_ddp_path_config *config, 
 	modules = ddp_get_scenario_list(handle->scenario);
 	module_num = ddp_get_module_num(handle->scenario);
 
-	memcpy(&handle->last_config, config, sizeof(disp_ddp_path_config));
+	memcpy(&handle->last_config, config, sizeof(struct disp_ddp_path_config));
 
 	/* switch between single and dual ovl mode */
 #ifdef OVL_CASCADE_SUPPORT
@@ -1340,7 +1340,7 @@ int dpmgr_path_config(disp_path_handle dp_handle, disp_ddp_path_config *config, 
 	return 0;
 }
 
-disp_ddp_path_config *dpmgr_path_get_last_config(disp_path_handle dp_handle)
+struct disp_ddp_path_config *dpmgr_path_get_last_config(disp_path_handle dp_handle)
 {
 	ddp_path_handle handle;
 
@@ -1574,7 +1574,7 @@ int dpmgr_path_dsi_power_off(disp_path_handle dp_handle, CMDQ_SWITCH encmdq)
 	ddp_path_handle handle;
 	int *modules;
 	int module_num;
-	DISP_MODULE_ENUM dst_module;
+	enum DISP_MODULE_ENUM dst_module;
 
 	ASSERT(dp_handle != NULL);
 	handle = (ddp_path_handle) dp_handle;
@@ -1600,7 +1600,7 @@ int dpmgr_path_dsi_power_on(disp_path_handle dp_handle, CMDQ_SWITCH encmdq)
 	ddp_path_handle handle;
 	int *modules;
 	int module_num;
-	DISP_MODULE_ENUM dst_module;
+	enum DISP_MODULE_ENUM dst_module;
 
 	ASSERT(dp_handle != NULL);
 	handle = (ddp_path_handle) dp_handle;
@@ -1626,7 +1626,7 @@ int dpmgr_path_dsi_off(disp_path_handle dp_handle, void *cmdq_handle, unsigned i
 	ddp_path_handle handle;
 	int *modules;
 	int module_num;
-	DISP_MODULE_ENUM dst_module;
+	enum DISP_MODULE_ENUM dst_module;
 
 	ASSERT(dp_handle != NULL);
 	handle = (ddp_path_handle) dp_handle;
@@ -1653,7 +1653,7 @@ int dpmgr_path_dsi_on(disp_path_handle dp_handle, void *cmdq_handle, unsigned in
 	ddp_path_handle handle;
 	int *modules;
 	int module_num;
-	DISP_MODULE_ENUM dst_module;
+	enum DISP_MODULE_ENUM dst_module;
 
 	ASSERT(dp_handle != NULL);
 	handle = (ddp_path_handle) dp_handle;
@@ -1764,7 +1764,7 @@ int dpmgr_path_idle_on(disp_path_handle dp_handle, void *cmdq_handle, unsigned i
 
 }
 
-static int is_module_in_path(DISP_MODULE_ENUM module, ddp_path_handle handle)
+static int is_module_in_path(enum DISP_MODULE_ENUM module, ddp_path_handle handle)
 {
 	DDP_MANAGER_CONTEXT *context = _get_context();
 
@@ -1777,7 +1777,7 @@ static int is_module_in_path(DISP_MODULE_ENUM module, ddp_path_handle handle)
 int dpmgr_path_user_cmd(disp_path_handle dp_handle, int msg, unsigned long arg, void *cmdqhandle)
 {
 	int ret = -1;
-	DISP_MODULE_ENUM dst = DISP_MODULE_UNKNOWN;
+	enum DISP_MODULE_ENUM dst = DISP_MODULE_UNKNOWN;
 	ddp_path_handle handle = NULL;
 
 	ASSERT(dp_handle != NULL);
@@ -2090,8 +2090,8 @@ int dpmgr_wait_event_timeout(disp_path_handle dp_handle, DISP_PATH_EVENT event, 
 		if (ret == 0) {
 			DISPERR("wait %s timeout on scenario %s\n", path_event_name(event),
 				   ddp_get_scenario_name(handle->scenario));
-			MMProfileLogEx(ddp_mmp_get_events()->dpmgr_wait_event_timeout,
-				       MMProfileFlagPulse, (unsigned long int)ddp_get_scenario_name(handle->scenario),
+			mmprofile_log_ex(ddp_mmp_get_events()->dpmgr_wait_event_timeout,
+				       MMPROFILE_FLAG_PULSE, (unsigned long int)ddp_get_scenario_name(handle->scenario),
 				       event);
 			dpmgr_check_status(dp_handle);
 			/* dpmgr_path_reset(dp_handle, 0); */
@@ -2169,7 +2169,7 @@ int dpmgr_signal_event(disp_path_handle dp_handle, DISP_PATH_EVENT event)
 	return 0;
 }
 
-static void dpmgr_irq_handler(DISP_MODULE_ENUM module, unsigned int regvalue)
+static void dpmgr_irq_handler(enum DISP_MODULE_ENUM module, unsigned int regvalue)
 {
 	int i = 0;
 	int j = 0;
@@ -2203,8 +2203,8 @@ static void dpmgr_irq_handler(DISP_MODULE_ENUM module, unsigned int regvalue)
 					       path_event_name(j), handle->wq_list[j].data,
 					       ddp_get_scenario_name(handle->scenario));
 					wake_up_interruptible(&(handle->wq_list[j].wq));
-					/* MMProfileLogEx(ddp_mmp_get_events()->primary_wakeup,
-							MMProfileFlagPulse, j, irq_bit);
+					/* mmprofile_log_ex(ddp_mmp_get_events()->primary_wakeup,
+							MMPROFILE_FLAG_PULSE, j, irq_bit);
 					 */
 				}
 			}

@@ -65,7 +65,7 @@
 #endif
 
 #ifdef CONFIG_MTK_USB2JTAG_SUPPORT
-#include <mt-plat/mt_usb2jtag.h>
+#include <mt-plat/mtk_usb2jtag.h>
 #endif
 
 #if defined(CONFIG_ARCH_MT6570) || defined(CONFIG_MACH_MT6580)
