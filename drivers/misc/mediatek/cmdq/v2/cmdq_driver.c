@@ -582,8 +582,11 @@ static long cmdq_ioctl(struct file *pFile, unsigned int code,
 	case CMDQ_IOCTL_ASYNC_JOB_EXEC:
 		if (copy_from_user(&job,
 			(void *)param,
-			sizeof(struct cmdqJobStruct)))
+			sizeof(struct cmdqJobStruct))) {
+			CMDQ_ERR(
+				"CMDQ_IOCTL_ASYNC_JOB_EXEC copy_from_user failed\n");
 			return -EFAULT;
+		}
 
 		/* backup */
 		userRegCount = job.command.regRequest.count;
@@ -594,16 +597,24 @@ static long cmdq_ioctl(struct file *pFile, unsigned int code,
 
 		/* create kernel-space address buffer */
 		status = cmdq_driver_create_reg_address_buffer(&job.command);
-		if (status != 0)
+		if (status != 0) {
+			CMDQ_ERR(
+				"CMDQ_IOCTL_ASYNC_JOB_EXEC create reg buf failed:%d\n",
+				status);
 			return status;
+		}
 
 		/* scenario id fixup */
 		cmdq_core_fix_command_scenario_for_user_space(&job.command);
 
 		/* allocate secure medatata */
 		status = cmdq_driver_create_secure_medadata(&job.command);
-		if (status != 0)
+		if (status != 0) {
+			CMDQ_ERR(
+				"CMDQ_IOCTL_ASYNC_JOB_EXEC create secure meta failed:%d\n",
+				status);
 			return status;
+		}
 
 		status = cmdqCoreSubmitTaskAsync(&job.command, NULL, 0, &pTask);
 
@@ -632,6 +643,8 @@ static long cmdq_ioctl(struct file *pFile, unsigned int code,
 			}
 		} else {
 			job.hJob = (unsigned long)NULL;
+			CMDQ_ERR(
+				"CMDQ_IOCTL_ASYNC_JOB_EXEC destroy secure meta failed\n");
 			return -EFAULT;
 		}
 		break;

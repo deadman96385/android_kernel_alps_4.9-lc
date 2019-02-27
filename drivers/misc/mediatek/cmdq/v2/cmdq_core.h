@@ -130,7 +130,7 @@ struct DumpFirstErrorStruct {
 #define CMDQ_LOG(string, args...) \
 	{ \
 		if (1) { \
-			pr_debug("[CMDQ]" string, ##args); \
+			pr_notice("[CMDQ]" string, ##args); \
 			cmdq_core_save_first_dump("[CMDQ]" string, ##args); \
 		} \
 	}
@@ -138,21 +138,21 @@ struct DumpFirstErrorStruct {
 #define CMDQ_MSG(string, args...) \
 	{ \
 		if (cmdq_core_should_print_msg()) { \
-			pr_debug("[CMDQ]" string, ##args); \
+			pr_notice("[CMDQ]" string, ##args); \
 		} \
 	}
 
 #define CMDQ_VERBOSE(string, args...) \
 	{ \
 		if (cmdq_core_should_print_msg()) { \
-			pr_debug("[CMDQ]" string, ##args); \
+			pr_notice("[CMDQ]" string, ##args); \
 		} \
 	}
 
 #define CMDQ_ERR(string, args...) \
 	{ \
 		if (1) { \
-			pr_debug("[CMDQ][ERR]" string, ##args); \
+			pr_notice("[CMDQ][ERR]" string, ##args); \
 			cmdq_core_save_first_dump("[CMDQ][ERR]" string, \
 						  ##args); \
 		} \
@@ -163,7 +163,7 @@ struct DumpFirstErrorStruct {
 		do { \
 			char dispatchedTag[50]; \
 			snprintf(dispatchedTag, 50, "CRDISPATCH_KEY:%s", tag); \
-			pr_debug("[CMDQ][AEE]" string, ##args); \
+			pr_notice("[CMDQ][AEE]" string, ##args); \
 			cmdq_core_save_first_dump("[CMDQ][AEE]" string, \
 						  ##args); \
 			cmdq_core_turnoff_first_dump(); \
