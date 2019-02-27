@@ -3798,6 +3798,7 @@ int primary_display_suspend(void)
 		       MMPROFILE_FLAG_PULSE, 0, 8);
 
 	pgc->state = DISP_SLEPT;
+	wake_up(&resume_wait_queue);
 done:
 	_primary_path_unlock(__func__);
 	/* Lock which is used to avoid esd and suspend affect */
