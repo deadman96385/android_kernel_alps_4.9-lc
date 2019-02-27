@@ -13,7 +13,7 @@
 
 #set IP folder name
 
-ifneq (,$(filter y,$(CONFIG_ARCH_MT6580)))
+ifneq (,$(filter y,$(CONFIG_MACH_MT6580)))
   MDI_IP_FOLDER:=mt6350
 endif
 
