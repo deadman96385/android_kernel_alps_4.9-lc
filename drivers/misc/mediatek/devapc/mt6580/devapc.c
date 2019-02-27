@@ -37,7 +37,6 @@
 #include "mt_device_apc.h"
 #include "mt_io.h"
 #include "sync_write.h"
-#include "mach/irqs.h"
 #include "devapc.h"
 
 static struct cdev *g_devapc_ctrl;
@@ -48,111 +47,111 @@ static void __iomem *devapc_pd_base;
 static struct DEVICE_INFO devapc_devices[] = {
 
 	{"INFRA_AO_TOP_LEVEL_CLOCK_GENERATOR",          true},  /* 0 */
-	{"INFRA_AO_INFRASYS_CONFIG_REGS",				true},
-	{"INFRA_AO_KPAD_CONTROL_REG",					true},
-	{"INFRA_AO_PERISYS_CONFIG_REGS",				true},
-	{"INFRA_AO _RSVD_0",							true},
-	{"INFRA_AO_GPIO_CONTROLLER",					false},
+	{"INFRA_AO_INFRASYS_CONFIG_REGS",               true},
+	{"INFRA_AO_KPAD_CONTROL_REG",                   true},
+	{"INFRA_AO_PERISYS_CONFIG_REGS",                true},
+	{"INFRA_AO _RSVD_0",                            true},
+	{"INFRA_AO_GPIO_CONTROLLER",                   false},
 	{"INFRA_AO_TOP_LEVEL_SLP_MANAGER",              true},
 	{"INFRA_AO_TOP_LEVEL_RESET_GENERATOR",          true},
-	{"INFRA_AO_GPT",								true},
-	{"INFRASYS_EFUSEC",                             false},
+	{"INFRA_AO_GPT",                                true},
+	{"INFRASYS_EFUSEC",                            false},
 
-	{"INFRA_AO_SEJ",								true},  /*10*/
+	{"INFRA_AO_SEJ",                                true},  /*10*/
 	{"INFRA_AO_APMCU_EINT_CONTROLLER",              true},
-	{"INFRA_AO_ AP_CCIF",							false},
-	{"INFRA_AO_ MD_CCIF",							false},
-	{"INFRA_AO_AES_TOP",							true},
-	{"INFRA_AO_PMIC_WRAP_CONTROL_REG",              false},
+	{"INFRA_AO_ AP_CCIF",                          false},
+	{"INFRA_AO_ MD_CCIF",                          false},
+	{"INFRA_AO_AES_TOP",                            true},
+	{"INFRA_AO_PMIC_WRAP_CONTROL_REG",             false},
 	{"INFRA_AO_DEVICE_APC_AO",                      true},
 	{"MIPI_CONFIG_REG",                             true},
 	{"INFRA_AO_MBIST_CONTROL_REG",                  true},
-	{"INFRA_AO _RSVD_1",							true},
+	{"INFRA_AO _RSVD_1",                            true},
 
 	{"INFRA_AO_IO_CONFG_T",                         true},  /*20*/
 	{"INFRA_AO_IO_CONFG_B",                         true},
 	{"INFRA_AO_IO_CONFG_L",                         true},
 	{"INFRA_AO_IO_CONFG_R",                         true},
 	{"INFRA_AO_APMIXEDSYS",                         true},
-	{"DEGBUGSYS",									true},
+	{"DEGBUGSYS",                                   true},
 	{"INFRASYS_MCUSYS_CONFIG_REG",                  true},
-	{"INFRASYS_CONTROL_REG",						true},
-	{"INFRASYS_SYSTEM_CIRQ",						true},
-	{"INFRASYS_MMSYS_IOMMU",						true},
+	{"INFRASYS_CONTROL_REG",                        true},
+	{"INFRASYS_SYSTEM_CIRQ",                        true},
+	{"INFRASYS_MMSYS_IOMMU",                        true},
 
-	{"INFRASYS _DEVICE_APC",						true},  /*30*/
-	{"INFRASYS_EMI",								false},
-	{"INFRASYS_DRAMC",                              false},
-	{"INFRASYS_DRAMC_CONFIG",						false},
-	{"INFRASYS_DDRPHY_CONFIG",                      false},
-	{"INFRASYS_SRAMROM",							true},
-	{"INFRASYS_GCE",								true},
-	{"INFRASYS_BUS_DBG_TRACKER",					true},
-	{"INFRASYS_TRNG",								true},
-	{"MCUSYS_BIU_CONFIG",							true},
+	{"INFRASYS _DEVICE_APC",                        true},  /*30*/
+	{"INFRASYS_EMI",                               false},
+	{"INFRASYS_DRAMC",                             false},
+	{"INFRASYS_DRAMC_CONFIG",                      false},
+	{"INFRASYS_DDRPHY_CONFIG",                     false},
+	{"INFRASYS_SRAMROM",                            true},
+	{"INFRASYS_GCE",                                true},
+	{"INFRASYS_BUS_DBG_TRACKER",                    true},
+	{"INFRASYS_TRNG",                               true},
+	{"MCUSYS_BIU_CONFIG",                           true},
 
 	{"DMA",                                         true},  /*40*/
 	{"NFI",                                         true},
 	{"NFI_ECC",                                     true},
-	{"AUXADC",                                      false},
-	{"FHCTL",										true},
-	{"UART0",										true},
-	{"UART1",										true},
-	{"UART2",										true},
+	{"AUXADC",                                     false},
+	{"FHCTL",                                       true},
+	{"UART0",                                       true},
+	{"UART1",                                       true},
+	{"UART2",                                       true},
 	{"PWM",                                         true},
-	{"I2C0",										true},
+	{"I2C0",                                        true},
 
-	{"I2C1",										true},  /*50*/
-	{"I2C2",										true},
-	{"SPI0",										true},
+	{"I2C1",                                        true},  /*50*/
+	{"I2C2",                                        true},
+	{"SPI0",                                        true},
 	{"PTP",                                         true},
-	{"BTIF",										true},
-	{"DISP_PWM",									true},
-	{"USB2.0",                                      false},
-	{"USB2.0 SIF",                                  false},
-	{"MSDC0",										true},
-	{"MSDC1",										true},
+	{"BTIF",                                        true},
+	{"DISP_PWM",                                    true},
+	{"USB2.0",                                     false},
+	{"USB2.0 SIF",                                 false},
+	{"MSDC0",                                       true},
+	{"MSDC1",                                       true},
 
-	{"AUDIO",										false},  /*60*/
-	{"CONN_PERIPHERALS",							false},
+	{"AUDIO",                                      false},  /*60*/
+	{"CONN_PERIPHERALS",                           false},
 	{"MD1_PERIPHERALS",                             true},
 	{"G3D_CONFIG",                                  true},
-	{"MALI",										true},
-	{"MMSYS_CONFIG",								true},
-	{"MDP_RDMA",									true},
-	{"MDP_RSZ0",									true},
-	{"MDP_RSZ1",									true},
-	{"MDP_WDMA",									true},
+	{"MALI",                                        true},
+	{"MMSYS_CONFIG",                                true},
+	{"MDP_RDMA",                                    true},
+	{"MDP_RSZ0",                                    true},
+	{"MDP_RSZ1",                                    true},
+	{"MDP_WDMA",                                    true},
 
-	{"MDP_WROT",									true},  /*70*/
-	{"MDP_TDSHP",									true},
-	{"DISP_OVL0",									true},
-	{"DISP_OVL1",									true},
+	{"MDP_WROT",                                    true},  /*70*/
+	{"MDP_TDSHP",                                   true},
+	{"DISP_OVL0",                                   true},
+	{"DISP_OVL1",                                   true},
 	{"DISP_RDMA0",                                  true},
 	{"DISP_RDMA1",                                  true},
-	{"DISP_WDMA",									true},
+	{"DISP_WDMA",                                   true},
 	{"DISP_COLOR",                                  true},
 	{"DISP_CCORR",                                  true},
 	{"DISP_AAL",                                    true},
 
 	{"DISP_GAMMA",                                  true},  /*80*/
 	{"DISP_DITHER",                                 true},
-	{"DSI_UFOE",									true},
-	{"DSI0",										true},
-	{"DPI0",										true},
-	{"DISP_PWM0",									true},
-	{"MM_MUTEX",									true},
-	{"SMI_LARB0",									true},
+	{"DSI_UFOE",                                    true},
+	{"DSI0",                                        true},
+	{"DPI0",                                        true},
+	{"DISP_PWM0",                                   true},
+	{"MM_MUTEX",                                    true},
+	{"SMI_LARB0",                                   true},
 	{"SMI_COMMON",                                  true},
 	{"MIPI_TX_CONFIG",                              true},
 
-	{"IMGSYS_CONFIG",								true},  /*90*/
-	{"SMI_LARB2",									true},
-	{"CAM_0",										true},
-	{"CAM_1",										true},
+	{"IMGSYS_CONFIG",                               true},  /*90*/
+	{"SMI_LARB2",                                   true},
+	{"CAM_0",                                       true},
+	{"CAM_1",                                       true},
 	{"SENINF_TOP",                                  true},
-	{"VENC",										true},
-	{"VDEC",										true},
+	{"VENC",                                        true},
+	{"VDEC",                                        true},
 
 };
 
