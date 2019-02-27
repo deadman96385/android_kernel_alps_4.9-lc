@@ -257,7 +257,7 @@ int config_mau(M4U_MAU_STRUCT mau)
 	int i;
 	int free_id = -1;
 	int m4u_id = m4u_port_2_m4u_id(mau.port);
-	int larb = m4u_port_2_larb_id(mau.port);
+	int larb = m4u_port_2_larbid(mau.port);
 	unsigned int MVAStart = mau.mva;
 	unsigned int MVAEnd = mau.mva + mau.size;
 
@@ -1105,7 +1105,7 @@ int m4u_insert_seq_range(M4U_PORT_ID port, unsigned int MVAStart, unsigned int M
 				continue;
 			else {
 				M4ULOG_HIGH("insert range overlap!: larb=%d,module=%s\n",
-						m4u_port_2_larb_id(port), m4u_get_port_name(port));
+						m4u_port_2_larbid(port), m4u_get_port_name(port));
 				M4ULOG_HIGH(
 						"warning: insert tlb range is overlapped with previous ranges, current process=%s,!\n",
 						current->comm);
@@ -1219,7 +1219,7 @@ static int _m4u_config_port(int port, int virt, int sec, int dis, int dir)
 	int mmu_en = 0;
 
 	m4u_index = m4u_port_2_m4u_id(port);
-	larb = m4u_port_2_larb_id(port);
+	larb = m4u_port_2_larbid(port);
 	larb_port = m4u_port_2_larb_port(port);
 	if ((m4u_index == -1) || (larb == -1) || (larb_port == M4U_PORT_UNKNOWN)) {
 		m4u_aee_print(" %s invalid parameter: port=%d\n", __func__, port);
@@ -1314,7 +1314,7 @@ int m4u_config_port(M4U_PORT_STRUCT *pM4uPort) /* native */
 	}
 	PortID = pM4uPort->ePortID;
 	m4u_index = m4u_port_2_m4u_id(PortID);
-	larb = m4u_port_2_larb_id(PortID);
+	larb = m4u_port_2_larbid(PortID);
 
 	_m4u_port_clock_toggle(m4u_index, larb, 1);
 
@@ -1386,7 +1386,7 @@ int m4u_config_port_array(struct m4u_port_array *port_array)
 		if (port_array->ports[port] && M4U_PORT_ATTR_EN != 0) {
 			unsigned int value;
 
-			larb = m4u_port_2_larb_id(port);
+			larb = m4u_port_2_larbid(port);
 			larb_port = m4u_port_2_larb_port(port);
 
 			if ((larb == -1) || (larb_port == M4U_PORT_UNKNOWN)) {
@@ -1729,7 +1729,7 @@ void m4u_print_port_status(struct seq_file *seq, int only_print_active)
 
 	for (port = 0; port < gM4u_port_num; port++) {
 		m4u_index = m4u_port_2_m4u_id(port);
-		larb = m4u_port_2_larb_id(port);
+		larb = m4u_port_2_larbid(port);
 		larb_port = m4u_port_2_larb_port(port);
 
 		if ((m4u_index == -1) || (larb == -1) || (larb_port == M4U_PORT_UNKNOWN)) {
