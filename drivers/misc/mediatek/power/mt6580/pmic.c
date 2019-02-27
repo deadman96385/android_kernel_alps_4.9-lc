@@ -160,6 +160,8 @@ unsigned int pmic_read_interface(unsigned int RegNum, unsigned int *val, unsigne
 	/* mt_read_byte(RegNum, &pmic_reg); */
 #if defined(CONFIG_MTK_PMIC_WRAP_HAL)
 	return_value = pwrap_wacs2(0, (RegNum), 0, &rdata);
+#else
+	PMICLOG("[pmic_read_interface] PWRAP config not enable\n");
 #endif
 	pmic_reg = rdata;
 	if (return_value != 0) {
@@ -193,6 +195,8 @@ unsigned int pmic_config_interface(unsigned int RegNum, unsigned int val, unsign
 	/* 1. mt_read_byte(RegNum, &pmic_reg); */
 #if defined(CONFIG_MTK_PMIC_WRAP_HAL)
 	return_value = pwrap_wacs2(0, (RegNum), 0, &rdata);
+#else
+	PMICLOG("[pmic_config_interface] PWRAP config not enable\n");
 #endif
 	pmic_reg = rdata;
 	if (return_value != 0) {
@@ -257,6 +261,8 @@ unsigned int pmic_config_interface_nolock(unsigned int RegNum, unsigned int val,
 	/*1. mt_read_byte(RegNum, &pmic_reg); */
 #if defined(CONFIG_MTK_PMIC_WRAP_HAL)
 	return_value = pwrap_wacs2(0, (RegNum), 0, &rdata);
+#else
+	PMICLOG("[pmic_config_interface] PWRAP config not enable\n");
 #endif
 	pmic_reg = rdata;
 	if (return_value != 0) {
@@ -2650,7 +2656,6 @@ void mt_pmic_eint_irq(void)
 #else
 irqreturn_t mt_pmic_eint_irq(int irq, void *desc)
 {
-
 	PMICLOG_DBG("[mt_pmic_eint_irq] receive interrupt\n");
 	disable_irq_nosync(irq);
 	wake_up_pmic();
@@ -2713,10 +2718,6 @@ void PMIC_EINT_SETTING(void)
 	upmu_set_reg_value(MT6350_INT_CON0, 0);
 	upmu_set_reg_value(MT6350_INT_CON1, 0);
 
-	/* Enable pwrkey/homekey interrupt */
-	upmu_set_reg_value(MT6350_INT_CON0_SET, 0x0420);	/* bit[10], bit[5] */
-	upmu_set_reg_value(MT6350_INT_CON1_SET, 0x0016);	/* bit[4], bit[2], bit[1] */
-
 	/* for all interrupt events, turn on interrupt module clock */
 	pmic_set_register_value(PMIC_RG_INTRP_CK_PDN, 0);
 
@@ -2730,6 +2731,7 @@ void PMIC_EINT_SETTING(void)
 	pmic_register_interrupt_callback(20, rtc_int_handler);
 #endif
 
+	/* Enable pwrkey/homekey interrupt */
 	pmic_enable_interrupt(5, 1, "PMIC");
 	pmic_enable_interrupt(10, 1, "PMIC");
 	pmic_enable_interrupt(17, 1, "PMIC");
@@ -2747,7 +2749,6 @@ void PMIC_EINT_SETTING(void)
 		g_pmic_irq = irq_of_parse_and_map(node, 0);
 		ret =
 		    request_irq(g_pmic_irq, mt_pmic_eint_irq, IRQF_TRIGGER_NONE, "pmic-eint", NULL);
-		disable_irq_nosync(g_pmic_irq);
 		if (ret > 0)
 			PMICLOG("EINT IRQ LINENNOT AVAILABLE\n");
 		enable_irq_wake(g_pmic_irq);
@@ -2757,21 +2758,17 @@ void PMIC_EINT_SETTING(void)
 	PMICLOG("[CUST_EINT] CUST_EINT_PMIC_DEBOUNCE_CN=%d\n", g_cust_eint_mt_pmic_debounce_cn);
 	PMICLOG("[CUST_EINT] CUST_EINT_PMIC_TYPE=%d\n", g_cust_eint_mt_pmic_type);
 	PMICLOG("[CUST_EINT] CUST_EINT_PMIC_DEBOUNCE_EN=%d\n", g_cust_eint_mt_pmic_debounce_en);
-
 }
 
 static void pmic_int_handler(void)
 {
 	unsigned char i, j;
-	unsigned int ret;
 	unsigned int int0, int1;
-
 #if 1
 	int0 = upmu_get_reg_value(MT6350_INT_CON0);
 	int1 = upmu_get_reg_value(MT6350_INT_CON1);
 	PMICLOG_DBG("int0 = %x int1 = %x\n", int0, int1);
 	upmu_set_reg_value(MT6350_INT_CON0_CLR, 0x0210);	/* bit[9], bit[4] */
-
 #endif
 
 	for (i = 0; i < ARRAY_SIZE(interrupts); i++) {
@@ -2782,12 +2779,12 @@ static void pmic_int_handler(void)
 
 		for (j = 0; j < PMIC_INT_WIDTH; j++) {
 			if ((int_status_val) & (1 << j)) {
-				PMICLOG_DBG("[PMIC_INT][%s]\n", interrupts[i].interrupts[j].name);
+				PMICLOG("[PMIC_INT][%s]\n", interrupts[i].interrupts[j].name);
 				if (interrupts[i].interrupts[j].callback != NULL) {
 					interrupts[i].interrupts[j].callback();
 					interrupts[i].interrupts[j].times++;
 				}
-				ret = pmic_config_interface(interrupts[i].address, 0x1, 0x1, j);
+				upmu_set_reg_value(interrupts[i].address, 0x1 << j);
 			}
 		}
 	}
