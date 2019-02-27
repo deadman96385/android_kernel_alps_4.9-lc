@@ -129,7 +129,8 @@ int musb_force_on;
 int musb_host_dynamic_fifo = 1;
 int musb_host_dynamic_fifo_usage_msk;
 bool musb_host_db_enable = true;
-bool musb_host_db_workaround = true;
+bool musb_host_db_workaround1 = true;
+bool musb_host_db_workaround2;
 long musb_host_db_delay_ns;
 long musb_host_db_workaround_cnt;
 module_param(musb_fake_CDP, int, 0644);
@@ -137,7 +138,8 @@ module_param(kernel_init_done, int, 0644);
 module_param(musb_host_dynamic_fifo, int, 0644);
 module_param(musb_host_dynamic_fifo_usage_msk, int, 0644);
 module_param(musb_host_db_enable, bool, 0644);
-module_param(musb_host_db_workaround, bool, 0644);
+module_param(musb_host_db_workaround1, bool, 0644);
+module_param(musb_host_db_workaround2, bool, 0644);
 module_param(musb_host_db_delay_ns, long, 0644);
 module_param(musb_host_db_workaround_cnt, long, 0644);
 #ifdef CONFIG_MTK_MUSB_QMU_SUPPORT
@@ -1394,6 +1396,10 @@ void musb_start(struct musb *musb)
 		musb->is_active = 0;
 	else
 		musb->is_active = 1;
+
+#ifdef CONFIG_DUAL_ROLE_USB_INTF
+	mt_usb_dual_role_changed(musb);
+#endif
 }
 
 void musb_generic_disable(struct musb *musb)
@@ -1556,6 +1562,10 @@ void musb_stop(struct musb *musb)
 	 *  - ...
 	 */
 	musb_platform_try_idle(musb, 0);
+
+#ifdef CONFIG_DUAL_ROLE_USB_INTF
+	mt_usb_dual_role_changed(musb);
+#endif
 }
 
 static void musb_shutdown(struct platform_device *pdev)
@@ -2045,6 +2055,13 @@ irqreturn_t musb_interrupt(struct musb *musb)
 
 	dumpTime(funcInterrupt, 0);
 
+	if (unlikely(!musb->softconnect)) {
+		DBG(0, "!softconnect, IRQ %s usb%04x tx%04x rx%04x\n",
+				(devctl & MUSB_DEVCTL_HM) ? "host" : "peripheral",
+				musb->int_usb, musb->int_tx, musb->int_rx);
+		return IRQ_HANDLED;
+	}
+
 	/* the core can interrupt us for multiple reasons; docs have
 	 * a generic interrupt flowchart to follow
 	 */
@@ -2103,20 +2120,26 @@ irqreturn_t musb_interrupt(struct musb *musb)
 			retval = IRQ_HANDLED;
 			if (devctl & MUSB_DEVCTL_HM) {
 				bool skip_tx = false;
+				static DEFINE_RATELIMIT_STATE(rlmt, HZ, 2);
+				static int skip_cnt;
 
 				if (host_tx_refcnt_dec(ep_num) < 0) {
 					int ref_cnt;
 
 					musb_host_db_workaround_cnt++;
 					ref_cnt = host_tx_refcnt_inc(ep_num);
-					DBG_LIMIT(5,
-						"addtional TX<%d> got, ref_cnt<%d>",
-						ep_num, ref_cnt);
+
+					if (__ratelimit(&rlmt)) {
+					DBG(0, "unexpect TX<%d,%d,%d>\n",
+							ep_num, ref_cnt,
+							skip_cnt);
+					dump_tx_ops(ep_num);
+					skip_cnt = 0;
+					} else
+						skip_cnt++;
+
 					skip_tx = true;
 				}
-
-				if (!musb_host_db_workaround)
-					skip_tx = false;
 
 				if (likely(!skip_tx))
 					musb_host_tx(musb, ep_num);
@@ -2602,6 +2625,10 @@ static int musb_init_controller
 #endif
 
 	status = musb_gadget_setup(musb);
+
+#ifdef CONFIG_DUAL_ROLE_USB_INTF
+	mt_usb_dual_role_init(musb);
+#endif
 
 	/*initial done, turn off usb */
 	musb_platform_disable(musb);
