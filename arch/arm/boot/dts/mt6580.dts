@@ -222,9 +222,9 @@
 		};
 
 		keypad: keypad@10002000 {
-			compatible = "mediatek,mt6580-keypad";
+			compatible = "mediatek,kp";
 			reg = <0x10002000 0x1000>;
-			interrupts = <0 109 0x2>;
+			interrupts = <GIC_SPI 109 IRQ_TYPE_EDGE_FALLING>;
 		};
 
 		PERICFG@0x10003000 {
@@ -721,10 +721,10 @@
 				};
 
 
-		PWM@0x11008000 {
-			compatible = "mediatek,PWM";
+		pwm@11008000 {
+			compatible = "mediatek,pwm";
 			reg = <0x11008000 0x1000>;
-			interrupts = <0 36 0x8>;
+			interrupts = <GIC_SPI 36 IRQ_TYPE_LEVEL_LOW>;
 		};
 
 		syscfg_pctl_a: syscfg_pctl_a@0x10005000 {
