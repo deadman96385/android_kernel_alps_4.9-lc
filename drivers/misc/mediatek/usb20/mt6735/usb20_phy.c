@@ -247,55 +247,55 @@ static void hs_slew_rate_cal(void)
 	unsigned char value;
 	unsigned long start_time, timeout;
 	unsigned int timeout_flag = 0;
-	/* enable usb ring oscillator. */
-	USBPHY_SET32(0x14, (0x1 << 15));
+	/* 4 s1:enable usb ring oscillator. */
+	USBPHY_SET8(0x15, 0x80);
 
-	/* wait 1us. */
+	/* 4 s2:wait 1us. */
 	udelay(1);
 
-	/* enable free run clock */
-	USBPHY_SET32(0xF10 - 0x800, (0x01 << 8));
-	/* setting cyclecnt. */
-	USBPHY_SET32(0xF00 - 0x800, (0x04 << 8));
-	/* enable frequency meter */
-	USBPHY_SET32(0xF00 - 0x800, (0x01 << 24));
+	/* 4 s3:enable free run clock */
+	USBPHY_SET8(0xf00 - 0x800 + 0x11, 0x01);
+	/* 4 s4:setting cyclecnt. */
+	USBPHY_SET8(0xf00 - 0x800 + 0x01, 0x04);
+	/* 4 s5:enable frequency meter */
+	USBPHY_SET8(0xf00 - 0x800 + 0x03, 0x01);
 
-	/* wait for frequency valid. */
+	/* 4 s6:wait for frequency valid. */
 	start_time = jiffies;
 	timeout = jiffies + 3 * HZ;
 
-	while (!((USBPHY_READ32(0xF10 - 0x800) & 0xFF) == 0x1)) {
+	while (!(USBPHY_READ8(0xf00 - 0x800 + 0x10) & 0x1)) {
 		if (time_after(jiffies, timeout)) {
 			timeout_flag = 1;
 			break;
 		}
 	}
 
-	/* read result. */
+	/* 4 s7: read result. */
 	if (timeout_flag) {
 		DBG(0, "[USBPHY] Slew Rate Calibration: Timeout\n");
 		value = 0x4;
 	} else {
-		data = USBPHY_READ32(0xF0C - 0x800);
+		data = USBPHY_READ32(0xf00 - 0x800 + 0x0c);
 		x = ((1024 * FRA * PARA) / data);
 		value = (unsigned char)(x / 1000);
 		if ((x - value * 1000) / 100 >= 5)
 			value += 1;
-		DBG(1, "[USBPHY]slew calibration:FM_OUT =%lu,x=%lu,value=%d\n",
-				data, x, value);
+		DBG(0, "[USBPHY]slew calibration:FM_OUT =%lu,x=%lu,value=%d\n", data, x, value);
 	}
 
-	/* disable Frequency and disable free run clock. */
-	USBPHY_CLR32(0xF00 - 0x800, (0x01 << 24));
-	USBPHY_CLR32(0xF10 - 0x800, (0x01 << 8));
+	/* 4 s8: disable Frequency and run clock. */
+	USBPHY_CLR8(0xf00 - 0x800 + 0x03, 0x01);
+	USBPHY_CLR8(0xf00 - 0x800 + 0x11, 0x01);
 
+	/* 4 s9: */
 #define MSK_RG_USB20_HSTX_SRCTRL 0x7
 	/* all clr first then set */
-	USBPHY_CLR32(0x14, (MSK_RG_USB20_HSTX_SRCTRL << 12));
-	USBPHY_SET32(0x14, ((value & MSK_RG_USB20_HSTX_SRCTRL) << 12));
+	USBPHY_CLR8(0x15, MSK_RG_USB20_HSTX_SRCTRL << 4);
+	USBPHY_SET8(0x15, (value & MSK_RG_USB20_HSTX_SRCTRL) << 4);
 
-	/* disable usb ring oscillator. */
-	USBPHY_CLR32(0x14, (0x1 << 15));
+	/* 4 s10:disable usb ring oscillator. */
+	USBPHY_CLR8(0x15, 0x80);
 }
 
 #ifdef CONFIG_MTK_UART_USB_SWITCH
@@ -434,45 +434,38 @@ void usb_phy_poweron(void)
 		return;
 	}
 #endif
+
 	/* wait 50 usec for PHY3.3v/1.8v stable. */
 	udelay(50);
 
-	/*
-	 * force_uart_en	1'b0		0x68 26
-	 * RG_UART_EN		1'b0		0x6c 16
-	 * rg_usb20_gpio_ctl	1'b0		0x20 09
-	 * usb20_gpio_mode	1'b0		0x20 08
-	 * RG_USB20_BC11_SW_EN	1'b0		0x18 23
-	 * rg_usb20_dp_100k_mode 1'b1		0x20 18
-	 * USB20_DP_100K_EN	1'b0		0x20 16
-	 * RG_USB20_DM_100K_EN	1'b0		0x20 17
-	 * RG_USB20_OTG_VBUSCMP_EN	1'b1	0x18 20
-	 * force_suspendm		1'b0	0x68 18
-	 */
-
 	/* force_uart_en, 1'b0 */
-	USBPHY_CLR32(0x68, (0x1 << 26));
+	USBPHY_CLR8(0x6b, 0x04);
 	/* RG_UART_EN, 1'b0 */
-	USBPHY_CLR32(0x6c, (0x1 << 16));
+	USBPHY_CLR8(0x6e, 0x01);
 	/* rg_usb20_gpio_ctl, 1'b0, usb20_gpio_mode, 1'b0 */
-	USBPHY_CLR32(0x20, ((0x1 << 9) | (0x1 << 8)));
+	USBPHY_CLR8(0x21, 0x03);
 
 	/* RG_USB20_BC11_SW_EN, 1'b0 */
-	USBPHY_CLR32(0x18, (0x1 << 23));
+	USBPHY_CLR8(0x1a, 0x80);
 
 	/* rg_usb20_dp_100k_mode, 1'b1 */
-	USBPHY_SET32(0x20, (0x1 << 18));
+	USBPHY_SET8(0x22, 0x04);
 	/* USB20_DP_100K_EN 1'b0, RG_USB20_DM_100K_EN, 1'b0 */
-	USBPHY_CLR32(0x20, ((0x1 << 16) | (0x1 << 17)));
+	USBPHY_CLR8(0x22, 0x03);
 
 	/* RG_USB20_OTG_VBUSCMP_EN, 1'b1 */
-	USBPHY_SET32(0x18, (0x1 << 20));
+	USBPHY_SET8(0x1a, 0x10);
 
 	/* force_suspendm, 1'b0 */
-	USBPHY_CLR32(0x68, (0x1 << 18));
+	USBPHY_CLR8(0x6a, 0x04);
 
-	/* wait for 800 usec. */
+	/* 7 s7: wait for 800 usec. */
 	udelay(800);
+
+	/* force enter device mode, from K2, FIXME */
+	USBPHY_CLR8(0x6c, 0x10);
+	USBPHY_SET8(0x6c, 0x2F);
+	USBPHY_SET8(0x6d, 0x3F);
 
 	DBG(0, "usb power on success\n");
 }
@@ -486,79 +479,75 @@ static void usb_phy_savecurrent_internal(void)
 		return;
 	}
 #endif
-	/*
-	 * force_uart_en	1'b0		0x68 26
-	 * RG_UART_EN		1'b0		0x6c 16
-	 * rg_usb20_gpio_ctl	1'b0		0x20 09
-	 * usb20_gpio_mode	1'b0		0x20 08
-
-	 * RG_USB20_BC11_SW_EN	1'b0		0x18 23
-	 * RG_USB20_OTG_VBUSCMP_EN	1'b0	0x18 20
-	 * RG_SUSPENDM		1'b1		0x68 03
-	 * force_suspendm	1'b1		0x68 18
-
-	 * RG_DPPULLDOWN	1'b1		0x68 06
-	 * RG_DMPULLDOWN	1'b1		0x68 07
-	 * RG_XCVRSEL[1:0]	2'b01		0x68 [04-05]
-	 * RG_TERMSEL		1'b1		0x68 02
-	 * RG_DATAIN[3:0]	4'b0000		0x68 [10-13]
-	 * force_dp_pulldown	1'b1		0x68 20
-	 * force_dm_pulldown	1'b1		0x68 21
-	 * force_xcversel	1'b1		0x68 19
-	 * force_termsel	1'b1		0x68 17
-	 * force_datain		1'b1		0x68 23
-
-	 * RG_SUSPENDM		1'b0		0x68 03
-	 */
 	/* force_uart_en, 1'b0 */
-	USBPHY_CLR32(0x68, (0x1 << 26));
+	USBPHY_CLR8(0x6b, 0x04);
 	/* RG_UART_EN, 1'b0 */
-	USBPHY_CLR32(0x6c, (0x1 << 16));
+	USBPHY_CLR8(0x6e, 0x01);
 	/* rg_usb20_gpio_ctl, 1'b0, usb20_gpio_mode, 1'b0 */
-	USBPHY_CLR32(0x20, (0x1 << 9));
-	USBPHY_CLR32(0x20, (0x1 << 8));
+	USBPHY_CLR8(0x21, 0x03);
 
 	/* RG_USB20_BC11_SW_EN, 1'b0 */
-	USBPHY_CLR32(0x18, (0x1 << 23));
+	USBPHY_CLR8(0x1a, 0x80);
 	/* RG_USB20_OTG_VBUSCMP_EN, 1'b0 */
-	USBPHY_CLR32(0x18, (0x1 << 20));
+	USBPHY_CLR8(0x1a, 0x10);
 
 	/* RG_SUSPENDM, 1'b1 */
-	USBPHY_SET32(0x68, (0x1 << 3));
+	USBPHY_SET8(0x68, 0x08);
 	/* force_suspendm, 1'b1 */
-	USBPHY_SET32(0x68, (0x1 << 18));
+	USBPHY_SET8(0x6a, 0x04);
+
 
 	/* RG_DPPULLDOWN, 1'b1, RG_DMPULLDOWN, 1'b1 */
-	USBPHY_SET32(0x68, ((0x1 << 6) | (0x1 << 7)));
-
+	USBPHY_SET8(0x68, 0xc0);
 	/* RG_XCVRSEL[1:0], 2'b01. */
-	USBPHY_CLR32(0x68, (0x3 << 4));
-	USBPHY_SET32(0x68, (0x1 << 4));
+	USBPHY_CLR8(0x68, 0x20);
+	USBPHY_SET8(0x68, 0x10);
 	/* RG_TERMSEL, 1'b1 */
-	USBPHY_SET32(0x68, (0x1 << 2));
+	USBPHY_SET8(0x68, 0x04);
 	/* RG_DATAIN[3:0], 4'b0000 */
-	USBPHY_CLR32(0x68, (0xF << 10));
+	USBPHY_CLR8(0x69, 0x3c);
 
 	/* force_dp_pulldown, 1'b1, force_dm_pulldown, 1'b1,
-	 * force_xcversel, 1'b1, force_termsel, 1'b1, force_datain, 1'b1
-	 */
-	USBPHY_SET32(0x68, ((0x1 << 20) | (0x1 << 21) |
-				(0x1 << 19) | (0x1 << 17) | (0x1 << 23)));
+	   force_xcversel, 1'b1, force_termsel, 1'b1, force_datain, 1'b1 */
+	USBPHY_SET8(0x6a, 0xba);
 
 	udelay(800);
 
 	/* RG_SUSPENDM, 1'b0 */
-	USBPHY_CLR32(0x68, (0x1 << 3));
+	USBPHY_CLR8(0x68, 0x08);
+
+	/* ALPS00427972, implement the analog register formula */
+	/*
+	   DBG(0, "%s: USBPHY_READ8(0x05) = 0x%x\n", __func__, USBPHY_READ8(0x05));
+	   DBG(0, "%s: USBPHY_READ8(0x07) = 0x%x\n", __func__, USBPHY_READ8(0x07));
+	 */
+	/* ALPS00427972, implement the analog register formula */
 
 	udelay(1);
 
-	set_usb_phy_mode(PHY_IDLE_MODE);
+	/* force enter device mode, from K2, FIXME */
+	/* force enter device mode */
+	/* USBPHY_CLR8(0x6c, 0x10); */
+	/* USBPHY_SET8(0x6c, 0x2E); */
+	/* USBPHY_SET8(0x6d, 0x3E); */
 }
 
 void usb_phy_savecurrent(void)
 {
 	usb_phy_savecurrent_internal();
 	DBG(0, "usb save current success\n");
+}
+
+static void HQA_special(void)
+{
+	u8 val;
+
+	val = USBPHY_READ8(0x18);
+	DBG(0, "HQA, 0x18, before:%x\n", val);
+	USBPHY_CLR8(0x18, 0x08);
+	USBPHY_SET8(0x18, 0x06);
+	val = USBPHY_READ8(0x18);
+	DBG(0, "HQA, 0x18, after:%x\n", val);
 }
 
 /* M17_USB_PWR Sequence 20160603.xls */
@@ -571,84 +560,59 @@ void usb_phy_recover(void)
 	}
 #endif
 
-	/* wait 50 usec. */
-	udelay(50);
-
-	/*
-	 * 04.force_uart_en	1'b0 0x68 26
-	 * 04.RG_UART_EN		1'b0 0x6C 16
-	 * 04.rg_usb20_gpio_ctl	1'b0 0x20 09
-	 * 04.usb20_gpio_mode	1'b0 0x20 08
-
-	 * 05.force_suspendm	1'b0 0x68 18
-
-	 * 06.RG_DPPULLDOWN	1'b0 0x68 06
-	 * 07.RG_DMPULLDOWN	1'b0 0x68 07
-	 * 08.RG_XCVRSEL[1:0]	2'b00 0x68 [04:05]
-	 * 09.RG_TERMSEL		1'b0 0x68 02
-	 * 10.RG_DATAIN[3:0]	4'b0000 0x68 [10:13]
-	 * 11.force_dp_pulldown	1'b0 0x68 20
-	 * 12.force_dm_pulldown	1'b0 0x68 21
-	 * 13.force_xcversel	1'b0 0x68 19
-	 * 14.force_termsel	1'b0 0x68 17
-	 * 15.force_datain	1'b0 0x68 23
-	 * 16.RG_USB20_BC11_SW_EN	1'b0 0x18 23
-	 * 17.RG_USB20_OTG_VBUSCMP_EN	1'b1 0x18 20
-	 */
-
 	/* clean PUPD_BIST_EN */
 	/* PUPD_BIST_EN = 1'b0 */
 	/* PMIC will use it to detect charger type */
-	/* NEED?? USBPHY_CLR8(0x1d, 0x10);*/
-	USBPHY_CLR32(0x1c, (0x1 << 12));
+	USBPHY_CLR8(0x1d, 0x10);
 
 	/* force_uart_en, 1'b0 */
-	USBPHY_CLR32(0x68, (0x1 << 26));
+	USBPHY_CLR8(0x6b, 0x04);
 	/* RG_UART_EN, 1'b0 */
-	USBPHY_CLR32(0x6C, (0x1 << 16));
+	USBPHY_CLR8(0x6e, 0x01);
 	/* rg_usb20_gpio_ctl, 1'b0, usb20_gpio_mode, 1'b0 */
-	USBPHY_CLR32(0x20, (0x1 << 9));
-	USBPHY_CLR32(0x20, (0x1 << 8));
+	USBPHY_CLR8(0x21, 0x03);
 
 	/* force_suspendm, 1'b0 */
-	USBPHY_CLR32(0x68, (0x1 << 18));
+	USBPHY_CLR8(0x6a, 0x04);
+
 
 	/* RG_DPPULLDOWN, 1'b0, RG_DMPULLDOWN, 1'b0 */
-	USBPHY_CLR32(0x68, ((0x1 << 6) | (0x1 << 7)));
-
+	USBPHY_CLR8(0x68, 0xc0);
 	/* RG_XCVRSEL[1:0], 2'b00. */
-	USBPHY_CLR32(0x68, (0x3 << 4));
-
+	USBPHY_CLR8(0x68, 0x30);
 	/* RG_TERMSEL, 1'b0 */
-	USBPHY_CLR32(0x68, (0x1 << 2));
+	USBPHY_CLR8(0x68, 0x04);
 	/* RG_DATAIN[3:0], 4'b0000 */
-	USBPHY_CLR32(0x68, (0xF << 10));
+	USBPHY_CLR8(0x69, 0x3c);
 
 	/* force_dp_pulldown, 1'b0, force_dm_pulldown, 1'b0,
-	 * force_xcversel, 1'b0, force_termsel, 1'b0, force_datain, 1'b0
-	 */
-	USBPHY_CLR32(0x68, ((0x1 << 20) | (0x1 << 21) |
-				(0x1 << 19) | (0x1 << 17) | (0x1 << 23)));
+	   force_xcversel, 1'b0, force_termsel, 1'b0, force_datain, 1'b0 */
+	USBPHY_CLR8(0x6a, 0xba);
 
 	/* RG_USB20_BC11_SW_EN, 1'b0 */
-	USBPHY_CLR32(0x18, (0x1 << 23));
+	USBPHY_CLR8(0x1a, 0x80);
 	/* RG_USB20_OTG_VBUSCMP_EN, 1'b1 */
-	USBPHY_SET32(0x18, (0x1 << 20));
+	USBPHY_SET8(0x1a, 0x10);
 
-	/* 18. PASS RX sensitivity HQA requirement */
-	USBPHY_CLR8(0x18, 0x08);
-	USBPHY_SET8(0x18, 0x06);
 
 	/* wait 800 usec. */
 	udelay(800);
 
-	/* force enter device mode */
-	set_usb_phy_mode(PHY_DEV_ACTIVE);
+	/* force enter device mode, from K2, FIXME */
+	USBPHY_CLR8(0x6c, 0x10);
+	USBPHY_SET8(0x6c, 0x2F);
+	USBPHY_SET8(0x6d, 0x3F);
+
+	/* from K2, FIXME */
+#if defined(MTK_HDMI_SUPPORT)
+	USBPHY_SET8(0x05, 0x05);
+	USBPHY_SET8(0x05, 0x50);
+#endif
+
+	/* adjustment after HQA */
+	HQA_special();
 
 	hs_slew_rate_cal();
-
-	/* disc threshold to max, RG_USB20_DISCTH[7:4], dft:1000, MAX:1111 */
-	USBPHY_SET32(0x18, (0xf0<<0));
 
 	usb_phy_tuning();
 
@@ -670,7 +634,7 @@ void Charger_Detect_Init(void)
 	udelay(50);
 
 	/* RG_USB20_BC11_SW_EN = 1'b1 */
-	USBPHY_SET32(0x18, (0x1 << 23));
+	USBPHY_SET8(0x1a, 0x80);
 
 	usb_prepare_enable_clock(false);
 
@@ -688,7 +652,7 @@ void Charger_Detect_Release(void)
 	usb_prepare_enable_clock(true);
 
 	/* RG_USB20_BC11_SW_EN = 1'b0 */
-	USBPHY_CLR32(0x18, (0x1 << 23));
+	USBPHY_CLR8(0x1a, 0x80);
 
 	udelay(1);
 
