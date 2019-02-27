@@ -412,7 +412,7 @@ static int cp2155_parse_dt(struct device *dev,
 		if (of_property_read_u32(cnp, "part", &pdata->dev_id[i].part))
 			goto err_node_put;
 		snprintf(pdata->dev_id[i].name, FLASHLIGHT_NAME_SIZE,
-				cp2155_NAME);
+				CP2155_NAME);
 		pdata->dev_id[i].channel = i;
 		pdata->dev_id[i].decouple = decouple;
 
@@ -483,7 +483,7 @@ static int cp2155_probe(struct platform_device *pdev)
 				goto err;
 			}
 	} else {
-		if (flashlight_dev_register(cp2155_NAME, &cp2155_ops)) {
+		if (flashlight_dev_register(CP2155_NAME, &cp2155_ops)) {
 			err = -EFAULT;
 			goto err;
 		}
@@ -511,7 +511,7 @@ static int cp2155_remove(struct platform_device *pdev)
 			flashlight_dev_unregister_by_device_id(
 					&pdata->dev_id[i]);
 	else
-		flashlight_dev_unregister(cp2155_NAME);
+		flashlight_dev_unregister(CP2155_NAME);
 
 	/* flush work queue */
 	flush_work(&cp2155_work);
@@ -523,14 +523,14 @@ static int cp2155_remove(struct platform_device *pdev)
 
 #ifdef CONFIG_OF
 static const struct of_device_id cp2155_gpio_of_match[] = {
-	{.compatible = cp2155_DTNAME},
+	{.compatible = CP2155_DTNAME},
 	{},
 };
 MODULE_DEVICE_TABLE(of, cp2155_gpio_of_match);
 #else
 static struct platform_device cp2155_gpio_platform_device[] = {
 	{
-		.name = cp2155_NAME,
+		.name = CP2155_NAME,
 		.id = 0,
 		.dev = {}
 	},
@@ -543,7 +543,7 @@ static struct platform_driver cp2155_platform_driver = {
 	.probe = cp2155_probe,
 	.remove = cp2155_remove,
 	.driver = {
-		.name = cp2155_NAME,
+		.name = CP2155_NAME,
 		.owner = THIS_MODULE,
 #ifdef CONFIG_OF
 		.of_match_table = cp2155_gpio_of_match,
