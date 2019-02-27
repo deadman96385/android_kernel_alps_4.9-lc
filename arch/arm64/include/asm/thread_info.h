@@ -51,12 +51,8 @@ struct thread_info {
 	u64			ttbr0;		/* saved TTBR0_EL1 */
 #endif
 	int			preempt_count;	/* 0 => preemptable, <0 => bug */
-<<<<<<< HEAD
-	int			cpu;		/* cpu */
 	void			*regs_on_excp;	/* aee */
 	int			cpu_excp;	/* aee */
-=======
->>>>>>> android-4.9
 };
 
 #define INIT_THREAD_INFO(tsk)						\
