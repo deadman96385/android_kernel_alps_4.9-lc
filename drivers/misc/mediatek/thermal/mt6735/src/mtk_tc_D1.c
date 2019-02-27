@@ -530,6 +530,12 @@ int get_immediate_ts3_wrap(void)
 	return curr_temp;
 }
 
+int (*get_immediate_tsX[THERMAL_SENSOR_NUM])(void) = {
+	get_immediate_ts1_wrap,
+	get_immediate_ts2_wrap,
+	get_immediate_ts3_wrap,
+};
+
 static void thermal_interrupt_handler(int bank)
 {
 	__u32 ret = 0;
