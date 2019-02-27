@@ -14,12 +14,9 @@
 static bool is_intra_domain(int prev, int target);
 static inline unsigned long task_util(struct task_struct *p);
 static int select_max_spare_capacity(struct task_struct *p, int target);
-static int __energy_diff(struct energy_env *eenv);
 int cpu_eff_tp = 1024;
 #ifdef CONFIG_SCHED_TUNE
 static inline int energy_diff(struct energy_env *eenv);
-#else
-#define energy_diff(eenv) __energy_diff(eenv)
 #endif
 
 #ifndef cpu_isolated
@@ -161,37 +158,6 @@ static bool system_overutil;
 inline bool system_overutilized(int cpu)
 {
 	return system_overutil;
-}
-
-static inline unsigned long
-__src_cpu_util(int cpu, int delta, unsigned long task_delta)
-{
-	unsigned long util = cpu_rq(cpu)->cfs.avg.util_avg;
-	unsigned long capacity = capacity_orig_of(cpu);
-
-#ifdef CONFIG_SCHED_WALT
-	if (!walt_disabled && sysctl_sched_use_walt_cpu_util)
-		util = div64_u64((cpu_rq(cpu)->prev_runnable_sum
-				<< SCHED_CAPACITY_SHIFT),
-				walt_ravg_window);
-#endif
-	util = max(util, task_delta);
-	delta += util;
-	if (delta < 0)
-		return 0;
-
-	return (delta >= capacity) ? capacity : delta;
-}
-
-static unsigned long
-__src_cpu_norm_util(int cpu, unsigned long capacity, int delta, int task_delta)
-{
-	int util = __src_cpu_util(cpu, delta, task_delta);
-
-	if (util >= capacity)
-		return SCHED_CAPACITY_SCALE;
-
-	return (util << SCHED_CAPACITY_SHIFT)/capacity;
 }
 
 static int init_cpu_info(void)
