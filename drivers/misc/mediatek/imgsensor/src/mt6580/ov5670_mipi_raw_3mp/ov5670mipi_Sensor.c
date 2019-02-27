@@ -61,7 +61,7 @@ static DEFINE_SPINLOCK(imgsensor_drv_lock);
 static struct imgsensor_info_struct imgsensor_info = {
 	.sensor_id = OV5670MIPI_SENSOR_ID,		//record sensor id defined in Kd_imgsensor.h
 
-	.checksum_value = 0x523c51f6,		//checksum value for Camera Auto Test
+	.checksum_value = 0x27cb5b3a,		//checksum value for Camera Auto Test
 
 	.pre = {
 		.pclk = 102850000,				//record different mode's pclk
