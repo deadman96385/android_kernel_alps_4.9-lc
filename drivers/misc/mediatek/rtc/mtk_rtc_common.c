@@ -71,6 +71,8 @@
 /* #include <linux/printk.h> */
 #include <linux/reboot.h>
 #include <mt-plat/charging.h>
+#include <mtk_reboot.h>
+
 
 #define RTC_NAME	"mt-rtc"
 #define RTC_RELPWR_WHEN_XRST	1	/* BBPU = 0 when xreset_rstb goes low */
@@ -366,16 +368,17 @@ void rtc_mark_recovery(void)
 	spin_unlock_irqrestore(&rtc_lock, flags);
 }
 
-#if defined(CONFIG_MTK_KERNEL_POWER_OFF_CHARGING)
 void rtc_mark_kpoc(void)
 {
+#if defined(CONFIG_MTK_KERNEL_POWER_OFF_CHARGING)
 	unsigned long flags;
 
 	spin_lock_irqsave(&rtc_lock, flags);
 	hal_rtc_set_spare_register(RTC_KPOC, 0x1);
 	spin_unlock_irqrestore(&rtc_lock, flags);
-}
 #endif
+}
+
 void rtc_mark_fast(void)
 {
 	unsigned long flags;
@@ -426,7 +429,7 @@ void mt_power_off(void)
 		mdelay(100);
 		rtc_xinfo("Phone with charger\n");
 		if (pmic_chrdet_status() == KAL_TRUE || count > 10)
-			machine_restart("charger");
+			arch_reset(0, "charger");
 		count++;
 #endif
 	}
@@ -502,7 +505,7 @@ static void rtc_handler(void)
 						tm.tm_min, tm.tm_sec);
 				} while (time <= now_time);
 				spin_unlock(&rtc_lock);
-				machine_restart("kpoc");
+				arch_reset(0, "kpoc");
 				return;
 			} else {
 				hal_rtc_save_pwron_alarm();
