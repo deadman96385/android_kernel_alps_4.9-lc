@@ -45,7 +45,7 @@ void __attribute__((weak)) mt_cpuidle_framework_init(void)
  */
 static int mtk_governor_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 {
-	struct mtk_idle_device *data = &__get_cpu_var(mtk_idle_devices);
+	struct mtk_idle_device *data = this_cpu_ptr(&mtk_idle_devices);
 	int state;
 
 	state = mt_idle_select(data->cpu);
