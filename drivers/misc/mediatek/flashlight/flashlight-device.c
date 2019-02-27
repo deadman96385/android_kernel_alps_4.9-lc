@@ -17,6 +17,7 @@
 	#if defined(tb8321p2_bsp) || defined(tb8321p2_bsp_1g) || \
 	defined(tb8321p2_bsp_3gds) || defined(tb8321p2_bsp_512m) || \
 	defined(tb8321p2_bsp_trusty) || defined(tb8321p2_bspab) || \
+	defined(tb8321p2_bsp_2g) || defined(tb8321p2_bsp_ab) || \
 	defined(tb8321p2_bspota)
 	const struct flashlight_device_id flashlight_id[] = {
 		/* {TYPE, CT, PART, "NAME", CHANNEL, DECOUPLE} */
