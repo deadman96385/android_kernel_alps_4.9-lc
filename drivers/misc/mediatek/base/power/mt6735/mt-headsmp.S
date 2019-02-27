@@ -15,7 +15,7 @@
 #include <linux/linkage.h>
 #include <linux/init.h>
 
-	__CPUINIT
+/*	__CPUINIT */
 
 CCI400_SI3_SNOOP_CONTROL:
 	.long 0x10394000

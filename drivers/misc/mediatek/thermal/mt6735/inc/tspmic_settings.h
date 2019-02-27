@@ -12,7 +12,7 @@
  */
 
 #include <mach/upmu_hw.h>
-#include <mach/mt_pmic_wrap.h>
+#include <mach/mtk_pmic_wrap.h>
 /* 2015.5.20 Jerry FIX_ME #include <mach/pmic_mt6331_6332_sw.h> */
 /* #include <mach/pmic_mt6325_sw.h> */
 

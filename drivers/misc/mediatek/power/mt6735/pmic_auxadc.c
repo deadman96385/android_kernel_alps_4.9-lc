@@ -41,7 +41,7 @@
 #include <mt-plat/upmu_common.h>
 #include <mach/upmu_sw.h>
 /*#include <mach/eint.h> TBD*/
-#include <mach/mt_pmic_wrap.h>
+#include <mach/mtk_pmic_wrap.h>
 #if defined CONFIG_MTK_LEGACY
 #include <mt-plat/mt_gpio.h>
 #endif

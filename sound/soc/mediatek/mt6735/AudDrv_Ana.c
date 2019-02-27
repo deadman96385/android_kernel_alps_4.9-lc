@@ -55,7 +55,7 @@
 /* define this to use wrapper to control */
 /*#define AUDIO_USING_WRAP_DRIVER*/
 #ifdef AUDIO_USING_WRAP_DRIVER
-#include <mach/mt_pmic_wrap.h>
+#include <mach/mtk_pmic_wrap.h>
 #endif
 
 static DEFINE_SPINLOCK(ana_set_reg_lock);

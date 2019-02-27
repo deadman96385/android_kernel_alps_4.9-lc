@@ -3938,7 +3938,7 @@ int mt_clkmgr_init(void)
 #endif /* !MT_CCF_BRINGUP */
 
 	initialized = 1;
-	mt_freqhopping_init();
+	/* mt_freqhopping_init(); */
 	print_grp_regs();
 
 	pr_warn("%s: CLKMGR_INCFILE_VER=%s\n", __func__, CLKMGR_INCFILE_VER);

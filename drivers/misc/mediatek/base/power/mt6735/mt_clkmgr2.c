@@ -33,7 +33,7 @@
 #include <mach/mt_clkmgr.h>
 /* #include <mach/mt_dcm.h> */
 #include <mach/mt_spm_mtcmos.h>
-#include <mach/mtk_freqhopping.h>
+#include <mach/mt_freqhopping.h>
 /* #include <mach/mt_gpufreq.h> */
 /* #include <mach/irqs.h> */
 
@@ -3881,7 +3881,7 @@ int mt_clkmgr_init(void)
 
 	initialized = 1;
 /* **** */
-	mt_freqhopping_init();
+	/* mt_freqhopping_init(); */
 	print_grp_regs();
 
 	pr_warn("%s: CLKMGR_INCFILE_VER=%s\n", __func__, CLKMGR_INCFILE_VER);

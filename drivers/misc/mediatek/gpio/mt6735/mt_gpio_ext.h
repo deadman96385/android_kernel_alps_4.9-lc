@@ -13,7 +13,7 @@
 #ifndef _MT_GPIO_EXT_H_
 #define _MT_GPIO_EXT_H_
 
-#include <mach/mt_pmic_wrap.h>
+#include <mach/mtk_pmic_wrap.h>
 
 #define GPIOEXT_WR(addr, data)   pwrap_write((unsigned long)addr, data)
 #define GPIOEXT_RD(addr)         ({ \

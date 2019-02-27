@@ -79,7 +79,7 @@ static void ddp_disp_refresh_tag_start(unsigned int index)
 {
 	static unsigned long sBufAddr[RDMA_NUM];
 
-	static RDMA_BASIC_STRUCT rdmaInfo;
+	static struct RDMA_BASIC_STRUCT rdmaInfo;
 	char tag_name[30] = { '\0' };
 
 	rdma_get_info(index, &rdmaInfo);

@@ -15,7 +15,6 @@
 #include <linux/init.h>
 #include <linux/cpu.h>
 #include <linux/kthread.h>
-#include <linux/wakelock.h>
 #include <linux/delay.h>
 #include <asm-generic/bug.h>
 

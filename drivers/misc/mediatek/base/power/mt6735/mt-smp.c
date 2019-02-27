@@ -42,6 +42,7 @@
 
 #define SLAVE_JUMP_REG  (SRAMROM_BASE+0x34)
 
+__attribute__((unused))
 static DEFINE_SPINLOCK(boot_lock);
 
 /*
@@ -49,7 +50,7 @@ static DEFINE_SPINLOCK(boot_lock);
  * observers, irrespective of whether they're taking part in coherency
  * or not.  This is necessary for the hotplug code to work reliably.
  */
-static void __cpuinit write_pen_release(int val)
+static void write_pen_release(int val)
 {
 	pen_release = val;
 	/* Make sure this is visible to other CPUs */
@@ -59,7 +60,7 @@ static void __cpuinit write_pen_release(int val)
 	outer_clean_range(__pa(&pen_release), __pa(&pen_release + 1));
 }
 
-void __cpuinit mt_smp_secondary_init(unsigned int cpu)
+void mt_smp_secondary_init(unsigned int cpu)
 {
 #ifndef CONFIG_MTK_GIC
 	mt_gic_secondary_init();
@@ -101,7 +102,7 @@ static void __init smp_set_boot_addr(void)
 	iounmap(infracfg_ao_base);
 }
 
-int __cpuinit mt_smp_boot_secondary(unsigned int cpu, struct task_struct *idle)
+int mt_smp_boot_secondary(unsigned int cpu, struct task_struct *idle)
 {
 	unsigned long timeout;
 

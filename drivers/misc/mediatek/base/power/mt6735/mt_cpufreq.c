@@ -69,7 +69,7 @@
 #include "freqhop_sw.h"
 #include "mt_spm.h"
 #include "pmic.h"
-#include "mt_pmic_wrap.h"
+#include "mtk_pmic_wrap.h"
 #include "efuse.h"	/* for SLT efuse check */
 #else
 #include "mt_spm.h"
@@ -548,7 +548,7 @@ static int _mt_cpufreq_set_cur_volt_extbuck(struct mt_cpu_dvfs *p, unsigned int 
 #endif
 
 /* CPU callback */
-static int __cpuinit _mt_cpufreq_cpu_CB(struct notifier_block *nfb, unsigned long action,
+static int _mt_cpufreq_cpu_CB(struct notifier_block *nfb, unsigned long action,
 					void *hcpu);
 
 /* cpufreq driver */
@@ -3117,7 +3117,7 @@ static void _mt_cpufreq_set(enum mt_cpu_dvfs_id id, int new_opp_idx)
 	FUNC_EXIT(FUNC_LV_LOCAL);
 }
 
-static int __cpuinit _mt_cpufreq_cpu_CB(struct notifier_block *nfb, unsigned long action,
+static int _mt_cpufreq_cpu_CB(struct notifier_block *nfb, unsigned long action,
 					void *hcpu)
 {
 	unsigned int cpu = (unsigned long)hcpu;
@@ -3847,15 +3847,15 @@ static int _mt_cpufreq_verify(struct cpufreq_policy *policy)
 static int _mt_cpufreq_target(struct cpufreq_policy *policy, unsigned int target_freq,
 				  unsigned int relation)
 {
-	unsigned int new_opp_idx;
+	unsigned int new_opp_idx = -1;
 	enum mt_cpu_dvfs_id id = _get_cpu_dvfs_id(policy->cpu);
 	int ret = 0;	/* -EINVAL; */
 
 	FUNC_ENTER(FUNC_LV_MODULE);
 
 	if (policy->cpu >= num_possible_cpus()
-		|| cpufreq_frequency_table_target(policy, id_to_cpu_dvfs(id)->freq_tbl_for_cpufreq,
-						  target_freq, relation, &new_opp_idx)
+		|| cpufreq_frequency_table_target(policy,
+						  target_freq, relation)
 		|| (id_to_cpu_dvfs(id) && id_to_cpu_dvfs(id)->dvfs_disable_by_procfs)
 		)
 		return -EINVAL;

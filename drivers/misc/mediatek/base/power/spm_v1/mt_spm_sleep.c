@@ -1262,7 +1262,7 @@ RESTORE_IRQ:
 
 #ifdef CONFIG_MTK_USB2JTAG_SUPPORT
 	if (usb2jtag_mode())
-		mt_usb2jtag_resume();
+		mtk_usb2jtag_resume();
 #endif
 #if SPM_AEE_RR_REC
 	aee_rr_rec_spm_suspend_val(aee_rr_curr_spm_suspend_val() | (1 << SPM_SUSPEND_LEAVE));

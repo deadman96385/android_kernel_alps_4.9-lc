@@ -19,7 +19,7 @@
 #include <linux/string.h>
 #include <linux/sysfs.h>
 
-#include <mach/mt_pmic_wrap.h>
+#include <mach/mtk_pmic_wrap.h>
 #include <mach/mt_clkmgr.h>
 #include <mach/mt_freqhopping.h>
 #include <mach/upmu_hw.h>

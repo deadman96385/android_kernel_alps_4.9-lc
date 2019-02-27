@@ -136,9 +136,11 @@ int hps_cpu_init(void)
 	/* c. 4L */
 	/* cpulist_parse("0-3", &hps_ctxt.little_cpumask); */
 
-	cpulist_scnprintf(str1, sizeof(str1), &hps_ctxt.little_cpumask);
+	/* cpulist_scnprintf(str1, sizeof(str1), &hps_ctxt.little_cpumask); */
+	scnprintf(str1, sizeof(str1), "%*pbl", cpumask_pr_args(&hps_ctxt.little_cpumask));
 	hps_warn("hps_ctxt.little_cpumask: %s\n", str1);
-	cpulist_scnprintf(str1, sizeof(str1), &hps_ctxt.big_cpumask);
+	/* cpulist_scnprintf(str1, sizeof(str1), &hps_ctxt.big_cpumask); */
+	scnprintf(str1, sizeof(str1), "%*pbl", cpumask_pr_args(&hps_ctxt.big_cpumask));
 	hps_warn("hps_ctxt.big_cpumask: %s\n", str1);
 	if (cpumask_weight(&hps_ctxt.little_cpumask) == 0) {
 		cpumask_copy(&hps_ctxt.little_cpumask, &hps_ctxt.big_cpumask);

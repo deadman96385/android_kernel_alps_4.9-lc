@@ -641,9 +641,9 @@ static int rdma_dump(enum DISP_MODULE_ENUM module, int level)
 	return 0;
 }
 
-void rdma_get_info(int idx, RDMA_BASIC_STRUCT *info)
+void rdma_get_info(int idx, struct RDMA_BASIC_STRUCT *info)
 {
-	RDMA_BASIC_STRUCT *p = info;
+	struct RDMA_BASIC_STRUCT *p = info;
 
 	p->addr = DISP_REG_GET(DISP_REG_RDMA_MEM_START_ADDR + DISP_RDMA_INDEX_OFFSET * idx);
 	p->src_w = DISP_REG_GET(DISP_REG_RDMA_SIZE_CON_0 + DISP_RDMA_INDEX_OFFSET * idx) & 0xfff;

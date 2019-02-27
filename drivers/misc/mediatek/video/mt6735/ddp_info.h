@@ -70,12 +70,12 @@ typedef struct _OVL_BASIC_STRUCT {
 	unsigned int bpp;
 } OVL_BASIC_STRUCT;
 
-typedef struct _RDMA_BASIC_STRUCT {
+struct RDMA_BASIC_STRUCT {
 	unsigned long addr;
 	unsigned int src_w;
 	unsigned int src_h;
 	unsigned int bpp;
-} RDMA_BASIC_STRUCT;
+};
 
 struct RDMA_CONFIG_STRUCT {
 	unsigned idx;		/* instance index */

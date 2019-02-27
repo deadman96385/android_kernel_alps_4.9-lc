@@ -15,7 +15,6 @@
 #include <linux/init.h>
 #include <linux/cpu.h>
 #include <linux/platform_device.h>
-#include <linux/wakelock.h>
 
 #include "mt_hotplug_strategy_internal.h"
 
