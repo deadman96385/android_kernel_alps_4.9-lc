@@ -32,12 +32,12 @@
 #if IS_ENABLED(CONFIG_MACH_MT6758)
 #include <clk-mt6758-pg.h>
 #include "smi_config_default.h"
-#elif IS_ENABLED(CONFIG_MACH_MT6765)
-#include <clk-mt6765-pg.h>
-#include "smi_config_mt6765.h"
 #elif IS_ENABLED(CONFIG_MACH_MT6761)
 #include <clk-mt6761-pg.h>
 #include "smi_config_mt6761.h"
+#elif IS_ENABLED(CONFIG_MACH_MT6765)
+#include <clk-mt6765-pg.h>
+#include "smi_config_mt6765.h"
 #else
 #include "smi_config_default.h"
 #endif
@@ -284,6 +284,7 @@ static int smi_larb_bw_thrt_enable(const unsigned int reg_indx)
 	return 0;
 }
 
+#if !IS_ENABLED(CONFIG_MACH_MT6580)
 static unsigned int smi_clk_subsys_larbs(enum subsys_id sys)
 {
 #if IS_ENABLED(CONFIG_MACH_MT6758)
@@ -352,6 +353,7 @@ static void smi_clk_subsys_after_on(enum subsys_id sys)
 static struct pg_callbacks smi_clk_subsys_handle = {
 	.after_on = smi_clk_subsys_after_on
 };
+#endif /* !IS_ENABLED(CONFIG_MACH_MT6580) */
 
 LIST_HEAD(cb_list);
 /* ********************************************
@@ -1322,7 +1324,9 @@ int smi_register(struct platform_driver *drv)
 		return ret;
 	}
 
+#if !IS_ENABLED(CONFIG_MACH_MT6580)
 	register_pg_callback(&smi_clk_subsys_handle);
+#endif
 #ifdef MMDVFS_HOOK
 	mmdvfs_init(&g_smi_bwc_mm_info);
 #endif
