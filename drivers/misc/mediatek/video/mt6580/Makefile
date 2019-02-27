@@ -51,7 +51,8 @@ ccflags-y +=	-I$(srctree)/drivers/misc/mediatek/video/include/                  
 		-I$(srctree)/drivers/misc/mediatek/base/power/include/                \
 		-I$(srctree)/drivers/misc/mediatek/m4u/$(MTK_PLATFORM)/               \
 		-I$(srctree)/drivers/misc/mediatek/mmp/                               \
-		-I$(srctree)/drivers/misc/mediatek/sync/
+		-I$(srctree)/drivers/misc/mediatek/sync/ \
+                -I$(srctree)/drivers/misc/mediatek/video/$(MTK_PLATFORM)/
 
 ccflags-$(CONFIG_MTK_LCM) += -I$(srctree)/drivers/misc/mediatek/lcm/inc/
 ccflags-y += -I$(srctree)/drivers/staging/android/ion \
