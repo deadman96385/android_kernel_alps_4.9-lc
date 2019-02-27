@@ -33,48 +33,17 @@
 		bootargs = "console=tty0 console=ttyMT0,921600n1 root=/dev/ram initrd=0x84000000,0x400000 loglevel=8";
 	};
 
-	/* Do not put any bus before mtk-msdc, because it should be mtk-msdc.0 for partition device node usage */
-	mtk-msdc.0 {
-			compatible = "simple-bus";
-			#address-cells = <1>;
-			#size-cells = <1>;
-			ranges = <0 0 0 0xffffffff>;
+	msdc0:msdc@11120000 {
+		compatible = "mediatek,msdc";
+		reg = <0 0x11230000 0 0x10000>;
+		interrupts = <GIC_SPI 38 IRQ_TYPE_LEVEL_LOW>;
+	};
 
-			mmc0: msdc0@11120000 {
-				compatible = "mediatek,mt6580-mmc";
-				reg = <0x11120000 0x10000/*MSDC0_BASE*/
-					0x10001e84 0x2>;/*FPGA PWR_GPIO,PWR_GPIO_EO*/
-				interrupts = <GIC_SPI 38 IRQ_TYPE_LEVEL_LOW>;
-				status = "disabled";
-				/* peter check when rainier ccf ready
-				clocks = <&perisys PERI_MSDC30_0>,
-					 <&topckgen TOP_MUX_MSDC30_0>,
-					 <&topckgen TOP_MSDCPLL_CK>,
-					 <&topckgen TOP_MSDCPLL_D2>,
-					 <&topckgen TOP_MSDCPLL_D4>;
-				clock-names="MSDC0-CLOCK",
-					"MSDC0_PLL_SEL",
-					"MSDC0_PLL_800M",
-					"MSDC0_PLL_400M",
-					"MSDC0_PLL_200M"; */
-			};
-
-			mmc1: msdc1@11130000 {
-				compatible = "mediatek,mt6580-mmc";
-				reg = <0x11130000 0x10000/*MSDC1_BASE*/
-					0x10001e84 0x2>;/*FPGA PWR_GPIO,PWR_GPIO_EO*/
-				interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
-				cd-gpios = <&pio 3 0>;
-				status = "disabled";
-				/* peter check when rainier ccf ready
-				clocks = <&perisys PERI_MSDC30_1>;
-				clock-names="MSDC1-CLOCK"; */
-			};
-
-			msdc1_ins: default {
-				compatible = "mediatek,msdc1_ins-eint";
-			};
-		};
+	msdc1:msdc@11130000 {
+		compatible = "mediatek,msdc";
+		reg = <0 0x11240000 0 0x10000>;
+		interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
+	};
 
 		cpus {
 			#address-cells = <1>;
@@ -1730,3 +1699,5 @@
 		debounce = <13 1000>;
 	};
 };
+
+#include "cust_mt6580_msdc.dtsi"
