@@ -69,10 +69,6 @@ extern void USB_PHY_Write_Register8(u8 var, u8 addr);
 extern u8 USB_PHY_Read_Register8(u8 addr);
 #endif
 
-extern struct clk *musb_clk;
-extern struct clk *musb_clk_top_sel;
-extern struct clk *musb_clk_univpll3_d4;
-
 #ifdef CONFIG_MTK_UART_USB_SWITCH
 
 #define RG_GPIO_SELECT (0x600)

@@ -39,12 +39,6 @@
 #endif
 
 static u32 cable_mode = CABLE_MODE_NORMAL;
-#ifndef FPGA_PLATFORM
-struct clk *musb_clk;
-struct clk *musb_clk_top_sel;
-struct clk *musb_clk_univpll3_d4;
-#endif
-
 void __iomem *usb_phy_base;
 
 #ifdef CONFIG_MTK_UART_USB_SWITCH
@@ -1665,24 +1659,6 @@ static int mt_usb_probe(struct platform_device *pdev)
 	mtk_usb_power = false;
 
 #ifndef FPGA_PLATFORM
-	musb_clk = devm_clk_get(&pdev->dev, "usb0");
-	if (IS_ERR(musb_clk)) {
-		DBG(0, "cannot get musb_clk clock\n");
-		goto err2;
-	}
-
-	musb_clk_top_sel = devm_clk_get(&pdev->dev, "usb0_clk_top_sel");
-	if (IS_ERR(musb_clk_top_sel)) {
-		DBG(0, "cannot get musb_clk_top_sel clock\n");
-		goto err2;
-	}
-
-	musb_clk_univpll3_d4 = devm_clk_get(&pdev->dev, "usb0_clk_univpll3_d4");
-	if (IS_ERR(musb_clk_univpll3_d4)) {
-		DBG(0, "cannot get musb_clk_univpll3_d4 clock\n");
-		goto err2;
-	}
-
 #ifdef CONFIG_DEBUG_FS
 	if (usb20_phy_init_debugfs()) {
 		DBG(0, "usb20_phy_init_debugfs fail!\n");
@@ -1702,13 +1678,10 @@ static int mt_usb_probe(struct platform_device *pdev)
 #endif
 
 #ifndef FPGA_PLATFORM
-	/* FIXME, check root cause */
-#if 0
 	if (get_boot_mode() == META_BOOT) {
 		DBG(0, "in special mode %d\n", get_boot_mode());
 		musb_force_on = 1;
 	}
-#endif
 #endif
 	return 0;
 
