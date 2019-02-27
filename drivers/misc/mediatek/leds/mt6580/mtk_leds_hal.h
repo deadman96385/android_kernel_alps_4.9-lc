@@ -14,7 +14,7 @@
 #ifndef _LEDS_HAL_H
 #define _LEDS_HAL_H
 
-#include "leds_sw.h"
+#include "mtk_leds_sw.h"
 
 /****************************************************************************
  * LED HAL functions
