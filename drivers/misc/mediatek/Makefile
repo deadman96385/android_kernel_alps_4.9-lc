@@ -139,6 +139,8 @@ obj-$(CONFIG_MTK_DEBUG_LATCH) += debug_latch/
 obj-$(CONFIG_MTK_USB2JTAG_SUPPORT) += usb2jtag/
 obj-$(CONFIG_MTK_WATCHPOINT) += watchpoint/
 
+obj-$(CONFIG_MTK_BTCVSD) += btcvsd/
+
 #io boost
 obj-y += io_boost/
 

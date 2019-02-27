@@ -72,7 +72,6 @@
 #include <mach/mt_clkbuf_ctl.h>
 
 
-#include <sound/mt_soc_audio.h>
 #include "mt_soc_afe_control.h"
 #include <mt-plat/upmu_common.h>
 
@@ -3858,7 +3857,7 @@ void InitCodecDefault(void)
 
 static int mt6350_codec_probe(struct snd_soc_codec *codec)
 {
-	struct snd_soc_dapm_context *dapm = &codec->dapm;
+	struct snd_soc_dapm_context *dapm = snd_soc_codec_get_dapm(codec);
 
 	pr_warn("%s()\n", __func__);
 	if (mInitCodec == true)
@@ -3933,11 +3932,12 @@ static struct snd_soc_codec_driver soc_mtk_codec = {
 	/* .controls = mt6350_snd_controls, */
 	/* .num_controls = ARRAY_SIZE(mt6350_snd_controls), */
 
-	.dapm_widgets = mt6350_dapm_widgets,
-	.num_dapm_widgets = ARRAY_SIZE(mt6350_dapm_widgets),
-	.dapm_routes = mtk_audio_map,
-	.num_dapm_routes = ARRAY_SIZE(mtk_audio_map),
-
+	.component_driver = {
+		.dapm_widgets = mt6350_dapm_widgets,
+		.num_dapm_widgets = ARRAY_SIZE(mt6350_dapm_widgets),
+		.dapm_routes = mtk_audio_map,
+		.num_dapm_routes = ARRAY_SIZE(mtk_audio_map),
+	},
 };
 
 static int mtk_mt6350_codec_dev_probe(struct platform_device *pdev)

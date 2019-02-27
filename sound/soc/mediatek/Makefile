@@ -72,4 +72,16 @@ else
 endif
 
 obj-$(CONFIG_SND_SOC_MTK_BTCVSD) += common_int/
+
+# Old architecture
+else
+
+obj-y += common/
+obj-$(CONFIG_MT_SND_SOC_V3) += mt6735/
+obj-$(CONFIG_MT_SND_SOC_6570) += mt6570/
+obj-$(CONFIG_MT_SND_SOC_6580) += mt6580/
+obj-$(CONFIG_MT_SND_SOC_6797) += mt6797/
+obj-$(CONFIG_MT_SND_SOC_6755) += mt6755/
+obj-$(CONFIG_MT_SND_SOC_6750) += mt6750/
+
 endif

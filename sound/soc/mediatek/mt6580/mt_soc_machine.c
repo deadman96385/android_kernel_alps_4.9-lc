@@ -57,7 +57,6 @@
 #include "mt_soc_afe_control.h"
 
 #include <mach/mt_clkbuf_ctl.h>
-#include <sound/mt_soc_audio.h>
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -76,14 +75,12 @@
 #include <linux/wait.h>
 #include <linux/spinlock.h>
 #include <linux/sched.h>
-#include <linux/wakelock.h>
 #include <linux/semaphore.h>
 #include <linux/jiffies.h>
 #include <linux/proc_fs.h>
 #include <linux/string.h>
 #include <linux/mutex.h>
 /*#include <linux/xlog.h>*/
-/*#include <mach/irqs.h>*/
 #include <linux/uaccess.h>
 #include <asm/irq.h>
 #include <linux/io.h>
