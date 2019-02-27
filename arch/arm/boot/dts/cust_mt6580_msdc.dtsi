@@ -14,7 +14,7 @@
 
 &msdc0 {
 	index = /bits/ 8 <0>;
-	clk_src = /bits/ 8 <MSDC0_CLKSRC_208MHZ>;
+	clk_src = /bits/ 8 <MSDC0_CLKSRC_187MHZ>;
 	bus-width = <8>;
 	max-frequency = <200000000>;
 	cap-mmc-highspeed;
@@ -40,7 +40,7 @@
 
 &msdc1 {
 	index = /bits/ 8 <1>;
-	clk_src = /bits/ 8 <MSDC1_CLKSRC_208MHZ>;
+	clk_src = /bits/ 8 <MSDC1_CLKSRC_187MHZ>;
 	bus-width = <4>;
 	max-frequency = <200000000>;
 	cap-sd-highspeed;
