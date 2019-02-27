@@ -15,13 +15,10 @@
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
 #include <linux/gpio.h>
-
+#include <linux/of_gpio.h>
 #include "cust_alsps.h"
 #include "cm36652.h"
 #include "alsps.h"
-#ifdef CUSTOM_KERNEL_SENSORHUB
-#include <SCP_sensorHub.h>
-#endif
 
 
 /******************************************************************************
@@ -46,13 +43,9 @@ static int cm36652_i2c_remove(struct i2c_client *client);
 static int cm36652_i2c_detect(struct i2c_client *client, struct i2c_board_info *info);
 static int cm36652_i2c_suspend(struct device *dev);
 static int cm36652_i2c_resume(struct device *dev);
-static int als_flush(void);
-static int ps_flush(void);
-
 
 /*----------------------------------------------------------------------------*/
 static const struct i2c_device_id cm36652_i2c_id[] = {{CM36652_DEV_NAME, 0}, {} };
-/* static struct i2c_board_info __initdata i2c_cm36652={ I2C_BOARD_INFO(CM36652_DEV_NAME, 0x60)}; */
 static unsigned long long int_top_time;
 
 /*----------------------------------------------------------------------------*/
@@ -60,9 +53,6 @@ struct cm36652_priv {
 	struct alsps_hw  hw;
 	struct i2c_client *client;
 	struct work_struct	eint_work;
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	struct work_struct init_done_work;
-#endif
 
 	/*misc*/
 	u16		als_modulus;
@@ -83,7 +73,7 @@ struct cm36652_priv {
 
 	/*data*/
 	u16			als;
-	u8			ps;
+	u16			ps;
 	u8			_align;
 	u16			als_level_num;
 	u16			als_value_num;
@@ -100,9 +90,6 @@ struct cm36652_priv {
 	atomic_t	ps_thd_val;
 	ulong		enable;		/*enable mask*/
 	ulong		pending_intr;	/*pending interrupt*/
-	bool als_flush;
-	bool ps_flush;
-
 };
 /*----------------------------------------------------------------------------*/
 
@@ -145,8 +132,6 @@ struct PS_CALI_DATA_STRUCT {
 
 static struct i2c_client *cm36652_i2c_client;
 static struct cm36652_priv *cm36652_obj;
-/* static struct PS_CALI_DATA_STRUCT ps_cali={0,0,0}; */
-static int intr_flag = 1; /* hw default away after enable. */
 
 static int cm36652_local_init(void);
 static int cm36652_remove(void);
@@ -157,9 +142,9 @@ static struct alsps_init_info cm36652_init_info = {
 		.uninit = cm36652_remove,
 
 };
-
+/*----------------------------------------------------------------------------*/
 static DEFINE_MUTEX(cm36652_mutex);
-
+/*----------------------------------------------------------------------------*/
 enum {
 	CMC_BIT_ALS	= 1,
 	CMC_BIT_PS	   = 2,
@@ -180,28 +165,47 @@ enum {
 
 
 
-int CM36652_i2c_master_operate(struct i2c_client *client, const char *buf, int count, int i2c_flag)
+int CM36652_i2c_master_operate(struct i2c_client *client, char *buf, int count, int i2c_flag)
 {
 	int res = 0;
-
+#ifndef CONFIG_MTK_I2C_EXTENSION
+	struct i2c_msg msg[2];
+#endif
 	mutex_lock(&cm36652_mutex);
 	switch (i2c_flag) {
 	case I2C_FLAG_WRITE:
-	client->addr &= I2C_MASK_FLAG;
-	res = i2c_master_send(client, buf, count);
-	client->addr &= I2C_MASK_FLAG;
-	break;
+#ifdef CONFIG_MTK_I2C_EXTENSION
+		client->addr &= I2C_MASK_FLAG;
+		res = i2c_master_send(client, buf, count);
+		client->addr &= I2C_MASK_FLAG;
+#else
+		res = i2c_master_send(client, buf, count);
+#endif
+		break;
 
 	case I2C_FLAG_READ:
-	client->addr &= I2C_MASK_FLAG;
-	client->addr |= I2C_WR_FLAG;
-	client->addr |= I2C_RS_FLAG;
-	res = i2c_master_send(client, buf, count);
-	client->addr &= I2C_MASK_FLAG;
-	break;
+#ifdef CONFIG_MTK_I2C_EXTENSION
+		client->addr &= I2C_MASK_FLAG;
+		client->addr |= I2C_WR_FLAG;
+		client->addr |= I2C_RS_FLAG;
+		res = i2c_master_send(client, buf, (count << 8) | 1);
+		client->addr &= I2C_MASK_FLAG;
+#else
+		msg[0].addr = client->addr;
+		msg[0].flags = 0;
+		msg[0].len = 1;
+		msg[0].buf = buf;
+
+		msg[1].addr = client->addr;
+		msg[1].flags = I2C_M_RD;
+		msg[1].len = count;
+		msg[1].buf = buf;
+		res = i2c_transfer(client->adapter, msg, ARRAY_SIZE(msg));
+#endif
+		break;
 	default:
-	APS_LOG("CM36652_i2c_master_operate i2c_flag command not support!\n");
-	break;
+		pr_debug("CM36652_i2c_master_operate i2c_flag command not support!\n");
+		break;
 	}
 	if (res < 0)
 		goto EXIT_ERR;
@@ -222,7 +226,7 @@ int cm36652_enable_ps(struct i2c_client *client, int enable)
 	if (enable == 1) {
 		APS_LOG("cm36652_enable_ps enable_ps\n");
 		databuf[0] = CM36652_REG_PS_CONF1_2;
-		res = CM36652_i2c_master_operate(client, databuf, 0x201, I2C_FLAG_READ);
+		res = CM36652_i2c_master_operate(client, databuf, 2, I2C_FLAG_READ);
 		if (res < 0) {
 			APS_ERR("i2c_master_send function err\n");
 			goto ENABLE_PS_EXIT_ERR;
@@ -238,11 +242,10 @@ int cm36652_enable_ps(struct i2c_client *client, int enable)
 		}
 		atomic_set(&obj->ps_deb_on, 1);
 		atomic_set(&obj->ps_deb_end, jiffies+atomic_read(&obj->ps_debounce)/(1000/HZ));
-		intr_flag = 1; /* reset hw status to away after enable. */
 	} else {
 		APS_LOG("cm36652_enable_ps disable_ps\n");
 		databuf[0] = CM36652_REG_PS_CONF1_2;
-		res = CM36652_i2c_master_operate(client, databuf, 0x201, I2C_FLAG_READ);
+		res = CM36652_i2c_master_operate(client, databuf, 2, I2C_FLAG_READ);
 		if (res < 0) {
 			APS_ERR("i2c_master_send function err\n");
 			goto ENABLE_PS_EXIT_ERR;
@@ -269,13 +272,13 @@ ENABLE_PS_EXIT_ERR:
 int cm36652_enable_als(struct i2c_client *client, int enable)
 {
 	struct cm36652_priv *obj = i2c_get_clientdata(client);
-	int res;
+	int res = 0;
 	u8 databuf[3];
 
 	if (enable == 1) {
 		/* APS_LOG("cm36652_enable_als enable_als\n"); */
 		databuf[0] = CM36652_REG_CS_CONF;
-		res = CM36652_i2c_master_operate(client, databuf, 0x201, I2C_FLAG_READ);
+		res = CM36652_i2c_master_operate(client, databuf, 2, I2C_FLAG_READ);
 		if (res < 0) {
 			APS_ERR("i2c_master_send function err\n");
 			goto ENABLE_ALS_EXIT_ERR;
@@ -295,7 +298,7 @@ int cm36652_enable_als(struct i2c_client *client, int enable)
 	} else {
 		/* APS_LOG("cm36652_enable_als disable_als\n"); */
 		databuf[0] = CM36652_REG_CS_CONF;
-		res = CM36652_i2c_master_operate(client, databuf, 0x201, I2C_FLAG_READ);
+		res = CM36652_i2c_master_operate(client, databuf, 2, I2C_FLAG_READ);
 		if (res < 0) {
 			APS_ERR("i2c_master_send function err\n");
 			goto ENABLE_ALS_EXIT_ERR;
@@ -317,14 +320,14 @@ ENABLE_ALS_EXIT_ERR:
 	return res;
 }
 /********************************************************************/
-long cm36652_read_ps(struct i2c_client *client, u8 *data)
+long cm36652_read_ps(struct i2c_client *client, u16 *data)
 {
-	long res;
+	long res = 0;
 	u8 databuf[2];
 	struct cm36652_priv *obj = i2c_get_clientdata(client);
 
 	databuf[0] = CM36652_REG_PS_DATA;
-	res = CM36652_i2c_master_operate(client, databuf, 0x201, I2C_FLAG_READ);
+	res = CM36652_i2c_master_operate(client, databuf, 2, I2C_FLAG_READ);
 	if (res < 0) {
 		APS_ERR("i2c_master_send function err\n");
 		goto READ_PS_EXIT_ERR;
@@ -332,10 +335,11 @@ long cm36652_read_ps(struct i2c_client *client, u8 *data)
 	if (atomic_read(&obj->trace) & CMC_TRC_DEBUG)
 		APS_LOG("CM36652_REG_PS_DATA value value_low = %x, value_high = %x\n", databuf[0], databuf[1]);
 
-	if (databuf[0] < obj->ps_cali)
+	*data = ((databuf[1] << 8) | databuf[0]);
+	if (*data < obj->ps_cali)
 		*data = 0;
 	else
-		*data = databuf[0] - obj->ps_cali;
+		*data = *data - obj->ps_cali;
 	return 0;
 READ_PS_EXIT_ERR:
 	return res;
@@ -343,12 +347,12 @@ READ_PS_EXIT_ERR:
 /********************************************************************/
 long cm36652_read_als(struct i2c_client *client, u16 *data)
 {
-	long res;
+	long res = 0;
 	u8 databuf[2];
 	struct cm36652_priv *obj = i2c_get_clientdata(client);
 
 	databuf[0] = CM36652_REG_ALS_DATA;
-	res = CM36652_i2c_master_operate(client, databuf, 0x201, I2C_FLAG_READ);
+	res = CM36652_i2c_master_operate(client, databuf, 2, I2C_FLAG_READ);
 	if (res < 0) {
 		APS_ERR("i2c_master_send function err\n");
 		goto READ_ALS_EXIT_ERR;
@@ -366,10 +370,9 @@ READ_ALS_EXIT_ERR:
 /********************************************************************/
 static int cm36652_get_ps_value(struct cm36652_priv *obj, u8 ps)
 {
-	int val, mask = atomic_read(&obj->ps_mask);
+	int val = 0, mask = atomic_read(&obj->ps_mask);
 	int invalid = 0;
 
-	val = intr_flag; /* value between high/low threshold should sync. with hw status. */
 	if (ps > atomic_read(&obj->ps_thd_val_high))
 		val = 0;  /*close*/
 	else if (ps < atomic_read(&obj->ps_thd_val_low))
@@ -433,12 +436,10 @@ static int cm36652_get_als_value(struct cm36652_priv *obj, u16 als)
 		if (1 == atomic_read(&obj->als_deb_on))
 			invalid = 1;
 	}
-
 	for (idx = 0; idx < obj->als_level_num; idx++) {
 		if (als < obj->hw.als_level[idx])
 			break;
 	}
-
 	if (idx >= obj->als_level_num || idx >= obj->als_value_num) {
 		if (idx < obj->als_value_num)
 			value = obj->hw.als_value[idx-1];
@@ -473,7 +474,6 @@ static int cm36652_get_als_value(struct cm36652_priv *obj, u16 als)
 	return value;
 }
 
-
 /*-------------------------------attribute file for debugging----------------------------------*/
 
 /******************************************************************************
@@ -481,23 +481,27 @@ static int cm36652_get_als_value(struct cm36652_priv *obj, u16 als)
 *******************************************************************************/
 static ssize_t cm36652_show_config(struct device_driver *ddri, char *buf)
 {
-	ssize_t res;
+	ssize_t res = 0;
 
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
 		return 0;
 	}
 
-	res = snprintf(buf, PAGE_SIZE, "(%d %d %d %d %d)\n",
-	atomic_read(&cm36652_obj->i2c_retry), atomic_read(&cm36652_obj->als_debounce),
-	atomic_read(&cm36652_obj->ps_mask), atomic_read(&cm36652_obj->ps_thd_val),
-		atomic_read(&cm36652_obj->ps_debounce));
+	res = snprintf(buf, PAGE_SIZE, "(%d %d %d %d %d\n)threadhold_low=%d threadhold_high=%d\n",
+				atomic_read(&cm36652_obj->i2c_retry),
+				atomic_read(&cm36652_obj->als_debounce),
+				atomic_read(&cm36652_obj->ps_mask),
+				atomic_read(&cm36652_obj->ps_thd_val),
+				atomic_read(&cm36652_obj->ps_debounce),
+				atomic_read(&cm36652_obj->ps_thd_val_low),
+				atomic_read(&cm36652_obj->ps_thd_val_high));
 	return res;
 }
 /*----------------------------------------------------------------------------*/
 static ssize_t cm36652_store_config(struct device_driver *ddri, const char *buf, size_t count)
 {
-	int retry, als_deb, ps_deb, mask, thres;
+	int retry = 0, als_deb = 0, ps_deb = 0, mask = 0, thres = 0;
 
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
@@ -511,13 +515,13 @@ static ssize_t cm36652_store_config(struct device_driver *ddri, const char *buf,
 		atomic_set(&cm36652_obj->ps_thd_val, thres);
 		atomic_set(&cm36652_obj->ps_debounce, ps_deb);
 	} else
-		APS_ERR("invalid content: '%s', length = %zu\n", buf, count);
+		APS_ERR("invalid content: '%s', length = %d\n", buf, (unsigned int)count);
 	return count;
 }
 /*----------------------------------------------------------------------------*/
 static ssize_t cm36652_show_trace(struct device_driver *ddri, char *buf)
 {
-	ssize_t res;
+	ssize_t res = 0;
 
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
@@ -530,7 +534,7 @@ static ssize_t cm36652_show_trace(struct device_driver *ddri, char *buf)
 /*----------------------------------------------------------------------------*/
 static ssize_t cm36652_store_trace(struct device_driver *ddri, const char *buf, size_t count)
 {
-	int trace;
+	int trace = 0;
 
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
@@ -540,13 +544,13 @@ static ssize_t cm36652_store_trace(struct device_driver *ddri, const char *buf, 
 	if (1 == sscanf(buf, "0x%x", &trace))
 		atomic_set(&cm36652_obj->trace, trace);
 	else
-		APS_ERR("invalid content: '%s', length = %zu\n", buf, count);
+		APS_ERR("invalid content: '%s', length = %d\n", buf, (unsigned int)count);
 	return count;
 }
 /*----------------------------------------------------------------------------*/
 static ssize_t cm36652_show_als(struct device_driver *ddri, char *buf)
 {
-	int res;
+	int res = 0;
 
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
@@ -561,7 +565,7 @@ static ssize_t cm36652_show_als(struct device_driver *ddri, char *buf)
 /*----------------------------------------------------------------------------*/
 static ssize_t cm36652_show_ps(struct device_driver *ddri, char *buf)
 {
-	ssize_t res;
+	ssize_t res = 0;
 
 	if (!cm36652_obj) {
 		APS_ERR("cm3623_obj is null!!\n");
@@ -570,7 +574,7 @@ static ssize_t cm36652_show_ps(struct device_driver *ddri, char *buf)
 
 	res = cm36652_read_ps(cm36652_obj->client, &cm36652_obj->ps);
 	if (res)
-		return snprintf(buf, PAGE_SIZE, "ERROR: %d\n", (int)res);
+		return snprintf(buf, PAGE_SIZE, "ERROR: %d\n", (unsigned int)res);
 	else
 		return snprintf(buf, PAGE_SIZE, "0x%04X\n", cm36652_obj->ps);
 }
@@ -583,18 +587,19 @@ static ssize_t cm36652_show_reg(struct device_driver *ddri, char *buf)
 	int res = 0;
 
 	if (!cm36652_obj) {
-		APS_ERR("cm3623_obj is null!!\n");
+		APS_ERR("cm36652_obj is null!!\n");
 		return 0;
 	}
 
-	for (_bIndex = 0; _bIndex < 0x0D; _bIndex++) {
+	for (_bIndex = 0; _bIndex < 0x0E; _bIndex++) {
 		databuf[0] = _bIndex;
-		res = CM36652_i2c_master_operate(cm36652_obj->client, databuf, 0x201, I2C_FLAG_READ);
+		res = CM36652_i2c_master_operate(cm36652_obj->client, databuf, 2, I2C_FLAG_READ);
 		if (res < 0)
-			APS_ERR("i2c_master_send function err res = %d\n", res);
+			APS_ERR("CM36652_i2c_master_operate err res = %d\n", res);
 
-		_tLength += snprintf((buf + _tLength), (PAGE_SIZE - _tLength),
-			"Reg[0x%02X]: 0x%02X\n", _bIndex, databuf[0]);
+		_tLength +=
+		    snprintf((buf + _tLength), (PAGE_SIZE - _tLength), "Reg[0x%02X]: 0x%04X\n", _bIndex,
+			     databuf[0] | databuf[1] << 8);
 	}
 
 	return _tLength;
@@ -608,8 +613,8 @@ static ssize_t cm36652_show_send(struct device_driver *ddri, char *buf)
 /*----------------------------------------------------------------------------*/
 static ssize_t cm36652_store_send(struct device_driver *ddri, const char *buf, size_t count)
 {
-	int addr, cmd;
-	u8 dat;
+	int addr = 0, cmd = 0;
+	u8 dat = 0;
 
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
@@ -620,6 +625,29 @@ static ssize_t cm36652_store_send(struct device_driver *ddri, const char *buf, s
 	}
 
 	dat = (u8)cmd;
+	return count;
+}
+
+/*----------------------------------------------------------------------------*/
+static ssize_t cm36652_show_recv(struct device_driver *ddri, char *buf)
+{
+	return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+static ssize_t cm36652_store_recv(struct device_driver *ddri, const char *buf, size_t count)
+{
+	int addr = 0, err = 0;
+
+	if (!cm36652_obj) {
+		pr_err("cm36652_obj is null!!\n");
+		return 0;
+	}
+	err = kstrtoint(buf, 16, &addr);
+	if (err != 0) {
+		pr_err("invalid format: '%s'\n", buf);
+		return 0;
+	}
 	return count;
 }
 
@@ -671,7 +699,7 @@ static int read_int_from_buf(struct cm36652_priv *obj, const char *buf, size_t c
 static ssize_t cm36652_show_alslv(struct device_driver *ddri, char *buf)
 {
 	ssize_t len = 0;
-	int idx;
+	int idx = 0;
 
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
@@ -690,12 +718,12 @@ static ssize_t cm36652_store_alslv(struct device_driver *ddri, const char *buf, 
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
 		return 0;
-	} else if (!strcmp(buf, "def"))
+	} else if (!strcmp(buf, "def")) {
 		memcpy(cm36652_obj->als_level, cm36652_obj->hw.als_level, sizeof(cm36652_obj->als_level));
-	else if (cm36652_obj->als_level_num != read_int_from_buf(cm36652_obj, buf, count,
-			cm36652_obj->hw.als_level, cm36652_obj->als_level_num))
+	} else if (cm36652_obj->als_level_num != read_int_from_buf(cm36652_obj, buf, count,
+			cm36652_obj->hw.als_level, cm36652_obj->als_level_num)) {
 		APS_ERR("invalid format: '%s'\n", buf);
-
+	}
 	return count;
 }
 /*----------------------------------------------------------------------------*/
@@ -721,24 +749,25 @@ static ssize_t cm36652_store_alsval(struct device_driver *ddri, const char *buf,
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
 		return 0;
-	} else if (!strcmp(buf, "def"))
+	} else if (!strcmp(buf, "def")) {
 		memcpy(cm36652_obj->als_value, cm36652_obj->hw.als_value, sizeof(cm36652_obj->als_value));
-	else if (cm36652_obj->als_value_num != read_int_from_buf(cm36652_obj, buf, count,
-			cm36652_obj->hw.als_value, cm36652_obj->als_value_num))
+	} else if (cm36652_obj->als_value_num != read_int_from_buf(cm36652_obj, buf, count,
+			cm36652_obj->hw.als_value, cm36652_obj->als_value_num)) {
 		APS_ERR("invalid format: '%s'\n", buf);
-
+	}
 	return count;
 }
 /*---------------------------------------------------------------------------------------*/
-static DRIVER_ATTR(als,	 S_IWUSR | S_IRUGO, cm36652_show_als, NULL);
-static DRIVER_ATTR(ps,	  S_IWUSR | S_IRUGO, cm36652_show_ps, NULL);
-static DRIVER_ATTR(config,  S_IWUSR | S_IRUGO, cm36652_show_config,	cm36652_store_config);
-static DRIVER_ATTR(alslv,   S_IWUSR | S_IRUGO, cm36652_show_alslv, cm36652_store_alslv);
-static DRIVER_ATTR(alsval,  S_IWUSR | S_IRUGO, cm36652_show_alsval, cm36652_store_alsval);
-static DRIVER_ATTR(trace,   S_IWUSR | S_IRUGO, cm36652_show_trace,		cm36652_store_trace);
-static DRIVER_ATTR(status,  S_IWUSR | S_IRUGO, cm36652_show_status, NULL);
+static DRIVER_ATTR(als,		S_IWUSR | S_IRUGO, cm36652_show_als, NULL);
+static DRIVER_ATTR(ps,		S_IWUSR | S_IRUGO, cm36652_show_ps, NULL);
+static DRIVER_ATTR(config,	S_IWUSR | S_IRUGO, cm36652_show_config, cm36652_store_config);
+static DRIVER_ATTR(alslv,	S_IWUSR | S_IRUGO, cm36652_show_alslv, cm36652_store_alslv);
+static DRIVER_ATTR(alsval,	S_IWUSR | S_IRUGO, cm36652_show_alsval, cm36652_store_alsval);
+static DRIVER_ATTR(trace,	S_IWUSR | S_IRUGO, cm36652_show_trace, cm36652_store_trace);
+static DRIVER_ATTR(status,	S_IWUSR | S_IRUGO, cm36652_show_status, NULL);
 static DRIVER_ATTR(send,	S_IWUSR | S_IRUGO, cm36652_show_send, cm36652_store_send);
-static DRIVER_ATTR(reg,	 S_IWUSR | S_IRUGO, cm36652_show_reg, NULL);
+static DRIVER_ATTR(recv,	S_IWUSR | S_IRUGO, cm36652_show_recv, cm36652_store_recv);
+static DRIVER_ATTR(reg,		S_IWUSR | S_IRUGO, cm36652_show_reg, NULL);
 /*----------------------------------------------------------------------------*/
 static struct driver_attribute *cm36652_attr_list[] = {
 	&driver_attr_als,
@@ -749,14 +778,15 @@ static struct driver_attribute *cm36652_attr_list[] = {
 	&driver_attr_alsval,
 	&driver_attr_status,
 	&driver_attr_send,
+	&driver_attr_recv,
 	&driver_attr_reg,
 };
 
 /*----------------------------------------------------------------------------*/
 static int cm36652_create_attr(struct device_driver *driver)
 {
-	int idx, err = 0;
-	int num = ARRAY_SIZE(cm36652_attr_list);
+	int idx = 0, err = 0;
+	int num = (int)(ARRAY_SIZE(cm36652_attr_list));
 
 	if (driver == NULL)
 		return -EINVAL;
@@ -773,8 +803,8 @@ static int cm36652_create_attr(struct device_driver *driver)
 /*----------------------------------------------------------------------------*/
 static int cm36652_delete_attr(struct device_driver *driver)
 {
-	int idx, err = 0;
-	int num = ARRAY_SIZE(cm36652_attr_list);
+	int idx = 0, err = 0;
+	int num = (int)(ARRAY_SIZE(cm36652_attr_list));
 
 	if (!driver)
 		return -EINVAL;
@@ -784,17 +814,15 @@ static int cm36652_delete_attr(struct device_driver *driver)
 
 	return err;
 }
+static int intr_flag;
 /*----------------------------------------------------------------------------*/
-
-/*----------------------------------interrupt functions--------------------------------*/
-#ifndef CUSTOM_KERNEL_SENSORHUB
 static int cm36652_check_intr(struct i2c_client *client)
 {
-	int res;
+	int res = 0;
 	u8 databuf[2];
 
 	databuf[0] = CM36652_REG_PS_DATA;
-	res = CM36652_i2c_master_operate(client, databuf, 0x201, I2C_FLAG_READ);
+	res = CM36652_i2c_master_operate(client, databuf, 2, I2C_FLAG_READ);
 	if (res < 0) {
 		APS_ERR("i2c_master_send function err res = %d\n", res);
 		goto EXIT_ERR;
@@ -802,18 +830,18 @@ static int cm36652_check_intr(struct i2c_client *client)
 	APS_LOG("CM36652_REG_PS_DATA value value_low = %x, value_reserve = %x\n", databuf[0], databuf[1]);
 
 	databuf[0] = CM36652_REG_INT_FLAG;
-	res = CM36652_i2c_master_operate(client, databuf, 0x201, I2C_FLAG_READ);
+	res = CM36652_i2c_master_operate(client, databuf, 2, I2C_FLAG_READ);
 	if (res < 0) {
 		APS_ERR("i2c_master_send function err res = %d\n", res);
 		goto EXIT_ERR;
 	}
 	APS_LOG("CM36652_REG_INT_FLAG value value_low = %x, value_high = %x\n", databuf[0], databuf[1]);
 
-	if (databuf[1]&0x02)
-		intr_flag = 0;/* for close */
-	else if (databuf[1]&0x01)
-		intr_flag = 1;/* for away */
-	else {
+	if (databuf[1] & 0x02) {
+		intr_flag = 0; /* for close */
+	} else if (databuf[1] & 0x01) {
+		intr_flag = 1; /* for away  */
+	} else {
 		res = -1;
 		APS_ERR("cm36652_check_intr fail databuf[1]&0x01: %d\n", res);
 		goto EXIT_ERR;
@@ -824,26 +852,18 @@ EXIT_ERR:
 	/* APS_ERR("cm36652_check_intr dev: %d\n", res); */
 	return res;
 }
-#endif /* #ifndef CUSTOM_KERNEL_SENSORHUB */
 /*----------------------------------------------------------------------------*/
 static void cm36652_eint_work(struct work_struct *work)
 {
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	int res = 0;
-
-	res = ps_report_interrupt_data(intr_flag);
-	if (res != 0)
-		APS_ERR("cm36652_eint_work err: %d\n", res);
-#else /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 	struct cm36652_priv *obj = (struct cm36652_priv *)container_of(work, struct cm36652_priv, eint_work);
 	int res = 0;
 
-	/* APS_LOG("cm36652 int top half time = %lld\n", int_top_time); */
+	APS_LOG("cm36652 int top half time = %lld\n", int_top_time);
 
 	res = cm36652_check_intr(obj->client);
-	if (res != 0)
+	if (res != 0) {
 		goto EXIT_INTR_ERR;
-	else {
+	} else {
 		APS_LOG("cm36652 interrupt value = %d\n", intr_flag);
 		res = ps_report_interrupt_data(intr_flag);
 	}
@@ -863,81 +883,8 @@ EXIT_INTR_ERR:
 #else
 	mt65xx_eint_unmask(CUST_EINT_ALS_NUM);
 #endif
-	/* APS_ERR("cm36652_eint_work err: %d\n", res); */
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
+	APS_ERR("cm36652_eint_work err: %d\n", res);
 }
-/*----------------------------------------------------------------------------*/
-#ifdef CUSTOM_KERNEL_SENSORHUB
-static void cm36652_init_done_work(struct work_struct *work)
-{
-	struct cm36652_priv *obj = cm36652_obj;
-	struct CM36652_CUST_DATA *p_cust_data;
-	SCP_SENSOR_HUB_DATA data;
-	int max_cust_data_size_per_packet;
-	int i;
-	uint sizeOfCustData;
-	uint len;
-	char *p = (char *)obj->hw;
-
-	APS_FUN();
-
-	p_cust_data = (struct CM36652_CUST_DATA *)data.set_cust_req.custData;
-	sizeOfCustData = sizeof(*(obj->hw));
-	max_cust_data_size_per_packet = sizeof(data.set_cust_req.custData) - offsetof(struct CM36652_SET_CUST, data);
-
-	for (i = 0; sizeOfCustData > 0; i++) {
-		data.set_cust_req.sensorType = ID_PROXIMITY;
-		data.set_cust_req.action = SENSOR_HUB_SET_CUST;
-		p_cust_data->setCust.action = CM36652_CUST_ACTION_SET_CUST;
-		p_cust_data->setCust.part = i;
-
-		if (sizeOfCustData > max_cust_data_size_per_packet)
-			len = max_cust_data_size_per_packet;
-		else
-			len = sizeOfCustData;
-
-		memcpy(p_cust_data->setCust.data, p, len);
-		sizeOfCustData -= len;
-		p += len;
-
-		len += offsetof(SCP_SENSOR_HUB_SET_CUST_REQ, custData) + offsetof(struct CM36652_SET_CUST, data);
-		SCP_sensorHub_req_send(&data, &len, 1);
-	}
-
-	data.set_cust_req.sensorType = ID_PROXIMITY;
-	data.set_cust_req.action = SENSOR_HUB_SET_CUST;
-	p_cust_data->setEintInfo.action = CM36652_CUST_ACTION_SET_EINT_INFO;
-	p_cust_data->setEintInfo.gpio_mode = GPIO_ALS_EINT_PIN_M_EINT;
-	p_cust_data->setEintInfo.gpio_pin = GPIO_ALS_EINT_PIN;
-	p_cust_data->setEintInfo.eint_num = CUST_EINT_ALS_NUM;
-	p_cust_data->setEintInfo.eint_is_deb_en = CUST_EINT_ALS_DEBOUNCE_EN;
-	p_cust_data->setEintInfo.eint_type = CUST_EINT_ALS_TYPE;
-	len = offsetof(SCP_SENSOR_HUB_SET_CUST_REQ, custData) + sizeof(p_cust_data->setEintInfo);
-	SCP_sensorHub_req_send(&data, &len, 1);
-
-	mutex_lock(&cm36652_mutex);
-	data.activate_req.sensorType = ID_PROXIMITY;
-	data.activate_req.action = SENSOR_HUB_ACTIVATE;
-	if (test_bit(CMC_BIT_PS, &obj->enable))
-		data.activate_req.enable = 1;
-	else
-		data.activate_req.enable = 0;
-
-	len = sizeof(data.activate_req);
-	SCP_sensorHub_req_send(&data, &len, 1);
-	data.activate_req.sensorType = ID_LIGHT;
-	if (test_bit(CMC_BIT_ALS, &obj->enable))
-		data.activate_req.enable = 1;
-	else
-		data.activate_req.enable = 0;
-
-	len = sizeof(data.activate_req);
-	SCP_sensorHub_req_send(&data, &len, 1);
-	mutex_unlock(&cm36652_mutex);
-
-	atomic_set(&obj->init_done,  1);
-}
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 /*----------------------------------------------------------------------------*/
 static void cm36652_eint_func(void)
 {
@@ -945,7 +892,6 @@ static void cm36652_eint_func(void)
 
 	if (!obj)
 		return;
-
 	int_top_time = sched_clock();
 	schedule_work(&obj->eint_work);
 }
@@ -959,54 +905,8 @@ static irqreturn_t cm36652_eint_handler(int irq, void *desc)
 }
 #endif
 /*----------------------------------------------------------------------------*/
-#ifdef CUSTOM_KERNEL_SENSORHUB
-static int cm36652_irq_handler(void *data, uint len)
-{
-	struct cm36652_priv *obj = cm36652_obj;
-	SCP_SENSOR_HUB_DATA_P rsp = (SCP_SENSOR_HUB_DATA_P)data;
-
-	if (!obj)
-		return -1;
-
-	APS_ERR("len = %d, type = %d, action = %d, errCode = %d\n",
-		len, rsp->rsp.sensorType, rsp->rsp.action, rsp->rsp.errCode);
-
-	switch (rsp->rsp.action) {
-	case SENSOR_HUB_NOTIFY:
-		switch (rsp->notify_rsp.event) {
-		case SCP_INIT_DONE:
-			schedule_work(&obj->init_done_work);
-			/* schedule_delayed_work(&obj->init_done_work, HZ); */
-			break;
-		case SCP_NOTIFY:
-			if (CM36652_NOTIFY_PROXIMITY_CHANGE == rsp->notify_rsp.data[0]) {
-				intr_flag = rsp->notify_rsp.data[1];
-				cm36652_eint_func();
-			} else
-				APS_ERR("Unknown notify");
-			break;
-		default:
-			APS_ERR("Error sensor hub notify");
-			break;
-		}
-		break;
-	default:
-		APS_ERR("Error sensor hub action");
-		break;
-	}
-
-	return 0;
-}
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
-/*----------------------------------------------------------------------------*/
 int cm36652_setup_eint(struct i2c_client *client)
 {
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	int err = 0;
-
-	err = SCP_sensorHub_rsp_registration(ID_PROXIMITY, cm36652_irq_handler);
-#else /* #ifdef CUSTOM_KERNEL_SENSORHUB */
-
 	int ret;
 	struct pinctrl *pinctrl;
 	struct pinctrl_state *pins_default;
@@ -1018,6 +918,7 @@ int cm36652_setup_eint(struct i2c_client *client)
 	if (IS_ERR(pinctrl)) {
 		ret = PTR_ERR(pinctrl);
 		APS_ERR("Cannot find alsps pinctrl!\n");
+		return ret;
 	}
 	pins_default = pinctrl_lookup_state(pinctrl, "pin_default");
 	if (IS_ERR(pins_default)) {
@@ -1030,19 +931,33 @@ int cm36652_setup_eint(struct i2c_client *client)
 	if (IS_ERR(pins_cfg)) {
 		ret = PTR_ERR(pins_cfg);
 		APS_ERR("Cannot find alsps pinctrl pin_cfg!\n");
-
+		return ret;
 	}
+	pinctrl_select_state(pinctrl, pins_cfg);
 /* eint request */
 	if (cm36652_obj->irq_node) {
+#ifndef CONFIG_MTK_EIC
+		/*upstream code*/
+		ints[0] = of_get_named_gpio(cm36652_obj->irq_node, "deb-gpios", 0);
+		if (ints[0] < 0) {
+			pr_err("debounce gpio not found\n");
+		} else{
+			ret = of_property_read_u32(cm36652_obj->irq_node, "debounce", &ints[1]);
+			if (ret < 0)
+				pr_err("debounce time not found\n");
+			else
+				gpio_set_debounce(ints[0], ints[1]);
+			pr_debug("ints[0] = %d, ints[1] = %d!!\n", ints[0], ints[1]);
+		}
+#else
 		ret = of_property_read_u32_array(cm36652_obj->irq_node, "debounce", ints, ARRAY_SIZE(ints));
-		if (!ret)
-			APS_LOG("of_property_read_u32_array fail!!\n");
-		ret = gpio_request(ints[0], "p-sensor");
-		if (ret)
-			APS_ERR("gpio_request fail. ret(%d)\n", ret);
+		if (ret) {
+			pr_err("of_property_read_u32_array fail, ret = %d\n", ret);
+			return ret;
+		}
 		gpio_set_debounce(ints[0], ints[1]);
-		pinctrl_select_state(pinctrl, pins_cfg);
 		APS_LOG("ints[0] = %d, ints[1] = %d!!\n", ints[0], ints[1]);
+#endif
 
 		cm36652_obj->irq = irq_of_parse_and_map(cm36652_obj->irq_node, 0);
 		APS_LOG("cm36652_obj->irq = %d\n", cm36652_obj->irq);
@@ -1054,14 +969,31 @@ int cm36652_setup_eint(struct i2c_client *client)
 			APS_ERR("IRQ LINE NOT AVAILABLE!!\n");
 			return -EINVAL;
 		}
-		enable_irq(cm36652_obj->irq);
 		enable_irq_wake(cm36652_obj->irq);
+		enable_irq(cm36652_obj->irq);
 	} else {
 		APS_ERR("null irq node!!\n");
 		return -EINVAL;
 	}
+	return 0;
+}
+static int set_psensor_threshold(struct i2c_client *client)
+{
+	struct cm36652_priv *obj = i2c_get_clientdata(client);
+	int res = 0;
+	u8 databuf[3];
 
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
+	APS_ERR("set_psensor_threshold function high: 0x%x, low:0x%x\n",
+		atomic_read(&obj->ps_thd_val_high), atomic_read(&obj->ps_thd_val_low));
+	databuf[0] = CM36652_REG_PS_THD;
+	databuf[1] = atomic_read(&obj->ps_thd_val_low);
+	databuf[2] = atomic_read(&obj->ps_thd_val_high);/* threshold value need to confirm */
+	res = CM36652_i2c_master_operate(client, databuf, 0x3, I2C_FLAG_WRITE);
+	if (res <= 0) {
+		APS_ERR("i2c_master_send function err\n");
+		return -1;
+	}
+
 	return 0;
 }
 /*--------------------------------------------------------------------------------*/
@@ -1150,50 +1082,18 @@ EXIT_ERR:
 	return res;
 }
 /*--------------------------------------------------------------------------------*/
-
-/* if use  this typ of enable , Gsensor should report inputEvent(x, y, z ,stats, div) to HAL */
 static int als_open_report_data(int open)
 {
-	/* should queuq work to report event if  is_report_input_direct=true */
 	return 0;
 }
 
-/* if use  this typ of enable , Gsensor only enabled but not report inputEvent to HAL */
 
 static int als_enable_nodata(int en)
 {
 	int res = 0;
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	SCP_SENSOR_HUB_DATA req;
-	int len;
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 
-	/* APS_LOG("cm36652_obj als enable value = %d\n", en); */
-	if (cm36652_obj->als_flush) {
-		if (en) {
-			APS_LOG("is not flush, will call als_flush in als_enable_nodata\n");
-			als_flush();
-		} else
-			cm36652_obj->als_flush = false;
-	}
+	APS_LOG("cm36652_obj als enable value = %d\n", en);
 
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	if (atomic_read(&cm36652_obj->init_done)) {
-		req.activate_req.sensorType = ID_LIGHT;
-		req.activate_req.action = SENSOR_HUB_ACTIVATE;
-		req.activate_req.enable = en;
-		len = sizeof(req.activate_req);
-		res = SCP_sensorHub_req_send(&req, &len, 1);
-	} else
-		APS_ERR("sensor hub has not been ready!!\n");
-
-	mutex_lock(&cm36652_mutex);
-	if (en)
-		set_bit(CMC_BIT_ALS, &cm36652_obj->enable);
-	else
-		clear_bit(CMC_BIT_ALS, &cm36652_obj->enable);
-	mutex_unlock(&cm36652_mutex);
-#else /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 	mutex_lock(&cm36652_mutex);
 	if (en)
 		set_bit(CMC_BIT_ALS, &cm36652_obj->enable);
@@ -1205,7 +1105,6 @@ static int als_enable_nodata(int en)
 		return -1;
 	}
 	res = cm36652_enable_als(cm36652_obj->client, en);
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 	if (res) {
 		APS_ERR("als_enable_nodata is failed!!\n");
 		return -1;
@@ -1218,36 +1117,21 @@ static int als_set_delay(u64 ns)
 	return 0;
 }
 
+static int als_batch(int flag, int64_t samplingPeriodNs, int64_t maxBatchReportLatencyNs)
+{
+	return als_set_delay(samplingPeriodNs);
+}
+
+static int als_flush(void)
+{
+	return als_flush_report();
+}
+
 static int als_get_data(int *value, int *status)
 {
 	int err = 0;
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	SCP_SENSOR_HUB_DATA req;
-	int len;
-#else
 	struct cm36652_priv *obj = NULL;
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	if (atomic_read(&cm36652_obj->init_done)) {
-		req.get_data_req.sensorType = ID_LIGHT;
-		req.get_data_req.action = SENSOR_HUB_GET_DATA;
-		len = sizeof(req.get_data_req);
-		err = SCP_sensorHub_req_send(&req, &len, 1);
-	if (err)
-		APS_ERR("SCP_sensorHub_req_send fail!\n");
-	else {
-		*value = req.get_data_rsp.int16_Data[0];
-		*status = SENSOR_STATUS_ACCURACY_MEDIUM;
-	}
-
-	if (atomic_read(&cm36652_obj->trace) & CMC_TRC_PS_DATA)
-		APS_LOG("value = %d\n", *value);
-	else {
-		APS_ERR("sensor hub hat not been ready!!\n");
-		err = -1;
-	}
-#else /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
 		return -1;
@@ -1258,62 +1142,26 @@ static int als_get_data(int *value, int *status)
 		err = -1;
 	else {
 		*value = cm36652_get_als_value(obj, obj->als);
-		if (*value < 0)
-			err = -1;
 		*status = SENSOR_STATUS_ACCURACY_MEDIUM;
 	}
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 
 	return err;
 }
 
-/* if use  this typ of enable , Gsensor should report inputEvent(x, y, z ,stats, div) to HAL */
 static int ps_open_report_data(int open)
 {
-	/* should queuq work to report event if  is_report_input_direct=true */
 	return 0;
 }
-
-/* if use  this typ of enable , Gsensor only enabled but not report inputEvent to HAL */
 
 static int ps_enable_nodata(int en)
 {
 	int res = 0;
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	SCP_SENSOR_HUB_DATA req;
-	int len;
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 
-	/* APS_LOG("cm36652_obj als enable value = %d\n", en); */
-	if (cm36652_obj->ps_flush) {
-		if (en) {
-			APS_LOG("is not flush, will call ps_flush in als_enable_nodata\n");
-			ps_flush();
-		} else
-			cm36652_obj->ps_flush = false;
-	}
-
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	if (atomic_read(&cm36652_obj->init_done)) {
-		req.activate_req.sensorType = ID_PROXIMITY;
-		req.activate_req.action = SENSOR_HUB_ACTIVATE;
-		req.activate_req.enable = en;
-		len = sizeof(req.activate_req);
-		res = SCP_sensorHub_req_send(&req, &len, 1);
-	} else
-		APS_ERR("sensor hub has not been ready!!\n");
+	APS_LOG("cm36652_obj als enable value = %d\n", en);
 
 	mutex_lock(&cm36652_mutex);
 	if (en)
 		set_bit(CMC_BIT_PS, &cm36652_obj->enable);
-	else
-		clear_bit(CMC_BIT_PS, &cm36652_obj->enable);
-	mutex_unlock(&cm36652_mutex);
-#else /* #ifdef CUSTOM_KERNEL_SENSORHUB */
-	mutex_lock(&cm36652_mutex);
-	if (en)
-		set_bit(CMC_BIT_PS, &cm36652_obj->enable);
-
 	else
 		clear_bit(CMC_BIT_PS, &cm36652_obj->enable);
 
@@ -1323,51 +1171,32 @@ static int ps_enable_nodata(int en)
 		return -1;
 	}
 	res = cm36652_enable_ps(cm36652_obj->client, en);
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 
 	if (res) {
 		APS_ERR("als_enable_nodata is failed!!\n");
 		return -1;
 	}
 	return 0;
-
 }
 
 static int ps_set_delay(u64 ns)
 {
 	return 0;
 }
+static int ps_batch(int flag, int64_t samplingPeriodNs, int64_t maxBatchReportLatencyNs)
+{
+	return 0;
+}
+
+static int ps_flush(void)
+{
+	return ps_flush_report();
+}
 
 static int ps_get_data(int *value, int *status)
 {
 	int err = 0;
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	SCP_SENSOR_HUB_DATA req;
-	int len;
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	if (atomic_read(&cm36652_obj->init_done)) {
-		req.get_data_req.sensorType = ID_PROXIMITY;
-		req.get_data_req.action = SENSOR_HUB_GET_DATA;
-		len = sizeof(req.get_data_req);
-		err = SCP_sensorHub_req_send(&req, &len, 1);
-	if (err) {
-		APS_ERR("SCP_sensorHub_req_send fail!\n");
-		*value = -1;
-		err = -1;
-	} else {
-		*value = req.get_data_rsp.int16_Data[0];
-		*status = SENSOR_STATUS_ACCURACY_MEDIUM;
-	}
-
-	if (atomic_read(&cm36652_obj->trace) & CMC_TRC_PS_DATA)
-		APS_LOG("value = %d\n", *value)
-	else {
-		APS_ERR("sensor hub has not been ready!!\n");
-		err = -1;
-	}
-#else /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 	if (!cm36652_obj) {
 		APS_ERR("cm36652_obj is null!!\n");
 		return -1;
@@ -1378,111 +1207,12 @@ static int ps_get_data(int *value, int *status)
 		err = -1;
 	else {
 		*value = cm36652_get_ps_value(cm36652_obj, cm36652_obj->ps);
-		if (*value < 0)
-			err = -1;
 		*status = SENSOR_STATUS_ACCURACY_MEDIUM;
 	}
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 
-	return err;
-}
-
-static int als_batch(int flag, int64_t samplingPeriodNs, int64_t maxBatchReportLatencyNs)
-{
-	int value = 0;
-
-	value = (int)samplingPeriodNs/1000/1000;
-	/*FIX  ME */
-
-	/* APS_LOG("cm36652 als set delay = (%d) ok.\n", value); */
-	return als_set_delay(samplingPeriodNs);
-}
-
-static int als_flush(void)
-{
-	int err = 0;
-	/*Only flush after sensor was enabled*/
-	if (!test_bit(CMC_BIT_ALS, &cm36652_obj->enable)) {
-		cm36652_obj->als_flush = true;
-		return 0;
-	}
-	err = als_flush_report();
-	if (err >= 0)
-		cm36652_obj->als_flush = false;
-	return err;
-}
-
-static int ps_batch(int flag, int64_t samplingPeriodNs, int64_t maxBatchReportLatencyNs)
-{
-	int value = 0;
-
-	value = (int)samplingPeriodNs/1000/1000;
-	/*FIX  ME */
-
-	APS_LOG("cm36652 ps set delay = (%d) ok.\n", value);
 	return 0;
 }
 
-static int ps_flush(void)
-{
-	int err = 0;
-	/*Only flash after sensor was enabled*/
-	if (!test_bit(CMC_BIT_PS, &cm36652_obj->enable)) {
-		cm36652_obj->ps_flush = true;
-		return 0;
-	}
-	err = ps_flush_report();
-	if (err >= 0)
-		cm36652_obj->ps_flush = false;
-	return err;
-}
-#if 0
-/************************************************************/
-static int set_psensor_threshold(struct i2c_client *client)
-{
-	struct cm36652_priv *obj = i2c_get_clientdata(client);
-	int res = 0;
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	SCP_SENSOR_HUB_DATA data;
-	struct CM36652_CUST_DATA *pCustData;
-	int len;
-	int32_t ps_thd_val_low, ps_thd_val_high;
-
-	ps_thd_val_low = atomic_read(&obj->ps_thd_val_low);
-	ps_thd_val_high = atomic_read(&obj->ps_thd_val_high);
-
-	/* ps_cali would be add back in SCP side. */
-	ps_thd_val_low -= obj->ps_cali;
-	ps_thd_val_high -= obj->ps_cali;
-
-	data.set_cust_req.sensorType = ID_PROXIMITY;
-	data.set_cust_req.action = SENSOR_HUB_SET_CUST;
-	pCustData = (struct CM36652_CUST_DATA *)(&data.set_cust_req.custData);
-
-	pCustData->setPSThreshold.action = CM36652_CUST_ACTION_SET_PS_THRESHODL;
-	pCustData->setPSThreshold.threshold[0] = ps_thd_val_low;
-	pCustData->setPSThreshold.threshold[1] = ps_thd_val_high;
-	len = offsetof(SCP_SENSOR_HUB_SET_CUST_REQ, custData) + sizeof(pCustData->setPSThreshold);
-
-	res = SCP_sensorHub_req_send(&data, &len, 1);
-#else /* #ifdef CUSTOM_KERNEL_SENSORHUB */
-	u8 databuf[3];
-
-	APS_ERR("set_psensor_threshold function high: 0x%x, low:0x%x\n",
-		atomic_read(&obj->ps_thd_val_high), atomic_read(&obj->ps_thd_val_low));
-	databuf[0] = CM36652_REG_PS_THD;
-	databuf[1] = atomic_read(&obj->ps_thd_val_low);
-	databuf[2] = atomic_read(&obj->ps_thd_val_high);/* threshold value need to confirm */
-	res = CM36652_i2c_master_operate(client, databuf, 0x3, I2C_FLAG_WRITE);
-	if (res <= 0) {
-		APS_ERR("i2c_master_send function err\n");
-		return -1;
-	}
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
-	return 0;
-
-}
-#endif
 static int cm36652_als_factory_enable_sensor(bool enable_disable, int64_t sample_periods_ms)
 {
 	int err = 0;
@@ -1567,14 +1297,8 @@ static int cm36652_ps_factory_get_data(int32_t *data)
 }
 static int cm36652_ps_factory_get_raw_data(int32_t *data)
 {
-
 	int err = 0;
 	struct cm36652_priv *obj = cm36652_obj;
-
-	if (!obj) {
-		APS_ERR("cm36652_obj is null!!\n");
-		return -1;
-	}
 
 	err = cm36652_read_ps(obj->client, &obj->ps);
 	if (err) {
@@ -1609,7 +1333,30 @@ static int cm36652_ps_factory_get_cali(int32_t *offset)
 	*offset = obj->ps_cali;
 	return 0;
 }
+static int cm36652_ps_factory_set_threashold(int32_t threshold[2])
+{
+	int err = 0;
+	struct cm36652_priv *obj = cm36652_obj;
 
+	APS_ERR("%s set threshold high: 0x%x, low: 0x%x\n", __func__, threshold[0], threshold[1]);
+	atomic_set(&obj->ps_thd_val_high, (threshold[0] + obj->ps_cali));
+	atomic_set(&obj->ps_thd_val_low, (threshold[1] + obj->ps_cali));
+	err = set_psensor_threshold(obj->client);
+
+	if (err < 0) {
+		APS_ERR("set_psensor_threshold fail\n");
+		return -1;
+	}
+	return 0;
+}
+static int cm36652_ps_factory_get_threashold(int32_t threshold[2])
+{
+	struct cm36652_priv *obj = cm36652_obj;
+
+	threshold[0] = atomic_read(&obj->ps_thd_val_high) - obj->ps_cali;
+	threshold[1] = atomic_read(&obj->ps_thd_val_low) - obj->ps_cali;
+	return 0;
+}
 static struct alsps_factory_fops cm36652_factory_fops = {
 	.als_enable_sensor = cm36652_als_factory_enable_sensor,
 	.als_get_data = cm36652_als_factory_get_data,
@@ -1626,6 +1373,8 @@ static struct alsps_factory_fops cm36652_factory_fops = {
 	.ps_clear_cali = cm36652_ps_factory_clear_cali,
 	.ps_set_cali = cm36652_ps_factory_set_cali,
 	.ps_get_cali = cm36652_ps_factory_get_cali,
+	.ps_set_threshold = cm36652_ps_factory_set_threashold,
+	.ps_get_threshold = cm36652_ps_factory_get_threashold,
 };
 
 static struct alsps_factory_public cm36652_factory_device = {
@@ -1658,9 +1407,6 @@ static int cm36652_i2c_probe(struct i2c_client *client, const struct i2c_device_
 
 	cm36652_obj = obj;
 	INIT_WORK(&obj->eint_work, cm36652_eint_work);
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	INIT_WORK(&obj->init_done_work, cm36652_init_done_work);
-#endif /* #ifdef CUSTOM_KERNEL_SENSORHUB */
 
 	obj->client = client;
 	i2c_set_clientdata(client, obj);
@@ -1686,8 +1432,8 @@ static int cm36652_i2c_probe(struct i2c_client *client, const struct i2c_device_
 	obj->enable = 0;
 	obj->pending_intr = 0;
 	obj->ps_cali = 0;
-	obj->als_level_num = sizeof(obj->hw.als_level)/sizeof(obj->hw.als_level[0]);
-	obj->als_value_num = sizeof(obj->hw.als_value)/sizeof(obj->hw.als_value[0]);
+	obj->als_level_num = ARRAY_SIZE(obj->hw.als_level);
+	obj->als_value_num = ARRAY_SIZE(obj->hw.als_value);
 	/*-----------------------------value need to be confirmed-----------------------------------------*/
 
 	BUG_ON(sizeof(obj->als_level) != sizeof(obj->hw.als_level));
@@ -1706,7 +1452,7 @@ static int cm36652_i2c_probe(struct i2c_client *client, const struct i2c_device_
 	APS_LOG("cm36652_init_client() OK!\n");
 	err = alsps_factory_device_register(&cm36652_factory_device);
 	if (err) {
-		APS_ERR("CM36558_device register failed\n");
+		APS_ERR("cm36652_device register failed\n");
 		goto exit_misc_device_register_failed;
 	}
 
@@ -1727,11 +1473,7 @@ static int cm36652_i2c_probe(struct i2c_client *client, const struct i2c_device_
 	als_ctl.batch = als_batch;
 	als_ctl.flush = als_flush;
 	als_ctl.is_report_input_direct = false;
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	als_ctl.is_support_batch = obj->hw.is_batch_supported_als;
-#else
 	als_ctl.is_support_batch = false;
-#endif
 
 	err = als_register_control_path(&als_ctl);
 	if (err) {
@@ -1752,12 +1494,8 @@ static int cm36652_i2c_probe(struct i2c_client *client, const struct i2c_device_
 	ps_ctl.set_delay  = ps_set_delay;
 	ps_ctl.batch = ps_batch;
 	ps_ctl.flush = ps_flush;
-	ps_ctl.is_report_input_direct = false;
-#ifdef CUSTOM_KERNEL_SENSORHUB
-	ps_ctl.is_support_batch = obj->hw.is_batch_supported_ps;
-#else
+	ps_ctl.is_report_input_direct = true;
 	ps_ctl.is_support_batch = false;
-#endif
 	err = ps_register_control_path(&ps_ctl);
 	if (err) {
 		APS_ERR("register fail = %d\n", err);
@@ -1786,7 +1524,7 @@ exit:
 	cm36652_i2c_client = NULL;
 	cm36652_obj = NULL;
 	APS_ERR("%s: err = %d\n", __func__, err);
-	cm36652_init_flag =  -1;
+	cm36652_init_flag = -1;
 	return err;
 }
 
@@ -1808,7 +1546,7 @@ static int cm36652_i2c_remove(struct i2c_client *client)
 
 static int cm36652_i2c_detect(struct i2c_client *client, struct i2c_board_info *info)
 {
-	strncpy(info->type, CM36652_DEV_NAME, strlen(CM36652_DEV_NAME));
+	strlcpy(info->type, CM36652_DEV_NAME, sizeof(info->type));
 	return 0;
 
 }
@@ -1839,10 +1577,8 @@ static int cm36652_i2c_resume(struct device *dev)
 	struct i2c_client *client = to_i2c_client(dev);
 	struct cm36652_priv *obj = i2c_get_clientdata(client);
 	int err;
-	struct hwm_sensor_data sensor_data;
 
-	memset(&sensor_data, 0, sizeof(sensor_data));
-	/* APS_LOG("cm36652_i2c_resume\n"); */
+	APS_LOG("cm36652_i2c_resume\n");
 	if (!obj) {
 		APS_ERR("null pointer!!\n");
 		return 0;
@@ -1889,9 +1625,7 @@ static int __init cm36652_init(void)
 /*----------------------------------------------------------------------------*/
 static void __exit cm36652_exit(void)
 {
-#ifdef CONFIG_CUSTOM_KERNEL_ALSPS_MODULE
-	alsps_success_Flag = false;
-#endif
+	pr_debug("%s\n", __func__);
 }
 /*----------------------------------------------------------------------------*/
 module_init(cm36652_init);
@@ -1900,4 +1634,3 @@ module_exit(cm36652_exit);
 MODULE_AUTHOR("yucong xiong");
 MODULE_DESCRIPTION("cm36652 driver");
 MODULE_LICENSE("GPL");
-

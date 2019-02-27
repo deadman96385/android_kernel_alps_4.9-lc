@@ -237,21 +237,6 @@ static long alsps_factory_unlocked_ioctl(struct file *file, unsigned int cmd,
 		if (copy_to_user(ptr, &data, sizeof(data)))
 			return -EFAULT;
 		return 0;
-	case ALSPS_IOCTL_ALS_GET_CALI:
-		if (alsps_factory.fops != NULL &&
-			alsps_factory.fops->als_get_cali != NULL) {
-			err = alsps_factory.fops->als_get_cali(&data);
-			if (err < 0) {
-				pr_err("ALSPS_IOCTL_ALS_GET_CALI FAIL!\n");
-				return -EINVAL;
-			}
-		} else {
-			pr_err("ALSPS_IOCTL_ALS_GET_CALI NULL\n");
-			return -EINVAL;
-		}
-		if (copy_to_user(ptr, &data, sizeof(data)))
-			return -EFAULT;
-		return 0;
 	case ALSPS_IOCTL_CLR_CALI:
 		if (copy_from_user(&data, ptr, sizeof(data)))
 			return -EFAULT;
@@ -308,7 +293,6 @@ static long alsps_factory_compat_ioctl(struct file *file,
 	case COMPAT_ALSPS_SET_PS_THRESHOLD:
 	case COMPAT_ALSPS_IOCTL_SET_CALI:
 	case COMPAT_ALSPS_IOCTL_GET_CALI:
-	case COMPAT_ALSPS_IOCTL_ALS_GET_CALI:
 	case COMPAT_ALSPS_IOCTL_CLR_CALI:
 	case COMPAT_ALSPS_ALS_ENABLE_CALI:
 	case COMPAT_ALSPS_PS_ENABLE_CALI:
