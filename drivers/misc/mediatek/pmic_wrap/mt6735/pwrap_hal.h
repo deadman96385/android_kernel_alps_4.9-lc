@@ -83,7 +83,7 @@ global variable and  sys interface
 /* #define PMIC_WRAP_SIG_ERRVAL1           ((PMIC_WRAP_BASE+0xDC)) */
 /* #define PMIC_WRAP_PMIC_IRQ_ADR          ((PMIC_WRAP_BASE+0x13C)) */
 /* #define PMIC_WRAP_PMIC_IRQ_MASK         ((PMIC_WRAP_BASE+0x140)) */
-#if defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735M)
 
 #include "pwrap_hal_d2.h"
 
@@ -340,7 +340,7 @@ global variable and  sys interface
 #define MDINF		(1 << 0)
 #define WACS0		(1 << 1)
 #define WACS1		(1 << 2)
-#if defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735M)
 #define WACS2		(1 << 4)
 #else
 #define WACS2		(1 << 5)
