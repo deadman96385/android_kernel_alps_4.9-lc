@@ -35,34 +35,20 @@ androidboot.hardware=mt6735 slub_max_order=0 slub_debug=OFZPU \
 firmware_class.path=/vendor/firmware";
 	};
 
-	/* Do not put any bus before mtk-msdc, because it should be mtk-msdc.0 for partition device node usage */
-	/*workaround for .0*/
-	mtk-msdc.0 {
-				compatible = "simple-bus";
-				#address-cells = <1>;
-				#size-cells = <1>;
-				ranges = <0 0 0 0xffffffff>;
-
-				mmc0: msdc0@11230000{
-						compatible = "mediatek,mt6735m-mmc";
-						reg = <0x11230000 0x10000  /* MSDC0_BASE   */
-							0x10000e84 0x2>;    /* FPGA PWR_GPIO, PWR_GPIO_EO */
-						interrupts = <GIC_SPI 79 IRQ_TYPE_LEVEL_LOW>;
-						status = "disabled";
-				};
-
-				mmc1: msdc1@11240000{
-						compatible = "mediatek,mt6735m-mmc";
-						reg = <0x11240000 0x10000  /* MSDC1_BASE   */
-							0x10000e84 0x2>;    /* FPGA PWR_GPIO, PWR_GPIO_EO */
-						interrupts = <GIC_SPI 80 IRQ_TYPE_LEVEL_LOW>;
-						status = "disabled";
-				};
-
-	/* only used for old way of DCT, can be removed in new platform */
-	msdc1_ins: default {
-		compatible = "mediatek, msdc1_ins-eint";
+	msdc0:msdc@11230000 {
+		compatible = "mediatek,msdc";
+		reg = <0 0x11230000 0 0x10000>;
+		interrupts = <GIC_SPI 79 IRQ_TYPE_LEVEL_LOW>;
 	};
+
+	msdc1:msdc@11240000 {
+		compatible = "mediatek,msdc";
+		reg = <0 0x11240000 0 0x10000>;
+		interrupts = <GIC_SPI 80 IRQ_TYPE_LEVEL_LOW>;
+	};
+
+	msdc1_ins:msdc1_ins@0 {
+		compatible = "mediatek,mt6735-sdcard-ins";
 	};
 
 	/* ATF logger SW IRQ number 281 = 32 + 249 */
@@ -736,8 +722,6 @@ firmware_class.path=/vendor/firmware";
 			reg = <0x10003000 0x1000>;
 			interrupts = <0 164 0x2>;
 		};
-
-
 
 		eintc: eintc@10005000 {
 			compatible = "mediatek,mt-eic";
@@ -1472,10 +1456,7 @@ firmware_class.path=/vendor/firmware";
 			interrupts = <0 73 0x8>;
 		};
 
-		MSDC3@0x11260000 {
-			compatible = "mediatek,MSDC3";
-			reg = <0x11260000 0x10000>;
-		};
+
 
 		WCN_AHB@0x11270000 {
 			compatible = "mediatek,WCN_AHB";
@@ -1915,7 +1896,7 @@ firmware_class.path=/vendor/firmware";
 #if !defined(CONFIG_SYSTEM_AS_ROOT) && !defined(CONFIG_MTK_AB_OTA_UPDATER)
 				system {
 					compatible = "android,system";
-					dev = "/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/system";
+					dev = "/dev/block/platform/bootdevice/by-name/system";
 					type = "ext4";
 					mnt_flags = "ro";
 #ifndef CONFIG_MTK_DM_VERITY_OFF
@@ -1932,7 +1913,7 @@ firmware_class.path=/vendor/firmware";
 #ifndef CONFIG_MTK_LATE_MOUNT
 				vendor {
 					compatible = "android,vendor";
-					dev = "/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/vendor";
+					dev = "/dev/block/platform/bootdevice/by-name/vendor";
 					type = "ext4";
 					mnt_flags = "ro";
 #ifndef CONFIG_MTK_AB_OTA_UPDATER
@@ -1961,7 +1942,7 @@ firmware_class.path=/vendor/firmware";
 #ifdef CONFIG_TARGET_COPY_OUT_ODM
 				odm {
 					compatible = "android,odm";
-					dev = "/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/odm";
+					dev = "/dev/block/platform/bootdevice/by-name/odm";
 					type = "ext4";
 					mnt_flags = "ro";
 #ifndef CONFIG_MTK_AB_OTA_UPDATER
@@ -2174,6 +2155,9 @@ firmware_class.path=/vendor/firmware";
 
 	};
 };
+
+
+#include "cust_mt6735_msdc.dtsi"
 /*CLDMA end*/
 
 #include <trusty.dtsi>
