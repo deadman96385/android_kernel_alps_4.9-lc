@@ -11,4 +11,7 @@
 # GNU General Public License for more details.
 #
 
+ifeq ($(CONFIG_MTK_DEBUGSYS_LOCK), y)
+  subdir-ccflags-y += -DDEBUGSYS_LOCK
+endif
 obj-y += devapc.o
