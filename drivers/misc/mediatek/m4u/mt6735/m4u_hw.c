@@ -37,6 +37,7 @@ int gM4U_4G_DRAM_Mode = 0;
 static spinlock_t gM4u_reg_lock;
 int gM4u_port_num = M4U_PORT_UNKNOWN;
 
+
 int m4u_invalid_tlb(int m4u_id, int L2_en, int isInvAll, unsigned int mva_start, unsigned int mva_end)
 {
 	unsigned int reg = 0;
@@ -1067,7 +1068,7 @@ void smi_larb0_clock_off(void)
 
 EXPORT_SYMBOL(smi_common_clock_off);
 
-
+static inline int m4u_port_2_larb_id(M4U_PORT_ID port);
 int m4u_insert_seq_range(M4U_PORT_ID port, unsigned int MVAStart, unsigned int MVAEnd)
 {
 	int i, free_id = -1;

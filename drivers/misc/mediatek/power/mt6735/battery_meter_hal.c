@@ -323,7 +323,7 @@ static signed int fgauge_read_current(void *data)
 	unsigned short uvalue16 = 0;
 	signed int dvalue = 0;
 	int m = 0;
-	long long Temp_Value = 0;
+	unsigned long long Temp_Value = 0;
 	signed int Current_Compensate_Value = 0;
 	unsigned int ret = 0;
 
@@ -443,7 +443,7 @@ signed int fgauge_read_IM_current(void *data)
 	unsigned short uvalue16 = 0;
 	signed int dvalue = 0;
 	/*int m = 0;*/
-	long long Temp_Value = 0;
+	unsigned long long Temp_Value = 0;
 	signed int Current_Compensate_Value = 0;
 	/*unsigned int ret = 0;*/
 
@@ -682,7 +682,7 @@ static signed int fgauge_read_columb_internal(void *data, int reset, int precise
 	unsigned int uvalue32_CAR_MSB = 0;
 	signed int dvalue_CAR = 0;
 	int m = 0;
-	long long Temp_Value = 0;
+	unsigned long long Temp_Value = 0;
 	unsigned int ret = 0;
 
 /* HW Init */

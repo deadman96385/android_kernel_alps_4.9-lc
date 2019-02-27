@@ -17,6 +17,10 @@ ifneq (,$(filter y,$(CONFIG_MACH_MT6580)))
   MDI_IP_FOLDER:=mt6350
 endif
 
+ifneq (,$(filter y,$(CONFIG_MACH_MT6735) $(CONFIG_MACH_MT6735M) $(CONFIG_MACH_MT6753)))
+  MDI_IP_FOLDER:=mt6328
+endif
+
 ifneq (,$(filter y,$(CONFIG_MTK_PMIC_CHIP_MT6355)))
   MDI_IP_FOLDER:=mt6355
 endif

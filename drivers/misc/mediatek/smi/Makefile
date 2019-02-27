@@ -17,7 +17,7 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/$(CONFIG_MTK_PLATFORM)/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/dramc/$(CONFIG_MTK_PLATFORM)/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/freqhopping/$(CONFIG_MTK_PLATFORM)/
 
-ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6580"))
+ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6580" "mt6735"))
 CMDQ_VER := "v2"
 else
 CMDQ_VER := "v3"

@@ -41,11 +41,11 @@
 
 #include <ddp_gamma.h>
 
-#include <mt-plat/mt_pwm.h>
+#include <mt-plat/mtk_pwm.h>
 #include <mt-plat/upmu_common.h>
 
-#include "leds_sw.h"
-#include "leds_hal.h"
+#include "mtk_leds_sw.h"
+#include "mtk_leds_hal.h"
 #include "ddp_pwm.h"
 #include "mtkfb.h"
 

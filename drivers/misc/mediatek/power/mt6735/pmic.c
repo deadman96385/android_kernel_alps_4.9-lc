@@ -92,7 +92,7 @@
 
 #if defined(CONFIG_MTK_KERNEL_POWER_OFF_CHARGING)
 #include <mt-plat/mt_boot.h>
-#include <mt-plat/mt_gpt.h>
+#include <mt-plat/mtk_gpt.h>
 #endif
 
 #if defined(CONFIG_MTK_SMART_BATTERY)

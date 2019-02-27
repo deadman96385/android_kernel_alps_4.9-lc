@@ -109,6 +109,7 @@ unsigned int read_dram_temperature(void);
 void sync_hw_gating_value(void);
 int dram_can_support_fh(void);
 int dram_fh_steps_freq(unsigned int step);
+int get_ddr_type(void);
 #if defined(CONFIG_MACH_MT6753)
 int enter_pasr_dpd_config(unsigned char segment_rank0, unsigned char segment_rank1);
 int exit_pasr_dpd_config(void);
