@@ -37,6 +37,7 @@
 /*****************************************************************************
  *                         D A T A   T Y P E S
  *****************************************************************************/
+
 typedef	uint8_t kal_uint8;
 typedef	int8_t kal_int8;
 typedef uint16_t kal_uint16;
@@ -107,10 +108,10 @@ typedef struct {
 	kal_uint32 u4BufferSize;	/*TX packetbuf size*/
 } BT_SCO_TX_T;
 
-struct time_buffer_info {
+typedef struct {
 	unsigned long long uDataCountEquiTime;
 	unsigned long long uTimestampUS;
-};
+} TIME_BUFFER_INFO_T;
 
 CVSD_MEMBLOCK_T BT_CVSD_Mem;
 
