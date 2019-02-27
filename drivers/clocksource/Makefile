@@ -54,7 +54,12 @@ obj-$(CONFIG_CLKSRC_TI_32K)	+= timer-ti-32k.o
 obj-$(CONFIG_CLKSRC_NPS)	+= timer-nps.o
 obj-$(CONFIG_OXNAS_RPS_TIMER)	+= timer-oxnas-rps.o
 
+ifneq (,$(filter $(CONFIG_MACH_MT6580), y))
+obj-y += mt_gpt.o
+obj-y += ca7_timer.o
+else
 obj-$(CONFIG_ARM_ARCH_TIMER)		+= arm_arch_timer.o
+endif
 obj-$(CONFIG_ARM_GLOBAL_TIMER)		+= arm_global_timer.o
 obj-$(CONFIG_ARMV7M_SYSTICK)		+= armv7m_systick.o
 obj-$(CONFIG_ARM_TIMER_SP804)		+= timer-sp804.o
