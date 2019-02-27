@@ -1929,6 +1929,7 @@ static int _convert_disp_input_to_ovl(struct OVL_CONFIG_STRUCT *dst,
 
 	if (src->buffer_source == DISP_BUFFER_ALPHA) {
 		dst->source = OVL_LAYER_SOURCE_RESERVED;	/* dim layer, constant alpha */
+		dst->dim_color = src->dim_color;
 	} else if (src->buffer_source == DISP_BUFFER_ION
 		   || src->buffer_source == DISP_BUFFER_MVA) {
 		dst->source = OVL_LAYER_SOURCE_MEM;	/* from memory */

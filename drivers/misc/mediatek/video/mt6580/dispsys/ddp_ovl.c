@@ -435,7 +435,7 @@ int ovl_layer_config(enum DISP_MODULE_ENUM module,
 			unsigned int sur_aen,
 			unsigned int src_alpha,
 			unsigned int dst_alpha,
-			unsigned int constant_color,
+			unsigned int dim_color,
 			unsigned int yuv_range,
 			void *handle)
 {
@@ -484,7 +484,7 @@ int ovl_layer_config(enum DISP_MODULE_ENUM module,
 	       idx, layer, (source == 0) ? "memory" : "dim", src_x, src_y, dst_x, dst_y,
 	       dst_w, dst_h, src_pitch, ovl_intput_format_name(fmt, input_swap),
 	       addr, key_en, key, aen, alpha, sur_aen,
-	       dst_alpha << 2 | src_alpha, constant_color, yuv_range);
+	       dst_alpha << 2 | src_alpha, dim_color, yuv_range);
 	if (source == OVL_LAYER_SOURCE_RESERVED) {
 		if (aen == 0)
 			DISPERR("dim layer ahpha enable should be 1!\n");
@@ -515,7 +515,8 @@ int ovl_layer_config(enum DISP_MODULE_ENUM module,
 
 	DISP_REG_SET(handle, DISP_REG_OVL_L0_CON + layer_offset, value);
 
-	DISP_REG_SET(handle, DISP_REG_OVL_L0_CLR + idx_offset + layer * 4, constant_color);
+	DISP_REG_SET(handle, DISP_REG_OVL_L0_CLR + idx_offset + layer * 4,
+			0xff000000 | dim_color);
 
 	DISP_REG_SET(handle, DISP_REG_OVL_L0_SRC_SIZE + layer_offset, dst_h << 16 | dst_w);
 
@@ -765,7 +766,7 @@ static int ovl_config_l(enum DISP_MODULE_ENUM module, struct disp_ddp_path_confi
 					pConfig->ovl_config[i].sur_aen,
 					pConfig->ovl_config[i].src_alpha,
 					pConfig->ovl_config[i].dst_alpha,
-					0xff000000,
+					pConfig->ovl_config[i].dim_color,
 					pConfig->ovl_config[i].yuv_range,
 					handle);
 		}
