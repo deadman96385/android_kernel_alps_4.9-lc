@@ -16,7 +16,7 @@
 
 /*--------------marco defination---------------*/
 #define BTIF_MAX_LEN_PER_PKT 2048
-#define BTIF_RXD_BE_BLOCKED_DETECT 0
+#define BTIF_RXD_BE_BLOCKED_DETECT 1
 /*--------------Enum Defination---------------*/
 enum _ENUM_BTIF_DPIDLE_ {
 	BTIF_DPIDLE_DISABLE = 0,

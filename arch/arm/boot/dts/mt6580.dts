@@ -794,26 +794,20 @@ firmware_class.path=/vendor/firmware loop.max_part=7";
 			interrupts = <0 37 0x8>;
 		};
 
-
-		btif_tx:btif_tx@11000380 {
-			compatible = "mediatek,btif_tx";
-			reg = <0x11000380 0x80>;
-			interrupts = <GIC_SPI 54 IRQ_TYPE_LEVEL_LOW>;
-		};
-
-		btif_rx:btif_rx@11000400 {
-			compatible = "mediatek,btif_rx";
-			reg = <0x11000400 0x80>;
-			interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_LOW>;
-		};
-
-		btif:btif@1100e000 {
+		btif@1100e000 {
 			compatible = "mediatek,btif";
-			reg = <0x1100e000 0x1000>;
-			interrupts = <GIC_SPI 67 IRQ_TYPE_LEVEL_LOW>;
-			/*clocks = <&perisys PERI_BTIF>,<&perisys PERI_APDMA>;*/
-			/*clock-names = "btifc","apdmac";*/
-		};/* End of btif */
+			#address-cells = <2>;
+			#size-cells = <2>;
+			reg = <0x1100e000 0x1000>,	/*btif base*/
+			      <0x11000380 0x80>,	/*btif tx dma base*/
+			      <0x11000400 0x80>;	/*btif rx dma base*/
+			interrupts = <GIC_SPI 67 IRQ_TYPE_LEVEL_LOW>,	/*btif irq*/
+				     <GIC_SPI 54 IRQ_TYPE_LEVEL_LOW>,	/*btif tx dma irq*/
+				     <GIC_SPI 55 IRQ_TYPE_LEVEL_LOW>;	/*btif rx dma irq*/
+			/* clocks = <&infracfg_ao INFRACFG_AO_BTIF_CG>,   btif clock*/
+			/* <&infracfg_ao INFRACFG_AO_AP_DMA_CG>;          ap dma clock*/
+			/* clock-names = "btifc","apdmac";*/
+		};
 
 		gps {
 			compatible = "mediatek,gps";
