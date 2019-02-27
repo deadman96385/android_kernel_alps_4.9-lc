@@ -189,8 +189,8 @@ int mtkcam_gpio_set(int PinIdx, int PwrType, int Val)
 }
 
 
-int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSensorName, BOOL On,
-		       char *mode_name)
+int kdCISModulePowerOn(enum CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx,
+				char *currSensorName, BOOL On, char *mode_name)
 {
 
 	u32 pinSetIdx = 0;	/* default main sensor */

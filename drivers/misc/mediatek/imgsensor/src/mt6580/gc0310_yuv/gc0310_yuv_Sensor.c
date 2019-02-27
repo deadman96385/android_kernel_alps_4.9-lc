@@ -53,12 +53,13 @@
 #include <linux/types.h>
 
 #include "kd_camera_typedef.h"
-#include "kd_camera_hw.h"
+/*#include "kd_camera_hw.h"*/
 #include "kd_imgsensor.h"
 #include "kd_imgsensor_define.h"
 #include "kd_imgsensor_errcode.h"
 #include "kd_camera_feature.h"
-
+#include "kd_camera_feature_id.h"
+#include "kd_camera_feature_enum.h"
 #include "gc0310_yuv_Sensor.h"
 
 
@@ -297,7 +298,7 @@ void GC0310_set_contrast(UINT16 para)
 }
 
 UINT32 GC0310_MIPI_SetMaxFramerateByScenario(
-  MSDK_SCENARIO_ID_ENUM scenarioId, MUINT32 frameRate)
+  enum MSDK_SCENARIO_ID_ENUM scenarioId, MUINT32 frameRate)
 {
     LOG_INF("scenarioId = %d\n", scenarioId);
 	return 0;
@@ -427,7 +428,8 @@ void GC0310_set_saturation(UINT16 para)
 void GC0310_set_iso(UINT16 para)
 {
 
-    LOG_INF("[GC0310]CONTROLFLOW GC0310_set_iso AEC p0:0x4f %d: shutter %d\n",GC0310_read_cmos_sensor(0x4f),GC0310_Read_Shutter());
+    LOG_INF("[GC0310]CONTROLFLOW GC0310_set_iso AEC p0:0x4f %d: shutter %d\n",
+    	GC0310_read_cmos_sensor(0x4f), GC0310_Read_Shutter());
     switch (para)
     {
         case AE_ISO_100:
@@ -475,7 +477,7 @@ void GC0310StreamOn(void)
 
 void GC0310_MIPI_GetDelayInfo(uintptr_t delayAddr)
 {
-    SENSOR_DELAY_INFO_STRUCT* pDelayInfo = (SENSOR_DELAY_INFO_STRUCT*)delayAddr;
+    struct SENSOR_DELAY_INFO_STRUCT* pDelayInfo = (struct SENSOR_DELAY_INFO_STRUCT*)delayAddr;
     pDelayInfo->InitDelay = 2;
     pDelayInfo->EffectDelay = 2;
     pDelayInfo->AwbDelay = 2;
@@ -487,7 +489,7 @@ void GC0310_MIPI_GetDelayInfo(uintptr_t delayAddr)
 }
 
 UINT32 GC0310_MIPI_GetDefaultFramerateByScenario(
-  MSDK_SCENARIO_ID_ENUM scenarioId, MUINT32 *pframeRate)
+enum MSDK_SCENARIO_ID_ENUM scenarioId, MUINT32 *pframeRate)
 {
     switch (scenarioId)
     {
@@ -522,7 +524,7 @@ void GC0310_MIPI_SetMaxMinFps(UINT32 u2MinFrameRate, UINT32 u2MaxFrameRate)
     return;
 }
 
-void GC0310_3ACtrl(ACDK_SENSOR_3A_LOCK_ENUM action)
+void GC0310_3ACtrl(enum ACDK_SENSOR_3A_LOCK_ENUM action)
 {
     LOG_INF("[GC0329]enter ACDK_SENSOR_3A_LOCK_ENUM function:action=%d\n",action);
    switch (action)
@@ -557,9 +559,9 @@ void GC0310_MIPI_GetExifInfo(uintptr_t exifAddr)
 {
 	int preGain = 0;
 	int postGain = 0;
-    SENSOR_EXIF_INFO_STRUCT* pExifInfo = NULL;
-	pExifInfo = (SENSOR_EXIF_INFO_STRUCT*)exifAddr;
-    pExifInfo->FNumber = 28;
+	struct SENSOR_EXIF_INFO_STRUCT* pExifInfo = NULL;
+	pExifInfo = (struct SENSOR_EXIF_INFO_STRUCT*)exifAddr;
+	pExifInfo->FNumber = 28;
 	GC0310_write_cmos_sensor(0xfe, 0x00);
 
 	preGain = GC0310_read_cmos_sensor(0x71);
@@ -576,7 +578,8 @@ void GC0310_MIPI_GetExifInfo(uintptr_t exifAddr)
 	}else {
 		pExifInfo->RealISOValue = AE_ISO_400;
 	}
-	LOG_INF("[GC0310]GC0310_MIPI_GetExifInfo preGain=0x%x postGain=0x%x iso=%d\n",preGain,postGain,pExifInfo->RealISOValue);
+	LOG_INF("[GC0310]GC0310_MIPI_GetExifInfo preGain=0x%x postGain=0x%x iso=%d\n",
+		preGain,postGain, pExifInfo->RealISOValue);
 //    pExifInfo->AEISOSpeed = GC0310_Driver.isoSpeed;
 //    pExifInfo->AWBMode = S5K4ECGX_Driver.awbMode;
 //    pExifInfo->CapExposureTime = S5K4ECGX_Driver.capExposureTime;
@@ -1500,7 +1503,7 @@ UINT32 GC0310GetResolution(MSDK_SENSOR_RESOLUTION_INFO_STRUCT *pSensorResolution
 } /* GC0310GetResolution() */
 
 
-UINT32 GC0310GetInfo(MSDK_SCENARIO_ID_ENUM ScenarioId,
+UINT32 GC0310GetInfo(enum MSDK_SCENARIO_ID_ENUM ScenarioId,
         MSDK_SENSOR_INFO_STRUCT *pSensorInfo,
         MSDK_SENSOR_CONFIG_STRUCT *pSensorConfigData)
 {
@@ -1574,7 +1577,7 @@ UINT32 GC0310GetInfo(MSDK_SCENARIO_ID_ENUM ScenarioId,
 } /* GC0310GetInfo() */
 
 
-UINT32 GC0310Control(MSDK_SCENARIO_ID_ENUM ScenarioId, MSDK_SENSOR_EXPOSURE_WINDOW_STRUCT *pImageWindow,
+UINT32 GC0310Control(enum MSDK_SCENARIO_ID_ENUM ScenarioId, MSDK_SENSOR_EXPOSURE_WINDOW_STRUCT *pImageWindow,
         MSDK_SENSOR_CONFIG_STRUCT *pSensorConfigData)
 {
 
@@ -2256,7 +2259,7 @@ void GC0310NightMode(kal_bool bEnable)
 }
 
 
-UINT32 GC0310YUVSensorSetting(FEATURE_ID iCmd, UINT16 iPara)
+UINT32 GC0310YUVSensorSetting(enum FEATURE_ID iCmd, UINT16 iPara)
 {
     switch (iCmd) {
     case FID_AWB_MODE:
@@ -2373,7 +2376,8 @@ UINT32 GC0310FeatureControl(MSDK_SENSOR_FEATURE_ENUM FeatureId,
         *pFeatureParaLen=4;
         break;
     case SENSOR_FEATURE_SET_YUV_CMD:
-        GC0310YUVSensorSetting((FEATURE_ID)*feature_data, *(feature_data+1));
+        GC0310YUVSensorSetting(
+		(enum FEATURE_ID)*feature_data, *(feature_data+1));
 
         break;
     case SENSOR_FEATURE_SET_VIDEO_MODE:    //  lanking
@@ -2389,7 +2393,7 @@ UINT32 GC0310FeatureControl(MSDK_SENSOR_FEATURE_ENUM FeatureId,
 
 	case SENSOR_FEATURE_SET_MAX_FRAME_RATE_BY_SCENARIO:
 		 LOG_INF("[GC0310] F_SET_MAX_FRAME_RATE_BY_SCENARIO.\n");
-		 GC0310_MIPI_SetMaxFramerateByScenario((MSDK_SCENARIO_ID_ENUM)*feature_data, *(feature_data+1));
+		 GC0310_MIPI_SetMaxFramerateByScenario((enum MSDK_SCENARIO_ID_ENUM)*feature_data, *(feature_data+1));
 		 break;
 
 //	case SENSOR_CMD_SET_VIDEO_FRAME_RATE:
@@ -2408,12 +2412,12 @@ UINT32 GC0310FeatureControl(MSDK_SENSOR_FEATURE_ENUM FeatureId,
 
     case SENSOR_FEATURE_GET_DEFAULT_FRAME_RATE_BY_SCENARIO:
          LOG_INF("[GC0310] F_GET_DEFAULT_FRAME_RATE_BY_SCENARIO\n");
-         GC0310_MIPI_GetDefaultFramerateByScenario((MSDK_SCENARIO_ID_ENUM)*feature_data, (MUINT32 *)(uintptr_t)(*(feature_data+1)));
+         GC0310_MIPI_GetDefaultFramerateByScenario((enum MSDK_SCENARIO_ID_ENUM)*feature_data, (MUINT32 *)(uintptr_t)(*(feature_data+1)));
     break;
 
 	case SENSOR_FEATURE_SET_YUV_3A_CMD:
 		 LOG_INF("[GC0310] SENSOR_FEATURE_SET_YUV_3A_CMD ID:%d\n", *pFeatureData32);
-		 GC0310_3ACtrl((ACDK_SENSOR_3A_LOCK_ENUM)*feature_data);
+		 GC0310_3ACtrl((enum ACDK_SENSOR_3A_LOCK_ENUM)*feature_data);
 		 break;
 
 
@@ -2440,7 +2444,7 @@ return ERROR_NONE;
 }   /* GC0310FeatureControl() */
 
 
-SENSOR_FUNCTION_STRUCT  SensorFuncGC0310YUV=
+struct SENSOR_FUNCTION_STRUCT SensorFuncGC0310YUV =
 {
     GC0310Open,
     GC0310GetInfo,
@@ -2451,7 +2455,7 @@ SENSOR_FUNCTION_STRUCT  SensorFuncGC0310YUV=
 };
 
 
-UINT32 GC0310_YUV_SensorInit(PSENSOR_FUNCTION_STRUCT *pfFunc)
+UINT32 GC0310_YUV_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc)
 {
     /* To Do : Check Sensor status here */
     if (pfFunc!=NULL)
