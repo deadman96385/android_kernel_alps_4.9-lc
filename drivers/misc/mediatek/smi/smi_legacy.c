@@ -133,7 +133,7 @@ void __iomem *smi_mmsys_base_addr_get(void)
 }
 
 #if IS_ENABLED(CONFIG_MACH_MT6580) || IS_ENABLED(CONFIG_MACH_MT6735M)
-static int smi_enable_clock(const unsigned int reg_indx, const char *user_name)
+static int smi_enable_clock(const unsigned int reg_indx, char *user_name)
 {
 	int ret;
 
@@ -157,7 +157,7 @@ static int smi_enable_clock(const unsigned int reg_indx, const char *user_name)
 	}
 }
 
-static int smi_disable_clock(const unsigned int reg_indx, const char *user_name)
+static int smi_disable_clock(const unsigned int reg_indx, char *user_name)
 {
 	int ret;
 
@@ -188,7 +188,7 @@ static int smi_disable_clock(const unsigned int reg_indx, const char *user_name)
  * mtcmos: wish to manipulate power with mtcmos = 1
  * *******************************************************/
 int smi_bus_prepare_enable(const unsigned int reg_indx,
-	const char *user_name, const bool mtcmos)
+	char *user_name, const bool mtcmos)
 {
 	int ref_cnt = -1, ret = 0;
 
@@ -249,7 +249,7 @@ EXPORT_SYMBOL_GPL(smi_bus_prepare_enable);
  * mtcmos: wish to manipulate power with mtcmos = 1
  * **********************************************************/
 int smi_bus_disable_unprepare(const unsigned int reg_indx,
-	const char *user_name, const bool mtcmos)
+	char *user_name, const bool mtcmos)
 {
 	int ref_cnt = -1, ret = 0;
 
