@@ -196,6 +196,53 @@ config MACH_MT6761
 	  thin-design smartphones. MT6761 also offers significant multitasking and
 	  multimedia improvements.
 
+config MACH_MT6580
+	bool "MediaTek MT6580"
+	select GENERIC_TIME
+	select GENERIC_CLOCKEVENTS
+	select ARCH_HAS_CPUFREQ
+	select ARM_AMBA
+	select CPU_V7
+	select FIQ_GLUE if (!TRUSTONIC_TEE_SUPPORT && !TRUSTY)
+	select HAVE_SMP
+	select NEED_MACH_MEMORY_H
+	select IRQ_DOMAIN
+	select IRQ_DOMAIN_DEBUG
+	select GENERIC_SCHED_CLOCK
+	select VFP_OPT
+	select ARCH_REQUIRE_GPIOLIB
+	select KERNEL_MODE_NEON
+	select CRYPTO_AES_ARM_BS
+	select CRYPTO_SHA2_ARM_CE
+	select CPU_IDLE
+	select ARM_HAS_SG_CHAIN
+	select MTK_EIC
+	select MTK_WATCHPOINT
+	select PINCTRL
+	select PINCTRL_MT6580
+	select MFD_SYSCON
+	select MTK_DEBUG_LATCH
+	select MTK_LASTPC
+	select CPU_IDLE
+	select ARM_MT6735_CPUIDLE
+	select MTK_SYSTRACKER_V2
+	select ARM_ERRATA_814220
+	select MTK_POWER_GS
+	select MTK_CPU_STRESS
+	select MTK_IRQ_NEW_DESIGN
+	select MTK_IRQ_NEW_DESIGN_DEBUG
+	select MTK_NO_ATF
+	select MTK_BASE_POWER
+	select MTK_GIC_V3_EXT
+	select MTK_SYSIRQ
+	select PM_DEVFREQ
+	select MTK_SYS_CIRQ
+	help
+	  This enables support for MediaTek MT6580
+	  Highly power-efficient, performance-oriented 4G LTE processor for premium,
+	  thin-design smartphones. MT6580 also offers significant multitasking and
+	  multimedia improvements.
+
 config MACH_MT3887
 	bool "MediaTek MT3887"
 	select GENERIC_TIME

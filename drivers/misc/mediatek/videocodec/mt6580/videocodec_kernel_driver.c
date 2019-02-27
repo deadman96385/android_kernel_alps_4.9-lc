@@ -2691,7 +2691,7 @@ static int __init vcodec_driver_init(void)
 	mutex_unlock(&DriverOpenCountLock);
 
 	{
-#ifdef CONFIG_ARCH_MT6580
+#ifdef CONFIG_MACH_MT6580
 		struct device_node *node = NULL;
 
 		node = of_find_compatible_node(NULL, NULL, "mediatek,VENC");
@@ -2719,7 +2719,7 @@ static int __init vcodec_driver_init(void)
 		KVA_VENC_IRQ_ACK_ADDR = KVA_VENC_BASE + 0x060;
 #endif
 	}
-#ifdef CONFIG_ARCH_MT6580
+#ifdef CONFIG_MACH_MT6580
 	{
 		struct device_node *node = NULL;
 

@@ -25,7 +25,7 @@
 #include <linux/irqchip.h>
 #include <linux/of_platform.h>
 
-#if defined(CONFIG_ARCH_MT6580) || defined(CONFIG_ARCH_MT6570)
+#if defined(CONFIG_MACH_MT6580) || defined(CONFIG_MACH_MT6570)
 #include <mt-smp.h>
 #endif
 
