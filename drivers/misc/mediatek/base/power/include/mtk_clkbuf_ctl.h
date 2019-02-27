@@ -33,7 +33,7 @@
 
 #elif defined(CONFIG_MACH_MT6580)
 
-#include "../../../include/mt-plat/mt6580/include/mach/mtk_clkbuf_ctl.h"
+#include "../../../include/mt-plat/mt6580/include/mach/mt_clkbuf_ctl.h"
 
 #elif defined(CONFIG_MACH_KIBOPLUS)
 

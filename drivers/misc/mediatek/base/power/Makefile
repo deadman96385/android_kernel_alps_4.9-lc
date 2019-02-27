@@ -42,6 +42,7 @@ obj-$(CONFIG_MACH_MT6765) += clkbuf_v1/
 obj-$(CONFIG_MACH_MT6761) += clkbuf_v1/
 obj-$(CONFIG_MACH_MT6765) += $(subst ",,$(CONFIG_MTK_PLATFORM))/
 obj-$(CONFIG_MACH_MT6761) += $(subst ",,$(CONFIG_MTK_PLATFORM))/
+obj-$(CONFIG_MACH_MT6580) += $(subst ",,$(CONFIG_MTK_PLATFORM))/
 endif
 obj-$(CONFIG_MACH_MT6758) += pbm_v2/
 obj-$(CONFIG_MACH_MT6765) += pbm_v4/
