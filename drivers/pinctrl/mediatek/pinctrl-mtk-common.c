@@ -1222,6 +1222,9 @@ static int mtk_gpio_get(struct gpio_chip *chip, unsigned int offset)
 
 static int mtk_gpio_to_irq(struct gpio_chip *chip, unsigned int offset)
 {
+#ifdef CONFIG_MTK_EIC
+	return mt_gpio_to_irq((unsigned int)offset);
+#else
 	const struct mtk_desc_pin *pin;
 	struct mtk_pinctrl *pctl = gpiochip_get_data(chip);
 	struct mtk_pinctrl_group *g = pctl->groups + offset;
@@ -1237,6 +1240,7 @@ static int mtk_gpio_to_irq(struct gpio_chip *chip, unsigned int offset)
 		return -EINVAL;
 
 	return irq;
+#endif
 }
 
 static int mtk_pinctrl_irq_request_resources(struct irq_data *d)
