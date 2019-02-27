@@ -1877,9 +1877,9 @@ int dpidle_enter(int cpu)
 
 	idle_ratio_calc_start(IDLE_TYPE_DP, cpu);
 
-	dpidle_pre_handler();
+	RCU_NONIDLE(dpidle_pre_handler());
 	spm_go_to_dpidle(slp_spm_deepidle_flags, 0, dpidle_dump_log);
-	dpidle_post_handler();
+	RCU_NONIDLE(dpidle_post_handler());
 
 	idle_ratio_calc_stop(IDLE_TYPE_DP, cpu);
 
@@ -1909,9 +1909,9 @@ int soidle_enter(int cpu)
 
 	idle_ratio_calc_start(IDLE_TYPE_SO, cpu);
 
-	soidle_pre_handler();
+	RCU_NONIDLE(soidle_pre_handler());
 	spm_go_to_sodi(slp_spm_SODI_flags, 0);
-	soidle_post_handler();
+	RCU_NONIDLE(soidle_post_handler());
 
 	idle_ratio_calc_stop(IDLE_TYPE_SO, cpu);
 
