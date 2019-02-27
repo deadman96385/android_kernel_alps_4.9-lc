@@ -82,7 +82,7 @@ bank_t tscpu_g_bank[THERMAL_BANK_NUM] = {
 	       .ts_number = 1},
 	[2] = {
 	       .ts = {TS_FILL(MCU2)},
-	       .ts_number = 2},
+	       .ts_number = 1},
 };
 
 #ifdef CONFIG_OF

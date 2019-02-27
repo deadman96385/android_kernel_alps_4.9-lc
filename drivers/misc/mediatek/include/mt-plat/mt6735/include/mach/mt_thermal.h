@@ -292,8 +292,6 @@ typedef enum {
 	THERMAL_SENSOR1 = 0,	/*TS_MCU1 */
 	THERMAL_SENSOR2 = 1,	/*TS_MCU2 */
 	THERMAL_SENSOR3 = 2,	/*TS_MCU3 */
-	THERMAL_SENSOR4 = 3,	/*TS_MCU4 */
-	THERMAL_SENSOR_ABB = 4,	/*TS_ABB */
 	THERMAL_SENSOR_NUM
 } thermal_sensor_name;
 
