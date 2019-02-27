@@ -92,7 +92,6 @@ ifeq ($(CONFIG_HAVE_MTK_IN_HOUSE_TEE_SUPPORT),y)
 obj-$(CONFIG_TRUSTY) += gcpu/
 endif
 obj-$(CONFIG_TRUSTONIC_TEE_SUPPORT) += gud/
-obj-y += sspm/
 obj-$(CONFIG_MMPROFILE) += mmp/
 obj-$(CONFIG_MTK_M4U)	+= m4u/
 obj-$(CONFIG_MTK_PSEUDO_M4U)   += pseudo_m4u/
