@@ -15,12 +15,7 @@
 # Makefile for misc devices that really don't fit anywhere else.
 #
 
-MTK_PLATFORM := $(subst ",,$(CONFIG_MTK_PLATFORM))
-ARCH_MTK_PROJECT := $(subst ",,$(CONFIG_ARCH_MTK_PROJECT))
 
-ifneq ($(findstring 8321,$(ARCH_MTK_PROJECT)),)
-ARCH_MTK_PROJECT := tb8321p2_bsp_basic
-endif
 
 define FILTER_PROJECT_DRV
 ifeq ($(wildcard $(srctree)/drivers/misc/mediatek/imgsensor/src/$(MTK_PLATFORM)/camera_project/$(ARCH_MTK_PROJECT)/$(1)),)
@@ -29,6 +24,9 @@ else
 project_drv += camera_project/$(ARCH_MTK_PROJECT)/$(1)
 endif
 endef
+
+MTK_PLATFORM := $(subst ",,$(CONFIG_MTK_PLATFORM))
+ARCH_MTK_PROJECT := $(subst ",,$(CONFIG_ARCH_MTK_PROJECT))
 
 obj-y				+= kd_sensorlist.o
 
