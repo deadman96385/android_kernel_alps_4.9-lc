@@ -16,7 +16,7 @@ ccflags-y  += -I$(THERMAL_CHIP_DRIVER_DIR)/inc
 ccflags-y  += -I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)
 ccflags-y  += -I$(srctree)/drivers/misc/mediatek/gpu/hal/
 ccflags-y  += -I$(srctree)/drivers/misc/mediatek/thermal/fakeHeader/
-
+ccflags-y  += -I$(srctree)/drivers/misc/mediatek/base/power/include/
 ifeq ($(CONFIG_MACH_MT6735),y)
 ccflags-y  += -I$(THERMAL_CHIP_DRIVER_DIR)/inc/D1
 obj-$(CONFIG_THERMAL) += mtk_tc_D1.o
