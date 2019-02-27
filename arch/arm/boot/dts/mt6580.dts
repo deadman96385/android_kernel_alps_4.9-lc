@@ -1258,6 +1258,19 @@ firmware_class.path=/vendor/firmware loop.max_part=7";
 			compatible = "mediatek,camera_hw2";
 			reg = <0x15008000 0x1000>;  /* SENINF_ADDR */
 		};
+		flashlight_core: flashlight_core {
+			compatible = "mediatek,flashlight_core";
+		};
+	        flashlights_lm3642: flashlights_lm3642 {
+        	        compatible = "mediatek,flashlights_lm3642";
+                	decouple = <1>;
+	                channel@1 {
+        	                type = <0>;
+                	        ct = <0>;
+                        	part = <0>;
+	                };
+        	};
+
 		seninf_top@15008000 {
 			compatible = "mediatek,SENINF_TOP";
 			reg = <0x15008000 0x1000>;
