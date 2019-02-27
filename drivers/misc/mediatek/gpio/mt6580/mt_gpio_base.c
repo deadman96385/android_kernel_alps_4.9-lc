@@ -404,13 +404,44 @@ void get_gpio_vbase(struct device_node *node)
 {
 	/* Setup IO addresses */
 	gpio_vbase.gpio_regs = of_iomap(node, 0);
-	GPIOLOG("gpio_vbase.gpio_regs=0x%p\n", gpio_vbase.gpio_regs);
+	GPIOERR("gpio_vbase.gpio_regs=0x%p, %p\n", gpio_vbase.gpio_regs, GPIO_BASE_1);
 
 	gpio_reg = (GPIO_REGS *) (GPIO_BASE_1);
 
 	/* printk("[DTS] gpio_regs=0x%lx\n", gpio_vbase.gpio_regs); */
 	spin_lock_init(&mtk_gpio_lock);
 }
+
+/*-----------------------User need GPIO APIs before GPIO probe------------------*/
+
+static int __init get_gpio_vbase_early(void)
+{
+	struct device_node *np_gpio = NULL;
+	//struct device_node *np_iocfg = NULL;
+
+	gpio_vbase.gpio_regs = NULL;
+	//gpio_vbase.iocfg_regs = NULL;
+	np_gpio = get_gpio_np();
+	//np_iocfg = get_iocfg_np();
+	/* Setup IO addresses */
+	gpio_vbase.gpio_regs = of_iomap(np_gpio, 0);
+	if (!gpio_vbase.gpio_regs) {
+		GPIOERR("GPIO base addr is NULL\n");
+		return 0;
+	}
+/*
+	gpio_vbase.iocfg_regs = of_iomap(np_iocfg, 0);
+	if (!gpio_vbase.iocfg_regs) {
+		GPIOERR("GPIO base addr is NULL\n");
+		return 0;
+	}
+*/
+	/* gpio_reg = (GPIO_REGS*)(GPIO_BASE); */
+	gpio_reg = (GPIO_REGS *) gpio_vbase.gpio_regs;
+	GPIOERR("GPIO base addr is 0x%p, %s\n", gpio_vbase.gpio_regs, __func__);
+	return 0;
+}
+postcore_initcall(get_gpio_vbase_early);
 
 /*---------------------------------------------------------------------------*/
 void get_io_cfg_vbase(void)
