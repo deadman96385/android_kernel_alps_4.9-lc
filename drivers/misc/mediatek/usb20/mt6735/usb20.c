@@ -92,7 +92,7 @@ static struct musb_fifo_cfg fifo_cfg[] __initdata = {
 /* USB GADGET                                                     */
 /*=======================================================================*/
 static const struct of_device_id apusb_of_ids[] = {
-	{.compatible = "mediatek,USB0",},
+	{.compatible = "mediatek,mt6735-usb20",},
 	{},
 };
 
