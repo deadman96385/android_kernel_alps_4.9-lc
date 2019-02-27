@@ -88,6 +88,7 @@
 #undef MyTag
 #endif
 #define MyTag "ISP"
+#undef LOG_DBG
 #ifndef LOG_DBG
 #define LOG_DBG(format, args...)    pr_debug(MyTag format, ##args)
 #define LOG_INF(format, args...)    pr_debug(MyTag format,  ##args)
@@ -6658,14 +6659,14 @@ static signed int ISP_mmap(struct file *pFile, struct vm_area_struct *pVma)
 		default:
 			LOG_ERR("Illegal starting HW addr for mmap!");
 			return -EAGAIN;
-
-		if (remap_pfn_range
-		    (pVma, pVma->vm_start, pVma->vm_pgoff,
-		    pVma->vm_end - pVma->vm_start,
-		    pVma->vm_page_prot)) {
-			return -EAGAIN;
-		}
 	}
+	if (remap_pfn_range
+	    (pVma, pVma->vm_start, pVma->vm_pgoff,
+	    pVma->vm_end - pVma->vm_start,
+	    pVma->vm_page_prot)) {
+		return -EAGAIN;
+	}
+
 
 	return 0;
 }
