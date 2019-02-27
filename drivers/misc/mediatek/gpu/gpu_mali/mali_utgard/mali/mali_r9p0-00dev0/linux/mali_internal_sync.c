@@ -386,7 +386,12 @@ static int mali_internal_sync_fence_set_fence_array(struct mali_internal_sync_fe
 #else
 	struct dma_fence_array *array;
 #endif
-	MALI_DEBUG_ASSERT(1 != num_fences);
+     if (num_fences == 1) {
+         sync_fence->fence = fences[0];
+         kfree(fences);
+         return 0;
+     }
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0)
 	array = fence_array_create(num_fences, fences,
 					   fence_context_alloc(1), 1, false);

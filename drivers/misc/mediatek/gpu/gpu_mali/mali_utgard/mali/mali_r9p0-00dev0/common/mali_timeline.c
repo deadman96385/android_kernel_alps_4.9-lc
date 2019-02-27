@@ -1208,6 +1208,10 @@ static void mali_timeline_system_create_waiters_and_unlock(struct mali_timeline_
 			continue;
 		}
 
+        if ((MALI_TIMELINE_SOFT == timeline->id) && mali_timeline_is_tracker_released(timeline, point)) {
+			continue;
+		}
+
 		/* The point is on timeline. */
 		MALI_DEBUG_ASSERT(mali_timeline_is_point_on(timeline, point));
 

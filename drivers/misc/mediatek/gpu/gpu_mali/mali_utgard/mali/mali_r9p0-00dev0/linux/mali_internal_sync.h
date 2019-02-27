@@ -96,9 +96,9 @@ struct mali_internal_sync_fence {
 	int num_fences;
 #endif
 	wait_queue_head_t       wq;
-#if LINUX_VERSION_CODE > KERNEL_VERSION(4, 12, 0)
+//#if LINUX_VERSION_CODE > KERNEL_VERSION(4, 12, 0)
 	unsigned long		flags;
-#endif
+//#endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 9, 0)
 	atomic_t                status;
 	struct mali_internal_sync_fence_cb    cbs[];
