@@ -297,7 +297,6 @@ static void disable_micbias_callback(struct work_struct *work)
 
 static void accdet_eint_work_callback(struct work_struct *work)
 {
-	pr_err("[Accdet]accdet_eint_work_callback---\n");
 	/*KE under fastly plug in and plug out*/
 	if (cur_eint_state == EINT_PIN_PLUG_IN) {
 		pr_debug("[Accdet]ACC EINT func:plug-in, cur_eint_state = %d\n",
@@ -358,8 +357,6 @@ static irqreturn_t accdet_eint_func(int irq, void *data)
 	int ret = 0;
 
 	pr_debug("[Accdet]Enter accdet_eint_func,accdet_eint_type=%d\n",
-		accdet_eint_type);
-	pr_err("[Accdet]Enter accdet_eint_func,accdet_eint_type=%d\n",
 		accdet_eint_type);
 	if (cur_eint_state == EINT_PIN_PLUG_IN) {
 /*
@@ -609,7 +606,6 @@ int accdet_irq_handler(void)
 
 	cur_time = accdet_get_current_time();
 
-	pr_err("[Accdet]ACCDET_IRQ_STS = 0x%x\n", pmic_pwrap_read(ACCDET_IRQ_STS));
 	if ((pmic_pwrap_read(ACCDET_IRQ_STS) & IRQ_STATUS_BIT)) {
 			clear_accdet_interrupt();
 		if (accdet_status == MIC_BIAS) {
@@ -621,9 +617,9 @@ int accdet_irq_handler(void)
 		while (((pmic_pwrap_read(ACCDET_IRQ_STS) & IRQ_STATUS_BIT)
 			&& (accdet_timeout_ns(cur_time, ACCDET_TIME_OUT))))
 			;
-		pr_err("[Accdet]AB int come\n");
 	} else {
-		pr_err("[Accdet]No AB int: ACCDET_IRQ_STS = 0x%x\n", pmic_pwrap_read(ACCDET_IRQ_STS));
+		pr_err("[Accdet]No AB int: ACCDET_IRQ_STS = 0x%x\n",
+			pmic_pwrap_read(ACCDET_IRQ_STS));
 	}
 
 	return 1;
@@ -919,9 +915,7 @@ static inline void check_cable_type(void)
 
 static void accdet_work_callback(struct work_struct *work)
 {
-	pr_err("[Accdet]accdet_work_callback---1\n");
 	__pm_stay_awake(accdet_irq_lock);
-	pr_err("[Accdet]accdet_work_callback---2\n");
 	check_cable_type();
 
 #ifdef CONFIG_ACCDET_PIN_SWAP
@@ -941,7 +935,6 @@ static void accdet_work_callback(struct work_struct *work)
 		pr_debug("[Accdet]Headset has plugged out,don't set accdet state\n");
 	mutex_unlock(&accdet_eint_irq_sync_mutex);
 	pr_debug("[Accdet] set state in cable_type status\n");
-	pr_err("[Accdet]accdet_work_callback---3\n");
 	__pm_relax(accdet_irq_lock);
 }
 
