@@ -1702,10 +1702,13 @@ static int mt_usb_probe(struct platform_device *pdev)
 #endif
 
 #ifndef FPGA_PLATFORM
+	/* FIXME, check root cause */
+#if 0
 	if (get_boot_mode() == META_BOOT) {
 		DBG(0, "in special mode %d\n", get_boot_mode());
 		musb_force_on = 1;
 	}
+#endif
 #endif
 	return 0;
 

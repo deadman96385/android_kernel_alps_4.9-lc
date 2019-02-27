@@ -658,11 +658,14 @@ void usb_phy_recover(void)
 /* BC1.2 */
 void Charger_Detect_Init(void)
 {
+	/* FIXME, check root cause */
+#if 0
 	if ((get_boot_mode() == META_BOOT) ||
 		(get_boot_mode() == ADVMETA_BOOT)) {
 		DBG(0, "%s Skip\n", __func__);
 		return;
 	}
+#endif
 
 	usb_prepare_enable_clock(true);
 
@@ -679,11 +682,14 @@ void Charger_Detect_Init(void)
 
 void Charger_Detect_Release(void)
 {
+	/* FIXME, check root cause */
+#if 0
 	if ((get_boot_mode() == META_BOOT) ||
 		(get_boot_mode() == ADVMETA_BOOT)) {
 		DBG(0, "%s Skip\n", __func__);
 		return;
 	}
+#endif
 
 	usb_prepare_enable_clock(true);
 
