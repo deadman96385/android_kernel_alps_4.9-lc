@@ -1068,7 +1068,6 @@ void smi_larb0_clock_off(void)
 
 EXPORT_SYMBOL(smi_common_clock_off);
 
-static inline int m4u_port_2_larb_id(M4U_PORT_ID port);
 int m4u_insert_seq_range(M4U_PORT_ID port, unsigned int MVAStart, unsigned int MVAEnd)
 {
 	int i, free_id = -1;
