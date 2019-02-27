@@ -6326,14 +6326,15 @@ schedtune_margin(int cpu, unsigned long signal, long boost)
 		if (boost >= 0) {
 			margin  = capacity_orig_of(cpu) - signal;
 			margin *= boost;
-		} else
-			margin = -signal * boost;
+	} else {
+		margin = -signal * boost;
+		}
 	}
 
 	margin  = reciprocal_divide(margin, schedtune_spc_rdiv);
-
 	if (boost < 0)
 		margin *= -1;
+
 	return margin;
 }
 
@@ -7555,14 +7556,14 @@ SELECT_TASK_RQ_FAIR(struct task_struct *p, int prev_cpu,
 	int want_affine = 0;
 	int sync = wake_flags & WF_SYNC;
 
-	if (should_hmp(cpu) && p->mm && (sd_flag & SD_BALANCE_FORK)) {
+	if (should_hmp(cpu)) {
 		int hmp_cpu;
 		/* HMP fork balance:
 		 * always put non-kernel forking tasks on a big domain
 		 */
 		hmp_cpu = hmp_fork_balance(p, prev_cpu);
 
-		if (hmp_cpu >= 0 && (hmp_cpu < nr_cpu_ids))
+		if (hmp_cpu >= 0 && (hmp_cpu >= nr_cpu_ids))
 			return LB_FORK | hmp_cpu;
 	}
 
