@@ -609,6 +609,14 @@ static int tpd_registration(void *client)
 		gt1x_abs_y_max = 0;
 	}
 
+	/* workaround */
+	if (strcmp(CONFIG_ARCH_MTK_PROJECT, "evb6580hd_ago_hdp") == 0) {
+		tpd_eint_mode = 0;
+		tpd_polling_time = 10;
+		tpd_flag = 1;
+		wake_up_interruptible(&waiter);
+	}
+
 	thread = kthread_run(tpd_event_handler, 0, TPD_DEVICE);
 	if (IS_ERR(thread)) {
 		err = PTR_ERR(thread);
