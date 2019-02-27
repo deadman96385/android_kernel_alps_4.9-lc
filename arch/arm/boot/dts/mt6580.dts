@@ -45,6 +45,10 @@
 		interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
 	};
 
+	msdc1_ins:msdc1_ins@0 {
+		compatible = "mediatek,mt6580-sdcard-ins";
+	};
+
 		cpus {
 			#address-cells = <1>;
 			#size-cells = <0>;

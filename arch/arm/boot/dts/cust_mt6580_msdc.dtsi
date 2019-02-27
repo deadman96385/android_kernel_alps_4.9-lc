@@ -31,7 +31,7 @@
 	status = "okay";
 
 #ifndef CONFIG_FPGA_EARLY_PORTING
-	vmmc-supply = <&mt_pmic_vemc_ldo_reg>;
+	vmmc-supply = <&mt_pmic_vemc_3v3_ldo_reg>;
 	/* clocks = <&perisys PERI_MSDC30_0>;
 	clock-names = "msdc0-clock"; */ /* No CCF */
 #endif
