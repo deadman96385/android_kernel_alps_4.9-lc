@@ -44,7 +44,8 @@
 #include "mt-plat/sync_write.h"
 /* #include "mach/mt_freqhopping.h" */
 /* #include "mach/mt_static_power.h" */
-#include "mach/mt_thermal.h"
+/* TODO: remove this workaround */
+/* #include "mach/mt_thermal.h" */
 
 
 /*
@@ -610,7 +611,8 @@ static void _mt_update_gpufreqs_power_table(void)
 		return;
 	}
 
-#ifdef CONFIG_THERMAL
+/* TODO: remove this workaround */
+#if 0 /*def CONFIG_THERMAL*/
 	temp = get_immediate_gpu_wrap() / 1000;
 #else
 	temp = 40;
@@ -649,7 +651,8 @@ static void _mt_setup_gpufreqs_power_table(int num)
 		return;
 	}
 
-#ifdef CONFIG_THERMAL
+/* TODO: remove this workaround */
+#if 0 /*def CONFIG_THERMAL*/
 	temp = get_immediate_gpu_wrap() / 1000;
 #else
 	temp = 40;
@@ -673,7 +676,9 @@ static void _mt_setup_gpufreqs_power_table(int num)
 		gpufreq_info("mt_gpufreqs_power[%d].gpufreq_power = %u\n", i,
 			     mt_gpufreqs_power[i].gpufreq_power);
 	}
-#ifdef CONFIG_THERMAL
+
+/* TODO: remove this workaround */
+#if 0/*def CONFIG_THERMAL*/
 	mtk_gpufreq_register(mt_gpufreqs_power, num);
 #endif
 }
