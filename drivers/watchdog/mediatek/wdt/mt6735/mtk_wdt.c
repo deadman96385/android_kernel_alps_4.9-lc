@@ -516,6 +516,13 @@ void mtk_wdt_set_c2k_sysrst(unsigned int flag)
 	spin_unlock(&rgu_reg_operation_spinlock);
 }
 
+
+int mtk_rgu_mcu_cache_preserve(int enable) {return 0; }
+int mtk_wdt_dfd_count_en(int value) {return 0; }
+int mtk_wdt_dfd_thermal1_dis(int value) {return 0; }
+int mtk_wdt_dfd_thermal2_dis(int value) {return 0; }
+int mtk_wdt_dfd_timeout(int value) {return 0; }
+
 #else
 /* ------------------------------------------------------------------------------------------------- */
 /* Dummy functions */
@@ -538,6 +545,12 @@ int mtk_wdt_request_mode_set(int mark_bit, WD_REQ_MODE mode) {return 0; }
 int mtk_wdt_request_en_set(int mark_bit, WD_REQ_CTL en) {return 0; }
 void mtk_wdt_set_c2k_sysrst(unsigned int flag) {}
 int mtk_rgu_dram_reserved(int enable) {return 0; }
+
+int mtk_rgu_mcu_cache_preserve(int enable) {return 0; }
+int mtk_wdt_dfd_count_en(int value) {return 0; }
+int mtk_wdt_dfd_thermal1_dis(int value) {return 0; }
+int mtk_wdt_dfd_thermal2_dis(int value) {return 0; }
+int mtk_wdt_dfd_timeout(int value) {return 0; }
 
 #endif /* #ifndef __USING_DUMMY_WDT_DRV__ */
 
