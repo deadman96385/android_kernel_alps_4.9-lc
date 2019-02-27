@@ -865,11 +865,10 @@ firmware_class.path=/vendor/firmware loop.max_part=7";
 			dma = <1>;
 			num_eps = <16>;
 			dma_channels = <8>;
-			iddig_gpio = <9 3>;
-			drvvbus_gpio = <10 3>;
-			usbiddig:usbiddig {
-				compatible = "mediatek,usb_iddig_eint";
-			};
+		};
+
+		usbiddig:usbiddig {
+			compatible = "mediatek,usb_iddig_eint";
 		};
 
 		usbphy0: usbphy@0 {

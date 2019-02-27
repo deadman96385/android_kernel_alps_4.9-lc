@@ -129,6 +129,7 @@ module_param(delay_time1, int, 0644);
 u32 iddig_cnt;
 module_param(iddig_cnt, int, 0644);
 
+#ifdef CONFIG_MTK_CHARGER
 void vbus_init(void)
 {
 	DBG(0, "+++\n");
@@ -144,6 +145,47 @@ void vbus_init(void)
 	DBG(0, "---\n");
 
 }
+#else
+
+struct pinctrl *pinctrl;
+struct pinctrl_state *pinctrl_drvvbus;
+struct pinctrl_state *pinctrl_drvvbus_low;
+struct pinctrl_state *pinctrl_drvvbus_high;
+
+int vbus_init(void)
+{
+#if !(defined(SWITCH_CHARGER) || defined(FPGA_PLATFORM))
+	int ret = 0;
+	DBG(0, "**** before Init Drive VBUS KS!!!!!\n");
+
+	pinctrl_drvvbus = pinctrl_lookup_state(pinctrl, "drvvbus_init");
+	if (IS_ERR(pinctrl_drvvbus)) {
+		ret = PTR_ERR(pinctrl_drvvbus);
+		DBG(0, "Cannot find usb pinctrl drvvbus\n");
+		return -ENODEV;
+	}
+
+	pinctrl_drvvbus_low = pinctrl_lookup_state(pinctrl, "drvvbus_low");
+	if (IS_ERR(pinctrl_drvvbus_low)) {
+		ret = PTR_ERR(pinctrl_drvvbus_low);
+		DBG(0, "Cannot find usb pinctrl drvvbus_low\n");
+		return -ENODEV;
+	}
+
+	pinctrl_drvvbus_high = pinctrl_lookup_state(pinctrl, "drvvbus_high");
+	if (IS_ERR(pinctrl_drvvbus_high)) {
+		ret = PTR_ERR(pinctrl_drvvbus_high);
+		DBG(0, "Cannot find usb pinctrl drvvbus_high\n");
+		return -ENODEV;
+	}
+
+	pinctrl_select_state(pinctrl, pinctrl_drvvbus);
+	DBG(0, "**** end Init Drive VBUS KS!!!!!\n");
+
+	return 0;
+}
+#endif
+#endif
 
 static bool vbus_on;
 module_param(vbus_on, bool, 0644);
@@ -154,6 +196,8 @@ bool usb20_check_vbus_on(void)
 	DBG(0, "vbus_on<%d>\n", vbus_on);
 	return vbus_on;
 }
+
+#ifdef CONFIG_MTK_CHARGER
 void _set_vbus(struct musb *musb, int is_on)
 {
 	static int vbus_inited;
@@ -193,6 +237,27 @@ void _set_vbus(struct musb *musb, int is_on)
 		vbus_on = false;
 	}
 }
+#else
+void _set_vbus(struct musb *musb, int is_on)
+{
+	static int vbus_inited;
+
+	if (!vbus_inited) {
+		if (!vbus_init())
+			vbus_inited = 1;
+	}
+
+	if (is_on && !vbus_on && vbus_inited) {
+		vbus_on = true;
+		DBG(0, "**** Drive VBUS HIGH KS!!!!!\n");
+		pinctrl_select_state(pinctrl, pinctrl_drvvbus_high);
+	} else if (!is_on && vbus_on && vbus_inited) {
+		DBG(0, "**** Drive VBUS LOW KS!!!!!\n");
+		pinctrl_select_state(pinctrl, pinctrl_drvvbus_low);
+		vbus_on = false;
+	}
+}
+#endif
 
 void mt_usb_set_vbus(struct musb *musb, int is_on)
 {
@@ -745,7 +810,7 @@ static irqreturn_t mt_usb_ext_iddig_int(int irq, void *dev_id)
 
 
 static const struct of_device_id otg_iddig_of_match[] = {
-	{.compatible = "mediatek,usb_iddig_bi_eint"},
+	{.compatible = "mediatek,usb_iddig_eint"},
 	{},
 };
 
@@ -768,6 +833,14 @@ static int otg_iddig_probe(struct platform_device *pdev)
 			iddig_eint_num, ret);
 		return ret;
 	}
+
+#ifndef CONFIG_MTK_CHARGER
+	pinctrl = devm_pinctrl_get(&pdev->dev);
+	if (IS_ERR(pinctrl)) {
+		DBG(0, "Cannot find usb pinctrl!\n");
+		return -ENODEV;
+	}
+#endif
 
 	return 0;
 }
