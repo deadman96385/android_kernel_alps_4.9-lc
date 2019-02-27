@@ -21,6 +21,7 @@ ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6580" "mt6735"))
 CMDQ_VER := "v2"
 else
 CMDQ_VER := "v3"
+obj-y += met/
 endif
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/cmdq/$(CMDQ_VER)/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/cmdq/$(CMDQ_VER)/$(CONFIG_MTK_PLATFORM)/
@@ -65,7 +66,6 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/emi/submodule/
 endif
 
 obj-y += smi_legacy.o
-obj-y += met/
 else
 obj-y += $(subst ",,variant)/
 endif
