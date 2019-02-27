@@ -51,11 +51,11 @@ void _mali_osk_abort(void)
 {
 	/* make a simple fault by dereferencing a NULL pointer */
 	dump_stack();
-    // <MTK, prevent KE. only print error log
-#if 0
+
+	// prevent KE. only print error log, do not assert
+#if !defined(MTK_SUPPORT)
 	*(int *)0 = 0;
 #endif
-	// MTK>
 }
 
 void _mali_osk_break(void)

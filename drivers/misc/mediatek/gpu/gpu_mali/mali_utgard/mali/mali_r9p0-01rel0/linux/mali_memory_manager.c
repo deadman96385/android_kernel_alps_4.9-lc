@@ -946,6 +946,10 @@ _mali_osk_errcode_t _mali_ukk_mem_cow_modify_range(_mali_uk_cow_modify_range_s *
 
 	if (NULL == mem_backend || 0 == mem_backend->size) {
 		MALI_DEBUG_ASSERT_POINTER(mem_backend);
+#if defined(MTK_SUPPORT)
+		if (NULL == mem_backend)
+			return ret;
+#endif
 		MALI_DEBUG_ASSERT(0 != mem_backend->size);
 		return ret;
 	}
