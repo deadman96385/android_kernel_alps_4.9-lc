@@ -2169,13 +2169,14 @@ int _esd_check_config_handle_cmd(void)
 	cmdqRecSetEventToken(pgc->cmdq_handle_config_esd,
 			     CMDQ_SYNC_TOKEN_ESD_EOF);
 
+	DISPMSG("[ESD]_esd_check_config_handle_cmd wil out of path lock\n");
+	_primary_path_unlock(__func__);
+
 	/* 6.flush instruction */
 	dprec_logger_start(DPREC_LOGGER_ESD_CMDQ, 0, 0);
 	ret = cmdqRecFlush(pgc->cmdq_handle_config_esd);
 	dprec_logger_done(DPREC_LOGGER_ESD_CMDQ, 0, 0);
 
-	DISPMSG("[ESD]_esd_check_config_handle_cmd wil out of path lock\n");
-	_primary_path_unlock(__func__);
 	DISPMSG("[ESD]_esd_check_config_handle_cmd ret=%d\n", ret);
 
 	if (ret)
@@ -2216,13 +2217,14 @@ int _esd_check_config_handle_vdo(void)
 	/* 5. trigger path */
 	dpmgr_path_trigger(pgc->dpmgr_handle, pgc->cmdq_handle_config_esd, CMDQ_ENABLE);
 
+	DISPMSG("[ESD]_esd_check_config_handle_vdo wil out of path lock\n");
+	_primary_path_unlock(__func__);
+
 	/* 6.flush instruction */
 	dprec_logger_start(DPREC_LOGGER_ESD_CMDQ, 0, 0);
 	ret = cmdqRecFlush(pgc->cmdq_handle_config_esd);
 	dprec_logger_done(DPREC_LOGGER_ESD_CMDQ, 0, 0);
 
-	DISPMSG("[ESD]_esd_check_config_handle_vdo wil out of path lock\n");
-	_primary_path_unlock(__func__);
 	DISPMSG("[ESD]_esd_check_config_handle_vdo ret=%d\n", ret);
 
 	if (ret)
