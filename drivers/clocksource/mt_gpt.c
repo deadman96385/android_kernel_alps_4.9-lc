@@ -184,6 +184,9 @@ static struct irqaction gpt_irq = {
 	.dev_id = &gpt_clockevent,
 };
 
+void mt_gpt_clkevt_aee_dump(void)
+{
+}
 
 static inline unsigned int gpt_get_and_ack_irq(void)
 {
