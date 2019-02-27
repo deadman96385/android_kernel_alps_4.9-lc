@@ -785,6 +785,31 @@ static void __exit mtk_wdt_exit(void)
 arch_initcall(mtk_wdt_init);
 /* module_exit(mtk_wdt_exit); */
 
+/*
+ * this function is for those user who need WDT APIs before WDT driver's probe
+ */
+static int __init mtk_wdt_get_base_addr(void)
+{
+	struct device_node *np_rgu;
+
+	for_each_matching_node(np_rgu, rgu_of_match) {
+		pr_info("%s: compatible node found: %s\n",
+			__func__, np_rgu->name);
+		break;
+	}
+
+	if (!toprgu_base) {
+		toprgu_base = of_iomap(np_rgu, 0);
+		if (!toprgu_base)
+			pr_info("%s: rgu iomap failed\n", __func__);
+
+		pr_debug("rgu base: 0x%p\n", toprgu_base);
+	}
+
+	return 0;
+}
+core_initcall(mtk_wdt_get_base_addr);
+
 MODULE_AUTHOR("MTK");
 MODULE_DESCRIPTION("MT6582 Watchdog Device Driver");
 MODULE_LICENSE("GPL");
