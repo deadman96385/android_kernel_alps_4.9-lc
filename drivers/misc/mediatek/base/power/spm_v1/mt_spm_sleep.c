@@ -1118,7 +1118,8 @@ wake_reason_t spm_go_to_sleep(u32 spm_flags, u32 spm_data)
 	if (!wd_ret)
 		wd_api->wd_suspend_notify();
 
-	mt_power_gs_dump_suspend();
+	/* todo: quick fix build error */
+	/* mt_power_gs_dump_suspend(); */
 #if 0
 	/* snapshot golden setting */
 	{
