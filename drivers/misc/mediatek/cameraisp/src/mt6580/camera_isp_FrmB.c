@@ -1932,7 +1932,11 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 	== 0) {
 		reg_val = ISP_RD32(ISP_REG_ADDR_TG_VF_CON);
 /* reg_val2 = ISP_RD32(ISP_REG_ADDR_TG2_VF_CON); */
-
+	LOG_ERR("[rtbc][ENQUE]:dma:(%d),bufIdx(%d),base_pAddr(0x%x),base_vAddr(0x%llx)",
+			rt_dma, rt_buf_info.bufIdx,
+			rt_buf_info.base_pAddr,
+			rt_buf_info.base_vAddr
+			);
 /* VF start already */
 /* bool CurVF_En = MFALSE; */
 		if ((_imgo_ == rt_dma) ||
@@ -2075,11 +2079,12 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 								{
 									/*  */
 			{
-/* LOG_DBG("[rtbc]dma(%d),old(%d) PA(0x%x) VA(0x%x)",
+/* LOG_DBG("[rtbc][ENQUE] dma(%d),old(%d) PA(0x%x) VA(0x%llx)",
  * rt_dma,i,pstRTBuf_FrmB->ring_buf[rt_dma].data[i].
  * base_pAddr,pstRTBuf_FrmB->ring_buf[rt_dma].
  * data[i].base_vAddr);
  */
+
 				IRQ_LOG_KEEPER(
 				irqT, 0,
 				_LOG_DBG,
