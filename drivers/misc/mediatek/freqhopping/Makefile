@@ -24,4 +24,6 @@ endif
 
 
 subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/freqhopping/$(MTK_PLATFORM)/
+# Legacy freqhopping header file path.
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/$(MTK_PLATFORM)/include/mach
 obj-y += $(MTK_PLATFORM)/
