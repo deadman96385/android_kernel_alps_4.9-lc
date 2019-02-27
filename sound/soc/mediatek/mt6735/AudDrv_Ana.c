@@ -52,19 +52,19 @@
 #include "AudDrv_Ana.h"
 #include "AudDrv_Clk.h"
 
-/* define this to use wrapper to control */
-/*#define AUDIO_USING_WRAP_DRIVER*/
-#ifdef AUDIO_USING_WRAP_DRIVER
+#ifdef CONFIG_MTK_PMIC_WRAP_HAL
 #include <mach/mtk_pmic_wrap.h>
-#endif
 
 static DEFINE_SPINLOCK(ana_set_reg_lock);
+#endif
+
 /*****************************************************************************
  *                         D A T A   T Y P E S
  *****************************************************************************/
 
 void Ana_Set_Reg(uint32 offset, uint32 value, uint32 mask)
 {
+#ifdef CONFIG_MTK_PMIC_WRAP_HAL
 	/* set pmic register or analog CONTROL_IFACE_PATH */
 	int ret = 0;
 	uint32 Reg_Value;
@@ -72,7 +72,7 @@ void Ana_Set_Reg(uint32 offset, uint32 value, uint32 mask)
 
 	PRINTK_ANA_REG("Ana_Set_Reg offset= 0x%x , value = 0x%x mask = 0x%x\n", offset, value,
 		       mask);
-#ifdef AUDIO_USING_WRAP_DRIVER
+
 	spin_lock_irqsave(&ana_set_reg_lock, flags);
 	Reg_Value = Ana_Get_Reg(offset);
 	Reg_Value &= (~mask);
@@ -90,14 +90,16 @@ EXPORT_SYMBOL(Ana_Set_Reg);
 
 uint32 Ana_Get_Reg(uint32 offset)
 {
+#ifdef CONFIG_MTK_PMIC_WRAP_HAL
 	/* get pmic register */
 	int ret = 0;
 	uint32 Rdata = 0;
-#ifdef AUDIO_USING_WRAP_DRIVER
 	ret = pwrap_read(offset, &Rdata);
-#endif
 	PRINTK_ANA_REG("Ana_Get_Reg offset=0x%x,Rdata=0x%x,ret=%d\n", offset, Rdata, ret);
 	return Rdata;
+#else
+	return 0;
+#endif
 }
 EXPORT_SYMBOL(Ana_Get_Reg);
 
