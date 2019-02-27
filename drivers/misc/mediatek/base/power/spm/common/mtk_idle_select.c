@@ -118,7 +118,7 @@ int mtk_idle_enter_dvt(int cpu)
 }
 #endif /* MTK_IDLE_DVT_TEST_ONLY */
 
-#if defined(CONFIG_MTK_UFS_BOOTING)
+#if defined(CONFIG_MTK_UFS_SUPPORT)
 static unsigned int idle_ufs_lock;
 static DEFINE_SPINLOCK(idle_ufs_spin_lock);
 
@@ -159,7 +159,7 @@ int mtk_idle_select(int cpu)
 {
 	int idx;
 	int reason = NR_REASONS;
-	#if defined(CONFIG_MTK_UFS_BOOTING)
+	#if defined(CONFIG_MTK_UFS_SUPPORT)
 	unsigned long flags = 0;
 	unsigned int ufs_locked;
 	#endif
@@ -195,7 +195,7 @@ int mtk_idle_select(int cpu)
 	}
 
 	/* 3. locked by ufs ? */
-	#if defined(CONFIG_MTK_UFS_BOOTING)
+	#if defined(CONFIG_MTK_UFS_SUPPORT)
 	spin_lock_irqsave(&idle_ufs_spin_lock, flags);
 	ufs_locked = idle_ufs_lock;
 	spin_unlock_irqrestore(&idle_ufs_spin_lock, flags);

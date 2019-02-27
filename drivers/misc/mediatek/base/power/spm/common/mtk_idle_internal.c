@@ -147,7 +147,7 @@ static unsigned int ufs_cb_before_idle(void)
 {
 	unsigned int op_cond = 0;
 
-	#if defined(CONFIG_MTK_UFS_BOOTING)
+	#if defined(CONFIG_MTK_UFS_SUPPORT)
 	op_cond |=
 		!ufs_mtk_deepidle_hibern8_check()
 				? MTK_IDLE_OPT_XO_UFS_ON_OFF : 0;
@@ -163,7 +163,7 @@ static unsigned int ufs_cb_before_idle(void)
 
 static void ufs_cb_after_idle(void)
 {
-	#if defined(CONFIG_MTK_UFS_BOOTING)
+	#if defined(CONFIG_MTK_UFS_SUPPORT)
 	ufs_mtk_deepidle_leave();
 	#endif
 }
