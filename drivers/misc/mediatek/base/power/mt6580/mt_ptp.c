@@ -713,6 +713,7 @@ static int base_ops_init02(struct ptp_det *det)
 
 static int base_ops_mon_mode(struct ptp_det *det)
 {
+#ifdef CONFIG_THERMAL
 	struct TS_PTPOD ts_info;
 	thermal_bank_name ts_bank;
 
@@ -754,6 +755,9 @@ static int base_ops_mon_mode(struct ptp_det *det)
 	FUNC_EXIT(FUNC_LV_HELP);
 
 	return 0;
+#else
+	return 0;
+#endif
 }
 
 static int base_ops_get_status(struct ptp_det *det)
@@ -916,6 +920,7 @@ static void base_ops_set_phase(struct ptp_det *det, ptp_phase phase)
 
 static int base_ops_get_temp(struct ptp_det *det)
 {
+#ifdef CONFIG_THERMAL
 	thermal_bank_name ts_bank;
 
 	FUNC_ENTER(FUNC_LV_HELP);
@@ -925,6 +930,9 @@ static int base_ops_get_temp(struct ptp_det *det)
 	FUNC_EXIT(FUNC_LV_HELP);
 
 	return tscpu_get_temp_by_bank(ts_bank);
+#else
+	return 0;
+#endif
 }
 
 static int base_ops_get_volt(struct ptp_det *det)
