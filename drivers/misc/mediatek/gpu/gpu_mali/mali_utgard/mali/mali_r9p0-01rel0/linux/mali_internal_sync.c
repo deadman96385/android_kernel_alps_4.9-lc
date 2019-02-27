@@ -194,11 +194,12 @@ void mali_internal_sync_timeline_destroy(struct mali_internal_sync_timeline *syn
 
 void mali_internal_sync_timeline_signal(struct mali_internal_sync_timeline *sync_timeline)
 {
-	unsigned long flags;
-	struct mali_internal_sync_point *sync_pt, *next;
+//	unsigned long flags;
+//	struct mali_internal_sync_point *sync_pt, *next;
 
 	MALI_DEBUG_ASSERT_POINTER(sync_timeline);
 
+#if 0
 	spin_lock_irqsave(&sync_timeline->sync_pt_list_lock, flags);
 
 	list_for_each_entry_safe(sync_pt, next, &sync_timeline->sync_pt_list_head,
@@ -212,6 +213,7 @@ void mali_internal_sync_timeline_signal(struct mali_internal_sync_timeline *sync
 	}
 
 	spin_unlock_irqrestore(&sync_timeline->sync_pt_list_lock, flags);
+#endif
 }
 
 struct mali_internal_sync_point *mali_internal_sync_point_create(struct mali_internal_sync_timeline *sync_timeline, int size)
@@ -671,7 +673,7 @@ static void mali_internal_fence_release(struct dma_fence *fence)
 static void mali_internal_fence_release(struct fence *fence)
 #endif
 {
-	unsigned long flags;
+//	unsigned long flags;
 	struct mali_internal_sync_point *sync_pt;
 	struct mali_internal_sync_timeline *parent;
 
@@ -679,13 +681,12 @@ static void mali_internal_fence_release(struct fence *fence)
 
 	sync_pt = mali_internal_fence_to_sync_pt(fence);
 	parent = mali_internal_sync_pt_to_sync_timeline(sync_pt);
-
-
+#if 0
 	spin_lock_irqsave(fence->lock, flags);
 	if (WARN_ON_ONCE(!list_empty(&sync_pt->sync_pt_list)))
 		list_del(&sync_pt->sync_pt_list);
 	spin_unlock_irqrestore(fence->lock, flags);
-
+#endif
 	if (parent->ops->free_pt)
 		parent->ops->free_pt(sync_pt);
 
@@ -729,6 +730,7 @@ static bool mali_internal_fence_enable_signaling(struct dma_fence *fence)
 static bool mali_internal_fence_enable_signaling(struct fence *fence)
 #endif
 {
+#if 0
 	struct mali_internal_sync_point *sync_pt;
 	struct mali_internal_sync_timeline *parent;
 
@@ -741,6 +743,7 @@ static bool mali_internal_fence_enable_signaling(struct fence *fence)
 		return false;
 
 	list_add_tail(&sync_pt->sync_pt_list, &parent->sync_pt_list_head);
+#endif
 	return true;
 }
 
