@@ -23,7 +23,7 @@
 #include <linux/smp.h>
 #include <linux/types.h>
 #include <linux/irqchip/arm-gic.h>
-#include <linux/irqchip/mt-gic.h>
+#include <linux/irqchip/mtk-gic.h>
 
 /*#include <mach/irqs.h>*/
 #include "mt_sys_cirq.h"

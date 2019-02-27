@@ -131,6 +131,7 @@ obj-$(CONFIG_USB)	+= usb_boost/
 obj-$(CONFIG_MTK_SMARTPA_SOUND)	+= smartpa/
 obj-$(CONFIG_MTK_IRQ) += irq/
 obj-$(CONFIG_MTK_SYS_CIRQ) += cirq/
+obj-$(CONFIG_MACH_MT6580) += cirq/
 obj-y += atf/
 obj-$(CONFIG_THERMAL)   += thermal/
 obj-$(CONFIG_MTK_SSMR) += memory-ssmr/
