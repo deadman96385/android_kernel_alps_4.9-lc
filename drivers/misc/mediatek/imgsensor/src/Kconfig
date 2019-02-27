@@ -1,3 +1,8 @@
+config TABLET_PROJECT
+	bool TABLET_PROJECT
+	depends on MTK_IMGSENSOR
+	help
+	  Specify whether the current project is tablet project.
 config SPECIFY_IMGSENSOR
 	bool SPECIFY_IMGSENSOR
 	depends on MTK_IMGSENSOR

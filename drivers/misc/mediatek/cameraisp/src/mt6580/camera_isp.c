@@ -7576,8 +7576,8 @@ void ISP_MCLK1_EN(bool En)
 
 	temp = ISP_RD32((void *)(ISP_ADDR + 0x4200));
 #ifdef ENABLE_KD_SENSORLIST
-	//ISP_MCLK1_GPIO_EN(0);
-	//ISP_MCLK2_GPIO_EN(0);
+	ISP_MCLK1_GPIO_EN(0);
+	ISP_MCLK2_GPIO_EN(0);
 #endif
 	if (En) {
 		temp |= 0x20000000;
@@ -7587,7 +7587,7 @@ void ISP_MCLK1_EN(bool En)
 		ISP_WR32((void *)(ISP_ADDR + 0x4200), temp);
 	}
 #ifdef ENABLE_KD_SENSORLIST
-	//ISP_MCLK1_GPIO_EN(En);
+	ISP_MCLK1_GPIO_EN(En);
 #endif
 }
 EXPORT_SYMBOL(ISP_MCLK1_EN);
@@ -7598,8 +7598,8 @@ void ISP_MCLK2_EN(bool En)
 
 	temp = ISP_RD32((void *)(ISP_ADDR + 0x4200));
 #ifdef ENABLE_KD_SENSORLIST
-	//ISP_MCLK1_GPIO_EN(0);
-	//ISP_MCLK2_GPIO_EN(0);
+	ISP_MCLK1_GPIO_EN(0);
+	ISP_MCLK2_GPIO_EN(0);
 #endif
 	if (En) {
 		temp |= 0x20000000;
@@ -7609,7 +7609,7 @@ void ISP_MCLK2_EN(bool En)
 		ISP_WR32((void *)(ISP_ADDR + 0x4200), temp);
 	}
 #ifdef ENABLE_KD_SENSORLIST
-	//ISP_MCLK2_GPIO_EN(En);
+	ISP_MCLK2_GPIO_EN(En);
 #endif
 }
 EXPORT_SYMBOL(ISP_MCLK2_EN);
