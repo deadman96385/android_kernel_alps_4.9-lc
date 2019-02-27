@@ -684,10 +684,10 @@ static void mali_internal_fence_release(struct fence *fence)
 	parent = mali_internal_sync_pt_to_sync_timeline(sync_pt);
 
 	if (!list_empty(&sync_pt->sync_pt_list)) {
-		int ret = spin_trylock_irqsave(fence->lock, flags);
+		spin_lock_irqsave(fence->lock, flags);
 		if (!list_empty(&sync_pt->sync_pt_list))
 			list_del_init(&sync_pt->sync_pt_list);
-		if (ret) spin_unlock_irqrestore(fence->lock, flags);
+		spin_unlock_irqrestore(fence->lock, flags);
 	}
 
 	if (parent->ops->free_pt)
