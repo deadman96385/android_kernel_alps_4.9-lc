@@ -1114,7 +1114,7 @@ static void enable_mem_access_protection(int md_id)
 	}
 
 #ifdef EMI_MPU_SET_AP_REGION
-	kernel_base = get_phys_offset();
+	kernel_base = memblock_start_of_DRAM();
 #ifdef ENABLE_DRAM_API
 	dram_size = get_max_DRAM_size();
 #else
@@ -1187,7 +1187,7 @@ static void set_ap_region_protection(int md_id)
 	unsigned int dram_size;
 	unsigned int ap_mem_phy_end;
 
-	kernel_base = get_phys_offset();
+	kernel_base = memblock_start_of_DRAM();
 #ifdef ENABLE_DRAM_API
 	dram_size = get_max_DRAM_size();
 #else
@@ -2234,7 +2234,8 @@ int __init ccci_mach_init(void)
 	CCCI_MSG("Ver. %s\n", CCCI_VERSION);
 
 #ifdef ENABLE_DRAM_API
-	/* CCCI_MSG("kernel base:0x%08X, kernel max addr:0x%08X\n", get_phys_offset(), get_max_phys_addr()); */
+	/* CCCI_MSG("kernel base:0x%08X, kernel max addr:0x%08X\n",
+		memblock_start_of_DRAM(), get_max_phys_addr());*/
 #endif
 
 	if ((ap_infra_base == 0) || (ap_mcu_reg_base == 0))

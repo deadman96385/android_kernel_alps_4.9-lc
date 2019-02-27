@@ -212,7 +212,6 @@ extern struct ccci_mem_layout_t md_mem_layout_tab[];
 extern void dump_firmware_info(void);
 #ifdef ENABLE_DRAM_API
 extern unsigned int get_max_DRAM_size(void);
-extern unsigned int get_phys_offset(void);
 extern unsigned int get_max_phys_addr(void);
 #endif
 extern int set_ap_smem_remap(int md_id, unsigned int src, unsigned int des);
