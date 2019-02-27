@@ -33,7 +33,7 @@
 #ifndef CONFIG_FPGA_EARLY_PORTING
 	vmmc-supply = <&mt_pmic_vemc_ldo_reg>;
 	/* clocks = <&perisys PERI_MSDC30_0>;
-	clock-names = "msdc0-clock"; */ /* Peter mark for CCF not ready */
+	clock-names = "msdc0-clock"; */ /* No CCF */
 #endif
 };
 
@@ -69,7 +69,7 @@
 	vmmc-supply = <&mt_pmic_vmch_ldo_reg>;
 	vqmmc-supply = <&mt_pmic_vmc_ldo_reg>;
 	/* clocks = <&perisys PERI_MSDC30_1>;
-	clock-names="msdc1-clock"; */ /* Peter mark for CCF not ready */
+	clock-names="msdc1-clock"; */ /* No CCF */
 #endif
 };
 
