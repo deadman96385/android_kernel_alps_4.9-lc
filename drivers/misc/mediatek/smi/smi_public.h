@@ -34,9 +34,9 @@ struct smi_bwc_scen_cb {
 #if IS_ENABLED(CONFIG_MTK_SMI_EXT)
 void __iomem *smi_base_addr_get(const unsigned int reg_indx);
 int smi_bus_prepare_enable(const unsigned int reg_indx,
-	const char *user_name, const bool mtcmos);
+	char *user_name, const bool mtcmos);
 int smi_bus_disable_unprepare(const unsigned int reg_indx,
-	const char *user_name, const bool mtcmos);
+	char *user_name, const bool mtcmos);
 void smi_debug_dump_status(const unsigned int reg_indx);
 int smi_debug_bus_hang_detect(unsigned int reg_indx, const bool dump,
 	const bool gce, const bool m4u);
