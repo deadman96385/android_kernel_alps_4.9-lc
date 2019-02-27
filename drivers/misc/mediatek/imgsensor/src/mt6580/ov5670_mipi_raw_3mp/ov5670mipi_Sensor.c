@@ -61,14 +61,14 @@ static DEFINE_SPINLOCK(imgsensor_drv_lock);
 static struct imgsensor_info_struct imgsensor_info = {
 	.sensor_id = OV5670MIPI_SENSOR_ID,		//record sensor id defined in Kd_imgsensor.h
 
-	.checksum_value = 0x27cb5b3a,		//checksum value for Camera Auto Test
+	.checksum_value = 0x5d82e181,		//checksum value for Camera Auto Test
 
 	.pre = {
 		.pclk = 102850000,				//record different mode's pclk
 		.linelength = 1676,				//record different mode's linelength
 		.framelength = 2045,			//record different mode's framelength
 		.startx = 136,					//record different mode's startx of grabwindow
-		.starty = 102,					//record different mode's starty of grabwindow
+		.starty = 104,					//record different mode's starty of grabwindow
 		.grabwindow_width = 1024,		//record different mode's width of grabwindow
 		.grabwindow_height = 768,		//record different mode's height of grabwindow
 		/*	 following for MIPIDataLowPwr2HighSpeedSettleDelayCount by different scenario	*/
@@ -80,7 +80,7 @@ static struct imgsensor_info_struct imgsensor_info = {
 		.pclk = 102850000,
 		.linelength = 1676,
 		.framelength = 2045,
-		.startx = 255,
+		.startx = 254,
 		.starty = 204,
 		.grabwindow_width = 2048,
 		.grabwindow_height = 1536,
@@ -91,7 +91,7 @@ static struct imgsensor_info_struct imgsensor_info = {
 		.pclk = 102850000,
 		.linelength = 3352,
 		.framelength = 2045,
-		.startx = 255,
+		.startx = 254,
 		.starty = 204,
 		.grabwindow_width = 2560,
 		.grabwindow_height = 1920,
@@ -102,8 +102,8 @@ static struct imgsensor_info_struct imgsensor_info = {
 		.pclk = 102850000,
 		.linelength = 1676,
 		.framelength = 2045,
-		.startx = 1,
-		.starty = 0,
+		.startx = 254,
+		.starty = 204,
 		.grabwindow_width = 2048,
 		.grabwindow_height = 1536,
 		.mipi_data_lp2hs_settle_dc = 85,//unit , ns
@@ -113,7 +113,7 @@ static struct imgsensor_info_struct imgsensor_info = {
 		.pclk = 102850000,
 		.linelength = 1676,
 		.framelength = 511,
-		.startx = 1,
+		.startx = 0,
 		.starty = 0,
 		.grabwindow_width = 640,
 		.grabwindow_height = 480,
@@ -124,7 +124,7 @@ static struct imgsensor_info_struct imgsensor_info = {
 		.pclk = 102850000,
 		.linelength = 1676,
 		.framelength = 2045,
-		.startx = 1,
+		.startx = 0,
 		.starty = 0,
 		.grabwindow_width = 1280,
 		.grabwindow_height = 960,
@@ -151,7 +151,7 @@ static struct imgsensor_info_struct imgsensor_info = {
     .sensor_interface_type = SENSOR_INTERFACE_TYPE_MIPI,//sensor_interface_type
     .mipi_sensor_type = MIPI_OPHY_NCSI2, //0,MIPI_OPHY_NCSI2;  1,MIPI_OPHY_CSI2
     .mipi_settle_delay_mode = MIPI_SETTLEDELAY_AUTO,//0,MIPI_SETTLEDELAY_AUTO; 1,MIPI_SETTLEDELAY_MANNUAL
-	.sensor_output_dataformat = SENSOR_OUTPUT_FORMAT_RAW_Gb,//sensor output first pixel color
+	.sensor_output_dataformat = SENSOR_OUTPUT_FORMAT_RAW_B,//sensor output first pixel color
 	.mclk = 24,//mclk value, suggest 24 or 26 for 24Mhz or 26Mhz
 	.mipi_lane_num = SENSOR_MIPI_2_LANE,//mipi lane num
 	.i2c_addr_table = {0x6c, 0x20, 0xff},//record sensor support all write id addr, only supprt 4must end with 0xff
@@ -176,11 +176,11 @@ static struct imgsensor_struct imgsensor = {
 
 /* Sensor output window information */
 static struct SENSOR_WINSIZE_INFO_STRUCT imgsensor_winsize_info[5] =
-{{ 2592, 1944,	  0,	0, 2592, 1944, 1296,  972, 0000, 0000, 1296,  972,	  136,	102, 1024,  768}, // Preview
- { 2592, 1944,	  0,	0, 2592, 1944, 2592, 1944, 0000, 0000, 2592,  1944,	  272,	204, 2048, 1536}, // capture
- { 2592, 1944,	  0,	0, 2592, 1944, 2592, 1944, 0000, 0000, 2592,  1944,	  272,	204, 2048, 1536}, // video
- { 2592, 1944,	  0,	0, 2592, 1944,  644,  480, 0000, 0000,  644,  480,	  1,	0, 	640,  480}, //hight speed video
- { 2592, 1944,	  0,	0, 2592, 1944, 1296,  972, 0000, 0000, 1296,  972,	  1,	0, 1280,  960}};// slim video
+{{ 2592, 1944,	  0,	0, 2592, 1944, 1296,  972, 0000, 0000, 1296,  972,	  136,	104, 1024,  768}, // Preview
+ { 2592, 1944,	  0,	0, 2592, 1944, 2592, 1944, 0000, 0000, 2592,  1944,	  254,	204, 2048, 1536}, // capture
+ { 2592, 1944,	  0,	0, 2592, 1944, 2592, 1944, 0000, 0000, 2592,  1944,	  254,	204, 2048, 1536}, // video
+ { 2592, 1944,	  0,	0, 2592, 1944,  644,  480, 0000, 0000,  644,  480,	  0,	0, 640,  480}, //hight speed video
+ { 2592, 1944,	  0,	0, 2592, 1944, 1296,  972, 0000, 0000, 1296,  972,	  0,	0, 1280,  960}};// slim video
 
 
 static kal_uint16 read_cmos_sensor(kal_uint32 addr)
