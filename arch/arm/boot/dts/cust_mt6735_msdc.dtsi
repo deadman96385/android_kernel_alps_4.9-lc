@@ -20,6 +20,7 @@
 	cap-mmc-highspeed;
 #if 0
 	mmc-hs200-1_8v;
+	mmc-hs400-1_8v;
 #endif
 	no-sd;
 	no-sdio;
@@ -48,13 +49,9 @@
 	sd-uhs-sdr25;
 	sd-uhs-sdr50;
 	sd-uhs-sdr104;
-	sd-uhs-ddr50;
 	no-mmc;
 	no-sdio;
 
-	pinctrl-names = "default","insert_cfg";
-	pinctrl-0 = <&mmc1_pins_insert_default>;
-	pinctrl-1 = <&mmc1_pins_insert_cfg>;
 	pinctl = <&msdc1_pins_default>;
 	pinctl_sdr104 = <&msdc1_pins_sdr104>;
 	pinctl_sdr50 = <&msdc1_pins_sdr50>;
@@ -66,7 +63,7 @@
 	cd_level = /bits/ 8 <MSDC_CD_LOW>;
 	cd-gpios = <&pio 5 0>;
 
-	status = "disable";
+	status = "okay";
 
 #ifndef CONFIG_FPGA_EARLY_PORTING
 	vmmc-supply = <&mt_pmic_vmch_ldo_reg>;
@@ -117,14 +114,6 @@
 		cmd_edge = /bits/ 8 <MSDC_SMPL_RISING>;
 		rdata_edge = /bits/ 8 <MSDC_SMPL_RISING>;
 		wdata_edge = /bits/ 8 <MSDC_SMPL_RISING>;
-	};
-
-	mmc1_pins_insert_default: mmc1_ins_default {
-	};
-	mmc1_pins_insert_cfg: mmc1_ins_cfg {
-		pins_insert {
-
-		};
 	};
 
 	msdc1_pins_default: msdc1@default {

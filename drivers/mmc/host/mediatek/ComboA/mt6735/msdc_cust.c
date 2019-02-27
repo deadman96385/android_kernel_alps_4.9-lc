@@ -504,6 +504,7 @@ int msdc_io_check(struct msdc_host *host)
 
 	if (host->id != 1)
 		return 1;
+	
 	for (i = 0; i < 3; i++) {
 		MSDC_SET_FIELD(MSDC1_GPIO_PUPD0_BASE, MSDC1_PUPD_CMD_CLK_DAT_MASK,
 			pupd_patterns[i]);
@@ -516,6 +517,7 @@ int msdc_io_check(struct msdc_host *host)
 			}
 		}
 	}
+
 	MSDC_SET_FIELD(MSDC1_GPIO_PUPD0_BASE, MSDC1_PUPD_CMD_CLK_DAT_MASK, 0x222262);
 	return result;
 
@@ -642,6 +644,8 @@ void msdc_set_pin_mode(struct msdc_host *host)
 		/*
 		 * set gpio to msdc mode. (clk/cmd/dat1/dat0 in GPIO_MODE17)
 		 */
+/*fix me : set to what?*/		 
+#if 0		 
 		MSDC_SET_FIELD(MSDC0_GPIO_MODE17_MWR_ADDR,
 			MSDC1_CLK_PINMUX_BITS |	MSDC1_CMD_PINMUX_BITS |
 			MSDC1_DAT0_PINMUX_BITS | MSDC1_DAT1_PINMUX_BITS,
@@ -651,7 +655,7 @@ void msdc_set_pin_mode(struct msdc_host *host)
 		 */
 		MSDC_SET_FIELD(MSDC0_GPIO_MODE18_MWR_ADDR,
 			MSDC1_DAT2_PINMUX_BITS | MSDC1_DAT3_PINMUX_BITS, 0x9);
-
+#endif
 	}
 
 }
@@ -1029,8 +1033,6 @@ int msdc_dt_init(struct platform_device *pdev, struct mmc_host *mmc)
 	int id;
 
 #ifndef FPGA_PLATFORM
-	struct pinctrl *pinctrl;
-	struct pinctrl_state *pins_ins;
 	struct device_node *np;
 #endif
 
@@ -1062,18 +1064,7 @@ int msdc_dt_init(struct platform_device *pdev, struct mmc_host *mmc)
 			infracfg_ao_base);
 	}
 
-	if (id == 1) {
-		pinctrl = devm_pinctrl_get(&pdev->dev);
-		if (IS_ERR(pinctrl))
-			pr_info("Can't find pinctrl!\n");
 
-		pins_ins = pinctrl_lookup_state(pinctrl, "insert_cfg");
-		if (IS_ERR(pins_ins))
-			pr_info("Can't find pinctrl insert_cfg!\n");
-
-		pinctrl_select_state(pinctrl, pins_ins);
-		pr_debug("msdc1 pinctl select state\n");
-	}
 
 #endif
 
