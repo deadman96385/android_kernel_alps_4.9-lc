@@ -1472,7 +1472,7 @@ u32 mt_irq_get_pending_hw(unsigned int irq)
 }
 EXPORT_SYMBOL(mt_irq_get_pending_hw);
 
-u32 mt_irq_get_pending_vec(u32 start_irq)
+u32 mt_irq_get_pol_hw(u32 start_irq)
 {
 	void __iomem *base = 0;
 	u32 pending_vec = 0;
