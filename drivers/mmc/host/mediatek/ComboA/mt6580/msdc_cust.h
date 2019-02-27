@@ -20,7 +20,7 @@
 /*#define MTK_MSDC_BRINGUP_DEBUG*/
 #endif
 
-#include <dt-bindings/mmc/mt6761-msdc.h>
+#include <dt-bindings/mmc/mt6580-msdc.h>
 
 //#define CONFIG_MTK_MSDC_BRING_UP_BYPASS
 
@@ -512,4 +512,4 @@
 #define MSDC_PB2_DEFAULT_CRCSTSENSEL    0x1
 
 #define MSDC_HW_NO_BUSY_CHECK
-#endif /* _MSDC_CUST_MT6761_H_ */
+#endif /* _MSDC_CUST_MT6580_H_ */

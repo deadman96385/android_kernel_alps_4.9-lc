@@ -17,6 +17,7 @@
 
 #define MSDC_EMMC               (0)
 #define MSDC_SD                 (1)
+#define MSDC_SDIO               (2)
 
 #define MSDC_CD_HIGH            (1)
 #define MSDC_CD_LOW             (0)
