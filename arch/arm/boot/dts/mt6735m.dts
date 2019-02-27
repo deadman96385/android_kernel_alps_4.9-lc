@@ -1192,8 +1192,7 @@ firmware_class.path=/vendor/firmware";
 		};
 
 		accdet: accdet@ {
-			compatible = "mediatek,mt6735-accdet",
-						"mediatek,mt6735m-accdet";
+			compatible = "mediatek,pmic-accdet";
 		};
 
 		THERM_CTRL@0x1100B000 {
