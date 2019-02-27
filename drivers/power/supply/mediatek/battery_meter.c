@@ -3661,7 +3661,6 @@ signed int battery_meter_get_QMAX25(void)
 {
 	return batt_meter_cust_data.q_max_pos_25;
 }
-
 /* ============================================================ // */
 static ssize_t fgadc_log_write(struct file *filp, const char __user *buff,
 			       size_t len, loff_t *data)
@@ -4613,8 +4612,7 @@ static int battery_meter_resume(struct platform_device *dev)
 				/* 0.1mAh */
 				oam_car_2 = oam_car_2 + (40*sleep_interval/3600);
 	}
-
-	bm_print(BM_LOG_CRTI,
+	battery_log(BAT_LOG_CRTI,
 		 "sleeptime=(%d:%d)s, be_ocv=(%d), af_ocv=(%d), D0=(%d), car1=(%d), car2=(%d)\n",
 		 _g_bat_sleep_total_time, sleep_interval,
 		 g_hw_ocv_before_sleep, hw_ocv_after_sleep, oam_d0, oam_car_1, oam_car_2);
