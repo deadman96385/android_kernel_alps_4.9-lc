@@ -331,12 +331,6 @@ extern int spm_go_to_ddrdfs(u32 spm_flags, u32 spm_data);
  **************************************/
 #define spm_read(addr)			__raw_readl(IOMEM(addr))
 #define spm_write(addr, val)		mt_reg_sync_writel(val, addr)
-#define spm_write_trace(addr, val) \
-	do { \
-		smp_mb(); \
-		mdelay(1); \
-		spm_write(addr, val); \
-	} while(0)
 
 #define is_cpu_pdn(flags)		(!((flags) & SPM_CPU_PDN_DIS))
 #define is_infra_pdn(flags)		(!((flags) & SPM_INFRA_PDN_DIS))
