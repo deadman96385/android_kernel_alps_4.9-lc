@@ -776,7 +776,7 @@ config ARCH_OMAP1
 endchoice
 
 menu "Multiple platform selection"
-	depends on ARCH_MULTIPLATFORM
+	depends on ARCH_MULTIPLATFORM && !MACH_MT6580
 
 comment "CPU Core family selection"
 
