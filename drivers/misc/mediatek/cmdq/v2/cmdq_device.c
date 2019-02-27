@@ -182,7 +182,7 @@ uint32_t cmdq_dev_enable_mtk_clock(bool enable,
 	return 0;
 }
 
-bool cmdq_dev_mtk_clock_is_enable(struct cgCLKID gateId)
+bool cmdq_dev_mtk_clock_is_enable(enum cg_clk_id gateId)
 {
 	return clock_is_on(gateId);
 }
