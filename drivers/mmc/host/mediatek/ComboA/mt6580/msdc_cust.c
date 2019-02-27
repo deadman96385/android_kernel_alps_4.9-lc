@@ -99,6 +99,10 @@ void __iomem *msdc_io_cfg_bases[HOST_MAX_NUM];
 /* Section 2: Power                                           */
 /**************************************************************/
 #if !defined(FPGA_PLATFORM)
+/* used for VMC CAL */
+static u32 msdc_vmc_cal_org;
+static u32 msdc_vmc_cal_shift;
+
 int msdc_regulator_set_and_enable(struct regulator *reg, int powerVolt)
 {
 #ifndef CONFIG_MTK_MSDC_BRING_UP_BYPASS
@@ -147,10 +151,9 @@ void msdc_ldo_power(u32 on, struct regulator *reg, int voltage_mv, u32 *status)
 void msdc_dump_ldo_sts(char **buff, unsigned long *size,
 	struct seq_file *m, struct msdc_host *host)
 {
-#if 0 /* Peter add for build error */
 #if !defined(CONFIG_MTK_MSDC_BRING_UP_BYPASS) \
 	|| defined(MTK_MSDC_BRINGUP_DEBUG)
-	u32 ldo_en = 0, ldo_vol = 0, ldo_cal = 0;
+	u32 ldo_en = 0, ldo_vol = 0;
 	u32 id = host->id;
 
 	switch (id) {
@@ -159,60 +162,40 @@ void msdc_dump_ldo_sts(char **buff, unsigned long *size,
 			SHIFT_VEMC_EN);
 		pmic_read_interface_nolock(REG_VEMC_VOSEL, &ldo_vol,
 			MASK_VEMC_VOSEL, SHIFT_VEMC_VOSEL);
-		pmic_read_interface_nolock(REG_VEMC_VOSEL_CAL, &ldo_cal,
-			MASK_VEMC_VOSEL_CAL, SHIFT_VEMC_VOSEL_CAL);
 		SPREAD_PRINTF(buff, size, m,
-		" VEMC_EN=0x%x, VEMC_VOL=0x%x [3b'011(3V)], VEMC_CAL=0x%x\n",
-			ldo_en, ldo_vol, ldo_cal);
-
-		pmic_read_interface_nolock(REG_VIO18_EN, &ldo_en, MASK_VIO18_EN,
-				SHIFT_VIO18_EN);
-		/* vio18 have no REG_VIO18_VOSEL, so not dump. */
-		pmic_read_interface_nolock(REG_VIO18_VOSEL_CAL, &ldo_cal,
-				MASK_VIO18_VOSEL_CAL, SHIFT_VIO18_VOSEL_CAL);
-		SPREAD_PRINTF(buff, size, m,
-		" VIO18_EN=0x%x, fix 1V8, VIO18_CAL=0x%x\n",
-				ldo_en, ldo_cal);
+		" VEMC_EN=0x%x, VEMC_VOL=0x%x [1b'1(3.3V), 1b'0(3.0V)]\n",
+			ldo_en, ldo_vol);
 		break;
 	case 1:
 		pmic_read_interface_nolock(REG_VMC_EN, &ldo_en, MASK_VMC_EN,
 			SHIFT_VMC_EN);
 		pmic_read_interface_nolock(REG_VMC_VOSEL, &ldo_vol,
 			MASK_VMC_VOSEL, SHIFT_VMC_VOSEL);
-		pmic_read_interface_nolock(REG_VMCH_VOSEL_CAL, &ldo_cal,
-			MASK_VMCH_VOSEL_CAL, SHIFT_VMCH_VOSEL_CAL);
 		SPREAD_PRINTF(buff, size, m,
-	" VMC_EN=0x%x, VMC_VOL=0x%x [3b'100(1V8),4b'1011(3V)], VMC_CAL=0x%x\n",
-			ldo_en, ldo_vol, ldo_cal);
+		" VMC_EN=0x%x, VMC_VOL=0x%x [1b'1(3.3V), 1b'0(1.8V)]\n",
+			ldo_en, ldo_vol);
 
 		pmic_read_interface_nolock(REG_VMCH_EN, &ldo_en, MASK_VMCH_EN,
 			SHIFT_VMCH_EN);
 		pmic_read_interface_nolock(REG_VMCH_VOSEL, &ldo_vol,
-			MASK_VMCH_VOSEL, SHIFT_VMCH_VOSEL);
-		pmic_read_interface_nolock(REG_VMC_VOSEL_CAL, &ldo_cal,
-			MASK_VMC_VOSEL_CAL, SHIFT_VMC_VOSEL_CAL);
+			MASK_VMCH_VOSEL, SHIFT_VMCH_VOSEL);;
 		SPREAD_PRINTF(buff, size, m,
-		" VMCH_EN=0x%x, VMCH_VOL=0x%x [3b'011(3V)], VMCH_CAL=0x%x\n",
-			ldo_en, ldo_vol, ldo_cal);
+		" VMCH_EN=0x%x, VMCH_VOL=0x%x [1b'1(3.3V), 1b'0(3.0V)]\n",
+			ldo_en, ldo_vol);
 		break;
 	default:
 		break;
 	}
 #endif
-#endif
 }
 
 void msdc_sd_power_switch(struct msdc_host *host, u32 on)
 {
-#if 0 /* Peter add for build error */
 #if !defined(CONFIG_MTK_MSDC_BRING_UP_BYPASS)
 	if (host->id == 1) {
 		if (on) {
-			/* VMC calibration +60mV. According to SA's request. */
-			pmic_config_interface(REG_VMC_VOSEL_CAL,
-				6,
-				MASK_VMC_VOSEL_CAL,
-				SHIFT_VMC_VOSEL_CAL);
+			pmic_config_interface(0x052a, msdc_vmc_cal_shift,
+				0xf, 0x9);
 		}
 
 		msdc_ldo_power(on, host->mmc->supply.vqmmc, VOL_1800,
@@ -223,43 +206,32 @@ void msdc_sd_power_switch(struct msdc_host *host, u32 on)
 		msdc_set_driving(host, host->hw->driving_applied);
 	}
 #endif
-#endif
-}
-
-void msdc_sdio_power(struct msdc_host *host, u32 on)
-{
-#if !defined(CONFIG_MTK_MSDC_BRING_UP_BYPASS)
-	if (host->id == 2) {
-		host->power_flash = VOL_1800 * 1000;
-		host->power_io = VOL_1800 * 1000;
-	}
-#endif
 }
 
 void msdc_power_calibration_init(struct msdc_host *host)
 {
+	if (host->hw->host_function == MSDC_SD) {
+		pmic_read_interface(0x052a, &msdc_vmc_cal_org, 0xf, 0x9);
+
+		/* shift CAL result +40mV */
+		if ((msdc_vmc_cal_org & 0x7) >= 2)
+			msdc_vmc_cal_shift = msdc_vmc_cal_org - 2;
+		else if (msdc_vmc_cal_org & 0x8) {
+			msdc_vmc_cal_shift = 0x8; /* max value */
+		} else {
+			if (msdc_vmc_cal_org == 0x0)
+				msdc_vmc_cal_shift = 0xe;
+			else if (msdc_vmc_cal_org == 0x1)
+				msdc_vmc_cal_shift = 0xf;
+		}
+		pr_info("msdc1 VMC CAL org = 0x%x, shift = 0x%x\n",
+			msdc_vmc_cal_org, msdc_vmc_cal_shift);
+	}
 }
 
 int msdc_oc_check(struct msdc_host *host, u32 en)
 {
-#if !defined(CONFIG_MTK_MSDC_BRING_UP_BYPASS)
-/* mt6765 follow mt6771 ,use interrupt */
-#if 0
-	u32 val = 0;
-
-	if (host->id == 1 && en) {
-		pmic_read_interface(REG_VMCH_OC_STATUS, &val,
-			MASK_VMCH_OC_STATUS, SHIFT_VMCH_OC_STATUS);
-
-		if (val) {
-			pr_notice("msdc1 OC status = %x\n", val);
-			host->power_control(host, 0);
-			msdc_set_bad_card_and_remove(host);
-			return -1;
-		}
-	}
-#endif
-#endif
+	/* MT6350 no OC */
 	return 0;
 }
 
@@ -282,7 +254,6 @@ void msdc_emmc_power(struct msdc_host *host, u32 on)
 
 void msdc_sd_power(struct msdc_host *host, u32 on)
 {
-#if 0 /* Peter add for build error */
 #if !defined(CONFIG_MTK_MSDC_BRING_UP_BYPASS)
 	u32 card_on = on;
 
@@ -294,29 +265,11 @@ void msdc_sd_power(struct msdc_host *host, u32 on)
 		if (host->hw->flags & MSDC_SD_NEED_POWER)
 			card_on = 1;
 
-		/* Disable VMCH OC */
-		if (!card_on)
-			pmic_enable_interrupt(INT_VMCH_OC, 0, "sdcard");
-
 		/* VMCH VOLSEL */
-		msdc_ldo_power(card_on, host->mmc->supply.vmmc, VOL_3000,
+		msdc_ldo_power(card_on, host->mmc->supply.vmmc, VOL_3300,
 			&host->power_flash);
 
-
-		/* Enable VMCH OC */
-		if (card_on) {
-			mdelay(3);
-			pmic_enable_interrupt(INT_VMCH_OC, 1, "sdcard");
-		}
-
-		/* VMC VOLSEL */
-		/* rollback to 0mv in REG_VMC_VOSEL_CAL
-		 * in case of SD3.0 setting
-		 */
-		pmic_config_interface(REG_VMC_VOSEL_CAL,
-			SD_VOL_ACTUAL - VOL_3000,
-			MASK_VMC_VOSEL_CAL, SHIFT_VMC_VOSEL_CAL);
-		msdc_ldo_power(on, host->mmc->supply.vqmmc, VOL_3000,
+		msdc_ldo_power(on, host->mmc->supply.vqmmc, VOL_3300,
 			&host->power_io);
 
 		if (on)
@@ -326,7 +279,6 @@ void msdc_sd_power(struct msdc_host *host, u32 on)
 	default:
 		break;
 	}
-#endif
 #endif
 #ifdef MTK_MSDC_BRINGUP_DEBUG
 	msdc_dump_ldo_sts(NULL, 0, NULL, host);
@@ -342,8 +294,8 @@ void msdc_sd_power_off(void)
 		pr_notice("Power Off, SD card\n");
 
 		/* power must be on */
-		host->power_io = VOL_3000 * 1000;
-		host->power_flash = VOL_3000 * 1000;
+		host->power_io = VOL_3300 * 1000;
+		host->power_flash = VOL_3300 * 1000;
 
 		host->power_control(host, 0);
 
@@ -356,12 +308,13 @@ EXPORT_SYMBOL(msdc_sd_power_off);
 
 void msdc_pmic_force_vcore_pwm(bool enable)
 {
-#if 0 /* Peter add for build error */
-#if !defined(FPGA_PLATFORM) && !defined(CONFIG_MTK_MSDC_BRING_UP_BYPASS)
-	if (vcore_pmic_set_mode(enable))
-		pr_notice("[msdc]error: vcore_pmic_set_mode fail\n");
-#endif
-#endif
+	if (enable) {
+		/* FPWM mode */
+		pmic_set_register_value(PMIC_RG_VPROC_MODESET, 1);
+	} else {
+		/* auto mode */
+		pmic_set_register_value(PMIC_RG_VPROC_MODESET, 0);
+	}
 }
 
 void msdc_set_host_power_control(struct msdc_host *host)
@@ -383,8 +336,6 @@ void msdc_set_host_power_control(struct msdc_host *host)
 			msdc_sd_power(host, 0);
 		}
 		#endif
-	} else if (host->hw->host_function == MSDC_SDIO) {
-		host->power_control = msdc_sdio_power;
 	}
 
 	if (host->power_control != NULL) {
@@ -396,56 +347,8 @@ void msdc_set_host_power_control(struct msdc_host *host)
 }
 
 #if defined(MSDC_HQA)
-/*#define MSDC_HQA_HV*/
-/*#define MSDC_HQA_NV*/
-/*#define MSDC_HQA_LV*/
-
 void msdc_HQA_set_voltage(struct msdc_host *host)
 {
-#if defined(MSDC_HQA_HV) || defined(MSDC_HQA_LV)
-	static int vcore_orig = -1, vio18_cal_orig = -1;
-	u32 vcore, vio18_cal = 0, val_delta;
-#endif
-#if defined(MSDC_HQA_NV)
-	static int vcore_orig = -1, vio18_cal_orig = -1;
-	u32 vio18_cal;
-#endif
-
-	if (host->is_autok_done == 1)
-		return;
-
-	if (vcore_orig < 0)
-		pmic_read_interface(REG_VCORE_VOSEL_SW, &vcore_orig,
-			VCORE_VOSEL_SW_MASK, VCORE_VOSEL_SW_SHIFT);
-	if (vio18_cal_orig < 0)
-		pmic_read_interface(REG_VIO_VOCAL_SW, &vio18_cal,
-			VIO_VOCAL_SW_MASK, VIO_VOCAL_SW_SHIFT);
-	pr_info("[MSDC%d HQA] orig Vcore 0x%x, Vio18_cal 0x%x\n",
-		host->id, vcore_orig, vio18_cal_orig);
-
-#if defined(MSDC_HQA_HV) || defined(MSDC_HQA_LV)
-	val_delta = (51875 + vcore_orig * 6250) / 20 / 6250;
-
-#ifdef MSDC_HQA_HV
-	vcore = vcore_orig + val_delta;
-	vio18_cal = 0xa;
-#endif
-
-#ifdef MSDC_HQA_LV
-	vcore = vcore_orig - val_delta;
-	vio18_cal = 0;
-#endif
-
-	pmic_config_interface(REG_VCORE_VOSEL_SW, vcore,
-		VCORE_VOSEL_SW_MASK, VCORE_VOSEL_SW_SHIFT);
-
-	if (vio18_cal)
-		pmic_config_interface(REG_VIO_VOCAL_SW, vio18_cal,
-			VIO_VOCAL_SW_MASK, VIO_VOCAL_SW_SHIFT);
-
-	pr_info("[MSDC%d HQA] adj Vcore 0x%x, Vio18_cal 0x%x\n",
-		host->id, vcore, vio18_cal);
-#endif
 }
 #endif
 
@@ -1168,16 +1071,6 @@ int msdc_of_parse(struct platform_device *pdev, struct mmc_host *mmc)
 		pr_debug("of_iomap for MSDC%d TOP base @ 0x%p\n",
 			host->id, host->base_top);
 #endif
-
-#if defined(CFG_DEV_MSDC3)
-	if (host->hw->host_function == MSDC_SDIO) {
-		host->hw->flags |= MSDC_EXT_SDIO_IRQ;
-		host->hw->request_sdio_eirq = mt_sdio_ops[3].sdio_request_eirq;
-		host->hw->enable_sdio_eirq = mt_sdio_ops[3].sdio_enable_eirq;
-		host->hw->disable_sdio_eirq = mt_sdio_ops[3].sdio_disable_eirq;
-		host->hw->register_pm = mt_sdio_ops[3].sdio_register_pm;
-	}
-#endif
 	/* device rename */
 	if ((host->id == 0) && !device_rename(mmc->parent, "bootdevice"))
 		pr_notice("[msdc%d] device renamed to bootdevice.\n", host->id);
@@ -1186,12 +1079,6 @@ int msdc_of_parse(struct platform_device *pdev, struct mmc_host *mmc)
 			host->id);
 	else if ((host->id == 0) || (host->id == 1))
 		pr_notice("[msdc%d] error: device renamed failed.\n", host->id);
-
-#if 0 /* Peter add for build error */
-	if (host->id == 1)
-		pmic_register_interrupt_callback(INT_VMCH_OC,
-			msdc_sd_power_off);
-#endif
 
 	return host->id;
 }
