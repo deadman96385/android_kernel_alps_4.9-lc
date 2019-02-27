@@ -1680,6 +1680,8 @@ static inline int adopt_CAMERA_HW_CheckIsAlive(void)
 	MUINT32 retLen = 0;
 	MSDK_SENSOR_RESOLUTION_INFO_STRUCT sensorResolution[2], *psensorResolution[2];
 	MUINT32 curr_sensor_id = 0;
+	char *pmtk_ccm_name = NULL;
+	char *pg_invokeSensorNameStr = NULL;
 
 	KD_IMGSENSOR_PROFILE_INIT();
 	/* power on sensor */
@@ -1717,9 +1719,16 @@ static inline int adopt_CAMERA_HW_CheckIsAlive(void)
 				} else {
 
 					PK_INF(" Sensor found ID = 0x%x\n", sensorID);
-					snprintf(mtk_ccm_name, sizeof(mtk_ccm_name),
-						 "%s CAM[%d]:%s;", mtk_ccm_name,
-						 g_invokeSocketIdx[i], g_invokeSensorNameStr[i]);
+
+					pmtk_ccm_name = strchr(mtk_ccm_name, '\0');
+					pg_invokeSensorNameStr = strchr(g_invokeSensorNameStr[i], '\0');
+
+					snprintf(pmtk_ccm_name,
+						camera_info_size - (int)(pmtk_ccm_name - mtk_ccm_name),
+						"\n\nCAM_Info[%d]:%s;",
+						sensorID,
+						pg_invokeSensorNameStr);
+
 					psensorResolution[0] = &sensorResolution[0];
 					psensorResolution[1] = &sensorResolution[1];
 					// don't care of the result
@@ -1729,9 +1738,11 @@ static inline int adopt_CAMERA_HW_CheckIsAlive(void)
 					else if(g_invokeSocketIdx[i] == DUAL_CAMERA_SUB_SENSOR)
 						curr_sensor_id = 1;
 					/* fill the cam infos with name/width/height */
-					snprintf(g_cam_infos, sizeof(g_cam_infos),"%s CAM[%d]:%s,Width:%d, Height:%d;",
-								g_cam_infos, g_invokeSocketIdx[i], g_invokeSensorNameStr[i],
-								sensorResolution[curr_sensor_id].SensorFullWidth, sensorResolution[curr_sensor_id].SensorFullHeight);
+
+					PK_DBG("socket_index: %d Full size: Width:%d, Height:%d\n",
+					g_invokeSocketIdx[i],
+					sensorResolution[curr_sensor_id].SensorFullWidth,
+					sensorResolution[curr_sensor_id].SensorFullHeight);
 
 					err = ERROR_NONE;
 				}
