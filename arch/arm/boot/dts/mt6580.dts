@@ -676,6 +676,7 @@ firmware_class.path=/vendor/firmware";
 
 		AP_UART0@0x11005000 {
 			cell-index = <0>;
+			skip_pinmux_clk = <1>;
 			compatible = "mediatek,AP_UART0";
 			reg = <0x11005000 0x1000>;
 			interrupts = <0 44 0x8>;
@@ -683,6 +684,7 @@ firmware_class.path=/vendor/firmware";
 
 		AP_UART1@0x11006000 {
 			cell-index = <1>;
+			skip_pinmux_clk = <1>;
 			compatible = "mediatek,AP_UART1";
 			reg = <0x11006000 0x1000>;
 			interrupts = <0 45 0x8>;

@@ -2332,7 +2332,7 @@ static struct uart_driver mtk_uart_drv = {
 static int mtk_uart_probe(struct platform_device *pdev)
 {
 	struct mtk_uart *uart;
-	int err;
+	int err, skip_pinmux_clk = 0;
 #if !defined(CONFIG_FPGA_EARLY_PORTING)
 	static const char * const clk_uart_name[] = {
 		"uart0-main",
@@ -2354,6 +2354,10 @@ static int mtk_uart_probe(struct platform_device *pdev)
 		err = of_property_read_u32(node, "cell-index", &pdev->id);
 		if (err)
 			pr_info("[DTS] get uart platform_device id fail!!\n");
+
+		err = of_property_read_u32(node, "skip_pinmux_clk", &skip_pinmux_clk);
+		if (err)
+			pr_info("[DTS] get skip_pinmux_clk property fail!!\n");
 	}
 	if (pdev->id >= UART_NR) {
 		pr_info("DTS cell ID %d > UART nuber %d\n", pdev->id, UART_NR);
@@ -2367,40 +2371,43 @@ static int mtk_uart_probe(struct platform_device *pdev)
 #if !defined(CONFIG_FPGA_EARLY_PORTING)
 	uart_setting = get_uart_default_settings(pdev->id);
 
-	uart_setting->clk_uart_main = devm_clk_get(&pdev->dev,
+	if (!skip_pinmux_clk) {
+		uart_setting->clk_uart_main = devm_clk_get(&pdev->dev,
 					clk_uart_name[pdev->id]);
-	if (IS_ERR(uart_setting->clk_uart_main)) {
-		pr_info("[UART%d][CCF]cannot get %s clock. ptr_err:%ld\n",
-				pdev->id, clk_uart_name[pdev->id],
-				PTR_ERR(uart_setting->clk_uart_main));
-		return PTR_ERR(uart_setting->clk_uart_main);
-	}
-	err = clk_prepare(uart_setting->clk_uart_main);
-	if (err) {
-		pr_info("[UART%d] cannot prepare main clk ctrl\n", pdev->id);
-		return err;
-	}
-	pr_debug("[UART%d][CCF]clk_uart_main:%p\n",
-		pdev->id, uart_setting->clk_uart_main);
-
-	if (pdev->id == 0) {
-		struct clk *clk_uart0_dma = devm_clk_get(&pdev->dev,
-			"uart-apdma");
-
-		if (IS_ERR(clk_uart0_dma)) {
-			pr_info("[UART][CCF]cannot get clk_uart0_dma clock. ptr_err:%ld\n",
-				PTR_ERR(clk_uart0_dma));
-			return PTR_ERR(clk_uart0_dma);
+		if (IS_ERR(uart_setting->clk_uart_main)) {
+			pr_info("[UART%d][CCF]cannot get %s clock. ptr_err:%ld\n",
+					pdev->id, clk_uart_name[pdev->id],
+					PTR_ERR(uart_setting->clk_uart_main));
+			return PTR_ERR(uart_setting->clk_uart_main);
 		}
-		err = clk_prepare(clk_uart0_dma);
+		err = clk_prepare(uart_setting->clk_uart_main);
 		if (err) {
-			pr_info("[UART%d] cannot prepare dma clk ctrl\n",
-				pdev->id);
+			pr_info("[UART%d] cannot prepare main clk ctrl\n",
+				 pdev->id);
 			return err;
 		}
+		pr_debug("[UART%d][CCF]clk_uart_main:%p\n",
+			pdev->id, uart_setting->clk_uart_main);
 
-		/* set_uart_dma_clk(pdev->id, clk_uart0_dma); */
-		pr_debug("[UART][CCF]clk_uart0_dma:%p\n", clk_uart0_dma);
+		if (pdev->id == 0) {
+			struct clk *clk_uart0_dma = devm_clk_get(&pdev->dev,
+				"uart-apdma");
+
+			if (IS_ERR(clk_uart0_dma)) {
+				pr_info("[UART][CCF]cannot get clk_uart0_dma clock. ptr_err:%ld\n",
+					PTR_ERR(clk_uart0_dma));
+				return PTR_ERR(clk_uart0_dma);
+			}
+			err = clk_prepare(clk_uart0_dma);
+			if (err) {
+				pr_info("[UART%d] cannot prepare dma clk ctrl\n",
+					pdev->id);
+				return err;
+			}
+
+			/* set_uart_dma_clk(pdev->id, clk_uart0_dma); */
+			pr_debug("[UART][CCF]clk_uart0_dma:%p\n", clk_uart0_dma);
+		}
 	}
 #else
 	pr_debug("[UART][CCF]probe CONFIG_FPGA_EARLY_PORTING is defined!\n");
@@ -2408,16 +2415,18 @@ static int mtk_uart_probe(struct platform_device *pdev)
 
 /* For GPIO setting */
 #if !defined(CONFIG_MTK_LEGACY) && !defined(CONFIG_FPGA_EARLY_PORTING)
-	ppinctrl = devm_pinctrl_get(&pdev->dev);
-	if (IS_ERR(ppinctrl)) {
-		err = PTR_ERR(ppinctrl);
-		pr_info("[UART%d][PinC]cannot find pinctrl. ptr_err:%ld\n",
-			pdev->id, PTR_ERR(ppinctrl));
-		/*return err;*/
+	if (!skip_pinmux_clk) {
+		ppinctrl = devm_pinctrl_get(&pdev->dev);
+		if (IS_ERR(ppinctrl)) {
+			err = PTR_ERR(ppinctrl);
+			pr_info("[UART%d][PinC]cannot find pinctrl. ptr_err:%ld\n",
+				pdev->id, PTR_ERR(ppinctrl));
+			/*return err;*/
+		}
+		set_uart_pinctrl(pdev->id, ppinctrl);
+		pr_debug("[UART%d][PinC]set idx:%d, ppinctrl:%p\n",
+			pdev->id, pdev->id, ppinctrl);
 	}
-	set_uart_pinctrl(pdev->id, ppinctrl);
-	pr_debug("[UART%d][PinC]set idx:%d, ppinctrl:%p\n",
-		pdev->id, pdev->id, ppinctrl);
 #else
 /* !defined(CONFIG_MTK_LEGACY) && !defined(CONFIG_FPGA_EARLY_PORTING) */
 	pr_debug("[UART]MTK_LEGACY or FPGA_EARLY_PORTING is defined!\n");
@@ -2772,6 +2781,8 @@ static int mtk_uart_init_ports(void)
 /*---------------------------------------------------------------------------*/
 static const struct of_device_id apuart_of_ids[] = {
 	{.compatible = "mediatek,mtk-uart",},
+	{.compatible = "mediatek,AP_UART0",},
+	{.compatible = "mediatek,AP_UART1",},
 	{}
 };
 
