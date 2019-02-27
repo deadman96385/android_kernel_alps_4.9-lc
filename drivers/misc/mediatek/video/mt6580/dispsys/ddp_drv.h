@@ -140,7 +140,7 @@ struct DISPLAY_PQ_T{
 	unsigned int CCORR_COEF[CCORR_COEF_CNT][3][3];
 };
 
-struct DISPLAY_COLOR_REG_T{
+struct DISPLAY_COLOR_REG {
 	unsigned int GLOBAL_SAT;
 	unsigned int CONTRAST;
 	unsigned int BRIGHTNESS;
@@ -339,7 +339,7 @@ enum DISP_INTERLACE_FORMAT{
 #define DISP_IOCTL_PQ_SET_DC_PARAM  _IOW(DISP_IOCTL_MAGIC, 76, struct DISP_PQ_DC_PARAM)
 #define DISP_IOCTL_WRITE_SW_REG     _IOW(DISP_IOCTL_MAGIC, 77, struct DISP_WRITE_REG)	/* also defined in atci_pq_cmd.h */
 #define DISP_IOCTL_READ_SW_REG      _IOWR(DISP_IOCTL_MAGIC, 78, struct DISP_READ_REG)	/* also defined in atci_pq_cmd.h */
-#define DISP_IOCTL_SET_COLOR_REG    _IOWR(DISP_IOCTL_MAGIC, 79, struct DISPLAY_COLOR_REG_T)
+#define DISP_IOCTL_SET_COLOR_REG    _IOWR(DISP_IOCTL_MAGIC, 79, struct DISPLAY_COLOR_REG)
 
 /* OD */
 #define DISP_IOCTL_OD_CTL           _IOWR(DISP_IOCTL_MAGIC, 80 , struct DISP_OD_CMD)

@@ -22,8 +22,8 @@
 #include <linux/of_address.h>
 #include <asm/uaccess.h>
 #include <asm/atomic.h>
-#include <leds_drv.h>
-#include <leds_sw.h>
+#include <mtk_leds_drv.h>
+#include <mtk_leds_sw.h>
 #include <cmdq_record.h>
 #include <ddp_reg.h>
 #include <ddp_drv.h>
@@ -69,7 +69,7 @@ int aal_dbg_en = 0;
 #ifdef CONFIG_MTK_AAL_SUPPORT
 static int disp_aal_write_init_regs(void *cmdq);
 #endif
-static int disp_aal_write_param_to_reg(cmdqRecHandle cmdq, const DISP_AAL_PARAM *param);
+static int disp_aal_write_param_to_reg(cmdqRecHandle cmdq, const struct DISP_AAL_PARAM *param);
 static void set_aal_need_lock(int aal_need_lock);
 
 
@@ -77,11 +77,11 @@ static DECLARE_WAIT_QUEUE_HEAD(g_aal_hist_wq);
 static DEFINE_SPINLOCK(g_aal_hist_lock);
 static DEFINE_SPINLOCK(g_aal_irq_en_lock);
 
-static DISP_AAL_HIST g_aal_hist = {
+static struct DISP_AAL_HIST g_aal_hist = {
 	.serviceFlags = 0,
 	.backlight = -1
 };
-static DISP_AAL_HIST g_aal_hist_db;
+static struct DISP_AAL_HIST g_aal_hist_db;
 static ddp_module_notify g_ddp_notify;
 static volatile int g_aal_hist_available;
 static volatile int g_aal_dirty_frame_retrieved = 1;
@@ -137,7 +137,7 @@ static int disp_aal_exit_idle(const char *caller, int need_kick)
 	return 0;
 }
 
-static int disp_aal_init(DISP_MODULE_ENUM module, int width, int height, void *cmdq)
+static int disp_aal_init(enum DISP_MODULE_ENUM module, int width, int height, void *cmdq)
 {
 #ifdef CONFIG_MTK_AAL_SUPPORT
 	/* Enable AAL histogram, engine */
@@ -182,7 +182,7 @@ static void disp_aal_trigger_refresh(int latency)
 #endif
 
 	if (g_ddp_notify != NULL) {
-		DISP_PATH_EVENT trigger_method = DISP_PATH_EVENT_TRIGGER;
+		enum DISP_PATH_EVENT trigger_method = DISP_PATH_EVENT_TRIGGER;
 
 #ifdef DISP_PATH_DELAYED_TRIGGER_33ms_SUPPORT
 		/*
@@ -194,7 +194,7 @@ static void disp_aal_trigger_refresh(int latency)
 			latency = scenario_latency;
 
 		if (latency == AAL_REFRESH_33MS)
-			trigger_method = DISP_PATH_EVENT_DELAYED_TRIGGER_33ms;
+			trigger_method = enum DISP_PATH_EVENT_DELAYED_TRIGGER_33ms;
 #endif
 		g_ddp_notify(AAL0_MODULE_NAMING, trigger_method);
 		AAL_DBG("disp_aal_trigger_refresh: %d", trigger_method);
@@ -444,7 +444,7 @@ void disp_aal_set_lcm_type(unsigned int panel_type)
 	AAL_DBG("disp_aal_set_lcm_type: %d", g_aal_panel_type);
 }
 
-static int disp_aal_copy_hist_to_user(DISP_AAL_HIST __user *hist)
+static int disp_aal_copy_hist_to_user(struct DISP_AAL_HIST __user *hist)
 {
 	unsigned long flags;
 	int ret = -EFAULT;
@@ -455,12 +455,12 @@ static int disp_aal_copy_hist_to_user(DISP_AAL_HIST __user *hist)
 #ifdef AAL_CUSTOMER_GET_PANEL_TYPE
 	g_aal_hist.panel_type = g_aal_panel_type;
 #endif
-	memcpy(&g_aal_hist_db, &g_aal_hist, sizeof(DISP_AAL_HIST));
+	memcpy(&g_aal_hist_db, &g_aal_hist, sizeof(struct DISP_AAL_HIST));
 	g_aal_hist.serviceFlags = 0;
 	g_aal_hist_available = 0;
 	spin_unlock_irqrestore(&g_aal_hist_lock, flags);
 
-	if (copy_to_user(hist, &g_aal_hist_db, sizeof(DISP_AAL_HIST)) == 0)
+	if (copy_to_user(hist, &g_aal_hist_db, sizeof(struct DISP_AAL_HIST)) == 0)
 		ret = 0;
 
 	atomic_set(&g_aal_force_enable_irq, 0);
@@ -474,21 +474,21 @@ static int disp_aal_copy_hist_to_user(DISP_AAL_HIST __user *hist)
 #define CABC_GAINLMT(v0, v1, v2) (((v2) << 20) | ((v1) << 10) | (v0))
 
 #ifdef CONFIG_MTK_AAL_SUPPORT
-static DISP_AAL_INITREG g_aal_init_regs;
+static struct DISP_AAL_INITREG g_aal_init_regs;
 #endif
 
-static DISP_AAL_PARAM g_aal_param;
+static struct DISP_AAL_PARAM g_aal_param;
 
 
-static int disp_aal_set_init_reg(DISP_AAL_INITREG __user *user_regs, void *cmdq)
+static int disp_aal_set_init_reg(struct DISP_AAL_INITREG __user *user_regs, void *cmdq)
 {
 	int ret = -EFAULT;
 #ifdef CONFIG_MTK_AAL_SUPPORT
-	DISP_AAL_INITREG *init_regs;
+	struct DISP_AAL_INITREG *init_regs;
 
 	init_regs = &g_aal_init_regs;
 
-	ret = copy_from_user(init_regs, user_regs, sizeof(DISP_AAL_INITREG));
+	ret = copy_from_user(init_regs, user_regs, sizeof(struct DISP_AAL_INITREG));
 	if (ret == 0) {
 		g_aal_is_init_regs_valid = 1;
 		ret = disp_aal_write_init_regs(cmdq);
@@ -510,7 +510,7 @@ static int disp_aal_write_init_regs(void *cmdq)
 	int ret = -EFAULT;
 
 	if (g_aal_is_init_regs_valid) {
-		DISP_AAL_INITREG *init_regs = &g_aal_init_regs;
+		struct DISP_AAL_INITREG *init_regs = &g_aal_init_regs;
 
 		int i, j;
 		int *gain;
@@ -534,14 +534,14 @@ static int disp_aal_write_init_regs(void *cmdq)
 }
 #endif
 
-int disp_aal_set_param(DISP_AAL_PARAM __user *param, void *cmdq)
+int disp_aal_set_param(struct DISP_AAL_PARAM __user *param, void *cmdq)
 {
 	int ret = -EFAULT;
 	int backlight_value = 0;
 
 	/* Not need to protect g_aal_param, since only AALService
 	   can set AAL parameters. */
-	if (copy_from_user(&g_aal_param, param, sizeof(DISP_AAL_PARAM)) == 0) {
+	if (copy_from_user(&g_aal_param, param, sizeof(struct DISP_AAL_PARAM)) == 0) {
 		backlight_value = g_aal_param.FinalBacklight;
 #ifdef CONFIG_MTK_AAL_SUPPORT
 		/* set cabc gain zero when detect backlight setting equal to zero */
@@ -579,7 +579,7 @@ int disp_aal_set_param(DISP_AAL_PARAM __user *param, void *cmdq)
 #define DRE_REG_2(v0, off0, v1, off1)           (((v1) << (off1)) | ((v0) << (off0)))
 #define DRE_REG_3(v0, off0, v1, off1, v2, off2) (((v2) << (off2)) | (v1 << (off1)) | ((v0) << (off0)))
 
-static int disp_aal_write_param_to_reg(cmdqRecHandle cmdq, const DISP_AAL_PARAM *param)
+static int disp_aal_write_param_to_reg(cmdqRecHandle cmdq, const struct DISP_AAL_PARAM *param)
 {
 	int i;
 	const int *gain;
@@ -619,7 +619,7 @@ static int disp_aal_write_param_to_reg(cmdqRecHandle cmdq, const DISP_AAL_PARAM 
 }
 
 
-static int aal_config(DISP_MODULE_ENUM module, disp_ddp_path_config *pConfig, void *cmdq)
+static int aal_config(enum DISP_MODULE_ENUM module, struct disp_ddp_path_config *pConfig, void *cmdq)
 {
 	if (pConfig->dst_dirty) {
 		int width, height;
@@ -707,7 +707,7 @@ static void ddp_aal_restore(void *cmq_handle)
 }
 
 
-static int aal_clock_on(DISP_MODULE_ENUM module, void *cmq_handle)
+static int aal_clock_on(enum DISP_MODULE_ENUM module, void *cmq_handle)
 {
 #if defined(CONFIG_ARCH_MT6755) || defined(CONFIG_ARCH_ELBRUS) || defined(CONFIG_ARCH_MT6757)
 	/* aal is DCM , do nothing */
@@ -725,7 +725,7 @@ static int aal_clock_on(DISP_MODULE_ENUM module, void *cmq_handle)
 	return 0;
 }
 
-static int aal_clock_off(DISP_MODULE_ENUM module, void *cmq_handle)
+static int aal_clock_off(enum DISP_MODULE_ENUM module, void *cmq_handle)
 {
 	ddp_aal_backup();
 #if defined(CONFIG_ARCH_MT6755) || defined(CONFIG_ARCH_ELBRUS) || defined(CONFIG_ARCH_MT6757)
@@ -743,25 +743,25 @@ static int aal_clock_off(DISP_MODULE_ENUM module, void *cmq_handle)
 	return 0;
 }
 
-static int aal_init(DISP_MODULE_ENUM module, void *cmq_handle)
+static int aal_init(enum DISP_MODULE_ENUM module, void *cmq_handle)
 {
 	aal_clock_on(module, cmq_handle);
 	return 0;
 }
 
-static int aal_deinit(DISP_MODULE_ENUM module, void *cmq_handle)
+static int aal_deinit(enum DISP_MODULE_ENUM module, void *cmq_handle)
 {
 	aal_clock_off(module, cmq_handle);
 	return 0;
 }
 
-static int aal_set_listener(DISP_MODULE_ENUM module, ddp_module_notify notify)
+static int aal_set_listener(enum DISP_MODULE_ENUM module, ddp_module_notify notify)
 {
 	g_ddp_notify = notify;
 	return 0;
 }
 
-int aal_bypass(DISP_MODULE_ENUM module, int bypass)
+int aal_bypass(enum DISP_MODULE_ENUM module, int bypass)
 {
 	int relay = 0;
 
@@ -813,7 +813,7 @@ static void set_aal_need_lock(int aal_need_lock)
 }
 
 #ifdef AAL_SUPPORT_PARTIAL_UPDATE
-static int _aal_partial_update(DISP_MODULE_ENUM module, void *arg, void *cmdq)
+static int _aal_partial_update(enum DISP_MODULE_ENUM module, void *arg, void *cmdq)
 {
 	struct disp_rect *roi = (struct disp_rect *) arg;
 	int width = roi->width;
@@ -824,7 +824,7 @@ static int _aal_partial_update(DISP_MODULE_ENUM module, void *arg, void *cmdq)
 	return 0;
 }
 
-static int aal_ioctl(DISP_MODULE_ENUM module, void *handle,
+static int aal_ioctl(enum DISP_MODULE_ENUM module, void *handle,
 		DDP_IOCTL_NAME ioctl_cmd, void *params)
 {
 	int ret = -1;
@@ -838,7 +838,7 @@ static int aal_ioctl(DISP_MODULE_ENUM module, void *handle,
 }
 #endif
 
-static int aal_io(DISP_MODULE_ENUM module, int msg, unsigned long arg, void *cmdq)
+static int aal_io(enum DISP_MODULE_ENUM module, int msg, unsigned long arg, void *cmdq)
 {
 	int ret = 0;
 	unsigned long flags;
@@ -875,7 +875,7 @@ static int aal_io(DISP_MODULE_ENUM module, int msg, unsigned long arg, void *cmd
 		{
 			disp_aal_wait_hist(60);
 
-			if (disp_aal_copy_hist_to_user((DISP_AAL_HIST *) arg) < 0) {
+			if (disp_aal_copy_hist_to_user((struct DISP_AAL_HIST *) arg) < 0) {
 				AAL_ERR("DISP_IOCTL_AAL_GET_HIST: copy_to_user() failed");
 				return -EFAULT;
 			}
@@ -883,7 +883,7 @@ static int aal_io(DISP_MODULE_ENUM module, int msg, unsigned long arg, void *cmd
 		}
 	case DISP_IOCTL_AAL_INIT_REG:
 		{
-			if (disp_aal_set_init_reg((DISP_AAL_INITREG *) arg, cmdq) < 0) {
+			if (disp_aal_set_init_reg((struct DISP_AAL_INITREG *) arg, cmdq) < 0) {
 				AAL_ERR("DISP_IOCTL_AAL_INIT_REG: failed");
 				return -EFAULT;
 			}
@@ -891,7 +891,7 @@ static int aal_io(DISP_MODULE_ENUM module, int msg, unsigned long arg, void *cmd
 		}
 	case DISP_IOCTL_AAL_SET_PARAM:
 		{
-			if (disp_aal_set_param((DISP_AAL_PARAM *) arg, cmdq) < 0) {
+			if (disp_aal_set_param((struct DISP_AAL_PARAM *) arg, cmdq) < 0) {
 				AAL_ERR("DISP_IOCTL_AAL_SET_PARAM: failed");
 				return -EFAULT;
 			}
@@ -902,7 +902,7 @@ static int aal_io(DISP_MODULE_ENUM module, int msg, unsigned long arg, void *cmd
 	return ret;
 }
 
-DDP_MODULE_DRIVER ddp_driver_aal = {
+struct DDP_MODULE_DRIVER ddp_driver_aal = {
 	.init = aal_init,
 	.deinit = aal_deinit,
 	.config = aal_config,
@@ -945,13 +945,13 @@ static void aal_test_en(const char *cmd)
 static void aal_dump_histogram(void)
 {
 	unsigned long flags;
-	DISP_AAL_HIST *hist;
+	struct DISP_AAL_HIST *hist;
 	int i;
 
-	hist = kmalloc(sizeof(DISP_AAL_HIST), GFP_KERNEL);
+	hist = kmalloc(sizeof(struct DISP_AAL_HIST), GFP_KERNEL);
 	if (hist != NULL) {
 		spin_lock_irqsave(&g_aal_hist_lock, flags);
-		memcpy(hist, &g_aal_hist, sizeof(DISP_AAL_HIST));
+		memcpy(hist, &g_aal_hist, sizeof(struct DISP_AAL_HIST));
 		spin_unlock_irqrestore(&g_aal_hist_lock, flags);
 
 		for (i = 0; i + 8 < AAL_HIST_BIN; i += 8) {

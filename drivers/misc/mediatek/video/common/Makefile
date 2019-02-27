@@ -40,7 +40,6 @@ obj-$(CONFIG_MTK_FB) +=                     \
 			fbconfig_kdebug.o
 endif
 
-obj-y += pwm10/
 obj-y += corr10/
 obj-y += color20/
 
@@ -48,6 +47,7 @@ ifeq (y, $(filter y, $(CONFIG_MACH_MT8167) $(CONFIG_MACH_MT6580)))
 obj-y += aal20/
 else
 obj-y += aal30/
+obj-y += pwm10/
 endif
 
 ifeq (y, $(filter y, $(CONFIG_MACH_MT6799)  $(CONFIG_MACH_MT6757) $(CONFIG_MACH_KIBOPLUS)))
