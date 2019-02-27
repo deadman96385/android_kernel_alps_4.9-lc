@@ -12,6 +12,13 @@
 #
 
 obj-y := cameraisp_dummy.o
+ifeq ($(CONFIG_MACH_MT6735M),y)
+  obj-y += $(subst ",,$(CONFIG_MTK_PLATFORM))/
+endif
+
+ifeq ($(CONFIG_MACH_MT6735),y)
+  obj-y += $(subst ",,$(CONFIG_MTK_PLATFORM))/
+endif
 
 ifeq ($(CONFIG_MACH_MT6758),y)
   obj-y += $(subst ",,$(CONFIG_MTK_PLATFORM))/
