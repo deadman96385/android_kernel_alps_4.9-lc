@@ -63,25 +63,34 @@ typedef enum wk_req_mode {
 struct wd_api {
 	long ready;
 	int (*wd_restart)(enum wd_restart_type type);
-	int (*wd_cpu_hot_plug_on_notify)(int);
-	int (*wd_cpu_hot_plug_off_notify)(int);
-	int (*wd_sw_reset)(int);
-	int (*wd_config)(enum ext_wdt_mode, int timeout_val);
+	int (*wd_cpu_hot_plug_on_notify)(int cpu);
+	int (*wd_cpu_hot_plug_off_notify)(int cpu);
+	int (*wd_sw_reset)(int cpu);
+	int (*wd_config)(enum ext_wdt_mode mode, int timeout_val);
 	int (*wd_disable_ext)(void);
 	int (*wd_disable_local)(void);
 	int (*wd_disable_all)(void);
-	int (*wd_set_mode)(enum ext_wdt_mode);
+	int (*wd_set_mode)(enum ext_wdt_mode mode);
 	int (*wd_aee_confirm_hwreboot)(void);
 	void (*wd_suspend_notify)(void);
 	void (*wd_resume_notify)(void);
 	unsigned int (*wd_get_check_bit)(void);
 	unsigned int (*wd_get_kick_bit)(void);
-	int (*wd_spmwdt_mode_config)(WD_REQ_CTL en, WD_REQ_MODE mode);
-	int (*wd_thermal_mode_config)(WD_REQ_CTL en, WD_REQ_MODE mode);
+	int (*wd_spmwdt_mode_config)(enum wk_req_en en, enum wk_req_mode mode);
+	int (*wd_thermal_mode_config)(enum wk_req_en en,
+		enum wk_req_mode mode);
 	int (*wd_dram_reserved_mode)(bool enabled);
-	int (*wd_thermal_direct_mode_config)(WD_REQ_CTL en, WD_REQ_MODE mode);
-	int (*wd_debug_key_eint_config)(WD_REQ_CTL en, WD_REQ_MODE mode);
-	int (*wd_debug_key_sysrst_config)(WD_REQ_CTL en, WD_REQ_MODE mode);
+	int (*wd_mcu_cache_preserve)(bool enabled);
+	int (*wd_thermal_direct_mode_config)(enum wk_req_en en,
+		enum wk_req_mode mode);
+	int (*wd_debug_key_eint_config)(enum wk_req_en en,
+		enum wk_req_mode mode);
+	int (*wd_debug_key_sysrst_config)(enum wk_req_en en,
+		enum wk_req_mode mode);
+	int (*wd_dfd_count_en)(int value);
+	int (*wd_dfd_thermal1_dis)(int value);
+	int (*wd_dfd_thermal2_dis)(int value);
+	int (*wd_dfd_timeout)(int value);
 };
 
 int wd_api_init(void);
