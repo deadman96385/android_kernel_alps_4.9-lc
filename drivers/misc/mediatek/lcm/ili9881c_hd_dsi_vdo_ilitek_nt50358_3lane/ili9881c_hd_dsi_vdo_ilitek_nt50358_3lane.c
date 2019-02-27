@@ -30,18 +30,7 @@
 #elif defined(BUILD_UBOOT)
 #include <asm/arch/mt_gpio.h>
 #else
-/*#include <mach/mt_pm_ldo.h>*/
-#ifdef CONFIG_MTK_LEGACY
-#include <mach/mt_gpio.h>
-#endif
-#endif
-#ifdef CONFIG_MTK_LEGACY
-#include <cust_gpio_usage.h>
-#endif
-#ifndef CONFIG_FPGA_EARLY_PORTING
-#if defined(CONFIG_MTK_LEGACY)
-#include <cust_i2c.h>
-#endif
+#include "disp_dts_gpio.h"
 #endif
 
 #ifdef BUILD_LK
@@ -55,7 +44,7 @@
 #define LCM_ID (0x98)
 
 static const unsigned int BL_MIN_LEVEL = 20;
-static LCM_UTIL_FUNCS lcm_util;
+static struct LCM_UTIL_FUNCS lcm_util;
 
 #define SET_RESET_PIN(v)	(lcm_util.set_reset_pin((v)))
 #define MDELAY(n)		(lcm_util.mdelay(n))
@@ -76,6 +65,22 @@ static LCM_UTIL_FUNCS lcm_util;
 #define read_reg_v2(cmd, buffer, buffer_size) \
 		lcm_util.dsi_dcs_read_lcm_reg_v2(cmd, buffer, buffer_size)
 
+#ifndef BUILD_LK
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/fs.h>
+#include <linux/slab.h>
+#include <linux/init.h>
+#include <linux/list.h>
+#include <linux/i2c.h>
+#include <linux/irq.h>
+/* #include <linux/jiffies.h> */
+/* #include <linux/delay.h> */
+#include <linux/uaccess.h>
+#include <linux/interrupt.h>
+#include <linux/io.h>
+#include <linux/platform_device.h>
+#endif
 #define set_gpio_lcd_enp(cmd) \
 		lcm_util.set_gpio_lcd_enp_bias(cmd)
 
@@ -101,7 +106,7 @@ static const unsigned char LCD_MODULE_ID = 0x01;
 #define REGFLAG_RESET_LOW	0xFFFE
 #define REGFLAG_RESET_HIGH	0xFFFF
 
-static LCM_DSI_MODE_SWITCH_CMD lcm_switch_mode_cmd;
+static struct LCM_DSI_MODE_SWITCH_CMD lcm_switch_mode_cmd;
 
 #ifndef TRUE
 #define TRUE 1
@@ -380,15 +385,15 @@ static void push_table(void *cmdq, struct LCM_setting_table *table,
 }
 
 
-static void lcm_set_util_funcs(const LCM_UTIL_FUNCS *util)
+static void lcm_set_util_funcs(const struct LCM_UTIL_FUNCS *util)
 {
-	memcpy(&lcm_util, util, sizeof(LCM_UTIL_FUNCS));
+	memcpy(&lcm_util, util, sizeof(struct LCM_UTIL_FUNCS));
 }
 
 
-static void lcm_get_params(LCM_PARAMS *params)
+static void lcm_get_params(struct LCM_PARAMS *params)
 {
-	memset(params, 0, sizeof(LCM_PARAMS));
+	memset(params, 0, sizeof(struct LCM_PARAMS));
 
 	params->type = LCM_TYPE_DSI;
 	params->width = FRAME_WIDTH;
@@ -685,7 +690,7 @@ static void *lcm_switch_mode(int mode)
 }
 
 
-LCM_DRIVER ili9881c_hd_dsi_vdo_ilitek_nt50358_3lane_lcm_drv = {
+struct LCM_DRIVER ili9881c_hd_dsi_vdo_ilitek_nt50358_3lane_lcm_drv = {
 	.name = "ili9881c_hd_dsi_vdo_ilitek_nt50358_3lane_drv",
 	.set_util_funcs = lcm_set_util_funcs,
 	.get_params = lcm_get_params,
