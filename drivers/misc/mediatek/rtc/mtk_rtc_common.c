@@ -40,7 +40,6 @@
 #endif
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
-#include <linux/pm.h>
 #include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/module.h>
@@ -60,18 +59,18 @@
 /* #include <mach/mt6577_reg_base.h> */
 #include <mtk_rtc.h>
 #include <mtk_rtc_hal_common.h>
-#include <mtk_rtc_hal.h>
+#include <mach/mtk_rtc_hal.h>
 /* #include <mach/pmic_mt6320_sw.h> */
 #include <upmu_common.h>
 /* #include <mach/upmu_hw.h> */
-#include <mach/mtk_pmic_wrap.h>
-#include <mtk_boot.h>
-#include <mt-plat/mtk_boot_common.h>
-/* #include <linux/printk.h> */
-#include <mtk_reboot.h>
-#ifdef CONFIG_MTK_CHARGER
-#include <mt-plat/mtk_charger.h>
+#include <mt_pmic_wrap.h>
+#if defined CONFIG_MTK_KERNEL_POWER_OFF_CHARGING
+#include <mt_boot.h>
+#include <mt-plat/mt_boot_common.h>
 #endif
+/* #include <linux/printk.h> */
+#include <linux/reboot.h>
+#include <mt-plat/charging.h>
 
 #define RTC_NAME	"mt-rtc"
 #define RTC_RELPWR_WHEN_XRST	1	/* BBPU = 0 when xreset_rstb goes low */
@@ -163,16 +162,16 @@
 #define rtc_xinfo(fmt, args...)		\
 	pr_notice(fmt, ##args)
 
+#define rtc_xerror(fmt, args...)	\
+	pr_err(fmt, ##args)
+
+#define rtc_xfatal(fmt, args...)	\
+	pr_emerg(fmt, ##args)
+
 static struct rtc_device *rtc;
 static DEFINE_SPINLOCK(rtc_lock);
 
 static void rtc_save_pwron_time(bool enable, struct rtc_time *tm, bool logo);
-
-void __attribute__((weak)) arch_reset(char mode, const char *cmd)
-{
-	pr_info("arch_reset is not ready\n");
-}
-
 
 static int rtc_show_time;
 static int rtc_show_alarm = 1;
@@ -216,16 +215,13 @@ int set_rtc_spare_fg_value(int val)
 	/* RTC_AL_HOU bit8~14 */
 	unsigned long flags;
 
-#ifdef CONFIG_MTK_GAUGE_VERSION
-#if (CONFIG_MTK_GAUGE_VERSION != 30)
 	if (val > 100)
 		return 1;
-#endif
-#endif
 
 	spin_lock_irqsave(&rtc_lock, flags);
 	hal_rtc_set_spare_register(RTC_FGSOC, val);
 	spin_unlock_irqrestore(&rtc_lock, flags);
+	rtc_xinfo("set_rtc_spare_fg_value, %d\n", val);
 
 	return 0;
 }
@@ -247,10 +243,10 @@ bool crystal_exist_status(void)
 EXPORT_SYMBOL(crystal_exist_status);
 
 /*
- * Only for GPS to check the status.
- * Others do not use this API
- * This low power detected API is read clear.
- */
+* Only for GPS to check the status.
+* Others do not use this API
+* This low power detected API is read clear.
+*/
 bool rtc_low_power_detected(void)
 {
 	unsigned long flags;
@@ -357,7 +353,7 @@ void rtc_mark_recovery(void)
 	rtc_xinfo("rtc_mark_recovery\n");
 	spin_lock_irqsave(&rtc_lock, flags);
 	hal_rtc_set_spare_register(RTC_FAC_RESET, 0x1);
-	/* Clear alarm setting when doing factory recovery. */
+	/* Clear alarm setting when doing factory reset. */
 	defaulttm.tm_year = RTC_DEFAULT_YEA - RTC_MIN_YEAR;
 	defaulttm.tm_mon = RTC_DEFAULT_MTH;
 	defaulttm.tm_mday = RTC_DEFAULT_DOM;
@@ -370,6 +366,7 @@ void rtc_mark_recovery(void)
 	spin_unlock_irqrestore(&rtc_lock, flags);
 }
 
+#if defined(CONFIG_MTK_KERNEL_POWER_OFF_CHARGING)
 void rtc_mark_kpoc(void)
 {
 	unsigned long flags;
@@ -378,7 +375,7 @@ void rtc_mark_kpoc(void)
 	hal_rtc_set_spare_register(RTC_KPOC, 0x1);
 	spin_unlock_irqrestore(&rtc_lock, flags);
 }
-
+#endif
 void rtc_mark_fast(void)
 {
 	unsigned long flags;
@@ -404,19 +401,9 @@ u16 rtc_rdwr_uart_bits(u16 *val)
 void rtc_bbpu_power_down(void)
 {
 	unsigned long flags;
-	bool charger_status = false;
-#ifdef CONFIG_MTK_CHARGER
-	unsigned char exist;
 
-	mtk_chr_is_charger_exist(&exist);
-	if (exist == 1)
-		charger_status = true;
-	else
-		charger_status = false;
-	rtc_xinfo("charger_status = %d\n", charger_status);
-#endif
 	spin_lock_irqsave(&rtc_lock, flags);
-	hal_rtc_bbpu_pwdn(charger_status);
+	hal_rtc_bbpu_pwdn();
 	spin_unlock_irqrestore(&rtc_lock, flags);
 }
 
@@ -424,13 +411,9 @@ void mt_power_off(void)
 {
 #if !defined(CONFIG_POWER_EXT)
 	int count = 0;
-#ifdef CONFIG_MTK_CHARGER
-	unsigned char exist;
 #endif
-#endif
-
 	rtc_xinfo("mt_power_off\n");
-	dump_stack();
+
 	/* pull PWRBB low */
 	rtc_bbpu_power_down();
 
@@ -440,14 +423,10 @@ void mt_power_off(void)
 		rtc_xinfo("EVB without charger\n");
 #else
 		/* Phone */
-		rtc_xinfo("Phone with charger\n");
 		mdelay(100);
-		rtc_xinfo("arch_reset\n");
-#ifdef CONFIG_MTK_CHARGER
-		mtk_chr_is_charger_exist(&exist);
-		if (exist == 1 || count > 10)
-			arch_reset(0, "charger");
-#endif
+		rtc_xinfo("Phone with charger\n");
+		if (pmic_chrdet_status() == KAL_TRUE || count > 10)
+			machine_restart("charger");
 		count++;
 #endif
 	}
@@ -469,8 +448,7 @@ void rtc_read_pwron_alarm(struct rtc_wkalrm *alm)
 	if (rtc_show_alarm) {
 		rtc_xinfo("power-on = %04d/%02d/%02d %02d:%02d:%02d (%d)(%d)\n",
 			  tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-			  tm->tm_hour, tm->tm_min, tm->tm_sec, alm->enabled,
-			  alm->pending);
+			  tm->tm_hour, tm->tm_min, tm->tm_sec, alm->enabled, alm->pending);
 	}
 }
 
@@ -480,14 +458,13 @@ static void rtc_handler(void)
 	bool pwron_alm = false, isLowPowerIrq = false, pwron_alarm = false;
 	struct rtc_time nowtm;
 	struct rtc_time tm;
-	unsigned long flags;
 
 	rtc_xinfo("rtc_tasklet_handler start\n");
 
-	spin_lock_irqsave(&rtc_lock, flags);
+	spin_lock(&rtc_lock);
 	isLowPowerIrq = hal_rtc_is_lp_irq();
 	if (isLowPowerIrq) {
-		spin_unlock_irqrestore(&rtc_lock, flags);
+		spin_unlock(&rtc_lock);
 		return;
 	}
 #if RTC_RELPWR_WHEN_XRST
@@ -501,14 +478,12 @@ static void rtc_handler(void)
 		unsigned long now_time, time;
 
 		now_time =
-		    mktime(nowtm.tm_year, nowtm.tm_mon, nowtm.tm_mday,
-			   nowtm.tm_hour, nowtm.tm_min, nowtm.tm_sec);
-		time =
-		    mktime(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour,
-			   tm.tm_min, tm.tm_sec);
+		    mktime(nowtm.tm_year, nowtm.tm_mon, nowtm.tm_mday, nowtm.tm_hour, nowtm.tm_min,
+			   nowtm.tm_sec);
+		time = mktime(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
-		/* power on */
-		if (now_time >= time - 1 && now_time <= time + 4) {
+		if (now_time >= time - 1 && now_time <= time + 4) {	/* power on */
+#if defined(CONFIG_MTK_KERNEL_POWER_OFF_CHARGING)
 			if (get_boot_mode() == KERNEL_POWER_OFF_CHARGING_BOOT
 			    || get_boot_mode() == LOW_POWER_OFF_CHARGING_BOOT) {
 				do {
@@ -521,21 +496,22 @@ static void rtc_handler(void)
 					hal_rtc_is_pwron_alarm(&nowtm, &tm);
 					nowtm.tm_year += RTC_MIN_YEAR;
 					tm.tm_year += RTC_MIN_YEAR;
-					now_time =
-					    mktime(nowtm.tm_year, nowtm.tm_mon,
-						   nowtm.tm_mday, nowtm.tm_hour,
-						   nowtm.tm_min, nowtm.tm_sec);
-					time =
-					    mktime(tm.tm_year, tm.tm_mon,
-						   tm.tm_mday, tm.tm_hour,
-						   tm.tm_min, tm.tm_sec);
+					now_time = mktime(nowtm.tm_year, nowtm.tm_mon, nowtm.tm_mday,
+						nowtm.tm_hour, nowtm.tm_min, nowtm.tm_sec);
+					time = mktime(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour,
+						tm.tm_min, tm.tm_sec);
 				} while (time <= now_time);
-				spin_unlock_irqrestore(&rtc_lock, flags);
-				arch_reset(0, "kpoc");
+				spin_unlock(&rtc_lock);
+				machine_restart("kpoc");
+				return;
 			} else {
 				hal_rtc_save_pwron_alarm();
 				pwron_alm = true;
 			}
+#else
+			hal_rtc_save_pwron_alarm();
+			pwron_alm = true;
+#endif
 		} else if (now_time < time) {	/* set power-on alarm */
 			time -= 1;
 			rtc_time_to_tm(time, &tm);
@@ -544,7 +520,7 @@ static void rtc_handler(void)
 			hal_rtc_set_alarm(&tm);
 		}
 	}
-	spin_unlock_irqrestore(&rtc_lock, flags);
+	spin_unlock(&rtc_lock);
 
 	if (rtc != NULL)
 		rtc_update_irq(rtc, 1, RTC_IRQF | RTC_AF);
@@ -590,8 +566,8 @@ static void rtc_reset_to_deftime(struct rtc_time *tm)
 	hal_rtc_set_alarm(&defaulttm);
 	spin_unlock_irqrestore(&rtc_lock, flags);
 
-	pr_info("reset to default date %04d/%02d/%02d\n",
-	       RTC_DEFAULT_YEA, RTC_DEFAULT_MTH, RTC_DEFAULT_DOM);
+	rtc_xerror("reset to default date %04d/%02d/%02d\n",
+		   RTC_DEFAULT_YEA, RTC_DEFAULT_MTH, RTC_DEFAULT_DOM);
 }
 #endif
 
@@ -713,8 +689,29 @@ static int rtc_ops_set_alarm(struct device *dev, struct rtc_wkalrm *alm)
 	return 0;
 }
 
-static int rtc_ops_ioctl(struct device *dev, unsigned int cmd,
-			 unsigned long arg)
+void rtc_pwm_enable_check(void)
+{
+#ifdef VRTC_PWM_ENABLE
+	U64 time;
+
+	rtc_xinfo("rtc_pwm_enable_check()\n");
+
+	time = sched_clock();
+	do_div(time, 1000000000);
+
+
+	if (time > RTC_PWM_ENABLE_POLLING_TIMER) {
+		hal_rtc_pwm_enable();
+	} else {
+		rtc_xinfo("time=%lld, less than %d, don't enable rtc pwm\n", time,
+			  RTC_PWM_ENABLE_POLLING_TIMER);
+	}
+
+#endif
+}
+
+
+static int rtc_ops_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
 {
 	/* dump_stack(); */
 	rtc_xinfo("rtc_ops_ioctl cmd=%d\n", cmd);
@@ -737,7 +734,7 @@ static int rtc_ops_ioctl(struct device *dev, unsigned int cmd,
 	return -ENOIOCTLCMD;
 }
 
-static const struct rtc_class_ops rtc_ops = {
+static struct rtc_class_ops rtc_ops = {
 	.read_time = rtc_ops_read_time,
 	.set_time = rtc_ops_set_time,
 	.read_alarm = rtc_ops_read_alarm,
@@ -752,20 +749,19 @@ static int rtc_pdrv_probe(struct platform_device *pdev)
 	/* only enable LPD interrupt in engineering build */
 	spin_lock_irqsave(&rtc_lock, flags);
 	hal_rtc_set_lp_irq();
-	/* lpsd */
-	rtc_lpsd_restore_al_mask();
 	spin_unlock_irqrestore(&rtc_lock, flags);
 
 	device_init_wakeup(&pdev->dev, 1);
 	/* register rtc device (/dev/rtc0) */
 	rtc = rtc_device_register(RTC_NAME, &pdev->dev, &rtc_ops, THIS_MODULE);
 	if (IS_ERR(rtc)) {
-		pr_err("register rtc device failed (%ld)\n", PTR_ERR(rtc));
+		rtc_xerror("register rtc device failed (%ld)\n", PTR_ERR(rtc));
 		return PTR_ERR(rtc);
 	}
-
-	pmic_register_interrupt_callback(INT_RTC, rtc_irq_handler);
-	pmic_enable_interrupt(INT_RTC, 1, "RTC");
+#if defined(PMIC_REGISTER_INTERRUPT_ENABLE) && !defined(CONFIG_FPGA_EARLY_PORTING)
+	pmic_register_interrupt_callback(RTC_INTERRUPT_NUM, rtc_irq_handler);
+	pmic_enable_interrupt(RTC_INTERRUPT_NUM, 1, "RTC");
+#endif
 
 	return 0;
 }
@@ -798,13 +794,13 @@ static int __init rtc_device_init(void)
 
 	r = platform_device_register(&rtc_pdev);
 	if (r) {
-		pr_err("register device failed (%d)\n", r);
+		rtc_xerror("register device failed (%d)\n", r);
 		return r;
 	}
 
 	r = platform_driver_register(&rtc_pdrv);
 	if (r) {
-		pr_err("register driver failed (%d)\n", r);
+		rtc_xerror("register driver failed (%d)\n", r);
 		platform_device_unregister(&rtc_pdev);
 		return r;
 	}
@@ -815,6 +811,34 @@ static int __init rtc_device_init(void)
 
 	return 0;
 }
+
+/*static int __init rtc_mod_init(void)
+{
+	int r;
+
+	rtc_xinfo("rtc_mod_init");
+
+	r = platform_device_register(&rtc_pdev);
+	if (r) {
+		rtc_xerror("register device failed (%d)\n", r);
+		return r;
+	}
+
+	r = platform_driver_register(&rtc_pdrv);
+	if (r) {
+		rtc_xerror("register driver failed (%d)\n", r);
+		platform_device_unregister(&rtc_pdev);
+		return r;
+	}
+
+	return 0;
+}*/
+
+/* should never be called */
+/*static void __exit rtc_mod_exit(void)
+{
+}*/
+
 
 static int __init rtc_late_init(void)
 {
@@ -837,23 +861,15 @@ static int __init rtc_late_init(void)
 	return 0;
 }
 
-static int __init rtc_arch_init(void)
-{
-	pm_power_off = mt_power_off;
-
-	return 0;
-}
-
 /* module_init(rtc_mod_init); */
 /* module_exit(rtc_mod_exit); */
 
 late_initcall(rtc_late_init);
 device_initcall(rtc_device_init);
-arch_initcall(rtc_arch_init);
 
 module_param(rtc_show_time, int, 0644);
 module_param(rtc_show_alarm, int, 0644);
 
 MODULE_LICENSE("GPL");
 
-#endif				/*#if defined(CONFIG_MTK_RTC) */
+#endif /*#if defined(CONFIG_MTK_RTC)*/
