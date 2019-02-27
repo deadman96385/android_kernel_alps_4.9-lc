@@ -398,14 +398,18 @@ static int mt_irq_set_type(struct irq_data *data, unsigned int flow_type)
 		mt_irq_set_sens(irq, MT_EDGE_SENSITIVE);
 		mt_irq_set_polarity(irq,
 				    (flow_type & IRQF_TRIGGER_FALLING) ? 0 : 1);
-		desc = irq_to_desc(irq);
-		desc->handle_irq = handle_edge_irq;
+		if (irq > 31) {
+			desc = irq_to_desc(irq);
+			desc->handle_irq = handle_edge_irq;
+		}
 	} else if (flow_type & (IRQF_TRIGGER_HIGH | IRQF_TRIGGER_LOW)) {
 		mt_irq_set_sens(irq, MT_LEVEL_SENSITIVE);
 		mt_irq_set_polarity(irq,
 				    (flow_type & IRQF_TRIGGER_LOW) ? 0 : 1);
-		desc = irq_to_desc(irq);
-		desc->handle_irq = handle_edge_irq;
+		if (irq > 31) {
+			desc = irq_to_desc(irq);
+			desc->handle_irq = handle_level_irq;
+		}
 	}
 
 	return 0;
