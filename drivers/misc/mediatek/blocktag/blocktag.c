@@ -90,7 +90,6 @@ static struct mtk_blocktag *mtk_btag_find_locked(const char *name)
 /* pid logger: page loger*/
 unsigned long long mtk_btag_system_dram_size;
 struct page_pid_logger *mtk_btag_pagelogger;
-spinlock_t mtk_btag_pagelogger_lock;
 
 static size_t mtk_btag_seq_pidlog_usedmem(char **buff, unsigned long *size,
 	struct seq_file *seq)
@@ -166,23 +165,46 @@ void mtk_btag_pidlog_map_sg(struct request_queue *q, struct bio *bio,
 {
 	struct page_pid_logger *ppl, tmp;
 	unsigned long page_offset;
-	unsigned long flags;
 
 	if (!mtk_btag_pagelogger || !bio || !bvec)
 		return;
 
 	page_offset = (unsigned long)(__page_to_pfn(bvec->bv_page))
-		- PHYS_PFN_OFFSET;
-	spin_lock_irqsave(&mtk_btag_pagelogger_lock, flags);
+		- (memblock_start_of_DRAM() >> PAGE_SHIFT);
 	ppl = ((struct page_pid_logger *)mtk_btag_pagelogger) + page_offset;
-	tmp.pid1 = ppl->pid1;
-	tmp.pid2 = ppl->pid2;
-	spin_unlock_irqrestore(&mtk_btag_pagelogger_lock, flags);
 
-	mtk_btag_pidlog_add(q, bio, tmp.pid1, bvec->bv_len);
-	mtk_btag_pidlog_add(q, bio, tmp.pid2, bvec->bv_len);
+	tmp.pid = ppl->pid;
+	ppl->pid = 0xFFFF;
+
+	mtk_btag_pidlog_add(q, bio, tmp.pid, bvec->bv_len);
 }
 EXPORT_SYMBOL_GPL(mtk_btag_pidlog_map_sg);
+
+static void _mtk_btag_pidlog_set_pid(struct page *p, int mode)
+{
+	struct page_pid_logger *ppl;
+	unsigned long page_index;
+
+	page_index = (unsigned long)(__page_to_pfn(p))
+			- (memblock_start_of_DRAM() >> PAGE_SHIFT);
+	ppl = ((struct page_pid_logger *)mtk_btag_pagelogger) + page_index;
+
+	/* we do lockless operation here to favor performance */
+
+	if (page_index < (mtk_btag_system_dram_size >> PAGE_SHIFT)) {
+		if (mode == PIDLOG_MODE_BLK_SUBMIT_BIO) {
+			/*
+			 * do not overwrite the real owner set by
+			 * mm or file system layer
+			 */
+			if (ppl->pid == 0xFFFF)
+				ppl->pid = current->pid;
+		} else {
+			/* the latest owner will be counted */
+			ppl->pid = current->pid;
+		}
+	}
+}
 
 /* pidlog: hook function for submit_bio() */
 void mtk_btag_pidlog_submit_bio(struct bio *bio)
@@ -194,54 +216,23 @@ void mtk_btag_pidlog_submit_bio(struct bio *bio)
 		return;
 
 	bio_for_each_segment(bvec, bio, iter) {
-		struct page_pid_logger *ppl;
-		unsigned long flags;
-
-		if (bvec.bv_page) {
-			unsigned long page_index;
-
-			page_index =
-		(unsigned long)(__page_to_pfn(bvec.bv_page)) - PHYS_PFN_OFFSET;
-			ppl =
-		((struct page_pid_logger *)mtk_btag_pagelogger) + page_index;
-			spin_lock_irqsave(&mtk_btag_pagelogger_lock, flags);
-			if (page_index
-			< (mtk_btag_system_dram_size >> PAGE_SHIFT)) {
-				if (ppl->pid1 == 0XFFFF && ppl->pid2
-				!= current->pid)
-					ppl->pid1 = current->pid;
-				else if (ppl->pid1 != current->pid)
-					ppl->pid2 = current->pid;
-			}
-			spin_unlock_irqrestore(&mtk_btag_pagelogger_lock,
-				flags);
+		if (bvec.bv_page ) {
+			_mtk_btag_pidlog_set_pid(bvec.bv_page,
+				PIDLOG_MODE_BLK_SUBMIT_BIO);
 		}
 	}
 }
 EXPORT_SYMBOL_GPL(mtk_btag_pidlog_submit_bio);
 
-/* pidlog: hook function for filesystem's write_begin() */
-void mtk_btag_pidlog_write_begin(struct page *p)
+void mtk_btag_pidlog_set_pid(struct page *p)
 {
-	struct page_pid_logger *ppl;
-	unsigned long flags;
-	unsigned long page_index;
-
 	if (!mtk_btag_pagelogger || !p)
 		return;
 
-	page_index = (unsigned long)(__page_to_pfn(p)) - PHYS_PFN_OFFSET;
-	ppl = ((struct page_pid_logger *)mtk_btag_pagelogger) + page_index;
-	spin_lock_irqsave(&mtk_btag_pagelogger_lock, flags);
-	if (page_index < (mtk_btag_system_dram_size >> PAGE_SHIFT)) {
-		if (ppl->pid1 == 0XFFFF)
-			ppl->pid1 = current->pid;
-		else if (ppl->pid1 != current->pid)
-			ppl->pid2 = current->pid;
-	}
-	spin_unlock_irqrestore(&mtk_btag_pagelogger_lock, flags);
+	_mtk_btag_pidlog_set_pid(p, PIDLOG_MODE_MM_FS);
 }
-EXPORT_SYMBOL_GPL(mtk_btag_pidlog_write_begin);
+EXPORT_SYMBOL_GPL(mtk_btag_pidlog_set_pid);
+
 
 /* evaluate vmstat trace from global_page_state() */
 void mtk_btag_vmstat_eval(struct mtk_btag_vmstat *vm)
@@ -907,8 +898,6 @@ static void mtk_btag_pidlogger_init(void)
 
 	if (mtk_btag_pagelogger)
 		goto init;
-
-	spin_lock_init(&mtk_btag_pagelogger_lock);
 
 #ifdef CONFIG_MTK_USE_RESERVED_EXT_MEM
 	mtk_btag_pagelogger = extmem_malloc_page_align(size);
