@@ -38,6 +38,10 @@
 #include <mt-plat/mtk_usb2jtag.h>
 #endif
 
+#ifndef CONFIG_MTK_CLKMGR
+struct clk *musb_clk;
+#endif
+
 static u32 cable_mode = CABLE_MODE_NORMAL;
 void __iomem *usb_phy_base;
 
@@ -1658,6 +1662,22 @@ static int mt_usb_probe(struct platform_device *pdev)
 	DBG(0, "keep musb->power & mtk_usb_power in the samae value\n");
 	mtk_usb_power = false;
 
+#ifndef CONFIG_MTK_CLKMGR
+	musb_clk = devm_clk_get(&pdev->dev, "usb0");
+	if (IS_ERR(musb_clk)) {
+		DBG(0, KERN_WARNING "cannot get musb clock\n");
+		return PTR_ERR(musb_clk);
+	}
+	DBG(0, KERN_WARNING "get musb clock ok, prepare it\n");
+	retval = clk_prepare(musb_clk);
+	if (retval == 0) {
+		DBG(0, KERN_WARNING "prepare done\n");
+	} else {
+		DBG(0, KERN_WARNING "prepare fail\n");
+		return retval;
+	}
+#endif
+
 #ifndef FPGA_PLATFORM
 #ifdef CONFIG_DEBUG_FS
 	if (usb20_phy_init_debugfs()) {
@@ -1699,6 +1719,10 @@ static int mt_usb_remove(struct platform_device *pdev)
 
 	platform_device_unregister(glue->musb);
 	kfree(glue);
+
+#ifndef CONFIG_MTK_CLKMGR
+	clk_unprepare(musb_clk);
+#endif
 
 	return 0;
 }

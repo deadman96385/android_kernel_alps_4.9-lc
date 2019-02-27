@@ -104,4 +104,8 @@ extern void fan5405_set_otg_en(u32 val);
 extern u32 fan5405_config_interface(u8 RegNum, u8 val, u8 MASK, u8 SHIFT);
 #endif
 
+#ifndef CONFIG_MTK_CLKMGR
+extern struct clk *musb_clk;
+#endif
+
 #endif

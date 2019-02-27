@@ -204,39 +204,60 @@ static DEFINE_SPINLOCK(musb_reg_clock_lock);
 static void enable_phy_clock(bool enable)
 {
 	/* USB phy 48M clock , UNIVPLL_CON0[26] */
-	if (enable) {
-		enable_clock(MT_CG_UNIV_48M, "PERI_USB");
-		enable_clock(MT_CG_USB_48M, "PERI_USB");
-	} else {
-		disable_clock(MT_CG_UNIV_48M, "PERI_USB");
-		disable_clock(MT_CG_USB_48M, "PERI_USB");
-	}
+	/* USB phy 48M clock , UNIVPLL_CON0[26] */
+	/* if (enable) { */
+	/* writel(readl((void __iomem *)UNIVPLL_CON0)|(0x04000000), */
+	/* (void __iomem *)UNIVPLL_CON0); */
+	/* } else { */
+	/* writel(readl((void __iomem *)UNIVPLL_CON0)&~(0x04000000), */
+	/* (void __iomem *)UNIVPLL_CON0); */
+	/* } */
 }
 
 bool usb_enable_clock(bool enable)
 {
 	static int count;
+	static int real_enable = 0, real_disable;
+	static int virt_enable = 0, virt_disable;
 	bool res = true;
 	unsigned long flags;
+
+	DBG(1, "enable(%d),count(%d),<%d,%d,%d,%d>\n",
+	    enable, count, virt_enable, virt_disable, real_enable, real_disable);
 
 	spin_lock_irqsave(&musb_reg_clock_lock, flags);
 
 	if (enable && count == 0) {
+		real_enable++;
 		enable_phy_clock(true);
-		res = enable_clock(MT_CG_USB_SW_CG, "PERI_USB");
+#ifdef CONFIG_MTK_CLKMGR
+		res = enable_clock(MT_CG_PERI_USB0, "PERI_USB");
+#else
+		res = clk_enable(musb_clk);
+#endif
 	} else if (!enable && count == 1) {
-		res = disable_clock(MT_CG_USB_SW_CG, "PERI_USB");
+		real_disable++;
+#ifdef CONFIG_MTK_CLKMGR
+		res = disable_clock(MT_CG_PERI_USB0, "PERI_USB");
+#else
+		res = 0;
+		clk_disable(musb_clk);
+#endif
 		enable_phy_clock(false);
 	}
 
-	if (enable)
+	if (enable) {
+		virt_enable++;
 		count++;
-	else
-		count = (count == 0) ? 0 : (count-1);
+	} else {
+		virt_disable++;
+		count = (count == 0) ? 0 : (count - 1);
+	}
 
 	spin_unlock_irqrestore(&musb_reg_clock_lock, flags);
 
-	DBG(1, "enable(%d), count(%d) res=%d\n", enable, count, res);
+	DBG(1, "enable(%d),count(%d),res(%d),<%d,%d,%d,%d>\n",
+	    enable, count, res, virt_enable, virt_disable, real_enable, real_disable);
 	return 1;
 }
 
