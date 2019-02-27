@@ -14,12 +14,6 @@
 #ifndef __MT_PWM_PRV_H__
 #define __MT_PWM_PRV_H__
 
-#define INREG32(reg)		__raw_readl((void *)reg)
-#define OUTREG32(reg, val)	mt_reg_sync_writel(val, reg)
-#define SETREG32(reg, val)	OUTREG32(reg, INREG32(reg) | (val))
-#define CLRREG32(reg, val)	OUTREG32(reg, INREG32(reg) & ~(val))
-#define MASKREG32(x, y, z)	OUTREG32(x, (INREG32(x) & ~(y)) | (z))
-
 #ifdef CONFIG_OF
 extern void __iomem *pwm_base;
 /* unsigned int pwm_irqnr; */
@@ -71,4 +65,5 @@ extern void __iomem *pwm_base;
 #define BLOCK_CLK	(66UL * 1000 * 1000)
 #define PWM_26M_CLK	(26UL * 1000 * 1000)
 
+void mt_pwm_platform_init(void);
 #endif
