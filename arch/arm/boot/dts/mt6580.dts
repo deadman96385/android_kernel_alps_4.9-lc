@@ -1039,7 +1039,7 @@
 			reg = <0x13010000 0x10000>;
 		};
 
-		mmsys_config@14000000 {
+		mmsys_config: mmsys_config@14000000 {
 			compatible = "mediatek,mmsys_config";
 			reg = <0x14000000 0x1000>;
 			interrupts = <GIC_SPI 132 IRQ_TYPE_LEVEL_LOW>;
@@ -1221,17 +1221,19 @@
 			interrupts = <0 112 0x8>;
 		};
 
-		SMI_LARB0@0x14016000 {
-			compatible = "mediatek,SMI_LARB0";
+		smi_larb0: SMI_LARB0@0x14016000 {
+			cell-index = <0>;
+			compatible = "mediatek,SMI_LARB0", "mediatek,smi_larb";
 			reg = <0x14016000 0x1000>;
 			interrupts = <0 133 0x8>;
 		};
 
 		SMI_COMMON@0x14017000 {
-			compatible = "mediatek,SMI_COMMON";
-			reg = <0x14017000 0x1000>,/* SMI_COMMON */
-				<0x14016000 0x1000>,/* LARB 0 */
-				<0x15001000 0x1000>;/* LARB 1 */
+			compatible = "mediatek,SMI_COMMON", "mediatek,smi_common";
+			reg = <0x14017000 0x1000>;
+			nr_larbs = <2>;
+			larbs = <&smi_larb0>, <&smi_larb1>;
+			mmsys_config = <&mmsys_config>;
 		};
 
 		MIPI_TX_CONFIG@0x14018000 {
@@ -1297,8 +1299,9 @@
 			interrupts = <0 137 0x8>;
 		};
 
-		SMI_LARB1@0x15001000 {
-			compatible = "mediatek,SMI_LARB1";
+		smi_larb1: SMI_LARB1@0x15001000 {
+			cell-index = <1>;
+			compatible = "mediatek,SMI_LARB1", "mediatek,smi_larb";
 			reg = <0x15001000 0x1000>;
 			interrupts = <0 136 0x8>;
 		};
