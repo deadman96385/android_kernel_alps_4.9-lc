@@ -89,7 +89,7 @@ static unsigned int g_initialize;
 #define TVDPLL_DEF_FREQ         1782000
 
 /* keep track the status of each PLL */
-static fh_pll_t g_fh_pll[FH_PLL_NUM] = {
+static struct fh_pll_t g_fh_pll[FH_PLL_NUM] = {
 	{FH_FH_ENABLE_SSC, FH_PLL_ENABLE, 0, ARMPLL_DEF_FREQ, 0},
 	{FH_FH_ENABLE_SSC, FH_PLL_ENABLE, 0, MAINPLL_DEF_FREQ, 0},
 	{FH_FH_ENABLE_SSC, FH_PLL_ENABLE, 0, MEMPLL_DEF_FREQ, 0},
@@ -388,7 +388,7 @@ static int __freqhopping_ctrl(struct freqhopping_ioctl *fh_ctl, bool enable)
 	const struct freqhopping_ssc *pSSC_setting = NULL;
 	unsigned int ssc_setting_id = 0;
 	int retVal = 1;
-	fh_pll_t *pfh_pll = NULL;
+	struct fh_pll_t *pfh_pll = NULL;
 
 	/* FH_MSG("%s for pll %d", __func__, fh_ctl->pll_id); */
 
@@ -737,7 +737,7 @@ static int mt_fh_hal_dfs_armpll(unsigned int pll, unsigned int dds)
 
 	return 0;
 }
-
+#if 0
 static int mt_fh_hal_dfs_mmpll(unsigned int target_dds)
 {				/* mmpll dfs mode */
 	unsigned long flags = 0;
@@ -805,7 +805,8 @@ static int mt_fh_hal_dfs_mmpll(unsigned int target_dds)
 
 	return 0;
 }
-
+#endif
+#if 0
 static int mt_fh_hal_dfs_vencpll(unsigned int target_freq)
 {
 	unsigned long flags = 0;
@@ -872,10 +873,11 @@ static int mt_fh_hal_dfs_vencpll(unsigned int target_freq)
 
 	return 0;
 }
-
+#endif
 /* ************************************************** */
 /* mt_fh_hal_dfs_mempll() */
 /* ************************************************** */
+#if 0
 static int mt_fh_hal_dfs_mempll(unsigned int target_dds)
 {
 	unsigned long flags = 0;
@@ -939,7 +941,8 @@ static int mt_fh_hal_dfs_mempll(unsigned int target_dds)
 
 	return 0;
 }
-
+#endif
+#if 0
 static int mt_fh_hal_l2h_dvfs_mempll(void)
 {
 	FH_BUG_ON(1);
@@ -1133,7 +1136,7 @@ static int fh_dumpregs_proc_read(struct seq_file *m, void *v)
 
 	return 0;
 }
-
+#endif
 static void __reg_tbl_init(void)
 {
 #ifdef CONFIG_OF
@@ -1243,7 +1246,7 @@ static int __reg_base_addr_init(void)
 #endif
 
 /* TODO: __init void mt_freqhopping_init(void) */
-static void mt_fh_hal_init(void)
+static int mt_fh_hal_init(void)
 {
 	int i = 0;
 	unsigned long flags = 0;
@@ -1252,7 +1255,7 @@ static void mt_fh_hal_init(void)
 	FH_MSG_DEBUG("EN: %s", __func__);
 
 	if (g_initialize == 1)
-		return;
+		return 0;
 
 #ifdef CONFIG_OF
 
@@ -1283,6 +1286,7 @@ static void mt_fh_hal_init(void)
 	}
 
 	g_initialize = 1;
+	return 0;
 }
 
 static void mt_fh_hal_lock(unsigned long *flags)
@@ -1299,16 +1303,16 @@ static int mt_fh_hal_get_init(void)
 {
 	return g_initialize;
 }
-
+#if 0
 static int mt_fh_hal_is_support_DFS_mode(void)
 {
 	return true;
 }
-
+#endif
 /* TODO: module_init(mt_freqhopping_init); */
 /* TODO: module_exit(cpufreq_exit); */
 
-static int __fh_debug_proc_read(struct seq_file *m, void *v, fh_pll_t *pll)
+static int __fh_debug_proc_read(struct seq_file *m, void *v, struct fh_pll_t *pll)
 {
 	FH_MSG("EN: %s", __func__);
 
@@ -1385,7 +1389,7 @@ static void __ioctl(unsigned int ctlid, void *arg)
 	switch (ctlid) {
 	case FH_IO_PROC_READ:
 		{
-			FH_IO_PROC_READ_T *tmp = (FH_IO_PROC_READ_T *) (arg);
+			struct FH_IO_PROC_READ_T *tmp = (struct FH_IO_PROC_READ_T *) (arg);
 
 			__fh_debug_proc_read(tmp->m, tmp->v, tmp->pll);
 		}
@@ -1408,40 +1412,40 @@ static void __ioctl(unsigned int ctlid, void *arg)
 
 static struct mt_fh_hal_driver g_fh_hal_drv = {
 	.fh_pll = g_fh_pll,
-	.fh_usrdef = mt_ssc_fhpll_userdefined,
-	.mempll = FH_MEM_PLLID,
-	.lvdspll = FH_MAX_PLLID + 1,
-	.mainpll = FH_MAIN_PLLID,
-	.msdcpll = FH_MSDC_PLLID,
-	.mmpll = FH_MM_PLLID,
-	.vencpll = FH_VENC_PLLID,
+	//.fh_usrdef = mt_ssc_fhpll_userdefined,
+	//.mempll = FH_MEM_PLLID,
+	//.lvdspll = FH_MAX_PLLID + 1,
+	//.mainpll = FH_MAIN_PLLID,
+	//.msdcpll = FH_MSDC_PLLID,
+	//.mmpll = FH_MM_PLLID,
+	//.vencpll = FH_VENC_PLLID,
 	.pll_cnt = FH_PLL_NUM,
-	.proc.clk_gen_read = NULL,
-	.proc.clk_gen_write = NULL,
-	.proc.dramc_read = fh_dramc_proc_read,
-	.proc.dramc_write = fh_dramc_proc_write,
-	.proc.dumpregs_read = fh_dumpregs_proc_read,
-	.proc.dvfs_read = fh_dvfs_proc_read,
-	.proc.dvfs_write = fh_dvfs_proc_write,
+	//.proc.clk_gen_read = NULL,
+	//.proc.clk_gen_write = NULL,
+	//.proc.dramc_read = fh_dramc_proc_read,
+	//.proc.dramc_write = fh_dramc_proc_write,
+	//.proc.dumpregs_read = fh_dumpregs_proc_read,
+	//.proc.dvfs_read = fh_dvfs_proc_read,
+	//.proc.dvfs_write = fh_dvfs_proc_write,
 	.mt_fh_hal_init = mt_fh_hal_init,
 	.mt_fh_hal_ctrl = __freqhopping_ctrl,
 	.mt_fh_lock = mt_fh_hal_lock,
 	.mt_fh_unlock = mt_fh_hal_unlock,
 	.mt_fh_get_init = mt_fh_hal_get_init,
-	.mt_fh_popod_restore = mt_fh_hal_popod_restore,
-	.mt_fh_popod_save = mt_fh_hal_popod_save,
-	.mt_l2h_mempll = NULL,
-	.mt_h2l_mempll = NULL,
+	//.mt_fh_popod_restore = mt_fh_hal_popod_restore,
+	//.mt_fh_popod_save = mt_fh_hal_popod_save,
+	//.mt_l2h_mempll = NULL,
+	//.mt_h2l_mempll = NULL,
 	.mt_dfs_armpll = mt_fh_hal_dfs_armpll,
-	.mt_dfs_mmpll = mt_fh_hal_dfs_mmpll,
-	.mt_dfs_vencpll = mt_fh_hal_dfs_vencpll,	/* TODO: should set to NULL */
-	.mt_dfs_mempll = mt_fh_hal_dfs_mempll,
-	.mt_is_support_DFS_mode = mt_fh_hal_is_support_DFS_mode,
-	.mt_l2h_dvfs_mempll = mt_fh_hal_l2h_dvfs_mempll,	/* TODO: should set to NULL */
-	.mt_h2l_dvfs_mempll = mt_fh_hal_h2l_dvfs_mempll,	/* TODO: should set to NULL */
-	.mt_dram_overclock = mt_fh_hal_dram_overclock,
-	.mt_get_dramc = mt_fh_hal_get_dramc,
-	.mt_fh_default_conf = mt_fh_hal_default_conf,
+	//.mt_dfs_mmpll = mt_fh_hal_dfs_mmpll,
+	//.mt_dfs_vencpll = mt_fh_hal_dfs_vencpll,	/* TODO: should set to NULL */
+	//.mt_dfs_mempll = mt_fh_hal_dfs_mempll,
+	//.mt_is_support_DFS_mode = mt_fh_hal_is_support_DFS_mode,
+	//.mt_l2h_dvfs_mempll = mt_fh_hal_l2h_dvfs_mempll,	/* TODO: should set to NULL */
+	//.mt_h2l_dvfs_mempll = mt_fh_hal_h2l_dvfs_mempll,	/* TODO: should set to NULL */
+	//.mt_dram_overclock = mt_fh_hal_dram_overclock,
+	//.mt_get_dramc = mt_fh_hal_get_dramc,
+	.mt_fh_hal_default_conf = mt_fh_hal_default_conf,
 	.ioctl = __ioctl
 };
 

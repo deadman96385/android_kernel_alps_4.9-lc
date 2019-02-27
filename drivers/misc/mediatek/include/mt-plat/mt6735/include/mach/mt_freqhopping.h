@@ -43,8 +43,6 @@
 	} while (0)
 #endif
 
-
-
 enum FH_FH_STATUS {
 	FH_FH_DISABLE = 0,
 	FH_FH_ENABLE_SSC,
@@ -82,13 +80,13 @@ enum FH_PLL_ID {
 
 /* keep track the status of each PLL */
 /* TODO: do we need another "uint mode" for Dynamic FH */
-typedef struct {
+struct fh_pll_t {
 	unsigned int fh_status;
 	unsigned int pll_status;
 	unsigned int setting_id;
 	unsigned int curr_freq;
 	unsigned int user_defined;
-} fh_pll_t;
+};
 
 
 
@@ -108,7 +106,7 @@ struct freqhopping_ioctl {
 };
 
 int freqhopping_config(unsigned int pll_id, unsigned long vco_freq, unsigned int enable);
-void mt_freqhopping_init(void);
+//void mt_freqhopping_init(void);
 void mt_freqhopping_pll_init(void);
 int mt_h2l_mempll(void);
 int mt_l2h_mempll(void);
@@ -126,10 +124,18 @@ int mt_dfs_armpll(unsigned int pll, unsigned int dds);
 int mt_dfs_vencpll(unsigned int target_dds);
 
 int mt_dfs_mempll(unsigned int target_dds);
+struct mt_fh_hal_driver *mt_get_fh_hal_drv(void);
 
 extern int DFS_APDMA_END(void);
 extern int DFS_APDMA_Enable(void);
 extern void DFS_APDMA_dummy_read_preinit(void);
 extern void DFS_APDMA_dummy_read_deinit(void);
+
+#define FH_BUG_ON(x) \
+do {    \
+		if ((x)) \
+			pr_err("BUGON %s:%d %s:%d\n", __func__, __LINE__, current->comm, current->pid); \
+} while (0)
+
 
 #endif				/* !__MT_FREQHOPPING_H__ */
