@@ -448,6 +448,17 @@ int mt_dfs_mempll(unsigned int target_dds)
 	return g_p_fh_hal_drv->mt_dfs_mempll(target_dds);
 }
 EXPORT_SYMBOL(mt_dfs_mempll);
+
+int mt_dfs_vencpll(unsigned int target_dds)
+{
+	if (!g_p_fh_hal_drv) {
+		FH_MSG("[%s]: g_p_fh_hal_drv is uninitialized.", __func__);
+		return 1;
+	}
+	return g_p_fh_hal_drv->mt_dfs_vencpll(target_dds);
+}
+EXPORT_SYMBOL(mt_dfs_vencpll);
+
 #define PROC_FH_(FOLDER) \
 	"/proc/freqhopping/"#FOLDER
 
