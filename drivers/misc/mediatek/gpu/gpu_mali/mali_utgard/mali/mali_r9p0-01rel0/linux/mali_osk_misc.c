@@ -53,9 +53,9 @@ void _mali_osk_abort(void)
 	dump_stack();
 
 	// prevent KE. only print error log, do not assert
-//#if !defined(MTK_SUPPORT)
+#if !defined(MTK_SUPPORT)
 	*(int *)0 = 0;
-//#endif
+#endif
 }
 
 void _mali_osk_break(void)

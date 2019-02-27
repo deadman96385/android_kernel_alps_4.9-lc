@@ -155,6 +155,12 @@ extern int mali_debug_level;
 #define MALI_DEBUG_ASSERT_POINTER(pointer) do  {if( (pointer)== NULL) {MALI_PRINT_ERROR(("NULL pointer " #pointer)); _mali_osk_break();} } while(0)
 #define MALI_DEBUG_ASSERT(condition) do  {if( !(condition)) {MALI_PRINT_ERROR(("ASSERT failed: " #condition )); _mali_osk_break();} } while(0)
 
+#if defined(MTK_SUPPORT)
+#define MALI_DEBUG_PRINT_MTK(condition, args) do  {if( !(condition)) { MALI_PRINT_ERROR(args);} } while(0)
+#define MALI_DEBUG_MTK_POINTER(pointer) do  {if( (pointer)== NULL) {MALI_PRINT_ERROR(("NULL pointer " #pointer));} } while(0)
+#define MALI_DEBUG_MTK(condition) do  {if( !(condition)) {MALI_PRINT_ERROR(("ASSERT failed: " #condition ));} } while(0)
+#endif
+
 #else /* DEBUG */
 
 #define MALI_DEBUG_CODE(code)
@@ -165,6 +171,12 @@ extern int mali_debug_level;
 #define MALI_DEBUG_PRINT_ASSERT(condition,args) do {} while(0)
 #define MALI_DEBUG_ASSERT_POINTER(pointer) do {} while(0)
 #define MALI_DEBUG_ASSERT(condition) do {} while(0)
+
+#if defined(MTK_SUPPORT)
+#define MALI_DEBUG_PRINT_MTK(condition,args) do {} while(0)
+#define MALI_DEBUG_MTK_POINTER(pointer) do {} while(0)
+#define MALI_DEBUG_MTK(condition) do {} while(0)
+#endif
 
 #endif /* DEBUG */
 

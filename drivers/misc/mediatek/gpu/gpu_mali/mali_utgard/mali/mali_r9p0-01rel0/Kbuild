@@ -52,6 +52,8 @@ export MALI_PLATFORM_FILES_ADD_PREFIX = $(addprefix platform/$(MALI_PLATFORM)/,$
 endif
 endif
 
+EXTRA_DEFINES += -DMTK_SUPPORT
+
 mali-y += \
 	linux/mali_osk_atomics.o \
 	linux/mali_osk_irq.o \

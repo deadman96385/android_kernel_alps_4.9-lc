@@ -819,8 +819,15 @@ _mali_osk_errcode_t _mali_ukk_mem_cow(_mali_uk_cow_mem_s *args)
 	target_backend = mali_mem_backend_struct_search(session, args->target_handle);
 
 	if (NULL == target_backend || 0 == target_backend->size) {
+#if !defined(MTK_SUPPORT)
 		MALI_DEBUG_ASSERT_POINTER(target_backend);
 		MALI_DEBUG_ASSERT(0 != target_backend->size);
+#else
+		MALI_DEBUG_MTK_POINTER(target_backend);
+		if (NULL == target_backend)
+			return ret;
+		MALI_DEBUG_MTK(0 != target_backend->size);
+#endif
 		return ret;
 	}
 
@@ -945,12 +952,15 @@ _mali_osk_errcode_t _mali_ukk_mem_cow_modify_range(_mali_uk_cow_modify_range_s *
 	mem_backend = mali_mem_backend_struct_search(session, args->vaddr);
 
 	if (NULL == mem_backend || 0 == mem_backend->size) {
+#if !defined(MTK_SUPPORT)
 		MALI_DEBUG_ASSERT_POINTER(mem_backend);
-#if defined(MTK_SUPPORT)
+		MALI_DEBUG_ASSERT(0 != mem_backend->size);
+#else
+		MALI_DEBUG_MTK_POINTER(mem_backend);
 		if (NULL == mem_backend)
 			return ret;
+		MALI_DEBUG_MTK(0 != mem_backend->size);
 #endif
-		MALI_DEBUG_ASSERT(0 != mem_backend->size);
 		return ret;
 	}
 
