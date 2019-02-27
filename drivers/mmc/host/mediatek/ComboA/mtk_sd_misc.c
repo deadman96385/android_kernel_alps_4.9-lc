@@ -57,7 +57,7 @@
 #define FORCE_NOTHING           (0x0)
 
 static u32 *sg_msdc_multi_buffer;
-#define SG_MSDC_MULTI_BUFFER_SIZE (64 * 2014)
+#define SG_MSDC_MULTI_BUFFER_SIZE (64 * 1024)
 
 static int simple_sd_open(struct inode *inode, struct file *file)
 {
@@ -580,7 +580,7 @@ static int simple_sd_ioctl_get_partition_size(struct msdc_ioctl *msdc_ctl)
 
 	mmc = host_ctl->mmc;
 
-	mmc_put_card(mmc->card);
+	mmc_get_card(mmc->card);
 
 	MMC_IOCTL_PR_DBG("get size of partition=%d\n", msdc_ctl->partition);
 
@@ -619,6 +619,10 @@ static int simple_sd_ioctl_set_driving(struct msdc_ioctl *msdc_ctl)
 {
 	void __iomem *base;
 	struct msdc_host *host;
+
+	/* cannot access ioctl except of Engineer Mode */
+	if (strcmp(current->comm, "em_svr"))
+		return -EINVAL;
 
 	host = mtk_msdc_host[msdc_ctl->host_num];
 	if (host == NULL)
