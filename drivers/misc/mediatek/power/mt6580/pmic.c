@@ -96,8 +96,8 @@
 #if defined(CONFIG_MTK_KERNEL_POWER_OFF_CHARGING)
 #include <mach/mt_gpt.h>
 #endif
-#if defined(CONFIG_MTK_PMIC_WRAP)
-#include <mach/mt_pmic_wrap.h>
+#if defined(CONFIG_MTK_PMIC_WRAP_HAL)
+#include <mach/mtk_pmic_wrap.h>
 #endif
 #include <mach/mt_spm_mtcmos.h>
 #include <mt-plat/mtk_rtc.h>
@@ -158,7 +158,7 @@ unsigned int pmic_read_interface(unsigned int RegNum, unsigned int *val, unsigne
 	unsigned int rdata = 0xFFFF;
 
 	/* mt_read_byte(RegNum, &pmic_reg); */
-#if defined(CONFIG_MTK_PMIC_WRAP)
+#if defined(CONFIG_MTK_PMIC_WRAP_HAL)
 	return_value = pwrap_wacs2(0, (RegNum), 0, &rdata);
 #endif
 	pmic_reg = rdata;
@@ -191,7 +191,7 @@ unsigned int pmic_config_interface(unsigned int RegNum, unsigned int val, unsign
 	mutex_lock(&pmic_access_mutex);
 
 	/* 1. mt_read_byte(RegNum, &pmic_reg); */
-#if defined(CONFIG_MTK_PMIC_WRAP)
+#if defined(CONFIG_MTK_PMIC_WRAP_HAL)
 	return_value = pwrap_wacs2(0, (RegNum), 0, &rdata);
 #endif
 	pmic_reg = rdata;
@@ -206,7 +206,7 @@ unsigned int pmic_config_interface(unsigned int RegNum, unsigned int val, unsign
 	pmic_reg |= (val << SHIFT);
 
 	/* 2. mt_write_byte(RegNum, pmic_reg); */
-#if defined(CONFIG_MTK_PMIC_WRAP)
+#if defined(CONFIG_MTK_PMIC_WRAP_HAL)
 	return_value = pwrap_wacs2(1, (RegNum), pmic_reg, &rdata);
 #endif
 	if (return_value != 0) {
@@ -255,7 +255,7 @@ unsigned int pmic_config_interface_nolock(unsigned int RegNum, unsigned int val,
 	/* pmic wrapper has spinlock protection. pmic do not to do it again */
 
 	/*1. mt_read_byte(RegNum, &pmic_reg); */
-#if defined(CONFIG_MTK_PMIC_WRAP)
+#if defined(CONFIG_MTK_PMIC_WRAP_HAL)
 	return_value = pwrap_wacs2(0, (RegNum), 0, &rdata);
 #endif
 	pmic_reg = rdata;
@@ -269,7 +269,7 @@ unsigned int pmic_config_interface_nolock(unsigned int RegNum, unsigned int val,
 	pmic_reg |= (val << SHIFT);
 
 	/*2. mt_write_byte(RegNum, pmic_reg); */
-#if defined(CONFIG_MTK_PMIC_WRAP)
+#if defined(CONFIG_MTK_PMIC_WRAP_HAL)
 	return_value = pwrap_wacs2(1, (RegNum), pmic_reg, &rdata);
 #endif
 	if (return_value != 0) {
@@ -2747,12 +2747,13 @@ void PMIC_EINT_SETTING(void)
 		g_pmic_irq = irq_of_parse_and_map(node, 0);
 		ret =
 		    request_irq(g_pmic_irq, mt_pmic_eint_irq, IRQF_TRIGGER_NONE, "pmic-eint", NULL);
+		disable_irq_nosync(g_pmic_irq);
 		if (ret > 0)
 			PMICLOG("EINT IRQ LINENNOT AVAILABLE\n");
 		enable_irq_wake(g_pmic_irq);
 	} else
 		PMICLOG("%s can't find compatible node\n", __func__);
-	PMICLOG("[CUST_EINT] CUST_EINT_MT_PMIC_MT6350_NUM=%d\n", g_eint_pmic_num);
+	PMICLOG("[CUST_EINT] CUST_EINT_MT_PMIC_MT6350_NUM=%d, %d\n", g_eint_pmic_num, g_pmic_irq);
 	PMICLOG("[CUST_EINT] CUST_EINT_PMIC_DEBOUNCE_CN=%d\n", g_cust_eint_mt_pmic_debounce_cn);
 	PMICLOG("[CUST_EINT] CUST_EINT_PMIC_TYPE=%d\n", g_cust_eint_mt_pmic_type);
 	PMICLOG("[CUST_EINT] CUST_EINT_PMIC_DEBOUNCE_EN=%d\n", g_cust_eint_mt_pmic_debounce_en);
@@ -2799,7 +2800,6 @@ static int pmic_thread_kthread(void *x)
 	struct sched_param param = {.sched_priority = 98 };
 
 	sched_setscheduler(current, SCHED_FIFO, &param);
-	set_current_state(TASK_INTERRUPTIBLE);
 
 	PMICLOG("[PMIC_INT] enter\n");
 
