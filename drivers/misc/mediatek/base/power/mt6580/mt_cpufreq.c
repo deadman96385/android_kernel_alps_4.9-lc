@@ -54,8 +54,8 @@
 
 /* project includes */
 #include <asm/io.h>
-/* FIX ME #include "mach/mt_thermal.h" */
-/* FIX ME #include <mt-plat/mt_hotplug_strategy.h> */
+#include "mach/mt_thermal.h"
+#include <mt-plat/mt_hotplug_strategy.h>
 #include "mach/mt_clkmgr.h"
 #include "mach/mt_freqhopping.h"
 #include "mt_ptp.h"
@@ -1712,7 +1712,7 @@ void mt_cpufreq_thermal_protect(unsigned int limited_power)
 			     p->limited_max_freq, p->limited_max_ncpu);
 
 		cpufreq_unlock(flag);	/* <- unlock */
-		/* FIX ME hps_set_cpu_num_limit(LIMIT_THERMAL, p->limited_max_ncpu, 0); */
+		hps_set_cpu_num_limit(LIMIT_THERMAL, p->limited_max_ncpu, 0);
 
 		/* correct opp idx will be calcualted in _thermal_limited_verify() */
 		_mt_cpufreq_set(MT_CPU_DVFS_LITTLE, -1);
