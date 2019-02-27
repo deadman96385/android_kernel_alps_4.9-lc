@@ -419,6 +419,12 @@ void mtk_wdt_cpu_callback(struct task_struct *wk_tsk, unsigned long action, int 
 }
 EXPORT_SYMBOL(mtk_wdt_cpu_callback);
 
+int mtk_rgu_mcu_cache_preserve(int enable) {return 0; }
+int mtk_wdt_dfd_count_en(int value) {return 0; }
+int mtk_wdt_dfd_thermal1_dis(int value) {return 0; }
+int mtk_wdt_dfd_thermal2_dis(int value) {return 0; }
+int mtk_wdt_dfd_timeout(int value) {return 0; }
+
 #else
 /* ------------------------------------------------------------------------------------------------- */
 /* Dummy functions */
@@ -494,6 +500,12 @@ int mtk_rgu_dram_reserved(int enable)
 {
 	return 0;
 }
+
+int mtk_rgu_mcu_cache_preserve(int enable) {return 0; }
+int mtk_wdt_dfd_count_en(int value) {return 0; }
+int mtk_wdt_dfd_thermal1_dis(int value) {return 0; }
+int mtk_wdt_dfd_thermal2_dis(int value) {return 0; }
+int mtk_wdt_dfd_timeout(int value) {return 0; }
 
 #endif				/* #ifndef __USING_DUMMY_WDT_DRV__ */
 
