@@ -52,13 +52,6 @@ $(TARGET_PREBUILT_KERNEL): $(BUILT_KERNEL_TARGET) $(LOCAL_PATH)/Android.mk | $(A
 
 endif#TARGET_PREBUILT_KERNEL is empty
 
-$(INSTALLED_DTB_OVERLAY_TARGET): $(BUILT_DTB_OVERLAY_TARGET) $(LOCAL_PATH)/Android.mk | $(ACP)
-	$(copy-file-to-target)
-
-ifeq ($(strip $(MTK_DTBO_FEATURE)), yes)
-droid: $(INSTALLED_DTB_OVERLAY_TARGET)
-endif
-
 $(INSTALLED_KERNEL_TARGET): $(BUILT_KERNEL_TARGET) $(LOCAL_PATH)/Android.mk | $(ACP)
 	$(copy-file-to-target)
 
@@ -85,13 +78,6 @@ clean-kernel:
 	$(hide) rm -rf $(KERNEL_OUT) $(KERNEL_MODULES_OUT) $(INSTALLED_KERNEL_TARGET)
 	$(hide) rm -f $(INSTALLED_DTB_OVERLAY_TARGET)
 
-ifeq ($(strip $(MTK_DTBO_FEATURE)), yes)
-.PHONY: odmdtboimage
-odmdtboimage: $(TARGET_KERNEL_CONFIG)
-	$(hide) mkdir -p $(KERNEL_OUT)
-	$(MAKE) -C $(KERNEL_DIR) $(KERNEL_MAKE_OPTION) odmdtboimage
-	$(hide) cp $(BUILT_DTB_OVERLAY_TARGET) $(INSTALLED_DTB_OVERLAY_TARGET)
-endif
 
 .PHONY: check-kernel-config check-kernel-dotconfig
 droid: check-kernel-config check-kernel-dotconfig
