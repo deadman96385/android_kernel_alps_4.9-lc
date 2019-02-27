@@ -12,13 +12,13 @@
  */
 
 #define LOG_TAG "WDMA"
-#if defined(COMMON_DISP_LOG)
+/*#if defined(COMMON_DISP_LOG)*/
 #include "disp_debug.h"
 #include "disp_log.h"
-#else
+/*#else
 #include "disp_drv_log.h"
 #include "ddp_log.h"
-#endif
+#endif*/
 #include <linux/delay.h>
 #include "ddp_reg.h"
 #include "ddp_matrix_para.h"
@@ -31,7 +31,7 @@
 #define ALIGN_TO(x, n)  \
 	(((x) + ((n) - 1)) & ~((n) - 1))
 
-unsigned int wdma_index(DISP_MODULE_ENUM module)
+unsigned int wdma_index(enum DISP_MODULE_ENUM module)
 {
 	int idx = 0;
 
@@ -49,7 +49,7 @@ unsigned int wdma_index(DISP_MODULE_ENUM module)
 	return idx;
 }
 
-int wdma_stop(DISP_MODULE_ENUM module, void *handle)
+int wdma_stop(enum DISP_MODULE_ENUM module, void *handle)
 {
 	unsigned int idx = wdma_index(module);
 
@@ -60,7 +60,7 @@ int wdma_stop(DISP_MODULE_ENUM module, void *handle)
 	return 0;
 }
 
-int wdma_reset(DISP_MODULE_ENUM module, void *handle)
+int wdma_reset(enum DISP_MODULE_ENUM module, void *handle)
 {
 	unsigned int delay_cnt = 0;
 	unsigned int idx = wdma_index(module);

@@ -96,8 +96,8 @@ bool fbconfig_start_LCM_config;
 
 
 struct dentry *ConfigPara_dbgfs = NULL;
-CONFIG_RECORD_LIST head_list;
-LCM_REG_READ reg_read;
+struct CONFIG_RECORD_LIST head_list;
+struct LCM_REG_READ reg_read;
 
 /* int esd_check_addr; */
 /* int esd_check_para_num; */
@@ -107,13 +107,13 @@ LCM_REG_READ reg_read;
 /* extern unsigned int fbconfig_get_layer_info(FBCONFIG_LAYER_INFO *layers); */
 /* extern unsigned int fbconfig_get_layer_vaddr(int layer_id,int * layer_size,int * enable); */
 /* unsigned int fbconfig_get_layer_height(int layer_id,int * layer_size,int * enable,int* height ,int * fmt); */
-typedef struct PM_TOOL_ST {
-	DSI_INDEX dsi_id;
-	LCM_REG_READ reg_read;
-	LCM_PARAMS *pLcm_params;
-	LCM_DRIVER *pLcm_drv;
-} PM_TOOL_T;
-static PM_TOOL_T pm_params = {
+struct PM_TOOL_T{
+	enum DSI_INDEX dsi_id;
+	struct LCM_REG_READ reg_read;
+	struct LCM_PARAMS *pLcm_params;
+	struct LCM_DRIVER *pLcm_drv;
+};
+static struct PM_TOOL_T pm_params = {
 	.dsi_id = PM_DSI0,
 	.pLcm_params = NULL,
 	.pLcm_drv = NULL,
@@ -124,7 +124,7 @@ static void *pm_get_handle(void)
 	return (void *)&pm_params;
 }
 
-static DISP_MODULE_ENUM pm_get_dsi_handle(DSI_INDEX dsi_id)
+static enum DISP_MODULE_ENUM pm_get_dsi_handle(enum DSI_INDEX dsi_id)
 {
 	if (dsi_id == PM_DSI0)
 		return DISP_MODULE_DSI0;
@@ -136,7 +136,7 @@ static DISP_MODULE_ENUM pm_get_dsi_handle(DSI_INDEX dsi_id)
 		return DISP_MODULE_UNKNOWN;
 }
 
-int fbconfig_get_esd_check(DSI_INDEX dsi_id, uint32_t cmd, uint8_t *buffer, uint32_t num)
+int fbconfig_get_esd_check(enum DSI_INDEX dsi_id, uint32_t cmd, uint8_t *buffer, uint32_t num)
 {
 	int array[4];
 	int ret = 0;
@@ -164,10 +164,10 @@ void Panel_Master_DDIC_config(void)
 {
 
 	struct list_head *p;
-	CONFIG_RECORD_LIST *node;
+	struct CONFIG_RECORD_LIST *node;
 	mutex_lock(&fb_config_lock);
 	list_for_each_prev(p, &head_list.list) {
-		node = list_entry(p, CONFIG_RECORD_LIST, list);
+		node = list_entry(p, struct CONFIG_RECORD_LIST, list);
 		switch (node->record.type) {
 		case RECORD_CMD:
 			dsi_set_cmdq(node->record.ins_array, node->record.ins_num, 1);
@@ -190,7 +190,7 @@ void Panel_Master_DDIC_config(void)
 {
 	int i;
 	struct list_head *p;
-	CONFIG_RECORD_LIST *print;
+	struct CONFIG_RECORD_LIST *print;
 	pr_debug("DDIC=====>:print_from_head_to_tail  START\n");
 
 	list_for_each_prev(p, &head_list.list) {
@@ -207,10 +207,10 @@ void Panel_Master_DDIC_config(void)
 static void free_list_memory(void)
 {
 	struct list_head *p, *n;
-	CONFIG_RECORD_LIST *print;
+	struct CONFIG_RECORD_LIST *print;
 	mutex_lock(&fb_config_lock);
 	list_for_each_safe(p, n, &head_list.list) {
-		print = list_entry(p, CONFIG_RECORD_LIST, list);
+		print = list_entry(p, struct CONFIG_RECORD_LIST, list);
 		list_del(&print->list);
 		kfree(print);
 	}
@@ -225,9 +225,9 @@ static void free_list_memory(void)
 
 static int fbconfig_open(struct inode *inode, struct file *file)
 {
-	PM_TOOL_T *pm_params;
+	struct PM_TOOL_T *pm_params;
 	file->private_data = inode->i_private;
-	pm_params = (PM_TOOL_T *) pm_get_handle();
+	pm_params = (struct PM_TOOL_T *) pm_get_handle();
 	PanelMaster_set_PM_enable(1);
 	pm_params->pLcm_drv = DISP_GetLcmDrv();
 	pm_params->pLcm_params = DISP_GetLcmPara();
@@ -270,9 +270,9 @@ static long fbconfig_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 	int ret_val = 0; /* for other function call and put_user / get_user */
 	unsigned long copy_ret_val = 0; /* for copy_from_user / copy_to_user */
 	void __user *argp = (void __user *)arg;
-	PM_TOOL_T *pm = (PM_TOOL_T *)pm_get_handle();
+	struct PM_TOOL_T *pm = (struct PM_TOOL_T *)pm_get_handle();
 	uint32_t dsi_id = pm->dsi_id;
-	LCM_DSI_PARAMS *pParams = get_dsi_params_handle(dsi_id);
+	struct LCM_DSI_PARAMS *pParams = get_dsi_params_handle(dsi_id);
 
 #ifdef FBCONFIG_SHOULD_KICK_IDLEMGR
 	primary_display_idlemgr_kick(__func__, 1);
@@ -304,8 +304,8 @@ static long fbconfig_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 	break;
 	case LCM_TEST_DSI_CLK:
 	{
-		LCM_TYPE_FB lcm_fb;
-		LCM_PARAMS *pLcm_params = pm->pLcm_params;
+		struct LCM_TYPE_FB lcm_fb;
+		struct LCM_PARAMS *pLcm_params = pm->pLcm_params;
 
 		lcm_fb.clock = pLcm_params->dsi.PLL_CLOCK;
 		lcm_fb.lcm_type = (unsigned int)pLcm_params->dsi.mode;
@@ -323,7 +323,7 @@ static long fbconfig_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 		unsigned int lcm_id = 0; /* the lcm driver does not impl "get_lcm_id" */
 		/* so we cannot use pLcm_drv->get_lcm_id(), instead return 0 */
 #if 0
-		LCM_DRIVER *pLcm_drv = pm->pLcm_drv;
+		struct LCM_DRIVER *pLcm_drv = pm->pLcm_drv;
 		if (pLcm_drv != NULL)
 			lcm_id = pLcm_drv->get_lcm_id();
 		else
@@ -338,12 +338,12 @@ static long fbconfig_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 	break;
 	case DRIVER_IC_CONFIG:
 	{
-		CONFIG_RECORD_LIST *record_tmp_list = kmalloc(sizeof(*record_tmp_list), GFP_KERNEL);
+		struct CONFIG_RECORD_LIST *record_tmp_list = kmalloc(sizeof(*record_tmp_list), GFP_KERNEL);
 		if (record_tmp_list == NULL) {
 			pr_debug("fbconfig=>DRIVER_IC_CONFIG kmalloc failed @line %d\n", __LINE__);
 			return -ENOMEM;
 		}
-		copy_ret_val = copy_from_user(&record_tmp_list->record, argp, sizeof(CONFIG_RECORD));
+		copy_ret_val = copy_from_user(&record_tmp_list->record, argp, sizeof(struct CONFIG_RECORD));
 		if (copy_ret_val != 0) {
 			pr_debug("fbconfig=>DRIVER_IC_CONFIG list_add: copy_from_user failed @line %d\n", __LINE__);
 			kfree(record_tmp_list);
@@ -473,7 +473,7 @@ static long fbconfig_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 	case LCM_GET_DSI_TIMING:
 	{
 		unsigned int r = 0;
-		MIPI_TIMING timing;
+		struct MIPI_TIMING timing;
 
 		copy_ret_val = copy_from_user(&timing, argp, sizeof(timing));
 		if (copy_ret_val != 0) {
@@ -492,7 +492,7 @@ static long fbconfig_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 	break;
 	case MIPI_SET_TIMING:
 	{
-		MIPI_TIMING timing;
+		struct MIPI_TIMING timing;
 
 		if (primary_display_is_sleepd())
 			return -EPERM;
@@ -524,7 +524,7 @@ static long fbconfig_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 	break;
 	case LCM_GET_ESD:
 	{
-		ESD_PARA esd_para;
+		struct ESD_PARA esd_para;
 		uint8_t *buffer = NULL;
 		int buffer_size;
 
