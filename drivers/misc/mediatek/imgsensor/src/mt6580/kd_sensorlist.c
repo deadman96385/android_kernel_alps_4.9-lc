@@ -2660,7 +2660,7 @@ static inline int adopt_CAMERA_HW_FeatureControl(void *pBuf)
 				memset(pCurAEAWB, 0x0, sizeof(struct SENSOR_AE_AWB_CUR_STRUCT));
 			*(pFeaturePara_64) = (uintptr_t)pCurAEAWB;
 				if (g_pSensorFunc) {
-					ret = g_pSensorFunc->SensorFeatureControl(pFeatureCtrl->InvokeCamera, pFeatureCtrl->FeatureId, (unsigned char *)pFeaturePara, (unsigned int *) &FeatureParaLen);
+					ret = g_pSensorFunc->SensorFeatureControl(pFeatureCtrl->InvokeCamera, pFeatureCtrl->FeatureId, (unsigned char *)pCurAEAWB, (unsigned int *) &FeatureParaLen);
 				}
 				else {
 					PK_DBG("[CAMERA_HW]ERROR:NULL g_pSensorFunc\n");
@@ -2793,7 +2793,7 @@ static inline int adopt_CAMERA_HW_FeatureControl(void *pBuf)
 		break;
 		/* copy to user */
 	case SENSOR_FEATURE_GET_EV_AWB_REF:
-	case SENSOR_FEATURE_GET_SHUTTER_GAIN_AWB_GAIN:
+	//case SENSOR_FEATURE_GET_SHUTTER_GAIN_AWB_GAIN:
 	case SENSOR_FEATURE_GET_EXIF_INFO:
 	case SENSOR_FEATURE_GET_DELAY_INFO:
 	case SENSOR_FEATURE_GET_AE_AWB_LOCK_INFO:
@@ -3073,7 +3073,7 @@ bool Get_Cam_Regulator(void)
 				sensor_device->of_node =
 				    of_find_compatible_node(NULL, NULL,
 							    "mediatek,camera_hw");
-				/* 若你需要sub也定義的話，需要自己加上
+				/*
 				   if (regVCAMA == NULL) {
 				   regVCAMA_SUB = regulator_get(sensor_device, "SUB_CAMERA_POWER_A");
 				   }

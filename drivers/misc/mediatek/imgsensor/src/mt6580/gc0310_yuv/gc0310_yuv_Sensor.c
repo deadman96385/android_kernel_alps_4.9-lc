@@ -89,6 +89,9 @@ kal_bool GC0310_night_mode_enable = KAL_FALSE;
 kal_uint16 GC0310_CurStatus_AWB = 0;
 kal_bool GC0310_banding_state = GC0310_BANDING_50HZ;      // 0~50hz; 1~60hz
 
+struct SENSOR_AE_AWB_CUR_STRUCT gyuvCurData;
+
+
 static void GC0310_awb_enable(kal_bool enalbe);
 
 extern int iReadRegI2C(u8 *a_pSendData , u16 a_sizeSendData, u8 * a_pRecvData, u16 a_sizeRecvData, u16 i2cId);
@@ -2435,6 +2438,14 @@ UINT32 GC0310FeatureControl(MSDK_SENSOR_FEATURE_ENUM FeatureId,
 	case SENSOR_FEATURE_SET_MIN_MAX_FPS:
 		LOG_INF("SENSOR_FEATURE_SET_MIN_MAX_FPS:[%d,%d]\n",*pFeatureData32,*(pFeatureData32+1));
 		GC0310_MIPI_SetMaxMinFps((UINT32)*feature_data, (UINT32)*(feature_data+1));
+	break;
+
+	case SENSOR_FEATURE_GET_SHUTTER_GAIN_AWB_GAIN:
+		gyuvCurData.SensorAECur.AeCurShutter = GC0310_Read_Shutter();
+		/*LOG_INF("get YUV shutter %d", gyuvCurData.SensorAECur.AeCurShutter);*/
+		memcpy(pFeaturePara, &gyuvCurData,
+			sizeof(struct SENSOR_AE_AWB_CUR_STRUCT));
+		*pFeatureParaLen = sizeof(struct SENSOR_AE_AWB_CUR_STRUCT);
 	break;
 
     default:
