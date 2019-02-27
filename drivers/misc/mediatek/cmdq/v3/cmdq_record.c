@@ -20,6 +20,10 @@
 #include "cmdq_device.h"
 #include "cmdq_mmp.h"
 
+#ifndef _CMDQ_DEBUG_
+#define DISABLE_LOOP_IRQ
+#endif
+
 #define CMDQ_DATA_VAR		(CMDQ_BIT_VAR<<CMDQ_DATA_BIT)
 #define CMDQ_TASK_TPR_VAR	(CMDQ_DATA_VAR | CMDQ_TPR_ID)
 #define CMDQ_TASK_TEMP_CPR_VAR	(CMDQ_DATA_VAR | CMDQ_SPR_FOR_TEMP)
