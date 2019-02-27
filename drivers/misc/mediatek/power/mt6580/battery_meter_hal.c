@@ -359,7 +359,7 @@ static signed int fgauge_set_columb_interrupt(void *data)
 
 
 
-#if defined(CONFIG_MTK_HAFG_20)
+#if CONFIG_MTK_GAUGE_VERSION == 20
 signed char is_lbat_int = KAL_TRUE;
 void fg_bat_l_int_handler(void)
 {
@@ -376,7 +376,7 @@ void fg_bat_l_int_handler(void)
 #endif
 static signed int fgauge_set_low_battery_interrupt(void *data)
 {
-#if defined(CONFIG_MTK_HAFG_20)
+#if CONFIG_MTK_GAUGE_VERSION == 20
 	unsigned int voltage = *(unsigned int *)(data);
 	unsigned int rawdata;
 	static int eint_init;
@@ -420,7 +420,7 @@ static signed int fgauge_set_low_battery_interrupt(void *data)
 
 static signed int fgauge_get_low_battery_interrupt_status(void *data)
 {
-#if defined(CONFIG_MTK_HAFG_20)
+#if CONFIG_MTK_GAUGE_VERSION == 20
 	*(signed int *)(data) = is_lbat_int;
 #else
 	*(signed int *)(data) = KAL_FALSE;
@@ -447,7 +447,7 @@ void trigger_hw_ocv(void)
 
 static signed int get_refresh_hw_ocv(void *data)
 {
-#if defined(CONFIG_MTK_HAFG_20)
+#if CONFIG_MTK_GAUGE_VERSION == 20
 
 	signed int hwocv1, hwocv2;
 

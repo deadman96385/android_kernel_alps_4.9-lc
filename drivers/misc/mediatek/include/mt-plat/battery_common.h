@@ -333,7 +333,7 @@ extern kal_bool g_charging_full_reset_bat_meter;
 extern kal_bool ta_check_chr_type;
 extern kal_bool ta_cable_out_occur;
 extern kal_bool is_ta_connect;
-extern struct wake_lock TA_charger_suspend_lock;
+extern struct wakeup_source TA_charger_suspend_lock;
 #endif
 
 
@@ -356,7 +356,7 @@ extern CHARGER_TYPE usb_charger_type_detect(void);
 extern bool mt_get_usb11_port_status(void);
 #endif
 
-#if defined(CONFIG_MTK_HAFG_20)
+#if CONFIG_MTK_GAUGE_VERSION == 20
 extern struct timespec mt_battery_get_duration_time_act(BATTERY_TIME_ENUM duration_type);
 #endif
 
@@ -405,7 +405,7 @@ void check_battery_exist(void);
 	extern int dlpt_check_power_off(void);
 #endif
 
-extern kal_bool is_usb_rdy(void);
+extern bool is_usb_rdy(void);
 
 extern unsigned int upmu_get_reg_value(unsigned int reg);
 
