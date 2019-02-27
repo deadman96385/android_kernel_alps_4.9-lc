@@ -919,31 +919,28 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg
 
 	case MTKFB_CAPTURE_FRAMEBUFFER:
 	{
-		unsigned long dst_pbuf = 0;
+
 		unsigned long *src_pbuf = 0;
 		unsigned int pixel_bpp = info->var.bits_per_pixel / 8;
 		unsigned int fbsize = DISP_GetScreenHeight() * DISP_GetScreenWidth() * pixel_bpp;
 
-		if (copy_from_user(&dst_pbuf, (void __user *)arg, sizeof(dst_pbuf))) {
-			DISPERR("[FB]: copy_from_user failed! line:%d\n", __LINE__);
+
+		src_pbuf = vmalloc(fbsize);
+		if (!src_pbuf) {
+			DISPERR("[FB]: vmalloc capture src_pbuf failed! line:%d\n", __LINE__);
 			r = -EFAULT;
 		} else {
-			src_pbuf = vmalloc(fbsize);
-			if (!src_pbuf) {
-				DISPERR("[FB]: vmalloc capture src_pbuf failed! line:%d\n", __LINE__);
+			dprec_logger_start(DPREC_LOGGER_WDMA_DUMP, 0, 0);
+			primary_display_capture_framebuffer_ovl((unsigned long)src_pbuf,
+				MTK_FB_FORMAT_BGRA8888);
+			dprec_logger_done(DPREC_LOGGER_WDMA_DUMP, 0, 0);
+			if (copy_to_user((void __user *)arg, src_pbuf, fbsize)) {
+				DISPERR("[FB]: copy_to_user failed! line:%d\n", __LINE__);
 				r = -EFAULT;
-			} else {
-				dprec_logger_start(DPREC_LOGGER_WDMA_DUMP, 0, 0);
-				primary_display_capture_framebuffer_ovl((unsigned long)src_pbuf,
-					MTK_FB_FORMAT_BGRA8888);
-				dprec_logger_done(DPREC_LOGGER_WDMA_DUMP, 0, 0);
-				if (copy_to_user((unsigned long *)dst_pbuf, src_pbuf, fbsize)) {
-					DISPERR("[FB]: copy_to_user failed! line:%d\n", __LINE__);
-					r = -EFAULT;
-				}
-				vfree(src_pbuf);
 			}
+			vfree(src_pbuf);
 		}
+
 
 		return r;
 	}
