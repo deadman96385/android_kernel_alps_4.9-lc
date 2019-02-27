@@ -11,6 +11,8 @@
  * GNU General Public License for more details.
  */
 
+#include <linux/init.h>
+#include <linux/module.h>
 #include <linux/delay.h>
 #include <linux/kthread.h>
 #include <mt-plat/sync_write.h>
