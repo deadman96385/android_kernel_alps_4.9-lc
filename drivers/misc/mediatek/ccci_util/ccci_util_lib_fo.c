@@ -1411,19 +1411,27 @@ unsigned int get_modem_is_enabled(int md_id)
 int get_modem_support_cap(int md_id)
 {
 	int ret = -1;
+	char *seno = "invalid";
 
 	if (md_id < MAX_MD_NUM_AT_LK) {
 		if ((get_boot_mode() == META_BOOT)
 			|| (get_boot_mode() == ADVMETA_BOOT)) {
 			/* using priority */
-			if (meta_boot_arguments[md_id])
+			if (meta_boot_arguments[md_id]) {
 				ret = meta_boot_arguments[md_id];
-			else
+				seno = "boot arg";
+			} else {
+				seno = "meta val";
 				ret = meta_md_support[md_id];
-		} else
+			}
+		} else {
+			seno = "nor val";
 			ret = md_support[md_id];
+		}
 	}
 
+	CCCI_UTIL_INF_MSG("get_modem_support_cap: %d|%d @ %s\n",
+						  md_id + 1, ret, seno);
 	return ret;
 }
 
@@ -1813,6 +1821,11 @@ int check_md_type(int data)
 		}
 		return -INVALID_MD_VIEW_MD_TYPE;
 	}
+
+#ifdef CONFIG_MACH_MT6735M
+	if (val ==5 || val == 6)
+		return val;
+#endif
 	/* check ap view md type */
 	if (val >= LEGACY_UBIN_START_ID && val <= LEGACY_UBIN_END_ID)
 		return val;

@@ -86,6 +86,16 @@ endif
 obj-$(CONFIG_MTK_CCCI_EXT)  +=  dual_ccci/
 obj-$(CONFIG_MTK_CCCI_DEVICES)	+=  ccci_util/
 obj-$(CONFIG_MTK_NET_CCMNI) +=  ccmni/
+ifeq ($(CONFIG_MACH_MT6735M),y)
+obj-$(CONFIG_MTK_ECCCI_DRIVER) +=  eccci1/
+else
+obj-$(CONFIG_MTK_ECCCI_DRIVER) +=  eccci/
+endif
+ifdef CONFIG_CUSTOM_KERNEL_SSW
+ifneq ($(strip $(CONFIG_CUSTOM_KERNEL_SSW)),"")
+obj-y += ssw/
+endif
+endif
 obj-$(CONFIG_TRUSTONIC_TEE_SUPPORT) += gcpu/
 obj-$(CONFIG_MTK_IN_HOUSE_TEE_SUPPORT) += gcpu/
 ifeq ($(CONFIG_HAVE_MTK_IN_HOUSE_TEE_SUPPORT),y)

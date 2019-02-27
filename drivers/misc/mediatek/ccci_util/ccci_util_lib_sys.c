@@ -297,6 +297,13 @@ static ssize_t kcfg_setting_show(char *buf)
 		actual_write = snprintf(&buf[curr], 4096 - curr,
 			"[ccci_drv_ver]:V1\n");
 	curr += actual_write;
+	/* modem type format */
+#ifdef CONFIG_MACH_MT6735M
+	/* using enum */
+	actual_write = snprintf(&buf[curr], 4096 - curr,
+			"[md_type_fmt]:enum\n");
+	curr += actual_write;
+#endif
 
 	/* Add total size to tail */
 	actual_write = snprintf(&buf[curr],

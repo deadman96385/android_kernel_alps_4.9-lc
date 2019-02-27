@@ -345,6 +345,15 @@ enum KERN_FUNC_ID {
 	ID_MD_MPU_ASSERT,	/* for EMI MPU */
 	ID_LWA_CONTROL_MSG,	/* for Wi-Fi driver */
 	ID_UPDATE_TX_POWER,	/* for SWTP */
+	ID_RESET_MD,
+	ID_STORE_SIM_SWITCH_MODE,
+	ID_GET_SIM_SWITCH_MODE,
+	ID_STOP_MD,
+	ID_START_MD,
+	ID_UPDATE_MD_BOOT_MODE,
+	ID_ENTER_FLIGHT_MODE,
+	ID_LEAVE_FLIGHT_MODE,
+	ID_MD_RF_DESENSE
 };
 
 /* AP<->MD messages on control or system channel */
@@ -385,6 +394,7 @@ enum {
 	MD_SW_MD2_TX_POWER_REQ = 0x111,
 
 	MD_THROTTLING = 0x112, /* SW throughput throttling */
+	MD_RF_DESENSE = 0x113,
 	/* TEST_MESSAGE for IT only */
 	TEST_MSG_ID_MD2AP = 0x114,
 	TEST_MSG_ID_AP2MD = 0x115,
