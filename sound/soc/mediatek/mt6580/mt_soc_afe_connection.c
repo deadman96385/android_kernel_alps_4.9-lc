@@ -71,13 +71,11 @@
 #include <linux/wait.h>
 #include <linux/spinlock.h>
 #include <linux/sched.h>
-#include <linux/wakelock.h>
 #include <linux/semaphore.h>
 #include <linux/jiffies.h>
 #include <linux/proc_fs.h>
 #include <linux/string.h>
 #include <linux/mutex.h>
-/*#include <mach/irqs.h>*/
 #include <linux/uaccess.h>
 #include <asm/irq.h>
 #include <linux/io.h>

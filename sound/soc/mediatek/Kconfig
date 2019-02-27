@@ -175,3 +175,46 @@ config MTK_AUDIO_SCP_SPKPROTECT_SUPPORT
 	  The process is done in DSP.
 	  Select Y to enable CONFIG_MTK_AUDIO_SCP_SPKPROTECT_SUPPORT for DSP playback.
 
+config MT_SND_SOC_V3
+	bool "MT_SND_SOC_V3"
+	default n
+	help
+	  If you say Y, enable MT_SND_SOC_V3_driver.
+
+config MT_SND_SOC_6570
+	bool "MT_SND_SOC_6570"
+	default n
+	help
+	  If you say Y, enable MT_SND_SOC_6570_driver.
+	  Must enable this to use medatek audio driver.
+	  The default value is n for MT6570.
+	  It is recommended not to change this.
+
+config MT_SND_SOC_6580
+	bool "MT_SND_SOC_6580"
+	default n
+	help
+	  If you say Y, enable MT_SND_SOC_6580_driver.
+
+config MT_SND_SOC_6755
+	bool "MT_SND_SOC_6755"
+	default n
+	help
+	  If you say Y, enable MT_SND_SOC_6755_driver.
+
+config MT_SND_SOC_6750
+	bool "MT_SND_SOC_6750"
+	help
+	  If you say Y, enable MT_SND_SOC_6750_driver.
+	  Must enable this to use medatek audio driver.
+	  The default value is n for MT8127.
+	  Recommnad to configure it before using MT8127 audio driver.
+
+config MT_SND_SOC_6797
+	bool "MT_SND_SOC_6797"
+	default n
+	help
+	  If you say Y, enable MT_SND_SOC_6797_driver.
+	  Must enable this to use medatek audio driver.
+	  The default value is y for MT6797.
+	  It's recommended no to change this.

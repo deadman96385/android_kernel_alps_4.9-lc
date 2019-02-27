@@ -67,7 +67,6 @@
 #include <linux/wait.h>
 #include <linux/spinlock.h>
 #include <linux/sched.h>
-#include <linux/wakelock.h>
 #include <linux/semaphore.h>
 #include <linux/jiffies.h>
 #include <linux/proc_fs.h>
@@ -100,7 +99,6 @@
 #include <sound/pcm.h>
 #include <sound/jack.h>
 /* #include <asm/mach-types.h> */
-#include <sound/mt_soc_audio.h>
 
 /* #define EFUSE_HP_TRIM */
 
