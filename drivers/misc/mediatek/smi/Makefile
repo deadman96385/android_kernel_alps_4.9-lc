@@ -12,28 +12,28 @@
 #
 
 ifneq ($(CONFIG_MTK_SMI_VARIANT),y)
-ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat
-ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/$(MTK_PLATFORM)/
-ccflags-y += -I$(srctree)/drivers/misc/mediatek/dramc/$(MTK_PLATFORM)/
-
-BUILD_ALL_FILES := true
 ccflags-y += -I$(srctree)/drivers/clk/mediatek
-ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/$(MTK_PLATFORM)/
-ccflags-y += -I$(srctree)/drivers/misc/mediatek/cmdq/v3/
-ccflags-y += -I$(srctree)/drivers/misc/mediatek/cmdq/v3/$(MTK_PLATFORM)/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/$(CONFIG_MTK_PLATFORM)/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/dramc/$(CONFIG_MTK_PLATFORM)/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/freqhopping/$(CONFIG_MTK_PLATFORM)/
 
-obj-y += smi_legacy.o
-SUPPORT_QOS := true
+ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6580"))
+CMDQ_VER := "v2"
+else
+CMDQ_VER := "v3"
+endif
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/cmdq/$(CMDQ_VER)/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/cmdq/$(CMDQ_VER)/$(CONFIG_MTK_PLATFORM)/
 
+SUPPORT_QOS := true
 ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6758"))
 ccflags-y += -DSMI_VIN
 ccflags-y += -DMMDVFS_HOOK
-
 SUPPORT_QOS := false
 obj-y += mmdvfs_mgr_v3.o
 obj-y += mmdvfs_mgr_util.o
 obj-y += mmdvfs_profile_adaptor.o
+
 else ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6765"))
 ccflags-y += -DSMI_CER
 ccflags-y += -DMMDVFS_HOOK
@@ -47,11 +47,9 @@ SUPPORT_USE_DDR_TYPE := true
 SUPPORT_MMP := true
 endif
 
-
 ifeq (true, $(SUPPORT_QOS))
 obj-y += mmdvfs_pmqos.o
 endif
-
 
 ifeq ($(CONFIG_MMPROFILE),y)
 ifeq (true, $(SUPPORT_MMP))
@@ -59,7 +57,6 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/mmp/
 ccflags-y += -DMMDVFS_MMP
 endif
 endif
-obj-y += $(subst ",,met)/
 
 ifeq (true, $(SUPPORT_USE_DDR_TYPE))
 ccflags-y += -DUSE_DDR_TYPE
@@ -67,6 +64,8 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/emi/$(MTK_PLATFORM)/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/emi/submodule/
 endif
 
+obj-y += smi_legacy.o
+obj-y += met/
 else
 obj-y += $(subst ",,variant)/
 endif
