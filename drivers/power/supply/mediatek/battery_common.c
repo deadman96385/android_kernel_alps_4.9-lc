@@ -86,7 +86,7 @@
 #include <mach/mt_battery_meter.h>
 #include <mach/mt_charging.h>
 #include <mach/mt_pmic.h>
-#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)
+#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)
 #include <mach/mt_pmic_wrap.h>
 #endif
 
@@ -326,10 +326,16 @@ static enum power_supply_property battery_props[] = {
 	POWER_SUPPLY_PROP_PRESENT,
 	POWER_SUPPLY_PROP_TECHNOLOGY,
 	POWER_SUPPLY_PROP_CAPACITY,
+	/*charging current*/
 	POWER_SUPPLY_PROP_CURRENT_NOW,
+	/*battery voltage*/
 	POWER_SUPPLY_PROP_VOLTAGE_NOW,
+	POWER_SUPPLY_PROP_CYCLE_COUNT,
+	POWER_SUPPLY_PROP_CHARGE_AVG,
+	POWER_SUPPLY_PROP_CHARGE_FULL,
 	POWER_SUPPLY_PROP_CHARGE_COUNTER,
-	POWER_SUPPLY_PROP_TEMP,
+	/*bettery temperature*/
+	POWER_SUPPLY_PROP_TEMP
 };
 
 /*void check_battery_exist(void);*/
@@ -641,9 +647,21 @@ static int battery_get_property(struct power_supply *psy,
 		val->intval = data->BAT_batt_temp;
 		break;
 	case POWER_SUPPLY_PROP_CURRENT_NOW:
-		val->intval = data->BAT_CURRENT_NOW; /* charge_current */
+		val->intval = data->BAT_CURRENT_NOW;
+		/* charge_current */
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_COUNTER:
+		val->intval = data->BAT_CAPACITY * battery_meter_get_QMAX25() * 10;
+		/* remaining capacity  uah , (ui*qmax*1000/100)*/
+		break;
+	case POWER_SUPPLY_PROP_CYCLE_COUNT:
+		val->intval = 0; /* charge_current */
+		break;
+	case POWER_SUPPLY_PROP_CHARGE_AVG:
+		val->intval = data->BAT_CURRENT_NOW;
+		/* charge_current */
+		break;
+	case POWER_SUPPLY_PROP_CHARGE_FULL:
 		val->intval = battery_meter_get_QMAX25() * 1000;
 		/* QMAX from battery, ma to ua */
 		break;
@@ -3570,7 +3588,7 @@ void hv_sw_mode(void)
 			    "[PMIC_BIAS_GEN_EN & PMIC_BIAS_GEN_EN_SEL] be writen 0xa=0x%x\n",
 			    upmu_get_reg_value(0x000a));
 
-		#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)
+		#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)
 		pr_info("HWCID:0x%x\n", pmic_get_register_value(PMIC_HWCID));
 		pr_info("VCORE1_CON9:0x%x\n", upmu_get_reg_value(0x0612));
 		pr_info("DEW_DIO_EN:0x%x\n", upmu_get_reg_value(0x02d4));

@@ -296,10 +296,10 @@ struct battery_data {
 	int BAT_PRESENT;
 	int BAT_TECHNOLOGY;
 	int BAT_CAPACITY;
+	int BAT_CURRENT_NOW;
 	/* Add for Battery Service */
 	int BAT_batt_vol;
 	int BAT_batt_temp;
-	int BAT_CURRENT_NOW;
 };
 
 static enum power_supply_property wireless_props[] = {
@@ -323,10 +323,16 @@ static enum power_supply_property battery_props[] = {
 	POWER_SUPPLY_PROP_PRESENT,
 	POWER_SUPPLY_PROP_TECHNOLOGY,
 	POWER_SUPPLY_PROP_CAPACITY,
+	/*charging current*/
 	POWER_SUPPLY_PROP_CURRENT_NOW,
+	/*battery voltage*/
 	POWER_SUPPLY_PROP_VOLTAGE_NOW,
+	POWER_SUPPLY_PROP_CYCLE_COUNT,
+	POWER_SUPPLY_PROP_CHARGE_AVG,
+	POWER_SUPPLY_PROP_CHARGE_FULL,
 	POWER_SUPPLY_PROP_CHARGE_COUNTER,
-	POWER_SUPPLY_PROP_TEMP,
+	/*battery temperature*/
+	POWER_SUPPLY_PROP_TEMP
 };
 
 struct timespec batteryThreadRunTime;
@@ -639,11 +645,23 @@ static int battery_get_property(struct power_supply *psy,
 		val->intval = data->BAT_batt_temp;
 		break;
 	case POWER_SUPPLY_PROP_CURRENT_NOW:
-		val->intval = data->BAT_CURRENT_NOW; /* charge_current */
+		val->intval = data->BAT_CURRENT_NOW;
+		/* charge_current */
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_COUNTER:
+		val->intval = data->BAT_CAPACITY * battery_meter_get_QMAX25() * 10;
+		/* remaining capacity,uah , (ui*qmax*1000/100)*/
+		break;
+	case POWER_SUPPLY_PROP_CYCLE_COUNT:
+		val->intval = 0;
+		/*battery cycle return 0  */
+		break;
+	case POWER_SUPPLY_PROP_CHARGE_AVG:
+		val->intval = data->BAT_CURRENT_NOW; /* charge_current */
+		break;
+	case POWER_SUPPLY_PROP_CHARGE_FULL:
 		val->intval = battery_meter_get_QMAX25() * 1000;
-		/* QMAX from battery, ma to ua */
+		/* QMAX from battery uah */
 		break;
 	default:
 		ret = -EINVAL;
@@ -2926,6 +2944,7 @@ void BAT_thread(void)
 	}
 
 	mt_kpoc_power_off_check();
+	/*Add in case something wrong happened in fg_bat_int_handler*/
 	battery_meter_set_fg_int();
 }
 
@@ -3898,33 +3917,48 @@ static int battery_probe(struct platform_device *dev)
 #endif
 
 	/* Integrate with Android Battery Service */
-	ac_main.psy = power_supply_register(&(dev->dev), &ac_main.psd, NULL);
-	if (IS_ERR(ac_main.psy)) {
-		battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register AC Fail !!\n");
-		return ret;
-	}
-	battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register AC Success !!\n");
+		ac_main.psy = power_supply_register(&(dev->dev), &ac_main.psd, NULL);
+		if (IS_ERR(ac_main.psy)) {
+			battery_log(BAT_LOG_CRTI,
+				"[BAT_probe] power_supply_register AC Fail !!\n");
+			ret = PTR_ERR(ac_main.psy);
+			return ret;
+		}
+		battery_log(BAT_LOG_CRTI,
+				"[BAT_probe] power_supply_register AC Success !!\n");
+	
+		usb_main.psy = power_supply_register(&(dev->dev), &usb_main.psd, NULL);
+		if (IS_ERR(usb_main.psy)) {
+			battery_log(BAT_LOG_CRTI,
+				"[BAT_probe] power_supply_register USB Fail !!\n");
+			ret = PTR_ERR(usb_main.psy);
+			return ret;
+		}
+		battery_log(BAT_LOG_CRTI,
+				"[BAT_probe] power_supply_register USB Success !!\n");
+	
+		wireless_main.psy = power_supply_register(
+					&(dev->dev), &wireless_main.psd, NULL);
+		if (IS_ERR(wireless_main.psy)) {
+			battery_log(BAT_LOG_CRTI,
+				"[BAT_probe] power_supply_register WIRELESS Fail !!\n");
+			ret = PTR_ERR(wireless_main.psy);
+			return ret;
+		}
+		battery_log(BAT_LOG_CRTI,
+			"[BAT_probe] power_supply_register WIRELESS Success !!\n");
+	
+		battery_main.psy = power_supply_register(
+					&(dev->dev), &battery_main.psd, NULL);
+		if (IS_ERR(battery_main.psy)) {
+			battery_log(BAT_LOG_CRTI,
+				"[BAT_probe] power_supply_register Battery Fail !!\n");
+			ret = PTR_ERR(battery_main.psy);
+			return ret;
+		}
+		battery_log(BAT_LOG_CRTI,
+			"[BAT_probe] power_supply_register Battery Success !!\n");
 
-	usb_main.psy = power_supply_register(&(dev->dev), &usb_main.psd, NULL);
-	if (IS_ERR(usb_main.psy)) {
-		battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register USB Fail !!\n");
-		return ret;
-	}
-	battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register USB Success !!\n");
-
-	wireless_main.psy = power_supply_register(&(dev->dev), &wireless_main.psd, NULL);
-	if (IS_ERR(wireless_main.psy)) {
-		battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register WIRELESS Fail !!\n");
-		return ret;
-	}
-	battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register WIRELESS Success !!\n");
-
-	battery_main.psy = power_supply_register(&(dev->dev), &battery_main.psd, NULL);
-	if (IS_ERR(battery_main.psy)) {
-		battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register Battery Fail !!\n");
-		return ret;
-	}
-	battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register Battery Success !!\n");
 
 #if !defined(CONFIG_POWER_EXT)
 
