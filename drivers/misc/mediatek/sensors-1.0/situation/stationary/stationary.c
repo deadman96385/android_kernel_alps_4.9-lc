@@ -51,6 +51,9 @@ static int stat_get_data(int *probability, int *status)
 	}
 	time_stamp		= data.time_stamp;
 	*probability	= data.gesture_data_t.probability;
+
+	pr_debug("recv ipi: timestamp: %lld, probability: %d!\n",
+		time_stamp, *probability);
 	return 0;
 }
 static int stat_open_report_data(int open)

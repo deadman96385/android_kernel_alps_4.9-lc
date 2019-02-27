@@ -66,6 +66,7 @@ endif
 obj-$(CONFIG_MTK_PMIC_NEW_ARCH)	+= pmic/
 obj-$(CONFIG_MTK_TINYSYS_SCP_SUPPORT) += scp/
 obj-$(CONFIG_MTK_TINYSYS_SCP_SUPPORT) += audio_ipi/
+obj-$(CONFIG_MTK_SENSORS_1_0) += sensors-1.0/
 obj-y += devinfo/
 obj-$(CONFIG_MTK_GPU_SUPPORT) += gpu/
 obj-$(CONFIG_MTK_LCM) += lcm/

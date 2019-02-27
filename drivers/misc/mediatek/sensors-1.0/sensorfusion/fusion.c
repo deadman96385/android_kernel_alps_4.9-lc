@@ -157,6 +157,10 @@ static ssize_t fusion_store_active(struct device *dev,
 		pr_err("[%s] invalid handle\n", __func__);
 		return -1;
 	}
+	if (cxt->fusion_context[index].fusion_ctl.enable_nodata == NULL) {
+		pr_debug("[%s] ctl not registered\n", __func__);
+		return -1;
+	}
 	mutex_lock(&fusion_context_obj->fusion_op_mutex);
 	if (en == 1)
 		cxt->fusion_context[index].enable = 1;
@@ -238,6 +242,11 @@ static ssize_t fusion_store_batch(struct device *dev,
 		pr_err("[%s] invalid handle\n", __func__);
 		return -1;
 	}
+	if (cxt->fusion_context[index].fusion_ctl.batch == NULL) {
+		pr_debug("[%s] ctl not registered\n", __func__);
+		return -1;
+	}
+
 	pr_debug("handle %d, flag:%d, PeriodNs:%lld, LatencyNs: %lld\n",
 		handle, flag, samplingPeriodNs, maxBatchReportLatencyNs);
 
