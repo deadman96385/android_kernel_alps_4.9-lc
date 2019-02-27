@@ -212,7 +212,7 @@ void pwrap_dump_ap_register(void)
 
 	PWRAPREG("dump pwrap register, base=0x%p\n", PMIC_WRAP_BASE);
 	PWRAPREG("address     :   3 2 1 0    7 6 5 4    B A 9 8    F E D C\n");
-	#if defined(CONFIG_ARCH_MT6735M)
+	#if defined(CONFIG_MACH_MT6735M)
 	for (i = 0; i <= 0x234; i += 16) {
 		PWRAPREG("offset 0x%.3x:0x%.8x 0x%.8x 0x%.8x 0x%.8x\n", i,
 				WRAP_RD32(PMIC_WRAP_BASE+i+0),
@@ -1316,7 +1316,7 @@ s32 pwrap_init(void)
 	/* ############################### */
 	/* PMIC_WRAP enables */
 	/* ############################### */
-  #if defined(CONFIG_ARCH_MT6735M)
+  #if defined(CONFIG_MACH_MT6735M)
 	WRAP_WR32(PMIC_WRAP_HIPRIO_ARB_EN, 0xff);
 	PWRAPLOG("mt_pwrap_init---- use D2\n");
   #else
@@ -1324,7 +1324,7 @@ s32 pwrap_init(void)
   #endif
 	WRAP_WR32(PMIC_WRAP_WACS0_EN, ENABLE);
 	WRAP_WR32(PMIC_WRAP_WACS1_EN, ENABLE);
-  #if defined(CONFIG_ARCH_MT6735M)
+  #if defined(CONFIG_MACH_MT6735M)
   /* not enable wacs3    D2 change */
   #else
 	WRAP_WR32(PMIC_WRAP_WACS3_EN, ENABLE);
@@ -1344,7 +1344,7 @@ s32 pwrap_init(void)
 	WRAP_WR32(PMIC_WRAP_INIT_DONE0 , ENABLE);
 	WRAP_WR32(PMIC_WRAP_INIT_DONE2 , ENABLE);
 	PWRAPLOG("mt_pwrap_init---- debug13\n");
-	#if defined(CONFIG_ARCH_MT6735M)
+	#if defined(CONFIG_MACH_MT6735M)
 	/* not enable wacs3    D2 change */
 	#else
 	WRAP_WR32(PMIC_WRAP_INIT_DONE3 , ENABLE);

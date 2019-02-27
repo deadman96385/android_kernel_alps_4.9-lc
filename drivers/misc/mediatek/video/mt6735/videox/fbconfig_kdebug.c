@@ -21,7 +21,7 @@
 #include <linux/wait.h>
 #include <linux/types.h>
 
-#if defined(CONFIG_ARCH_MT6755) || defined(CONFIG_ARCH_MT6570) || defined(CONFIG_ARCH_MT6580) || defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_ARCH_MT6755) || defined(CONFIG_ARCH_MT6570) || defined(CONFIG_ARCH_MT6580) || defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)
 #include "disp_debug.h"
 #include "mtkfb_debug.h"
 #else
