@@ -23,7 +23,12 @@
 #include <linux/of_address.h>
 #endif
 
+#if 0
 #include <linux/irqchip/mt-gic.h>
+#else
+#include <linux/irqchip/mtk-gic-extend.h>
+#endif
+
 #include <mach/wd_api.h>
 #include <mt-plat/upmu_common.h>
 
