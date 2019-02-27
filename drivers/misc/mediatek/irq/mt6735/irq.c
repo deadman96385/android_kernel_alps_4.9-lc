@@ -235,6 +235,8 @@ static int gic_set_affinity(struct irq_data *d,
 	writel_relaxed(val | bit, reg);
 	raw_spin_unlock(&irq_lock.rlock);
 #else
+
+
 	/*
 	 * no need to update when:
 	 * input mask is equal to the current setting
@@ -257,9 +259,12 @@ static int gic_set_affinity(struct irq_data *d,
 
 	/* update gic register */
 	raw_spin_lock(&irq_lock.rlock);
+
 	val = readl_relaxed(reg) & ~(0xff << shift);
 	writel_relaxed(val | bit, reg);
 	raw_spin_unlock(&irq_lock.rlock);
+
+
 #endif
 	return IRQ_SET_MASK_OK;
 }
@@ -514,7 +519,12 @@ static void mt_gic_dist_init(void)
 	 * Set all global interrupts to this CPU only.
 	 */
 	for (i = 32; i < (MT_NR_SPI + 32); i += 4)
+#ifndef CONFIG_MTK_IRQ_NEW_DESIGN
 		writel(cpumask, IOMEM(GIC_DIST_BASE + GIC_DIST_TARGET + i * 4 / 4));
+#else
+		/* target all */
+		writel(0xffffffff, IOMEM(GIC_DIST_BASE + GIC_DIST_TARGET + i * 4 / 4));
+#endif
 
 	/*
 	 * Set priority on all global interrupts.
@@ -564,6 +574,15 @@ static void mt_gic_dist_init(void)
 static void mt_gic_cpu_init(void)
 {
 	int i;
+	unsigned int cpu_mask, cpu = smp_processor_id();
+
+	BUG_ON(cpu >= NR_GIC_CPU_IF);
+	/*
+	cpu_mask = gic_get_cpumask(gic);
+	FIXME
+	*/
+	cpu_mask = 1 << smp_processor_id();
+	gic_cpu_map[cpu] = cpu_mask;
 
 	/*
 	 * Deal with the banked PPI and SGI interrupts - disable all
