@@ -82,8 +82,8 @@ enum _ENUM_BTIF_TEST_CASE_ {
 };
 #endif
 
-#define ENABLE_BTIF_RX_DMA 1
-#define ENABLE_BTIF_TX_DMA 1
+#define ENABLE_BTIF_RX_DMA 0
+#define ENABLE_BTIF_TX_DMA 0
 
 #ifdef ENABLE_BTIF_TX_DMA
 #define BTIF_TX_MODE BTIF_MODE_DMA
