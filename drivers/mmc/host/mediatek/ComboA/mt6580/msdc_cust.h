@@ -29,7 +29,10 @@
 #endif
 
 #ifndef CONFIG_MTK_MSDC_BRING_UP_BYPASS
-#include <mtk_spm_resource_req.h>
+#define spm_resource_req(a, b)
+#define SPM_RESOURCE_USER_MSDC
+#define SPM_RESOURCE_RELEASE
+#define SPM_RESOURCE_ALL
 #endif
 
 /**************************************************************/
