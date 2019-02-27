@@ -66,7 +66,7 @@ static DEFINE_SPINLOCK(clk_buf_ctrl_lock);
 #define clkbuf_unlock(flags) spin_unlock_irqrestore(&clk_buf_ctrl_lock, flags)
 
 #define clkbuf_read(addr)            __raw_readl(IOMEM(addr))
-#define clkbuf_write(addr, val)      mt_reg_sync_writel(val, addr)
+#define clkbuf_write(addr, val)      __raw_writel(val, addr)
 
 #else				/* for preloader */
 
