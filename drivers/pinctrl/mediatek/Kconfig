@@ -14,6 +14,12 @@ config PINCTRL_MT6758
 	select PINCTRL_MTK_NO_UPSTREAM
 	select MTK_EINT_MULTI_TRIGGER_DESIGN
 
+config PINCTRL_MT6580
+	bool "pinctrl mt6580"
+	default n
+	def_bool MACH_MT6580
+	select PINCTRL_MTK
+
 config PINCTRL_MT6761
 	bool "Mediatek MT6761 pin control"
 	default n
