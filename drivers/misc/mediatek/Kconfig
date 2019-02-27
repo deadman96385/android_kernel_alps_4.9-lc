@@ -113,6 +113,13 @@ config MTK_BASE_POWER
 	  Select if you want to enable MediaTek power
 	  management feature.
 
+config MTK_POWER_GS
+	bool "MediaTek power golden setting"
+	help
+	  For MediaTek power golden setting feature.
+	  Select if you want to enable MediaTek power
+	  golden setting feature.
+
 config MTK_FREQ_HOPPING
 	bool "MediaTek FREQHOPPING SUPPORT"
 	help
