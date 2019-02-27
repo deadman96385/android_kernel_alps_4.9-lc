@@ -17,6 +17,7 @@
 #include "cmdq_reg.h"
 #include <linux/seq_file.h>
 #ifdef CMDQ_CONFIG_SMI
+#include "smi_public.h"
 #include "smi_debug.h"
 #endif
 #ifdef CMDQ_CG_M4U_LARB0
@@ -973,10 +974,8 @@ int cmdq_virtual_dump_smi(const int showSmiDump)
 
 #if defined(CMDQ_CONFIG_SMI) && !defined(CONFIG_MTK_FPGA) &&                   \
 	!defined(CONFIG_MTK_SMI_VARIANT)
-	isSMIHang = smi_debug_bus_hanging_detect_ext(
-		SMI_DBG_DISPSYS | SMI_DBG_VDEC | SMI_DBG_IMGSYS | SMI_DBG_VENC |
-			SMI_DBG_MJC,
-		showSmiDump, showSmiDump);
+	isSMIHang = smi_debug_bus_hang_detect(SMI_PARAM_BUS_OPTIMIZATION,
+		showSmiDump, showSmiDump, showSmiDump);
 	CMDQ_ERR("SMI Hang? = %d\n", isSMIHang);
 #else
 	CMDQ_LOG("[WARNING]not enable SMI dump now\n");
