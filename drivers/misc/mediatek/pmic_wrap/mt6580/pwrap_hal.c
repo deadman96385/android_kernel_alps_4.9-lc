@@ -31,7 +31,7 @@
 #include <linux/of_irq.h>
 #include <linux/of_address.h>
 #endif
-#include <mach/mt_pmic_wrap.h>
+#include <mach/mtk_pmic_wrap.h>
 #include "pwrap_hal.h"
 #include <mt-plat/aee.h>
 
