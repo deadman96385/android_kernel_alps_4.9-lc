@@ -129,10 +129,13 @@ static inline int m4u_port_2_larb_port(M4U_PORT_ID port)
 	return gM4uPort[port].larb_port;
 }
 
-static inline int m4u_port_2_larb_id(M4U_PORT_ID port)
+static inline int m4u_port_2_larbid(M4U_PORT_ID port)
 {
-	return gM4uPort[port].larb_id;
+	if ((port < gM4u_port_num) && (port >= M4U_PORT_DISP_OVL0))
+		return gM4uPort[port].larb_id;
+	return 0xff;
 }
+
 
 static inline int larb_2_m4u_slave_id(int larb)
 {
