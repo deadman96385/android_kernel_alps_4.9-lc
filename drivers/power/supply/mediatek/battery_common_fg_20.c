@@ -299,6 +299,7 @@ struct battery_data {
 	/* Add for Battery Service */
 	int BAT_batt_vol;
 	int BAT_batt_temp;
+	int BAT_CURRENT_NOW;
 };
 
 static enum power_supply_property wireless_props[] = {
@@ -3897,29 +3898,29 @@ static int battery_probe(struct platform_device *dev)
 #endif
 
 	/* Integrate with Android Battery Service */
-	ret = power_supply_register(&(dev->dev), &ac_main.psy);
-	if (ret) {
+	ac_main.psy = power_supply_register(&(dev->dev), &ac_main.psd, NULL);
+	if (IS_ERR(ac_main.psy)) {
 		battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register AC Fail !!\n");
 		return ret;
 	}
 	battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register AC Success !!\n");
 
-	ret = power_supply_register(&(dev->dev), &usb_main.psy);
-	if (ret) {
+	usb_main.psy = power_supply_register(&(dev->dev), &usb_main.psd, NULL);
+	if (IS_ERR(usb_main.psy)) {
 		battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register USB Fail !!\n");
 		return ret;
 	}
 	battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register USB Success !!\n");
 
-	ret = power_supply_register(&(dev->dev), &wireless_main.psy);
-	if (ret) {
+	wireless_main.psy = power_supply_register(&(dev->dev), &wireless_main.psd, NULL);
+	if (IS_ERR(wireless_main.psy)) {
 		battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register WIRELESS Fail !!\n");
 		return ret;
 	}
 	battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register WIRELESS Success !!\n");
 
-	ret = power_supply_register(&(dev->dev), &battery_main.psy);
-	if (ret) {
+	battery_main.psy = power_supply_register(&(dev->dev), &battery_main.psd, NULL);
+	if (IS_ERR(battery_main.psy)) {
 		battery_log(BAT_LOG_CRTI, "[BAT_probe] power_supply_register Battery Fail !!\n");
 		return ret;
 	}

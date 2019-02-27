@@ -628,9 +628,6 @@ signed int battery_meter_set_columb_interrupt(unsigned int val)
 int __batt_meter_init_cust_data_from_cust_header(struct platform_device *dev)
 {
 
-	batt_meter_cust_data.versionID1 = FG_DAEMON_CMD_FROM_USER_NUMBER;
-	batt_meter_cust_data.versionID2 = sizeof(batt_meter_cust_data);
-
 	/* cust_battery_meter_table.h */
 #ifdef MTK_MULTI_BAT_PROFILE_SUPPORT
 

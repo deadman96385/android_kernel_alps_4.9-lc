@@ -418,6 +418,7 @@ extern void mt_battery_set_init_vol(int);
 
 #if CONFIG_MTK_GAUGE_VERSION == 20
 unsigned int get_cv_voltage(void);
+extern void battery_meter_set_fg_int(void);
 #endif
 
 #endif /* #ifndef _BATTERY_METER_H */
