@@ -105,7 +105,7 @@ endif
 ccflags-y += -D_CMDQ_DISABLE_MARKER_
 # porting don't support mmp
 ifeq (,$(filter $(CONFIG_MTK_PLATFORM), "elbrus", "mt8173"))
-ccflags-y += -DCMDQ_PROFILE_MMP
+#ccflags-y += -DCMDQ_PROFILE_MMP
 endif
 
 # driver module
