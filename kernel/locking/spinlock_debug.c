@@ -76,10 +76,26 @@ static void spin_dump(raw_spinlock_t *lock, const char *msg)
 
 static void spin_bug(raw_spinlock_t *lock, const char *msg)
 {
+	char aee_str[50];
+
 	if (!debug_locks_off())
 		return;
 
 	spin_dump(lock, msg);
+	snprintf(aee_str, 50, "%s: %s\n", current->comm, msg);
+	if (!strcmp(msg, "bad magic") || !strcmp(msg, "already unlocked")
+		|| !strcmp(msg, "wrong owner") || !strcmp(msg, "wrong CPU")) {
+		pr_info("%s\n", aee_str);
+		pr_info("maybe use an un-initial spin_lock or mem corrupt\n");
+		pr_info("maybe already unlocked or wrong owner or wrong CPU\n");
+		pr_info("maybe bad magic %08x, should be %08x\n",
+			lock->magic, SPINLOCK_MAGIC);
+		pr_info(">>>>>>>>>>>>>> Let's KE <<<<<<<<<<<<<<\n");
+		BUG_ON(1);
+	}
+	aee_kernel_warning_api(__FILE__, __LINE__,
+		DB_OPT_DUMMY_DUMP | DB_OPT_FTRACE,
+		aee_str, "spinlock debugger\n");
 }
 
 #define SPIN_BUG_ON(cond, lock, msg) if (unlikely(cond)) spin_bug(lock, msg)
@@ -152,9 +168,8 @@ static void __spin_lock_debug(raw_spinlock_t *lock)
 
 	for (;;) {
 		for (i = 0; i < loops; i++) {
-			if (arch_spin_trylock(&lock->raw_lock)) {
+			if (arch_spin_trylock(&lock->raw_lock))
 				return;
-			}
 			__delay(1);
 		}
 		t3 = sched_clock();
@@ -164,10 +179,6 @@ static void __spin_lock_debug(raw_spinlock_t *lock)
 			continue;
 		/* if(sched_clock() - t2 < WARNING_TIME) continue; */
 		t2 = sched_clock();
-
-		if (oops_in_progress != 0)
-			/* in exception follow, printk maybe spinlock error */
-			continue;
 
 		/* lockup suspected: */
 		if (lock->owner && lock->owner != SPINLOCK_OWNER_INIT)
@@ -180,6 +191,10 @@ static void __spin_lock_debug(raw_spinlock_t *lock)
 		owner ? owner->comm : "<none>",
 		owner ? task_pid_nr(owner) : -1,
 		lock->owner_cpu);
+
+		if (oops_in_progress != 0)
+			/* in exception follow, printk maybe spinlock error */
+			continue;
 
 		if (print_once) {
 			print_once = 0;
@@ -195,12 +210,10 @@ static void __spin_lock_debug(raw_spinlock_t *lock)
 				owner->comm, owner->pid);
 				smp_call_function_single(lock->owner_cpu,
 					show_cpu_backtrace, NULL, 0);
-				if (debug_locks)
 					debug_show_held_locks(owner);
 			}
 
 			/* ensure debug_locks is true,then can call aee */
-			if (debug_locks) {
 				debug_show_all_locks();
 				snprintf(aee_str, 50,
 					"Spinlock lockup: %ps in %s\n",
@@ -210,7 +223,6 @@ static void __spin_lock_debug(raw_spinlock_t *lock)
 					DB_OPT_DUMMY_DUMP | DB_OPT_FTRACE,
 					aee_str, "spinlock debugger\n");
 				#endif
-			}
 		}
 	}
 #else /* MTK_LOCK_DEBUG */
@@ -246,10 +258,16 @@ static void __spin_lock_debug(raw_spinlock_t *lock)
  */
 void do_raw_spin_lock(raw_spinlock_t *lock)
 {
+#ifdef CONFIG_MTK_SCHED_MONITOR
+	mt_trace_lock_spinning_start(lock);
+#endif
 	debug_spin_lock_before(lock);
 	if (unlikely(!arch_spin_trylock(&lock->raw_lock)))
 		__spin_lock_debug(lock);
 	debug_spin_lock_after(lock);
+#ifdef CONFIG_MTK_SCHED_MONITOR
+	mt_trace_lock_spinning_end(lock);
+#endif
 }
 
 int do_raw_spin_trylock(raw_spinlock_t *lock)
