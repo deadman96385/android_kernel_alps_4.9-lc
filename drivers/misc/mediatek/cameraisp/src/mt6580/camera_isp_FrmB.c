@@ -3096,7 +3096,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
  */
 					if (IspInfo_FrmB.DebugMask &
 						ISP_DBG_BUF_CTRL) {
-						LOG_DBG(
+						LOG_ERR(
 						"[rtbc][DEQUE](%d):d(%d)/id(0x%x)/bs(0x%x)/va(0x%llx)/pa(0x%x)/t(%d.%d)/img(%d,%d,%d,%d,%d,%d,%d,%d)/m(0x%x)/fc(%d)/hrz(%d,%d,%d,%d,%d,%d),dmao(%d,%d,%d,%d),lm#(0x%x)",
 						iBuf + i, rt_dma,
 						deque_buf.data[i].memID,
@@ -5915,21 +5915,45 @@ ISP_IRQ_INT_STATUS_FLK_ERR_ST|ISP_IRQ_INT_STATUS_LSC_ERR_ST)
 
 		if (IspInfo_FrmB.DebugMask & ISP_DBG_INT) {
 			IRQ_LOG_KEEPER(_IRQ, m_CurrentPPB, _LOG_INF,
-			"P1_DON_%d(0x%x,0x%x)\n",
+			"P1_DON_%d(0x%x,0x%x, D_%d(%d/%d)_Filled(%d_%d_%d),D_%d(%d/%d)_Filled(%d_%d_%d) )\n",
 			(sof_count[_PASS1]) ? (sof_count[_PASS1] -
 			1) : (sof_count[_PASS1]),
 			(unsigned int)p1_fbc[0].Reg_val,
-			(unsigned int)p1_fbc[1].Reg_val);
+			(unsigned int)p1_fbc[1].Reg_val,
+			_imgo_,
+			pstRTBuf_FrmB->ring_buf[_imgo_].start,
+			pstRTBuf_FrmB->ring_buf[_imgo_].read_idx,
+			pstRTBuf_FrmB->ring_buf[_imgo_].data[0].bFilled,
+			pstRTBuf_FrmB->ring_buf[_imgo_].data[1].bFilled,
+			pstRTBuf_FrmB->ring_buf[_imgo_].data[2].bFilled,
+			_img2o_,
+			pstRTBuf_FrmB->ring_buf[_img2o_].start,
+			pstRTBuf_FrmB->ring_buf[_img2o_].read_idx,
+			pstRTBuf_FrmB->ring_buf[_img2o_].data[0].bFilled,
+			pstRTBuf_FrmB->ring_buf[_img2o_].data[1].bFilled,
+			pstRTBuf_FrmB->ring_buf[_img2o_].data[2].bFilled);
 		}
 #else
 #if defined(_rtbc_use_cq0c_)
 		if (IspInfo_FrmB.DebugMask & ISP_DBG_INT) {
 			IRQ_LOG_KEEPER(_IRQ, m_CurrentPPB, _LOG_INF,
-			"P1_DON_%d(0x%x,0x%x)\n",
+			"P1_DON_%d(0x%x,0x%x, D_%d(%d/%d)_Filled(%d_%d_%d),D_%d(%d/%d)_Filled(%d_%d_%d) )\n",
 			(sof_count[_PASS1]) ? (sof_count[_PASS1] -
 			1) : (sof_count[_PASS1]),
 			(unsigned int)p1_fbc[0].Reg_val,
-			(unsigned int)p1_fbc[1].Reg_val);
+			(unsigned int)p1_fbc[1].Reg_val,
+			_imgo_,
+			pstRTBuf_FrmB->ring_buf[_imgo_].start,
+			pstRTBuf_FrmB->ring_buf[_imgo_].read_idx,
+			pstRTBuf_FrmB->ring_buf[_imgo_].data[0].bFilled,
+			pstRTBuf_FrmB->ring_buf[_imgo_].data[1].bFilled,
+			pstRTBuf_FrmB->ring_buf[_imgo_].data[2].bFilled,
+			_img2o_,
+			pstRTBuf_FrmB->ring_buf[_img2o_].start,
+			pstRTBuf_FrmB->ring_buf[_img2o_].read_idx,
+			pstRTBuf_FrmB->ring_buf[_img2o_].data[0].bFilled,
+			pstRTBuf_FrmB->ring_buf[_img2o_].data[1].bFilled,
+			pstRTBuf_FrmB->ring_buf[_img2o_].data[2].bFilled);
 		}
 #else
 		/* LOG_DBG("[k_js_test]Pass1_done(0x%x)",
@@ -6077,7 +6101,7 @@ ISP_IRQ_INT_STATUS_FLK_ERR_ST|ISP_IRQ_INT_STATUS_LSC_ERR_ST)
 			_fbc_chk[0].Reg_val = ISP_RD32(ISP_REG_ADDR_IMGO_FBC);
 			_fbc_chk[1].Reg_val = ISP_RD32(ISP_REG_ADDR_IMG2O_FBC);
 			IRQ_LOG_KEEPER(_IRQ, m_CurrentPPB, _LOG_INF,
-			"P1_SOF_%d_%d(0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x)\n",
+			"P1_SOF_%d_%d(0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x,0x%x, D_%d(%d/%d)_Filled(%d_%d_%d),D_%d(%d/%d)_Filled(%d_%d_%d) )\n",
 			sof_count[_PASS1], cur_v_cnt,
 			(unsigned int)_fbc_chk[0].Reg_val,
 			(unsigned int)_fbc_chk[1].Reg_val,
@@ -6086,7 +6110,19 @@ ISP_IRQ_INT_STATUS_FLK_ERR_ST|ISP_IRQ_INT_STATUS_LSC_ERR_ST)
 			ISP_RD32(ISP_REG_ADDR_IMGO_YSIZE),
 			ISP_RD32(ISP_REG_ADDR_IMG2O_YSIZE),
 			ISP_RD32(ISP_REG_ADDR_TG_MAGIC_0),
-			ISP_RD32(ISP_REG_ADDR_CQ0_CUR_BASE_ARRR));
+			ISP_RD32(ISP_REG_ADDR_CQ0_CUR_BASE_ARRR),
+			_imgo_,
+			pstRTBuf_FrmB->ring_buf[_imgo_].start,
+			pstRTBuf_FrmB->ring_buf[_imgo_].read_idx,
+			pstRTBuf_FrmB->ring_buf[_imgo_].data[0].bFilled,
+			pstRTBuf_FrmB->ring_buf[_imgo_].data[1].bFilled,
+			pstRTBuf_FrmB->ring_buf[_imgo_].data[2].bFilled,
+			_img2o_,
+			pstRTBuf_FrmB->ring_buf[_img2o_].start,
+			pstRTBuf_FrmB->ring_buf[_img2o_].read_idx,
+			pstRTBuf_FrmB->ring_buf[_img2o_].data[0].bFilled,
+			pstRTBuf_FrmB->ring_buf[_img2o_].data[1].bFilled,
+			pstRTBuf_FrmB->ring_buf[_img2o_].data[2].bFilled);
 		}
 		{
 			unsigned long long sec;
