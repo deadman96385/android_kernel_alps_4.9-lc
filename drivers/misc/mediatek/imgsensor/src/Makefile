@@ -21,6 +21,10 @@ MTK_PROJECT_PATH_ROOT := $(srctree)/drivers/misc/mediatek/mach/$(MTK_PLATFORM)/$
 
 CONFIG_MTK_PLATFORM_SENSOR := $(CONFIG_MTK_PLATFORM)
 
+ifeq ($(CONFIG_MACH_MT6735M),y)
+CONFIG_MTK_PLATFORM_SENSOR := mt6735m
+endif
+
 subdir-ccflags-y += -I$(MTK_PROJECT_PATH_ROOT)/camera/camera
 
 MTK_DRIVER_PATH  := $(srctree)/drivers/misc/mediatek
