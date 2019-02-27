@@ -497,7 +497,7 @@ CONFIG_MTK_CMDQ,COMMON,dennis-yc.hsieh,,y,y,y,y,y,y
 CONFIG_MTK_CMDQ_MBOX,COMMON,dennis-yc.hsieh,,y,y,y,y,y,y
 CONFIG_MTK_CM_MGR,PLATFORM,morven-cf.yeh,,X,y,y,y,y,y
 CONFIG_MTK_COMBO_ANT,PROJECT,zhiguo.niu,new config in this commit 3413d51500ed33e5696cbfe6286d5b8617867b35,,,,,,
-CONFIG_MTK_COMBO_BT,COMMON,Libin.Zang,,y,y,y,y,y,y
+CONFIG_MTK_COMBO_BT,PROJECT,Libin.Zang,,y,y,y,y,y,y
 CONFIG_MTK_COMBO_CHIP_CONSYS_6580,PLATFORM,robbin.chiu,,X,X,X,X,X,X
 CONFIG_MTK_COMBO_CHIP_CONSYS_6735,PROJECT,robbin.chiu,,X,X,X,X,X,X
 CONFIG_MTK_COMBO_CHIP_CONSYS_6739,PLATFORM,robbin.chiu,,X,X,X,X,X,X
