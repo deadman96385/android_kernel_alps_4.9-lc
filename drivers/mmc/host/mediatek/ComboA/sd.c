@@ -4144,6 +4144,8 @@ static void msdc_ops_request(struct mmc_host *mmc, struct mmc_request *mrq)
 		__pm_stay_awake(&host->trans_lock);
 
 	/* SDIO need need lock dvfs */
+	if ((host->hw->host_function == MSDC_SDIO) && (host->lock_vcore == 1))
+		msdc_set_vcore_performance(host, 1);
 
 	if (mrq->data)
 		host_cookie = mrq->data->host_cookie;
@@ -4189,6 +4191,8 @@ static void msdc_ops_request(struct mmc_host *mmc, struct mmc_request *mrq)
 		msdc_ops_request_legacy(mmc, mrq);
 
 	/* SDIO need check lock dvfs */
+	if ((host->hw->host_function == MSDC_SDIO) && (host->lock_vcore == 1))
+		msdc_set_vcore_performance(host, 0);
 
 	if ((host->hw->host_function == MSDC_SDIO) &&
 	    (host->trans_lock.active))
