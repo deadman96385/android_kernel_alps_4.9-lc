@@ -35,12 +35,12 @@
 static struct mutex boost_eas;
 #ifdef CONFIG_CGROUP_SCHEDTUNE
 static int current_boost_value[NR_CGROUP];
+static unsigned long policy_mask[NR_CGROUP];
 #endif
 static int boost_value[NR_CGROUP][EAS_MAX_KIR];
 static int debug_boost_value[NR_CGROUP];
 static int debug;
 static int log_enable;
-static unsigned long policy_mask[NR_CGROUP];
 
 /************************/
 
