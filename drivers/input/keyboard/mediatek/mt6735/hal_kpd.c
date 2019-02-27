@@ -17,16 +17,13 @@
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
 #include <mt-plat/upmu_common.h>
+#include <mt-plat/mtk_boot_common.h>
 #ifdef CONFIG_MTK_TC1_FM_AT_SUSPEND
 #include <mt_soc_afe_control.h>
 #endif
-#define KPD_DEBUG	KPD_YES
 
 #define KPD_SAY		"kpd: "
-#if KPD_DEBUG
-#define kpd_print(fmt, arg...)	pr_err(KPD_SAY fmt, ##arg)
-#define kpd_info(fmt, arg...)	pr_warn(KPD_SAY fmt, ##arg)
-#else
+#ifndef KPD_DEBUG
 #define kpd_print(fmt, arg...)	do {} while (0)
 #define kpd_info(fmt, arg...)	do {} while (0)
 #endif
@@ -44,6 +41,8 @@ static u16 kpd_keymap_state[KPD_NUM_MEMS] = {
 };
 
 static bool kpd_sb_enable;
+extern void kpd_pwrkey_pmic_handler(unsigned long pressed);
+extern unsigned int get_boot_mode(void);
 
 #ifdef CONFIG_MTK_SMARTBOOK_SUPPORT
 static void sb_kpd_release_keys(struct input_dev *dev)
@@ -100,7 +99,7 @@ static void enable_kpd(int enable)
 
 void kpd_slide_qwerty_init(void)
 {
-#if KPD_HAS_SLIDE_QWERTY
+#if 0
 	bool evdev_flag = false;
 	bool power_op = false;
 	struct input_handler *handler;
@@ -324,7 +323,7 @@ void kpd_wakeup_src_setting(int enable)
 }
 
 /********************************************************************/
-void kpd_init_keymap(u16 keymap[])
+void kpd_init_keymap(u32 keymap[])
 {
 	int i = 0;
 

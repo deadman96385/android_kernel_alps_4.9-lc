@@ -163,6 +163,7 @@ config MACH_MT6735
 	select MTK_SYSTRACKER
 	select MTK_SYS_CIRQ
 	select MTK_EIC
+	select MTK_GPIO
 	select MTK_GIC
 	select COMMON_CLK if !MTK_CLKMGR
 	select CPU_IDLE
@@ -199,6 +200,7 @@ config MACH_MT6735M
 	select MTK_SYSTRACKER
 	select MTK_SYS_CIRQ
 	select MTK_EIC
+	select MTK_GPIO
 	select MTK_GIC
 	select ARM_HAS_SG_CHAIN
 	select PINCTRL
