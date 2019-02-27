@@ -34,7 +34,7 @@
 /* #include <linux/aee.h> */
 #endif
 
-#include <mt-plat/mt_pwm.h>
+#include <mt-plat/mtk_pwm.h>
 #include <mt-plat/upmu_common.h>
 
 #include "mtk_leds_sw.h"
