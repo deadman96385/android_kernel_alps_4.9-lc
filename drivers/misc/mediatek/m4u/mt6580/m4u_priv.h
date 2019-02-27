@@ -40,9 +40,9 @@
 #define M4U_DVT 0
 
 #ifndef M4U_PROFILE
-#define MMProfileLogEx(...)
-#define MMProfileEnable(...)
-#define MMProfileStart(...)
+#define mmprofile_log_ex(...)
+#define mmprofile_enable(...)
+#define mmprofile_start(...)
 #define MMP_Event unsigned int
 #else
 #include "mmprofile.h"
