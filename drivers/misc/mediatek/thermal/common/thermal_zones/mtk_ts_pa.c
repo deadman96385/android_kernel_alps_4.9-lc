@@ -396,12 +396,9 @@ static int tspa_sysrst_set_cur_state(struct thermal_cooling_device *cdev, unsign
 		pr_debug("*****************************************");
 		pr_debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
-/* Bug to Fix */
-#if 0
 /* BUG(); */
 		*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
 		/* arch_reset(0,NULL); */
-#endif
 	}
 	return 0;
 }

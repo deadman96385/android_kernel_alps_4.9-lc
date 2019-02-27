@@ -576,21 +576,11 @@ static int get_hw_bts_temp(void)
 	/* Mt_auxadc_hal.c */
 	/* #define VOLTAGE_FULL_RANGE  1500 // VA voltage */
 	/* #define AUXADC_PRECISE      4096 // 12 bits */
-
-/* Bug to Fix */
-#if 1
-	times = ret;
-	ret = ret * 1500 / 4096;
-	output = mtk_ts_bts_volt_to_temp(ret);
-	pr_debug("[Thermal][TS_AP_DEBUG]auxadc raw = %d,output mV = %d,temp = %d",
-		times, ret, output);
-#else
 	ret = ret * 1500 / 4096;
 	/* ret = ret*1800/4096;//82's ADC power */
 	mtkts_bts_dprintk("APtery output mV = %d\n", ret);
 	output = mtk_ts_bts_volt_to_temp(ret);
 	mtkts_bts_dprintk("BTS output temperature = %d\n", output);
-#endif
 	return output;
 }
 
