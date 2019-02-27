@@ -1297,11 +1297,13 @@ static void msdc_set_cmd_intr(struct msdc_host *host,
 
 	init_completion(&host->cmd_done);
 
+#ifndef MSDC_HW_NO_BUSY_CHECK
 	if (check_busy) {
 		msdc_set_busy_timeout_ms(host, timeout_ms);
 		/* set check busy */
 		MSDC_SET_BIT32(MSDC_PATCH_BIT1, MSDC_PB1_BUSY_CHECK_SEL);
 	}
+#endif
 
 	host->use_cmd_intr = true; /* set flag */
 	host->intsts = 0;
@@ -1339,8 +1341,10 @@ static unsigned int msdc_wait_cmd_intr(struct msdc_host *host,
 
 	host->use_cmd_intr = false; /* clear flag */
 
+#ifndef MSDC_HW_NO_BUSY_CHECK
 	if (check_busy)
 		MSDC_CLR_BIT32(MSDC_PATCH_BIT1, MSDC_PB1_BUSY_CHECK_SEL);
+#endif
 
 	if (!tmo) {
 		host->sw_timeout++;

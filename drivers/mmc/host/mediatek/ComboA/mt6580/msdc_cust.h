@@ -498,19 +498,18 @@
 /* Section 6: BBChip-depenent Tunnig Parameter                */
 /**************************************************************/
 #define EMMC_MAX_FREQ_DIV               4 /* lower frequence to 12.5M */
-#define MSDC_CLKTXDLY                   0
-
-#define MSDC0_DDR50_DDRCKD              1 /* FIX ME: may be removed */
+#define MSDC_CLKTXDLY                   2
 
 #define VOL_CHG_CNT_DEFAULT_VAL         0x1F4 /* =500 */
 
 /* hw diff: 0xB0[0]=1 */
-#define MSDC_PB0_DEFAULT_VAL            0x403C0007
-#define MSDC_PB1_DEFAULT_VAL            0xFFFA0349
+#define MSDC_PB0_DEFAULT_VAL            0x403C0006
+#define MSDC_PB1_DEFAULT_VAL            0xFFFE00C9
 
 
 #define MSDC_PB2_DEFAULT_RESPWAITCNT    0x3
 #define MSDC_PB2_DEFAULT_RESPSTENSEL    0x1
 #define MSDC_PB2_DEFAULT_CRCSTSENSEL    0x1
 
+#define MSDC_HW_NO_BUSY_CHECK
 #endif /* _MSDC_CUST_MT6761_H_ */
