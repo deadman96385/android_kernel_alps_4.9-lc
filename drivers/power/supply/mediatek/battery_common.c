@@ -86,7 +86,7 @@
 #include <mach/mt_battery_meter.h>
 #include <mach/mt_charging.h>
 #include <mach/mt_pmic.h>
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)
 #include <mach/mt_pmic_wrap.h>
 #endif
 
@@ -3570,7 +3570,7 @@ void hv_sw_mode(void)
 			    "[PMIC_BIAS_GEN_EN & PMIC_BIAS_GEN_EN_SEL] be writen 0xa=0x%x\n",
 			    upmu_get_reg_value(0x000a));
 
-		#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)
+		#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)
 		pr_info("HWCID:0x%x\n", pmic_get_register_value(PMIC_HWCID));
 		pr_info("VCORE1_CON9:0x%x\n", upmu_get_reg_value(0x0612));
 		pr_info("DEW_DIO_EN:0x%x\n", upmu_get_reg_value(0x02d4));

@@ -35,8 +35,8 @@ endif
 ifneq ($(CONFIG_MTK_CLKMGR),y)
 
 ifeq ($(CONFIG_MACH_MT6580),y)
-else ifeq ($(CONFIG_ARCH_MT6735M),y)
-else ifeq ($(CONFIG_ARCH_MT6753),y)
+else ifeq ($(CONFIG_MACH_MT6735M),y)
+else ifeq ($(CONFIG_MACH_MT6753),y)
 else
 ccflags-y += -DCMDQ_USE_CCF
 endif

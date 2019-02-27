@@ -1010,7 +1010,7 @@ static ssize_t emi_mpu_store(struct device_driver *driver,
 			goto out;
 
 		access_permission = SET_ACCESS_PERMISSON(NO_PROTECTION,
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6753)
 							 NO_PROTECTION,
 							 NO_PROTECTION,
 							 NO_PROTECTION,

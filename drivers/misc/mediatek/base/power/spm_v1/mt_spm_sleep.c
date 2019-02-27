@@ -1068,7 +1068,7 @@ wake_reason_t spm_go_to_sleep(u32 spm_flags, u32 spm_data)
 	int wd_ret;
 	/* struct wake_status wakesta; */
 	unsigned long flags;
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M)
 	unsigned long temp_a, temp_b;
 #endif
 #if 0
@@ -1141,7 +1141,7 @@ wake_reason_t spm_go_to_sleep(u32 spm_flags, u32 spm_data)
 
 	spm_set_sysclk_settle();
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 	__spm_enable_i2c4_clk();
 
 	if (vcorefs_get_curr_voltage() == VCORE_1_P_25_UV)
@@ -1181,17 +1181,17 @@ wake_reason_t spm_go_to_sleep(u32 spm_flags, u32 spm_data)
 	temp_b = spm_read(PMIC_WRAP_DVFS_WDATA2);
 	spm_write(SPM_PCM_PASR_DPD_2, (temp_a << 16) | temp_b);
 #endif
-#if defined(CONFIG_ARCH_MT6735)
+#if defined(CONFIG_MACH_MT6735)
 	temp_a = spm_read(PMIC_WRAP_DVFS_WDATA2);
 	temp_b = spm_read(PMIC_WRAP_DVFS_WDATA3);
 	spm_write(SPM_PCM_PASR_DPD_3, (temp_b << 16) | temp_a);
 
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 	temp_a = spm_read(PMIC_WRAP_DVFS_WDATA2);
 	temp_b = spm_read(PMIC_WRAP_DVFS_WDATA3);
 	spm_write(SPM_PCM_PASR_DPD_3, (temp_b << 16) | temp_a);
 
-#elif defined(CONFIG_ARCH_MT6753)
+#elif defined(CONFIG_MACH_MT6753)
 	spm_write(PMIC_WRAP_DVFS_ADR10, 0x454);
 	spm_write(PMIC_WRAP_DVFS_WDATA10, 0x3E62);
 	spm_write(PMIC_WRAP_DVFS_ADR11, 0x454);
@@ -1239,7 +1239,7 @@ wake_reason_t spm_go_to_sleep(u32 spm_flags, u32 spm_data)
 	spm_crit2("VRF18_0 = 0x%x\n", temp_c);
 #endif
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 	if (vcorefs_get_curr_voltage() == VCORE_1_P_25_UV)
 		vcorefs_list_kicker_request();
 

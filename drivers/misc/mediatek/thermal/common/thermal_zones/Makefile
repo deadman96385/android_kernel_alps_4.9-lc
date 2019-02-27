@@ -24,19 +24,19 @@ ccflags-y  += -I$(srctree)/drivers/misc/mediatek/thermal/common/inc/
 ccflags-y  += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/
 
 ifneq (,$(filter $(CONFIG_MTK_PLATFORM), "mt6735"))
-ifeq ($(CONFIG_ARCH_MT6735),y)
+ifeq ($(CONFIG_MACH_MT6735),y)
 ccflags-y  += -I$(THERMAL_CHIP_DRIVER_DIR)/inc/D1
 endif
 
-ifeq ($(CONFIG_ARCH_MT6735M),y)
+ifeq ($(CONFIG_MACH_MT6735M),y)
 ccflags-y  += -I$(THERMAL_CHIP_DRIVER_DIR)/inc/D2
 endif
 
-ifeq ($(CONFIG_ARCH_MT6753),y)
+ifeq ($(CONFIG_MACH_MT6753),y)
 ccflags-y  += -I$(THERMAL_CHIP_DRIVER_DIR)/inc/D3
 endif
 
-ifeq ($(CONFIG_ARCH_MT6753),y)
+ifeq ($(CONFIG_MACH_MT6753),y)
 obj-$(CONFIG_THERMAL) += mtk_ts_6311buck.o
 endif
 

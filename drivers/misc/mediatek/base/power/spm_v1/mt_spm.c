@@ -78,7 +78,7 @@ static struct dentry *spm_file;
 static struct platform_device *pspmdev;
 static int dyna_load_pcm_done __nosavedata;
 
-#if defined(CONFIG_ARCH_MT6735)
+#if defined(CONFIG_MACH_MT6735)
 static char *dyna_load_pcm_path[] = {
 	[DYNA_LOAD_PCM_SUSPEND] = "pcm_suspend_1.bin",
 	[DYNA_LOAD_PCM_SODI] = "pcm_sodi_1.bin",
@@ -91,7 +91,7 @@ MODULE_FIRMWARE(dyna_load_pcm_path[DYNA_LOAD_PCM_SUSPEND]);
 MODULE_FIRMWARE(dyna_load_pcm_path[DYNA_LOAD_PCM_SODI]);
 MODULE_FIRMWARE(dyna_load_pcm_path[DYNA_LOAD_PCM_DEEPIDLE]);
 MODULE_FIRMWARE(dyna_load_pcm_path[DYNA_LOAD_PCM_VCORE_DVFS]);
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 static char *dyna_load_pcm_path[] = {
 	[DYNA_LOAD_PCM_SUSPEND] = "pcm_suspend_2.bin",
 	[DYNA_LOAD_PCM_SODI] = "pcm_sodi_2.bin",
@@ -104,7 +104,7 @@ MODULE_FIRMWARE(dyna_load_pcm_path[DYNA_LOAD_PCM_SUSPEND]);
 MODULE_FIRMWARE(dyna_load_pcm_path[DYNA_LOAD_PCM_SODI]);
 MODULE_FIRMWARE(dyna_load_pcm_path[DYNA_LOAD_PCM_DEEPIDLE]);
 MODULE_FIRMWARE(dyna_load_pcm_path[DYNA_LOAD_PCM_VCORE_DVFS]);
-#elif defined(CONFIG_ARCH_MT6753)
+#elif defined(CONFIG_MACH_MT6753)
 static char *dyna_load_pcm_path[] = {
 	[DYNA_LOAD_PCM_SUSPEND] = "pcm_suspend_3.bin",
 	[DYNA_LOAD_PCM_SODI] = "pcm_sodi_3.bin",
@@ -144,7 +144,7 @@ void __iomem *scp_i2c1_base;
 void __iomem *scp_i2c2_base;
 void __iomem *i2c4_base;
 #include <mt_dramc.h> /* for ucDram_Register_Read () */
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 void __iomem *_mcucfg_base;
 void __iomem *_mcucfg_phys_base;
 #endif
@@ -312,7 +312,7 @@ static void spm_register_init(void)
 #if !defined(CONFIG_ARCH_MT6570) && !defined(CONFIG_MACH_MT6580)
 	unsigned int code = mt_get_chip_hw_code();
 #endif
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 	struct resource r;
 #endif
 
@@ -340,7 +340,7 @@ static void spm_register_init(void)
 	if (!spm_irq_3)
 		spm_err("get spm_irq_3 failed\n");
 #endif
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 #define MCUCFG_NODE "mediatek,MCUCFG"
 
 	node = of_find_compatible_node(NULL, NULL, MCUCFG_NODE);
@@ -542,8 +542,8 @@ int __init spm_module_init(void)
 
 #ifndef CONFIG_MTK_FPGA
 #if defined(CONFIG_PM)
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6570) || defined(CONFIG_MACH_MT6580) \
-	|| defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_ARCH_MT6570) || defined(CONFIG_MACH_MT6580) \
+	|| defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)
 	if (spm_fs_init() != 0)
 		r = -EPERM;
 #endif
@@ -585,7 +585,7 @@ int __init spm_module_init(void)
 #ifdef SPM_VCORE_EN
 	spm_go_to_vcore_dvfs(SPM_VCORE_DVFS_EN, 0);
 #else
-#if defined(CONFIG_ARCH_MT6735)
+#if defined(CONFIG_MACH_MT6735)
 	/* only for common solution, no DVS */
 	spm_go_to_vcore_dvfs(0, 0);
 #endif
@@ -1040,7 +1040,7 @@ static struct ddrphy_golden_cfg ddrphy_setting[] = {
 #ifdef CONFIG_OF
 	{0x5c0, 0x063c0000},
 	{0x5c4, 0x00000000},
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 	{0x5c8, 0x0000f410},	/* temp remove mempll2/3 control for golden setting refine */
 #else
 	{0x5c8, 0x0000fC10},	/* temp remove mempll2/3 control for golden setting refine */
@@ -1049,7 +1049,7 @@ static struct ddrphy_golden_cfg ddrphy_setting[] = {
 #else
 	{0xf02135c0, 0x063c0000},
 	{0xf02135c4, 0x00000000},
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 	{0xf02135c8, 0x0000fC10},	/* temp remove mempll2/3 control for golden setting refine */
 #else
 	{0xf02135c8, 0x0000fC10},	/* temp remove mempll2/3 control for golden setting refine */

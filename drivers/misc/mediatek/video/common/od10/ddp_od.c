@@ -210,7 +210,7 @@ static void od_refresh_screen(void)
 {
 #if defined(CONFIG_ARCH_ELBRUS)
 	return;
-#elif defined(CONFIG_ARCH_MT6753) || defined(CONFIG_ARCH_MT6795)
+#elif defined(CONFIG_MACH_MT6753) || defined(CONFIG_ARCH_MT6795)
 	if (g_od_ddp_notify != NULL)
 		g_od_ddp_notify(DISP_MODULE_OD, DISP_PATH_EVENT_TRIGGER);
 #else

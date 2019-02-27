@@ -110,7 +110,7 @@ int tscpu_g_curr_temp = 0;
 int tscpu_g_prev_temp = 0;
 static int g_max_temp = 50000;	/* default=50 deg */
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 /*For MT6753 PMIC 5A throttle patch*/
 static int thermal5A_TH = 55000;
 static int thermal5A_status;
@@ -689,7 +689,7 @@ static int tscpu_get_temp(struct thermal_zone_device *thermal, int *t)
 	tscpu_set_GPIO_toggle_for_monitor();
 #endif
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 		/*For MT6753 PMIC 5A throttle patch*/
 	if (curr_temp >= thermal5A_TH && thermal5A_status == 0) {
 		mt_cpufreq_thermal_5A_limit(1);
@@ -1824,7 +1824,7 @@ static const struct file_operations mtktscpu_fops = {
 	.release = single_release,
 };
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 /*For MT6753 PMIC 5A throttle patch*/
 static int tzcpu_cpufreq5A_read(struct seq_file *m, void *v)
 {
@@ -2473,7 +2473,7 @@ static void tscpu_create_fs(void)
 		if (entry)
 			proc_set_user(entry, uid, gid);
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 		/*For MT6753 PMIC 5A throttle patch*/
 		entry = proc_create("tzcpu_cpufreq5A", S_IRUGO | S_IWUSR | S_IWGRP,
 					mtktscpu_dir, &tzcpu_cpufreq5A_fops);
@@ -2598,7 +2598,7 @@ static int tscpu_thermal_probe(struct platform_device *dev)
 	return err;
 }
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 /*For MT6753 PMIC 5A throttle patch*/
 int isMT6753T(void)
 {
@@ -2642,7 +2642,7 @@ static int __init tscpu_init(void)
 		goto err_unreg;
 	}
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 /*For MT6753 PMIC 5A throttle patch*/
 	if (isMT6753T() == 0)
 		fast_polling_trip_temp = 40000;

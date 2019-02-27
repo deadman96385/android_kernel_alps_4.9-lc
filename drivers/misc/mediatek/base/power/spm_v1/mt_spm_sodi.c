@@ -74,7 +74,7 @@
 #if SODI_DVT_WAKEUP
 #define WAKE_SRC_FOR_SODI WAKE_SRC_EINT	/* WAKE_SRC_GPT | WAKE_SRC_EINT */
 #else
-#if defined(CONFIG_ARCH_MT6735)
+#if defined(CONFIG_MACH_MT6735)
 #if defined(CONFIG_MICROTRUST_TEE_SUPPORT)
 #define WAKE_SRC_FOR_SODI \
 	(WAKE_SRC_KP | WAKE_SRC_GPT | WAKE_SRC_EINT | WAKE_SRC_CONN_WDT | \
@@ -90,7 +90,7 @@
 	WAKE_SRC_CIRQ | WAKE_SRC_MD1_VRF18_WAKE | WAKE_SRC_SYSPWREQ | \
 	WAKE_SRC_MD_WDT | WAKE_SRC_C2K_WDT | WAKE_SRC_CLDMA_MD)
 #endif
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 #if defined(CONFIG_MICROTRUST_TEE_SUPPORT)
 #define WAKE_SRC_FOR_SODI \
 	(WAKE_SRC_KP | WAKE_SRC_GPT | WAKE_SRC_EINT | WAKE_SRC_CONN_WDT | \
@@ -106,7 +106,7 @@
 	WAKE_SRC_CIRQ | WAKE_SRC_MD1_VRF18_WAKE | WAKE_SRC_SYSPWREQ | \
 	WAKE_SRC_MD_WDT | WAKE_SRC_CLDMA_MD)
 #endif
-#elif defined(CONFIG_ARCH_MT6753)
+#elif defined(CONFIG_MACH_MT6753)
 #if defined(CONFIG_MICROTRUST_TEE_SUPPORT)
 #define WAKE_SRC_FOR_SODI \
 	(WAKE_SRC_KP | WAKE_SRC_GPT | WAKE_SRC_EINT | WAKE_SRC_CONN_WDT | \
@@ -301,7 +301,7 @@ static struct pwr_ctrl sodi_ctrl = {
 	.mfg_req_mask		= 1,
 	.lte_mask			= 1,
 
-#if defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6570) || defined(CONFIG_MACH_MT6580)
+#if defined(CONFIG_MACH_MT6735M) || defined(CONFIG_ARCH_MT6570) || defined(CONFIG_MACH_MT6580)
 	.md2_req_mask		= 1,
 #endif
 
@@ -555,7 +555,7 @@ void spm_go_to_sodi(u32 spm_flags, u32 spm_data)
 #ifdef SPM_VCORE_EN
 	/* If Vcore DVFS is disable, force to disable SODI internal Vcore DVS */
 	if (pwrctrl->pcm_flags_cust == 0) {
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M)
 		if ((pwrctrl->pcm_flags & SPM_VCORE_DVFS_EN) == 0)
 			pwrctrl->pcm_flags |= SPM_VCORE_DVS_EVENT_DIS;
 #else
@@ -593,7 +593,7 @@ void spm_go_to_sodi(u32 spm_flags, u32 spm_data)
 	mt_cirq_clone_gic();
 	mt_cirq_enable();
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 	__spm_enable_i2c4_clk();
 #endif
 
@@ -620,7 +620,7 @@ void spm_go_to_sodi(u32 spm_flags, u32 spm_data)
 
 	__spm_init_event_vector(pcmdesc);
 
-#if defined(CONFIG_ARCH_MT6735) ||  defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6735) ||  defined(CONFIG_MACH_MT6753)
 /* In MT6735M, do not set apsrc_req bit in SODI. */
 	/* Display set SPM_PCM_SRC_REQ[0]=1'b1 to force DRAM not enter self-refresh mode */
 	if ((spm_read(SPM_PCM_SRC_REQ) & 0x00000001))
@@ -829,7 +829,7 @@ void spm_go_to_sodi(u32 spm_flags, u32 spm_data)
 	aee_rr_rec_sodi_val(aee_rr_curr_sodi_val() | (1 << SPM_SODI_LEAVE_SPM_FLOW));
 #endif
 
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 	__spm_disable_i2c4_clk();
 #endif
 

@@ -332,7 +332,7 @@ enum {
 	NR_REASONS
 };
 
-#if defined(CONFIG_ARCH_MT6735)
+#if defined(CONFIG_MACH_MT6735)
 /* Idle handler on/off */
 static int idle_switch[NR_TYPES] = {
 	1,  /* dpidle switch */
@@ -383,7 +383,7 @@ static unsigned int slidle_condition_mask[NR_GRPS] = {
 	0x00000000, /* VDEC1: */
 	0x00000000, /* VENC:  */
 };
-#elif defined(CONFIG_ARCH_MT6735M)
+#elif defined(CONFIG_MACH_MT6735M)
 /* Idle handler on/off */
 static int idle_switch[NR_TYPES] = {
 	1,  /* dpidle switch */
@@ -434,7 +434,7 @@ static unsigned int slidle_condition_mask[NR_GRPS] = {
 	0x00000000, /* VDEC1: */
 	/* VENC: there is no venc */
 };
-#elif defined(CONFIG_ARCH_MT6753)
+#elif defined(CONFIG_MACH_MT6753)
 static int idle_switch[NR_TYPES] = {
 	1,  /* dpidle switch */
 #if defined(CONFIG_MTK_DISABLE_SODI)
@@ -703,7 +703,7 @@ static void __iomem *mfgsys_base;
 static void __iomem *mmsys_base;
 static void __iomem *imgsys_base;
 static void __iomem *vdecsys_base;
-#if !defined(CONFIG_ARCH_MT6735M)
+#if !defined(CONFIG_MACH_MT6735M)
 static void __iomem *vencsys_base;
 #endif
 static void __iomem *cksys_base;
@@ -779,7 +779,7 @@ static void get_all_clock_state(u32 clks[NR_GRPS])
 	clks[CG_PERI] = ~idle_readl(PERI_PDN0_STA); /* PERI */
 
 	if (sys_is_on(SYS_DIS)) {
-#if defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6753)
 		clks[CG_DISP0] = ~idle_readl(DISP_CG_DUMMY); /* DUMMY */
 #else
 		clks[CG_DISP0] = ~idle_readl(DISP_CG_CON0); /* DISP0 */
@@ -800,7 +800,7 @@ static void get_all_clock_state(u32 clks[NR_GRPS])
 		clks[CG_VDEC0] = idle_readl(VDEC_CKEN_SET); /* VDEC0 */
 		clks[CG_VDEC1] = idle_readl(LARB_CKEN_SET); /* VDEC1 */
 	}
-#if !defined(CONFIG_ARCH_MT6735M)
+#if !defined(CONFIG_MACH_MT6735M)
 	if (sys_is_on(SYS_VEN))
 		clks[CG_VENC] = idle_readl(VENC_CG_CON); /* VENC_JPEG */
 #endif
@@ -931,7 +931,7 @@ static void __init iomap_init(void)
 		{.compatible = "mediatek,mt6735-vdec_gcon"},
 		{ /* sentinel */ }
 	};
-#if !defined(CONFIG_ARCH_MT6735M)
+#if !defined(CONFIG_MACH_MT6735M)
 	static const struct of_device_id venc_gcon_ids[] = {
 		{.compatible = "mediatek,venc_gcon"},
 		{.compatible = "mediatek,mt6735-venc_gcon"},
@@ -951,7 +951,7 @@ static void __init iomap_init(void)
 	get_base_from_node(mmsys_config_ids, &mmsys_base, 0, "mmsys_config");
 	get_base_from_node(imgsys_ids, &imgsys_base, 0, "imgsys");
 	get_base_from_node(vdec_gcon_ids, &vdecsys_base, 0, "vdec_gcon");
-#if !defined(CONFIG_ARCH_MT6735M)
+#if !defined(CONFIG_MACH_MT6735M)
 	get_base_from_node(venc_gcon_ids, &vencsys_base, 0, "venc_gcon");
 #endif
 	get_base_from_node(cksys_ids, &cksys_base, 0, "cksys");
@@ -1571,14 +1571,14 @@ out:
 
 static void slidle_before_wfi(int cpu)
 {
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)
 	mt_dcm_topckg_enable();
 #endif
 }
 
 static void slidle_after_wfi(int cpu)
 {
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)
 	mt_dcm_topckg_disable();
 	slidle_cnt[cpu]++;
 #endif

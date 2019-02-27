@@ -100,20 +100,28 @@ config MTK_COMBO_CHIP_CONSYS_6761
 	  MT6761(BT/WIFI/GPS/FM combo chip)
 
 config MTK_COMBO_CHIP_CONSYS_8167
-    bool "MTK MT8167 combo chip support"
-    help
-      this config is used to decided SOC consys version
-      in current platform
-      is
-      MT8167(BT/WIFI/GPS/FM combo chip)
+	bool "MTK MT8167 combo chip support"
+	help
+	  this config is used to decided SOC consys version
+	  in current platform
+	  is
+	  MT8167(BT/WIFI/GPS/FM combo chip)
 
 config MTK_COMBO_CHIP_CONSYS_6580
-    bool "MTK MT6580 combo chip support"
-    help
-      this config is used to decided SOC consys version
-      in current platform
-      is
-      MT6580(BT/WIFI/GPS/FM combo chip)
+	bool "MTK MT6580 combo chip support"
+	help
+	  this config is used to decided SOC consys version
+	  in current platform
+	  is
+	  MT6580(BT/WIFI/GPS/FM combo chip)
+
+config MTK_COMBO_CHIP_CONSYS_6735
+	bool "MTK MT6735 combo chip support"
+	help
+	  this config is used to decided SOC consys version
+	  in current platform
+	  is
+	  MT6735(BT/WIFI/GPS/FM combo chip)
 
 endchoice
 
@@ -128,6 +136,7 @@ config MTK_COMBO_CHIP
 	default "CONSYS_6763" if MTK_COMBO_CHIP_CONSYS_6763
 	default "CONSYS_6758" if MTK_COMBO_CHIP_CONSYS_6758
 	default "CONSYS_6759" if MTK_COMBO_CHIP_CONSYS_6759
+	default "CONSYS_6735" if MTK_COMBO_CHIP_CONSYS_6735
 	default "CONSYS_6580" if MTK_COMBO_CHIP_CONSYS_6580
 	default "CONSYS_6765" if MTK_COMBO_CHIP_CONSYS_6765
 	default "CONSYS_6761" if MTK_COMBO_CHIP_CONSYS_6761

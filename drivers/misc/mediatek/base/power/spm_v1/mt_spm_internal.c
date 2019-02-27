@@ -511,7 +511,7 @@ void __spm_dpidle_sodi_restore_pmic_setting(u32 vsram_vosel_on_lb)
 									MT6328_PMIC_VSRAM_VOSEL_ON_LB_SHIFT);
 }
 
-#ifdef CONFIG_ARCH_MT6753
+#ifdef CONFIG_MACH_MT6753
 #include <mach/mt_clkmgr.h>
 #include <linux/i2c.h>
 #include "mt_i2c.h"

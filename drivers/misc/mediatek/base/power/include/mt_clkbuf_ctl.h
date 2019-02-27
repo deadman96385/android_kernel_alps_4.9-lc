@@ -14,7 +14,7 @@
 #ifndef _MT_CLK_BUF_CTL_H_
 #define _MT_CLK_BUF_CTL_H_
 
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)
 
 #include "../mt6735/mt_clkbuf_ctl.h"
 

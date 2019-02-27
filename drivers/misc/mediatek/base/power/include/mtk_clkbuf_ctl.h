@@ -17,7 +17,7 @@
 #if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) ||\
 	defined(CONFIG_MACH_MT6753)
 
-#include "../mt6735/mtk_clkbuf_ctl.h"
+#include "../../../include/mt-plat/mt6735/include/mach/mt_clkbuf_ctl.h"
 
 #elif defined(CONFIG_MACH_MT6755)
 

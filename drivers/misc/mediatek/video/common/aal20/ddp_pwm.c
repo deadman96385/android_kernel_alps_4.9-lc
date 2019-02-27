@@ -465,8 +465,8 @@ static void disp_pwm_log(int level_1024, int log_type)
 int is_disp_pwm_driver_ready(void)
 {
 	int status = 1;
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M)\
-	|| defined(CONFIG_ARCH_MT6753)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M)\
+	|| defined(CONFIG_MACH_MT6753)
 	status = primary_display_get_init_status();
 #endif
 	return status;

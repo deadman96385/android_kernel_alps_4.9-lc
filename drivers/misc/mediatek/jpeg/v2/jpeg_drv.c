@@ -326,7 +326,7 @@ void jpeg_drv_enc_power_on(void)
 #ifdef CONFIG_MTK_CLKMGR
 	/* REG_JPEG_MM_REG_MASK  = 0; */
 	enable_clock(MT_CG_DISP0_SMI_COMMON, "JPEG");
-	#ifdef CONFIG_ARCH_MT6735M
+	#ifdef CONFIG_MACH_MT6735M
 		enable_clock(MT_CG_IMAGE_JPGENC, "JPEG");
 	#else
 		enable_clock(MT_CG_VENC_LARB, "JPEG");
@@ -355,7 +355,7 @@ void jpeg_drv_enc_power_on(void)
 			if (clk_prepare_enable(gJpegClk.clk_venc_jpgEnc))
 				JPEG_ERR("enable clk_venc_jpgEnc fail!");
 
-			#ifndef CONFIG_ARCH_MT6735M
+			#ifndef CONFIG_MACH_MT6735M
 				if (clk_prepare_enable(gJpegClk.clk_venc_larb))
 					JPEG_ERR("enable clk_venc_larb fail!");
 			#endif
@@ -367,7 +367,7 @@ void jpeg_drv_enc_power_on(void)
 void jpeg_drv_enc_power_off(void)
 {
 #ifdef CONFIG_MTK_CLKMGR
-	#ifdef CONFIG_ARCH_MT6735M
+	#ifdef CONFIG_MACH_MT6735M
 		disable_clock(MT_CG_IMAGE_JPGENC, "JPEG");
 	#else
 		disable_clock(MT_CG_VENC_JPGENC, "JPEG");
@@ -383,7 +383,7 @@ void jpeg_drv_enc_power_off(void)
 			clk_disable_unprepare(gJpegClk.clk_venc_jpgEnc);
 			smi_bus_disable_unprepare(SMI_LARB7_REG_INDX, "JPEG", true);
 		#else
-			#ifndef CONFIG_ARCH_MT6735M
+			#ifndef CONFIG_MACH_MT6735M
 				clk_disable_unprepare(gJpegClk.clk_venc_larb);
 			#endif
 			clk_disable_unprepare(gJpegClk.clk_venc_jpgEnc);

@@ -18,7 +18,7 @@
 #ifndef __DTS_MT6735M_PINFUNC_H
 #define __DTS_MT6735M_PINFUNC_H
 
-#include "mt65xx.h"
+#include <dt-bindings/pinctrl/mt65xx.h>
 
 #define PINMUX_GPIO0__FUNC_GPIO0 (MTK_PIN_NO(0) | 0)
 #define PINMUX_GPIO0__FUNC_IDDIG (MTK_PIN_NO(0) | 1)

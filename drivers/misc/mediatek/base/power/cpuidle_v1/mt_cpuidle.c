@@ -43,8 +43,8 @@
 #define dormant_warn(fmt, args...)	pr_warn(TAG fmt, ##args)
 #define dormant_debug(fmt, args...)	pr_debug(TAG fmt, ##args)
 
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)
-#define CONFIG_ARCH_MT6735_SERIES
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)
+#define CONFIG_MACH_MT6735_SERIES
 #endif
 
 
@@ -61,9 +61,9 @@ static unsigned long gic_ci_base;
 
 #else
 static unsigned long gic_id_base;
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M)
 static unsigned long biu_base;
-#endif /* #if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) */
+#endif /* #if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) */
 
 #endif /* #ifdef CONFIG_MACH_MT6580 */
 
@@ -77,7 +77,7 @@ static unsigned int c2k_wdt_irq_bit;
 #endif
 #endif
 
-#if defined(CONFIG_ARCH_MT6735_SERIES) || (defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
+#if defined(CONFIG_MACH_MT6735_SERIES) || (defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
 #define CPUIDLE_CPU_IDLE_STA SPM_SLEEP_TIMER_STA
 #define CPUIDLE_CPU_IDLE_STA_OFFSET 16
 #define CPUIDLE_SPM_WAKEUP_MISC SPM_SLEEP_WAKEUP_MISC
@@ -85,7 +85,7 @@ static unsigned int c2k_wdt_irq_bit;
 #define CPUIDLE_WAKE_SRC_R12_KP_IRQ_B WAKE_SRC_KP
 #define CPUIDLE_WAKE_SRC_R12_CONN_WDT_IRQ_B WAKE_SRC_CONN_WDT
 #define CPUIDLE_WAKE_SRC_R12_LOWBATTERY_IRQ_B WAKE_SRC_LOW_BAT
-#if defined(CONFIG_ARCH_MT6735_SERIES)
+#if defined(CONFIG_MACH_MT6735_SERIES)
 #define CPUIDLE_WAKE_SRC_R12_MD1_WDT_B WAKE_SRC_MD_WDT
 #else
 #define CPUIDLE_WAKE_SRC_R12_MD1_WDT_B WAKE_SRC_MD1_WDT
@@ -118,7 +118,7 @@ static unsigned int c2k_wdt_irq_bit;
 #define SW_ROM_PD		BIT(31)
 #endif
 
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M)
 #define BIU_CONTROL		(biu_base)
 #define CMD_QUEUE_EN		BIT(0)
 #define DCM_EN			BIT(1)
@@ -211,7 +211,7 @@ void start_generic_timer(void)
 	write_cntpctl(read_cntpctl() | 1);
 }
 
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M)
 static inline void biu_reconfig(void)
 {
 	int val;
@@ -652,7 +652,7 @@ static void mt_cluster_save(int flags)
 
 static void mt_cluster_restore(int flags)
 {
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M)
 	biu_reconfig();
 #elif defined(CONFIG_ARCH_MT6797)
 	mt_gic_cpu_init_for_low_power();
@@ -859,7 +859,7 @@ static int mt_cpu_dormant_abort(unsigned long index)
 
 #endif
 
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M)
 	biu_reconfig();
 #endif
 
@@ -1053,10 +1053,10 @@ static void get_dts_nodes_irq_bit(void)
 	lowbattery_irq_bit = get_dts_node_irq_bit("mediatek,ap-auxadc", 3, 0);
 	md1_wdt_irq_bit = get_dts_node_irq_bit("mediatek,ap_ccif0", 6, 3);
 }
-#elif defined(CONFIG_ARCH_MT6735_SERIES)
+#elif defined(CONFIG_MACH_MT6735_SERIES)
 static void get_dts_nodes_address(void)
 {
-#if defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M)
+#if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M)
 	biu_base = get_dts_node_address("mediatek,mt6735-mcu_biu", 0);
 #endif
 	gic_id_base = get_dts_node_address("mediatek,mt6735-gic", 0);
