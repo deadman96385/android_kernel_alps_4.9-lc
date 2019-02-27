@@ -1121,7 +1121,7 @@ static void __ioctl(unsigned int ctlid, void *arg)
 }
 
 static struct mt_fh_hal_driver g_fh_hal_drv = {
-	//.fh_pll = g_fh_pll,
+	.fh_pll = g_fh_pll,
 	//.fh_usrdef = mt_ssc_fhpll_userdefined,
 	//.mempll = FH_MEM_PLLID,
 	//.lvdspll = FH_MAX_PLLID + 1,
