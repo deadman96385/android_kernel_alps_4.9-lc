@@ -608,9 +608,10 @@ firmware_class.path=/vendor/firmware loop.max_part=7";
 			two_stage_timeout = <1>;
 		};
 
-		TRNG@0x1020C000 {
-			compatible = "mediatek,TRNG";
-			reg = <0x1020C000 0x1000>;
+		trng@0x1020f000 {
+			compatible = "mediatek,trng";
+			reg = <0x1020f000 0x1000>,
+				<0x10001000 0x1000>;
 			interrupts = <0 87 0x8>;
 		};
 
