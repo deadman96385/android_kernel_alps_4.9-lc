@@ -256,7 +256,7 @@ firmware_class.path=/vendor/firmware";
 		};
 
 		apxgpt: apxgpt@10004000 {
-			compatible = "mediatek,mt6735-apxgpt";
+			compatible = "mediatek,APXGPT";
 			reg = <0x10004000 0x1000>;
 			interrupts = <GIC_SPI 152 IRQ_TYPE_LEVEL_LOW>;
 			clock-frequency = <13000000>;

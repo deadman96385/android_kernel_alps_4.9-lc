@@ -35,6 +35,9 @@
 #include <linux/slab.h>
 
 #include <mach/mt_gpt.h>
+#if defined(CONFIG_MACH_MT6735M) || defined (CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6753)
+#include <mach/mt_cpuxgpt.h>
+#endif
 #include <mt-plat/sync_write.h>
 
 #define GPT_CLKEVT_ID				(GPT1)
@@ -578,6 +581,17 @@ static inline void setup_syscnt(void)
 	struct gpt_device *dev = id_to_dev(GPT_SYSCNT_ID);
 
 	setup_gpt_dev_locked(dev, GPT_FREE_RUN, GPT_CLK_SRC_SYS, GPT_CLK_DIV_1, 0, NULL, 0);
+
+#if defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6735) || defined (CONFIG_MACH_MT6753)
+	/* map cpuxgpt address */
+	mt_cpuxgpt_map_base();
+
+	/* set cpuxgpt free run,cpuxgpt always free run & oneshot no need to set */
+	/* set cpuxgpt 13Mhz clock */
+	set_cpuxgpt_clk(CLK_DIV2);
+	/* enable cpuxgpt */
+	enable_cpuxgpt();
+#endif
 
 	pr_alert("fwq sysc count\n");
 }
