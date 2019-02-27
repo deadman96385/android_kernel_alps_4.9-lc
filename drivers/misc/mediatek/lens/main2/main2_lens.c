@@ -88,12 +88,12 @@ static struct stAF_DrvList g_stAF_DrvList[MAX_NUM_OF_LENS] = {
 	 LC898212XDAF_F_GetFileName, NULL},
 	{1, AFDRV_LC898217AF, LC898217AF_SetI2Cclient, LC898217AF_Ioctl,
 	 LC898217AF_Release, LC898217AF_GetFileName, NULL},
-	{1, AFDRV_LC898217AFA, LC898217AFA_SetI2Cclient, LC898217AF_Ioctl,
-	 LC898217AF_Release, LC898217AF_GetFileName, NULL},
-	{1, AFDRV_LC898217AFB, LC898217AFB_SetI2Cclient, LC898217AF_Ioctl,
-	 LC898217AF_Release, LC898217AF_GetFileName, NULL},
-	{1, AFDRV_LC898217AFC, LC898217AFC_SetI2Cclient, LC898217AF_Ioctl,
-	 LC898217AF_Release, LC898217AF_GetFileName, NULL},
+	{1, AFDRV_LC898217AFA, LC898217AFA_SetI2Cclient, LC898217AFA_Ioctl,
+	 LC898217AFA_Release, LC898217AFA_GetFileName, NULL},
+	{1, AFDRV_LC898217AFB, LC898217AFB_SetI2Cclient, LC898217AFB_Ioctl,
+	 LC898217AFB_Release, LC898217AFB_GetFileName, NULL},
+	{1, AFDRV_LC898217AFC, LC898217AFC_SetI2Cclient, LC898217AFC_Ioctl,
+	 LC898217AFC_Release, LC898217AFC_GetFileName, NULL},
 	{1, AFDRV_AK7371AF, AK7371AF_SetI2Cclient, AK7371AF_Ioctl,
 	 AK7371AF_Release, AK7371AF_GetFileName, NULL},
 	{1, AFDRV_BU64748AF, bu64748af_SetI2Cclient_Main2,
@@ -129,7 +129,7 @@ void MAIN2AF_PowerDown(void)
 
 #ifdef CONFIG_MACH_MT6758
 		AK7371AF_PowerDown(g_pstAF_I2Cclient,
-				      &g_s4AF_Opened);
+					&g_s4AF_Opened);
 #endif
 
 #ifdef CONFIG_MACH_MT6765
@@ -365,12 +365,12 @@ static int AF_Open(struct inode *a_pstInode, struct file *a_pstFile)
 {
 	LOG_INF("Start\n");
 
+	spin_lock(&g_AF_SpinLock);
 	if (g_s4AF_Opened) {
+		spin_unlock(&g_AF_SpinLock);
 		LOG_INF("The device is opened\n");
 		return -EBUSY;
 	}
-
-	spin_lock(&g_AF_SpinLock);
 	g_s4AF_Opened = 1;
 	spin_unlock(&g_AF_SpinLock);
 
