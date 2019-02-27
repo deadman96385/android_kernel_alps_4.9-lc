@@ -1941,7 +1941,7 @@ static int mt_auxadc_probe(struct platform_device *dev)
 	mt_auxadc_create_device_attr(adc_dev);
 	mt_auxadc_update_cali();
 
-	pr_err(TAG "MT AUXADC driver probe Done!\n");
+	pr_debug(TAG "MT AUXADC driver probe Done %d!\n", ret);
 
 	return ret;
 }
@@ -1995,6 +1995,14 @@ static int __init mt_auxadc_init(void)
 {
 	int ret;
 	pr_err(TAG "mt_auxadc_init\n");
+
+#if !defined(CONFIG_MTK_CLKMGR)
+#else
+#ifndef CONFIG_MTK_FPGA
+	if (enable_clock(MT_PDN_PERI_AUXADC, "AUXADC"))
+		pr_err("hwEnableClock AUXADC failed.");
+#endif
+#endif
 
 	ret = platform_driver_register(&mt_auxadc_driver);
 	if (ret) {
