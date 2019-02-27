@@ -14,7 +14,7 @@
 #ifndef _AUTOK_DVFS_H_
 #define _AUTOK_DVFS_H_
 #include "msdc_cust.h"
-#include "../autok.h" /* Peter check for build error */
+#include "autok.h"
 
 //#define VCOREFS_READY
 
