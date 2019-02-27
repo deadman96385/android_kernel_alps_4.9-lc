@@ -125,7 +125,7 @@ int update_userlimit_cpu_freq(int kicker, int num_cluster
 	perfmgr_trace_printk("cpu_ctrl", msg);
 #endif
 
-#ifndef CONFIG_MACH_MT6580
+#if !defined(CONFIG_MACH_MT6580) && !defined(CONFIG_MACH_MT6735) && !defined(CONFIG_MACH_MT6735M) && !defined(CONFIG_MACH_MT6753)
 	mt_ppm_userlimit_cpu_freq(perfmgr_clusters, final_freq);
 #endif
 
