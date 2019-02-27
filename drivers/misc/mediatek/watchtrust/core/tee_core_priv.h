@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
- 
+
 #ifndef __TEE_CORE_PRIV_H__
 #define __TEE_CORE_PRIV_H__
 

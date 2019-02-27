@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
- 
+
 #ifndef _TEE_KERNEL_API_H
 #define _TEE_KERNEL_API_H
 
@@ -31,10 +31,10 @@
  * and a trusted application.
  */
 /**
-* typedef struct {
-*  void *session;
-* } TEEC_Session;
-*/
+ * typedef struct {
+ *  void *session;
+ * } TEEC_Session;
+ */
 
 /**
  * TEEC_InitializeContext() - Initializes a context holding connection

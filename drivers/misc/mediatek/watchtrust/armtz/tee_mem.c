@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
- 
+
 /**
  * \file tee_mem.c
  * \brief Functions to manage a pool of memory chunks.

@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
- 
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -1436,23 +1436,25 @@ static int tz_tee_probe(struct platform_device *pdev)
 #endif
 
 	if (of_machine_is_compatible("mediatek,MT6735M")) {
-		log_paddr = (unsigned long)0x50100000;
+		log_paddr = 0x50100000;
 	} else if (of_machine_is_compatible("mediatek,MT6735")) {
-		log_paddr = (unsigned long)0x50100000;
+		log_paddr = 0x50100000;
 	} else if (of_machine_is_compatible("mediatek,MT6750")) {
-		log_paddr = (unsigned long)0x70100000;
+		log_paddr = 0x70100000;
 	} else if (of_machine_is_compatible("mediatek,MT6795")) {
-		log_paddr = (unsigned long)0x70100000;
+		log_paddr = 0x70100000;
 	} else if (of_machine_is_compatible("mediatek,MT6797")) {
-		log_paddr = (unsigned long)0x70100000;
+		log_paddr = 0x70100000;
 	} else if (of_machine_is_compatible("mediatek,MT6763")) {
-		log_paddr = (unsigned long)0x70100000;
+		log_paddr = 0x70100000;
 	} else if (of_machine_is_compatible("mediatek,mt6763")) {
-		log_paddr = (unsigned long)0x70100000;
+		log_paddr = 0x70100000;
 	} else if (of_machine_is_compatible("mediatek,mt6765")) {
-		log_paddr = (unsigned long)0x70100000;
+		log_paddr = 0x70100000;
 	} else if (of_machine_is_compatible("mediatek,MT6765")) {
-		log_paddr = (unsigned long)0x70100000;
+		log_paddr = 0x70100000;
+	} else if (of_machine_is_compatible("mediatek,MT6761")) {
+		log_paddr = 0x70100000;
 	} else {
 		pr_err("map TEE log share buff err: unknown Soc type\n");
 		goto bail3;

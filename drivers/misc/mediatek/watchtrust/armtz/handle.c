@@ -36,7 +36,7 @@ int handle_get(struct handle_db *db, void *ptr)
 {
 	unsigned int n;
 	void *p;
-	unsigned new_max_ptrs;
+	unsigned int new_max_ptrs;
 
 	if (!db || !ptr)
 		return -1;
@@ -71,7 +71,7 @@ void *handle_put(struct handle_db *db, int handle)
 {
 	void *p;
 
-	if (!db || handle < 0 || (unsigned)handle >= db->max_ptrs)
+	if (!db || handle < 0 || (unsigned int)handle >= db->max_ptrs)
 		return NULL;
 
 	p = db->ptrs[handle];
@@ -81,7 +81,7 @@ void *handle_put(struct handle_db *db, int handle)
 
 void *handle_lookup(struct handle_db *db, int handle)
 {
-	if (!db || handle < 0 || (unsigned)handle >= db->max_ptrs)
+	if (!db || handle < 0 || (unsigned int)handle >= db->max_ptrs)
 		return NULL;
 
 	return db->ptrs[handle];
