@@ -324,6 +324,10 @@ static int mtk_pmx_gpio_set_direction(struct pinctrl_dev *pctldev,
 		return mtk_pinctrl_set_gpio_direction(pctl, offset, !input);
 #endif
 
+	if (pctl->devdata->mt_set_gpio_dir) {
+	    return pctl->devdata->mt_set_gpio_dir(offset|0x80000000, (!input));
+	}
+
 	reg_addr = mtk_get_port(pctl, offset) + pctl->devdata->dir_offset;
 	bit = BIT(offset & 0xf);
 
@@ -354,6 +358,12 @@ static void mtk_gpio_set(struct gpio_chip *chip,
 		return;
 	}
 #endif
+
+	if (pctl->devdata->mt_set_gpio_out) {
+		pctl->devdata->mt_set_gpio_out(offset|0x80000000, value);
+		return;
+	}
+
 	reg_addr = mtk_get_port(pctl, offset) + pctl->devdata->dout_offset;
 	bit = BIT(offset & 0xf);
 
@@ -382,6 +392,13 @@ static int mtk_pconf_set_ies_smt(struct mtk_pinctrl *pctl, unsigned int pin,
 				pin, value);
 	}
 #endif
+
+	if (pctl->devdata->mt_set_gpio_ies || pctl->devdata->mt_set_gpio_smt) {
+		if (arg == PIN_CONFIG_INPUT_ENABLE)
+		return pctl->devdata->mt_set_gpio_ies(pin|0x80000000, value);
+		else if (arg == PIN_CONFIG_INPUT_SCHMITT_ENABLE)
+		return pctl->devdata->mt_set_gpio_smt(pin|0x80000000, value);
+	}
 
 	/**
 	 * Due to some soc are not support ies/smt config, add this special
@@ -468,8 +485,13 @@ static void mtk_pconf_set_direction(struct mtk_pinctrl *pctl, unsigned int pin,
 		int value, enum pin_config_param param)
 
 {
+#if defined(CONFIG_PINCTRL_MTK_NO_UPSTREAM)
 	if (pctl->devdata->pin_dir_grps)
 		mtk_pinctrl_set_gpio_direction(pctl, pin, value);
+#endif
+	if (pctl->devdata->mt_set_gpio_dir)
+		pctl->devdata->mt_set_gpio_dir(pin|0x80000000, value);
+
 }
 
 static int mtk_pconf_set_driving(struct mtk_pinctrl *pctl,
@@ -490,6 +512,10 @@ static int mtk_pconf_set_driving(struct mtk_pinctrl *pctl,
 		return pctl->devdata->mtk_pctl_set_gpio_drv(pctl,
 			pin, driving);
 #endif
+
+	if (pctl->devdata->mt_set_gpio_driving) {
+		return pctl->devdata->mt_set_gpio_driving(pin | 0x80000000, driving);
+	}
 
 	if (pin >= pctl->devdata->npins)
 		return -EINVAL;
@@ -590,6 +616,42 @@ static int mtk_pconf_set_pull_select(struct mtk_pinctrl *pctl,
 		return pctl->devdata->mtk_pctl_set_pull_sel(pctl, pin,
 			enable, isup, arg);
 #endif
+
+	if (pctl->devdata->mt_set_gpio_pull_enable) {
+		if (enable)
+			return pctl->devdata->mt_set_gpio_pull_enable(pin | 0x80000000, 1);
+	    else {
+			return pctl->devdata->mt_set_gpio_pull_enable(pin | 0x80000000, 0);
+		}
+	}
+
+	if (pctl->devdata->mt_set_gpio_pull_select) {
+		if (isup)
+			pctl->devdata->mt_set_gpio_pull_select(pin | 0x80000000, 1);
+		else
+			pctl->devdata->mt_set_gpio_pull_select(pin | 0x80000000, 0);
+
+		if (pctl->devdata->mt_set_gpio_pull_resistor) {
+			switch (arg) {
+
+			case MTK_PUPD_SET_R1R0_00:
+				break;
+			case MTK_PUPD_SET_R1R0_01:
+				pctl->devdata->mt_set_gpio_pull_resistor(pin | 0x80000000, 0x1);
+				break;
+			case MTK_PUPD_SET_R1R0_10:
+				pctl->devdata->mt_set_gpio_pull_resistor(pin | 0x80000000, 0x2);
+				break;
+			case MTK_PUPD_SET_R1R0_11:
+				pctl->devdata->mt_set_gpio_pull_resistor(pin | 0x80000000, 0x3);
+				break;
+			default:
+				break;
+			}
+		}
+		return 0;
+	}
+
 
 	if (pctl->devdata->spec_pull_set) {
 		ret = pctl->devdata->spec_pull_set(mtk_get_regmap(pctl, pin),
@@ -981,6 +1043,10 @@ static int mtk_pmx_set_mode(struct pinctrl_dev *pctldev,
 	reg_addr = ((pin / MAX_GPIO_MODE_PER_REG) << pctl->devdata->port_shf)
 			+ pctl->devdata->pinmux_offset;
 
+	if (pctl->devdata->spec_set_gpio_mode) {
+		return pctl->devdata->spec_set_gpio_mode(pin|0x80000000, mode);
+	}
+
 	mode &= mask;
 	bit = pin % MAX_GPIO_MODE_PER_REG;
 	mask <<= (GPIO_MODE_BITS * bit);
@@ -1107,6 +1173,10 @@ static int mtk_gpio_get_direction(struct gpio_chip *chip, unsigned int offset)
 	}
 #endif
 
+	if (pctl->devdata->mt_get_gpio_dir) {
+		return pctl->devdata->mt_get_gpio_dir(offset|0x80000000);
+	}
+
 	reg_addr =  mtk_get_port(pctl, offset) + pctl->devdata->dir_offset;
 	bit = BIT(offset & 0xf);
 
@@ -1128,6 +1198,13 @@ static int mtk_gpio_get(struct gpio_chip *chip, unsigned int offset)
 	if (pctl->devdata->pin_din_grps)
 		return mtk_pinctrl_get_gpio_input(pctl, offset);
 #endif
+
+	if (pctl->devdata->mt_get_gpio_out != NULL && pctl->devdata->mt_get_gpio_in != NULL) {
+		if (mtk_gpio_get_direction(chip, offset))
+			return pctl->devdata->mt_get_gpio_out(offset|0x80000000);
+		else
+			return pctl->devdata->mt_get_gpio_in(offset|0x80000000);
+	}
 
 	reg_addr = mtk_get_port(pctl, offset) +
 		pctl->devdata->din_offset;

@@ -24,6 +24,7 @@
 
 
 #define NO_EINT_SUPPORT    255
+#define MTK_CHIP_TYPE_BASE     0
 #define MT_EDGE_SENSITIVE           0
 #define MT_LEVEL_SENSITIVE          1
 #define EINT_DBNC_SET_DBNC_BITS     4
@@ -317,6 +318,21 @@ struct mtk_pinctrl {
  * @port_align: Provide clear register and set register step.
  * @regmap_num:chip regmap number.
  */
+
+extern int mt_set_gpio_mode(unsigned long pin, unsigned long mode);
+extern int mt_set_gpio_driving(unsigned long pin, unsigned long strength);
+extern int mt_set_gpio_dir(unsigned long pin, unsigned long dir);
+extern int mt_get_gpio_dir(unsigned long pin);
+extern int mt_get_gpio_out(unsigned long pin);
+extern int mt_set_gpio_out(unsigned long pin, unsigned long output);
+extern int mt_get_gpio_in(unsigned long pin);
+extern int mt_set_gpio_ies(unsigned long pin, unsigned long enable);
+extern int mt_set_gpio_smt(unsigned long pin, unsigned long enable);
+extern int mt_set_gpio_slew_rate(unsigned long pin, unsigned long enable);
+extern int mt_set_gpio_pull_enable(unsigned long pin, unsigned long enable);
+extern int mt_set_gpio_pull_select(unsigned long pin, unsigned long select);
+extern int mt_set_gpio_pull_resistor(unsigned long pin, unsigned long resistors);
+
 struct mtk_pinctrl_devdata {
 #ifdef CONFIG_MTK_EINT_MULTI_TRIGGER_DESIGN
 	struct mtk_desc_pin		*pins;
@@ -383,6 +399,19 @@ struct mtk_pinctrl_devdata {
 		unsigned int pin);
 	int (*mtk_pctl_get_pull_en)(struct mtk_pinctrl *pctl, unsigned int pin);
 #endif
+	int (*spec_set_gpio_mode)(unsigned long pin, unsigned long mode);
+	int (*mt_set_gpio_dir)(unsigned long pin, unsigned long dir);
+	int (*mt_get_gpio_dir)(unsigned long pin);
+	int (*mt_get_gpio_out)(unsigned long pin);
+	int (*mt_set_gpio_out)(unsigned long pin, unsigned long output);
+	int (*mt_set_gpio_driving)(unsigned long pin, unsigned long strength);
+	int (*mt_get_gpio_in)(unsigned long pin);
+	int (*mt_set_gpio_ies)(unsigned long pin, unsigned long enable);
+	int (*mt_set_gpio_smt)(unsigned long pin, unsigned long enable);
+	int (*mt_set_gpio_slew_rate)(unsigned long pin, unsigned long enable);
+	int (*mt_set_gpio_pull_enable)(unsigned long pin, unsigned long enable);
+	int (*mt_set_gpio_pull_select)(unsigned long pin, unsigned long select);
+	int (*mt_set_gpio_pull_resistor)(unsigned long pin, unsigned long resistors);
 	unsigned int dir_offset;
 	unsigned int ies_offset;
 	unsigned int smt_offset;
@@ -397,6 +426,7 @@ struct mtk_pinctrl_devdata {
 	unsigned char  port_shf;
 	unsigned char  port_mask;
 	unsigned char  port_align;
+	unsigned char	chip_type;
 	struct mtk_eint_offsets eint_offsets;
 	unsigned int	ap_num;
 	unsigned int	db_cnt;
