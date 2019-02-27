@@ -1187,8 +1187,7 @@ firmware_class.path=/vendor/firmware";
 		};
 
 		touch: touch@ {
-			compatible = "mediatek,mt6735-touch",
-						"mediatek,mt6735m-touch";
+			compatible = "mediatek,touch";
 			vtouch-supply = <&mt_pmic_vgp1_ldo_reg>;
 		};
 
