@@ -384,6 +384,13 @@ static const struct file_operations mfgclk_fops = {
 	.release = single_release,
 };
 #endif
+
+__weak void mt_power_off(void)
+{
+	/* fix RTC disable build error */
+}
+
+
 static int __init mt_power_management_init(void)
 {
 #ifdef DEBUG_FQMTR
