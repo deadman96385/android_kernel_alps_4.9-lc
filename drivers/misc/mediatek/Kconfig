@@ -387,12 +387,21 @@ config MTK_DM_VERITY_OFF
 	default n
 
 config SYSTEM_AS_ROOT
-    bool "Support system-as-root"
-    default y
-    help
-        Y means to enable system-as-root.
-        This option merges ramdisk into system image
-        All new launched projects in android P should enable it.
-        If you are not sure about this, set n
+	bool "Support system-as-root"
+	default y
+	help
+	  Y means to enable system-as-root.
+	  This option merges ramdisk into system image
+	  All new launched projects in android P should enable it.
+	  If you are not sure about this, set n
+
+config MTK_OTA_DEVICE
+	bool "OTA device"
+	default n
+	help
+	  This is an option for OTA devices configuration
+	  It support legacy flow when it declares ota devices.
+	  Internal project will disable it to support full functionality.
+	  If you are not sure about this, do not set it to y.
 
 endmenu    # Misc
