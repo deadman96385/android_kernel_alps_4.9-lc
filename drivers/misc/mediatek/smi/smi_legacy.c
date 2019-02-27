@@ -159,21 +159,25 @@ static int smi_enable_clock(const unsigned int reg_indx, char *user_name)
 
 static int smi_disable_clock(const unsigned int reg_indx, char *user_name)
 {
-	int ret;
+	int ret = 0;
 
 	switch (reg_indx) {
 	case 0:
 		ret = mt_disable_clock(MT_CG_DISP0_SMI_LARB0, user_name);
+		break;
 	case 1:
 #if IS_ENABLED(CONFIG_MACH_MT6580)
 		ret = mt_disable_clock(MT_CG_LARB1_SMI_CKPDN, user_name);
+		break;
 #else /* IS_ENABLED(CONFIG_MACH_MT6735M) */
 		ret = mt_disable_clock(MT_CG_VDEC1_LARB, user_name);
+		break;
 	case 2:
 		ret = mt_disable_clock(MT_CG_IMAGE_LARB2_SMI, user_name);
+		break;
 #endif
 	default:
-		ret = 0;
+		break;
 	}
 	if (ret)
 		return ret;
