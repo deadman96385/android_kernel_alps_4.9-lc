@@ -167,6 +167,7 @@ static void StartAudioCaptureHardware(struct snd_pcm_substream *substream)
 	}
 
 	SetMemoryPathEnable(Soc_Aud_Digital_Block_MEM_VUL, true);
+	udelay(300);
 	/* here to set interrupt */
 	irq_add_user(substream,
 		     Soc_Aud_IRQ_MCU_MODE_IRQ2_MCU_MODE,
