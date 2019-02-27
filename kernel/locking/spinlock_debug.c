@@ -147,19 +147,12 @@ static void __spin_lock_debug(raw_spinlock_t *lock)
 		return;
 	}
 
-#ifdef CONFIG_PREEMPT_MONITOR
-	MT_trace_spin_lock_start(lock);
-#endif
-
 	t1 = sched_clock();
 	t2 = t1;
 
 	for (;;) {
 		for (i = 0; i < loops; i++) {
 			if (arch_spin_trylock(&lock->raw_lock)) {
-#ifdef CONFIG_PREEMPT_MONITOR
-				MT_trace_spin_lock_end(lock);
-#endif
 				return;
 			}
 			__delay(1);
