@@ -24,7 +24,7 @@
 #include <linux/irqdomain.h>
 #include <linux/device.h>
 #include <linux/platform_device.h>
-#include <linux/irqchip/mt-gic.h>
+#include <linux/irqchip/mtk-gic.h>
 #if defined(CONFIG_FIQ_GLUE)
 #include <asm/fiq.h>
 #include <asm/fiq_glue.h>
@@ -36,6 +36,8 @@
 #include <mach/mt_secure_api.h>
 #include <linux/trusty/trusty.h>
 #include <linux/trusty/smcall.h>
+
+#include "irq.h"
 
 #define GIC_ICDISR (GIC_DIST_BASE + 0x80)
 #define GIC_ICDISER0 (GIC_DIST_BASE + 0x100)
@@ -186,11 +188,6 @@ void mt_irq_set_sens(unsigned int irq, unsigned int sens)
 	dsb();
 }
 EXPORT_SYMBOL(mt_irq_set_sens);
-
-static inline unsigned int gic_irq(struct irq_data *d)
-{
-	return d->hwirq;
-}
 
 #ifdef CONFIG_SMP
 static int gic_set_affinity(struct irq_data *d,
@@ -345,6 +342,7 @@ EXPORT_SYMBOL(mt_irq_set_polarity);
 static int mt_irq_set_type(struct irq_data *data, unsigned int flow_type)
 {
 	const unsigned int irq = data->irq;
+	struct irq_desc *desc;
 
 #if defined(__CHECK_IRQ_TYPE)
 	if (irq > (NR_GIC_SGI + NR_GIC_PPI)) {
@@ -400,12 +398,14 @@ static int mt_irq_set_type(struct irq_data *data, unsigned int flow_type)
 		mt_irq_set_sens(irq, MT_EDGE_SENSITIVE);
 		mt_irq_set_polarity(irq,
 				    (flow_type & IRQF_TRIGGER_FALLING) ? 0 : 1);
-		__irq_set_handler_locked(irq, handle_edge_irq);
+		desc = irq_to_desc(irq);
+		desc->handle_irq = handle_edge_irq;
 	} else if (flow_type & (IRQF_TRIGGER_HIGH | IRQF_TRIGGER_LOW)) {
 		mt_irq_set_sens(irq, MT_LEVEL_SENSITIVE);
 		mt_irq_set_polarity(irq,
 				    (flow_type & IRQF_TRIGGER_LOW) ? 0 : 1);
-		__irq_set_handler_locked(irq, handle_level_irq);
+		desc = irq_to_desc(irq);
+		desc->handle_irq = handle_edge_irq;
 	}
 
 	return 0;
@@ -461,8 +461,6 @@ static int mt_gic_irq_domain_xlate(struct irq_domain *d,
 				   unsigned long *out_hwirq,
 				   unsigned int *out_type)
 {
-	if (d->of_node != controller)
-		return -EINVAL;
 	if (intsize < 3)
 		return -EINVAL;
 
@@ -661,7 +659,7 @@ static void mt_gic_cpu_init(void)
 	dsb();
 }
 
-void __cpuinit mt_gic_secondary_init(void)
+void mt_gic_secondary_init(void)
 {
 	mt_gic_cpu_init();
 }
@@ -1246,33 +1244,21 @@ static void __raise_priority(int irq)
 	spin_unlock_irqrestore(&irq_lock, flags);
 }
 
-static int
-restore_for_fiq(struct notifier_block *nfb, unsigned long action, void *hcpu)
+static int mt_gic_starting_cpu(unsigned int cpu)
 {
 	int i;
 
-	switch (action) {
-	case CPU_STARTING:
-		for (i = 0; i < ARRAY_SIZE(irqs_to_fiq); i++) {
-			if ((irqs_to_fiq[i].irq < (NR_GIC_SGI + NR_GIC_PPI))
-			    && (irqs_to_fiq[i].handler)) {
-				__set_security(irqs_to_fiq[i].irq);
-				__raise_priority(irqs_to_fiq[i].irq);
-				dsb();
-			}
+	for (i = 0; i < ARRAY_SIZE(irqs_to_fiq); i++) {
+		if ((irqs_to_fiq[i].irq < (NR_GIC_SGI + NR_GIC_PPI))
+		    && (irqs_to_fiq[i].handler)) {
+			__set_security(irqs_to_fiq[i].irq);
+			__raise_priority(irqs_to_fiq[i].irq);
+			dsb();
 		}
-		break;
-
-	default:
-		break;
 	}
 
-	return NOTIFY_OK;
+	return 0;
 }
-
-static struct notifier_block fiq_notifier __cpuinitdata = {
-	.notifier_call = restore_for_fiq,
-};
 
 static struct fiq_glue_handler fiq_handler = {
 	.fiq = fiq_isr,
@@ -1290,7 +1276,9 @@ static int __init_fiq(void)
 {
 	int ret;
 
-	register_cpu_notifier(&fiq_notifier);
+	cpuhp_setup_state_nocalls(CPUHP_AP_IRQ_GIC_STARTING,
+					"AP_IRQ_GIC_STARTING",
+					mt_gic_starting_cpu, NULL);
 
 #ifdef CONFIG_TRUSTY_WDT_FIQ_ARMV7_SUPPORT
 	/* set atomic enter for wdt */
@@ -1763,3 +1751,23 @@ static int __init mt_gic_init(void)
 #ifdef LDVT
 arch_initcall(mt_gic_init);
 #endif
+
+void set_irq_flags(unsigned int irq, unsigned int iflags)
+{
+	unsigned long clr = 0, set = IRQ_NOREQUEST | IRQ_NOPROBE | IRQ_NOAUTOEN;
+
+	if (irq >= nr_irqs) {
+		pr_err("Trying to set irq flags for IRQ%d\n", irq);
+		return;
+	}
+
+	if (iflags & IRQF_VALID)
+		clr |= IRQ_NOREQUEST;
+	if (iflags & IRQF_PROBE)
+		clr |= IRQ_NOPROBE;
+	if (!(iflags & IRQF_NOAUTOEN))
+		clr |= IRQ_NOAUTOEN;
+	/* Order is clear bits in "clr" then set bits in "set" */
+	irq_modify_status(irq, clr, set & ~clr);
+}
+EXPORT_SYMBOL_GPL(set_irq_flags);
