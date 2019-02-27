@@ -122,6 +122,7 @@ obj-$(CONFIG_MTK_JPEG)	+= jpeg/
 obj-$(CONFIG_MD32_SUPPORT)     += md32/
 obj-$(CONFIG_USB)	+= usb_boost/
 obj-$(CONFIG_MTK_SMARTPA_SOUND)	+= smartpa/
+obj-$(CONFIG_MTK_IRQ) += irq/
 obj-$(CONFIG_MTK_SYS_CIRQ) += cirq/
 obj-y += atf/
 obj-$(CONFIG_THERMAL)   += thermal/
