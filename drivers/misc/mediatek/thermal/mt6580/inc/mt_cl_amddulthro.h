@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 MediaTek Inc.
+ * Copyright (C) 2015 MediaTek Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -11,9 +11,4 @@
  * GNU General Public License for more details.
  */
 
-#ifndef __MT_CL_AMDDULTHRO_H__
-#define __MT_CL_AMDDULTHRO_H__
-
 extern int amddulthro_backoff(int level);
-
-#endif	/* __MT_CL_AMDDULTHRO_H__ */

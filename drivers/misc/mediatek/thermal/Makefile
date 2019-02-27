@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2017 MediaTek Inc.
+# Copyright (C) 2015 MediaTek Inc.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,8 +22,6 @@ endif
 
 ccflags-y  += -I$(THERMAL_CHIP_DRIVER_DIR)/inc
 ccflags-y  += -I$(srctree)/drivers/misc/mediatek/thermal/fakeHeader/
-ccflags-y  += -I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)
-ccflags-y  += -I$(srctree)/drivers/misc/mediatek/thermal/$(MTK_PLATFORM)/inc
 
 obj-$(CONFIG_THERMAL) += mtk_thermal_monitor.o
 obj-$(CONFIG_THERMAL) += mtk_cooler_shutdown.o
@@ -35,8 +33,9 @@ obj-$(CONFIG_THERMAL) += mtk_cooler_kshutdown.o
 #obj-$(CONFIG_THERMAL) += mtk_cooler_spkrvol.o
 #obj-$(CONFIG_THERMAL) += mtk_cooler_dropcall.o
 obj-$(CONFIG_THERMAL) += mtk_cooler_cam.o
+obj-$(CONFIG_THERMAL) += mtk_cooler_vrt.o
 
-ifeq (,$(filter $(CONFIG_MACH_MT8173) $(CONFIG_ARCH_MT8163) $(CONFIG_MACH_MT2701) $(CONFIG_ARCH_MT7623) $(CONFIG_ARCH_MT8127) $(CONFIG_MACH_MT8167), y))
+ifeq (,$(filter $(CONFIG_ARCH_MT8173) $(CONFIG_ARCH_MT8163) $(CONFIG_MACH_MT2701) $(CONFIG_ARCH_MT7623) $(CONFIG_ARCH_MT8127) $(CONFIG_ARCH_MT8167), y))
 obj-y += common/
 endif
 
