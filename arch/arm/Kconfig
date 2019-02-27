@@ -110,6 +110,8 @@ config MACH_MT6580
 	select CPU_V7
 	select FIQ_GLUE if (!TRUSTONIC_TEE_SUPPORT)
 	select HAVE_SMP
+	select EXT4_FS
+	select EXT4_FS_SECURITY
 	select NEED_MACH_MEMORY_H
 	select IRQ_DOMAIN
 	select IRQ_DOMAIN_DEBUG
