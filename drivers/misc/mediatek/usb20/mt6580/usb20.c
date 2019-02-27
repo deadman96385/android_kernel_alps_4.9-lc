@@ -38,103 +38,11 @@
 #include <mt-plat/mtk_usb2jtag.h>
 #endif
 
-#ifndef FPGA_PLATFORM
-#include "mtk_spm_resource_req.h"
-
-static int dpidle_status = USB_DPIDLE_ALLOWED;
-module_param(dpidle_status, int, 0644);
-
-static int dpidle_debug;
-module_param(dpidle_debug, int, 0644);
-
-static DEFINE_SPINLOCK(usb_hal_dpidle_lock);
-
-#define DPIDLE_TIMER_INTERVAL_MS 30
-
-static void issue_dpidle_timer(void);
-
-static void dpidle_timer_wakeup_func(unsigned long data)
-{
-	struct timer_list *timer = (struct timer_list *)data;
-
-	DBG_LIMIT(1, "dpidle_timer<%p> alive", timer);
-	DBG(2, "dpidle_timer<%p> alive...\n", timer);
-
-	if (dpidle_status == USB_DPIDLE_TIMER)
-		issue_dpidle_timer();
-	kfree(timer);
-}
-
-static void issue_dpidle_timer(void)
-{
-	struct timer_list *timer;
-
-	timer = kzalloc(sizeof(struct timer_list), GFP_ATOMIC);
-	if (!timer)
-		return;
-
-	DBG(2, "add dpidle_timer<%p>\n", timer);
-	init_timer(timer);
-	timer->function = dpidle_timer_wakeup_func;
-	timer->data = (unsigned long)timer;
-	timer->expires = jiffies + msecs_to_jiffies(DPIDLE_TIMER_INTERVAL_MS);
-	add_timer(timer);
-}
-
-static void usb_6761_dpidle_request(int mode)
-{
-	unsigned long flags;
-
-	spin_lock_irqsave(&usb_hal_dpidle_lock, flags);
-
-	/* update dpidle_status */
-	dpidle_status = mode;
-
-	switch (mode) {
-	case USB_DPIDLE_ALLOWED:
-		spm_resource_req(SPM_RESOURCE_USER_SSUSB, SPM_RESOURCE_RELEASE);
-		if (likely(!dpidle_debug))
-			DBG_LIMIT(1, "USB_DPIDLE_ALLOWED");
-		else
-			DBG(0, "USB_DPIDLE_ALLOWED\n");
-		break;
-	case USB_DPIDLE_FORBIDDEN:
-		spm_resource_req(SPM_RESOURCE_USER_SSUSB, SPM_RESOURCE_ALL);
-		if (likely(!dpidle_debug))
-			DBG_LIMIT(1, "USB_DPIDLE_FORBIDDEN");
-		else
-			DBG(0, "USB_DPIDLE_FORBIDDEN\n");
-		break;
-	case USB_DPIDLE_SRAM:
-		spm_resource_req(SPM_RESOURCE_USER_SSUSB,
-				SPM_RESOURCE_CK_26M | SPM_RESOURCE_MAINPLL);
-		if (likely(!dpidle_debug))
-			DBG_LIMIT(1, "USB_DPIDLE_SRAM");
-		else
-			DBG(0, "USB_DPIDLE_SRAM\n");
-		break;
-	case USB_DPIDLE_TIMER:
-		spm_resource_req(SPM_RESOURCE_USER_SSUSB,
-				SPM_RESOURCE_CK_26M | SPM_RESOURCE_MAINPLL);
-		DBG(0, "USB_DPIDLE_TIMER\n");
-		issue_dpidle_timer();
-		break;
-	default:
-		DBG(0, "[ERROR] Are you kidding!?!?\n");
-		break;
-	}
-
-	spin_unlock_irqrestore(&usb_hal_dpidle_lock, flags);
-}
-#endif
-
 static u32 cable_mode = CABLE_MODE_NORMAL;
 #ifndef FPGA_PLATFORM
 struct clk *musb_clk;
 struct clk *musb_clk_top_sel;
 struct clk *musb_clk_univpll3_d4;
-static struct regulator *reg_vusb;
-static struct regulator *reg_va12;
 #endif
 
 void __iomem *usb_phy_base;
@@ -186,7 +94,7 @@ static struct musb_fifo_cfg fifo_cfg[] __initdata = {
 /* USB GADGET                                                     */
 /*=======================================================================*/
 static const struct of_device_id apusb_of_ids[] = {
-	{.compatible = "mediatek,mt6761-usb20",},
+	{.compatible = "mediatek,USB0",},
 	{},
 };
 
@@ -288,35 +196,6 @@ static void mt_usb_try_idle(struct musb *musb, unsigned long timeout)
 	mod_timer(&musb_idle_timer, timeout);
 }
 
-/* setup sram, only for mt6761 */
-static int usb_sram_init(void)
-{
-	struct device_node *node = NULL;
-	void __iomem *infra_mbist;
-
-	node = of_find_compatible_node(NULL, NULL,
-					"mediatek,infra_mbist");
-	if (!node) {
-		DBG(0, "infra_mbist map node failed\n");
-		return -1;
-	}
-
-	infra_mbist = of_iomap(node, 0);
-	if (!infra_mbist) {
-		DBG(0, "iomap infra_mbist failed\n");
-		return -1;
-	}
-
-	/* usb20_top_bist */
-	writel(0x093cc01b, infra_mbist + 0x2c);
-	/* wait stable */
-	mdelay(1);
-
-	iounmap(infra_mbist);
-
-	return 0;
-}
-
 static int real_enable = 0, real_disable;
 static int virt_enable = 0, virt_disable;
 static void mt_usb_enable(struct musb *musb)
@@ -346,9 +225,6 @@ static void mt_usb_enable(struct musb *musb)
 	#endif
 
 	flags = musb_readl(musb->mregs, USB_L1INTM);
-
-	/* only for mt6761 */
-	usb_sram_init();
 
 	usb_phy_recover();
 
@@ -1574,46 +1450,8 @@ static int __init mt_usb_init(struct musb *musb)
 	musb->power = false;
 	musb->is_host = false;
 	musb->fifo_size = 8 * 1024;
-#ifndef FPGA_PLATFORM
-	musb->usb_rev6_setting = usb_rev6_setting;
-#endif
 
 	wakeup_source_init(&musb->usb_lock, "USB suspend lock");
-
-#ifndef FPGA_PLATFORM
-	reg_vusb = regulator_get(musb->controller, "vusb");
-	if (!IS_ERR(reg_vusb)) {
-#ifdef NEVER
-#define	VUSB33_VOL_MIN 3070000
-#define	VUSB33_VOL_MAX 3070000
-		ret = regulator_set_voltage(reg_vusb,
-					VUSB33_VOL_MIN, VUSB33_VOL_MAX);
-		if (ret < 0)
-			pr_err("regulator set vol failed: %d\n", ret);
-		else
-			DBG(0, "regulator set vol ok, <%d,%d>\n",
-					VUSB33_VOL_MIN, VUSB33_VOL_MAX);
-#endif /* NEVER */
-		ret = regulator_enable(reg_vusb);
-		if (ret < 0) {
-			pr_err("regulator_enable vusb failed: %d\n", ret);
-			regulator_put(reg_vusb);
-		}
-	} else
-		pr_err("regulator_get vusb failed\n");
-
-
-	reg_va12 = regulator_get(musb->controller, "va12");
-	if (!IS_ERR(reg_va12)) {
-		ret = regulator_enable(reg_va12);
-		if (ret < 0) {
-			pr_err("regulator_enable va12 failed: %d\n", ret);
-			regulator_put(reg_va12);
-		}
-	} else
-		pr_err("regulator_get va12 failed\n");
-
-#endif
 
 	ret = device_create_file(musb->controller, &dev_attr_cmode);
 
@@ -1656,12 +1494,6 @@ static int __init mt_usb_init(struct musb *musb)
 static int mt_usb_exit(struct musb *musb)
 {
 	del_timer_sync(&musb_idle_timer);
-#ifndef FPGA_PLATFORM
-	if (reg_vusb)
-		regulator_put(reg_vusb);
-	if (reg_va12)
-		regulator_put(reg_va12);
-#endif
 #ifdef CONFIG_USB_MTK_OTG
 	mt_usb_otg_exit(musb);
 #endif
@@ -1822,9 +1654,6 @@ static int mt_usb_probe(struct platform_device *pdev)
 	isoc_ep_gpd_count = 248; /* 30 ms for HS, at most (30*8 + 1) */
 
 	mtk_host_qmu_force_isoc_restart = 0;
-#endif
-#ifndef FPGA_PLATFORM
-	register_usb_hal_dpidle_request(usb_6761_dpidle_request);
 #endif
 	register_usb_hal_disconnect_check(trigger_disconnect_check_work);
 

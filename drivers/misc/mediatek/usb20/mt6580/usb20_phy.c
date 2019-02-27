@@ -23,7 +23,6 @@
 #include <mtk_musb.h>
 #include <musb_core.h>
 #include "usb20.h"
-#include "mtk_devinfo.h"
 
 #ifdef CONFIG_OF
 #include <linux/of_address.h>
@@ -104,8 +103,6 @@ void usb_phy_switch_to_usb(void)
 #define SHFT_RG_USB20_VRT_VREF_SEL 12
 #define OFFSET_RG_USB20_TERM_VREF_SEL 0x4
 #define SHFT_RG_USB20_TERM_VREF_SEL 8
-#define OFFSET_RG_USB20_PHY_REV6 0x18
-#define SHFT_RG_USB20_PHY_REV6 30
 void usb_phy_tuning(void)
 {
 	static bool inited;
@@ -145,14 +142,6 @@ void usb_phy_tuning(void)
 				u2_term_ref << SHFT_RG_USB20_TERM_VREF_SEL);
 		}
 	}
-	if (u2_enhance != -1) {
-		if (u2_enhance <= VAL_MAX_WIDTH_2) {
-			USBPHY_CLR32(OFFSET_RG_USB20_PHY_REV6,
-				VAL_MAX_WIDTH_2 << SHFT_RG_USB20_PHY_REV6);
-			USBPHY_SET32(OFFSET_RG_USB20_PHY_REV6,
-					u2_enhance<<SHFT_RG_USB20_PHY_REV6);
-		}
-	}
 }
 
 #ifdef CONFIG_MTK_USB2JTAG_SUPPORT
@@ -162,7 +151,7 @@ int usb2jtag_usb_init(void)
 	void __iomem *usb_phy_base;
 	u32 temp;
 
-	node = of_find_compatible_node(NULL, NULL, "mediatek,mt6761-usb20");
+	node = of_find_compatible_node(NULL, NULL, "mediatek,USB0");
 	if (!node) {
 		pr_err("[USB2JTAG] map node @ mediatek,USB0 failed\n");
 		return -1;
@@ -210,114 +199,48 @@ void usb_prepare_enable_clock(bool enable)
 	}
 }
 
-DEFINE_MUTEX(prepare_lock);
-static atomic_t clk_prepare_cnt = ATOMIC_INIT(0);
-
 bool usb_prepare_clock(bool enable)
 {
-	int before_cnt = atomic_read(&clk_prepare_cnt);
-
-	mutex_lock(&prepare_lock);
-
-	if (IS_ERR_OR_NULL(musb_clk) ||
-			IS_ERR_OR_NULL(musb_clk_top_sel) ||
-			IS_ERR_OR_NULL(musb_clk_univpll3_d4)) {
-		DBG(0, "clk not ready\n");
-		mutex_unlock(&prepare_lock);
-		return 0;
-	}
-
-	if (enable) {
-
-		if (clk_prepare(musb_clk_top_sel)) {
-			DBG(0, "musb_clk_top_sel prepare fail\n");
-		} else {
-			if (clk_set_parent(musb_clk_top_sel,
-						musb_clk_univpll3_d4))
-				DBG(0, "musb_clk_top_sel set_parent fail\n");
-		}
-		if (clk_prepare(musb_clk))
-			DBG(0, "musb_clk prepare fail\n");
-
-		atomic_inc(&clk_prepare_cnt);
-	} else {
-
-		clk_unprepare(musb_clk_top_sel);
-		clk_unprepare(musb_clk);
-
-		atomic_dec(&clk_prepare_cnt);
-	}
-
-	mutex_unlock(&prepare_lock);
-
-	DBG(1, "enable(%d), usb prepare_cnt, before(%d), after(%d)\n",
-		enable, before_cnt, atomic_read(&clk_prepare_cnt));
-#ifdef CONFIG_MTK_AEE_FEATURE
-	if (atomic_read(&clk_prepare_cnt) < 0)
-		aee_kernel_warning("usb20", "usb clock prepare_cnt error\n");
-#endif
-	return 1;
+	return true;
 }
 
 static DEFINE_SPINLOCK(musb_reg_clock_lock);
+static void enable_phy_clock(bool enable)
+{
+	/* USB phy 48M clock , UNIVPLL_CON0[26] */
+	if (enable) {
+		enable_clock(MT_CG_UNIV_48M, "PERI_USB");
+		enable_clock(MT_CG_USB_48M, "PERI_USB");
+	} else {
+		disable_clock(MT_CG_UNIV_48M, "PERI_USB");
+		disable_clock(MT_CG_USB_48M, "PERI_USB");
+	}
+}
 
 bool usb_enable_clock(bool enable)
 {
 	static int count;
-	static int real_enable = 0, real_disable;
-	static int virt_enable = 0, virt_disable;
+	bool res = true;
 	unsigned long flags;
-
-	DBG(1, "enable(%d),count(%d),<%d,%d,%d,%d>\n",
-	    enable, count, virt_enable, virt_disable,
-	    real_enable, real_disable);
 
 	spin_lock_irqsave(&musb_reg_clock_lock, flags);
 
-	if (unlikely(atomic_read(&clk_prepare_cnt) <= 0)) {
-		DBG_LIMIT(1, "clock not prepare");
-		goto exit;
-	}
-
 	if (enable && count == 0) {
-		if (clk_enable(musb_clk_top_sel)) {
-			DBG(0, "musb_clk_top_sel enable fail\n");
-			goto exit;
-		}
-
-		if (clk_enable(musb_clk)) {
-			DBG(0, "musb_clk enable fail\n");
-			clk_disable(musb_clk_top_sel);
-			goto exit;
-		}
-
-		usb_hal_dpidle_request(USB_DPIDLE_FORBIDDEN);
-		real_enable++;
-
+		enable_phy_clock(true);
+		res = enable_clock(MT_CG_USB_SW_CG, "PERI_USB");
 	} else if (!enable && count == 1) {
-		clk_disable(musb_clk);
-		clk_disable(musb_clk_top_sel);
-
-		usb_hal_dpidle_request(USB_DPIDLE_ALLOWED);
-		real_disable++;
+		res = disable_clock(MT_CG_USB_SW_CG, "PERI_USB");
+		enable_phy_clock(false);
 	}
 
 	if (enable)
 		count++;
 	else
-		count = (count == 0) ? 0 : (count - 1);
-
-exit:
-	if (enable)
-		virt_enable++;
-	else
-		virt_disable++;
+		count = (count == 0) ? 0 : (count-1);
 
 	spin_unlock_irqrestore(&musb_reg_clock_lock, flags);
 
-	DBG(1, "enable(%d),count(%d), <%d,%d,%d,%d>\n",
-	    enable, count, virt_enable, virt_disable,
-	    real_enable, real_disable);
+	DBG(1, "enable(%d), count(%d) res=%d\n", enable, count, res);
 	return 1;
 }
 
@@ -506,22 +429,6 @@ void set_usb_phy_mode(int mode)
 	DBG(0, "force PHY to mode %d, 0x6c=%x\n", mode, USBPHY_READ32(0x6c));
 }
 
-void usb_rev6_setting(int value)
-{
-	static int direct_return;
-
-	if (direct_return)
-		return;
-
-	/* RG_USB20_PHY_REV[7:0] = 8'b01000000 */
-	USBPHY_CLR32(0x18, (0xFF << 24));
-
-	if (value)
-		USBPHY_SET32(0x18, (value << 24));
-	else
-		direct_return = 1;
-}
-
 /* M17_USB_PWR Sequence 20160603.xls */
 void usb_phy_poweron(void)
 {
@@ -567,10 +474,6 @@ void usb_phy_poweron(void)
 
 	/* force_suspendm, 1'b0 */
 	USBPHY_CLR32(0x68, (0x1 << 18));
-
-	/* RG_USB20_PHY_REV[7:0] = 8'b01000000 */
-	USBPHY_CLR32(0x18, (0xFF << 24));
-	USBPHY_SET32(0x18, (0x40 << 24));
 
 	/* wait for 800 usec. */
 	udelay(800);
@@ -665,8 +568,6 @@ void usb_phy_savecurrent(void)
 /* M17_USB_PWR Sequence 20160603.xls */
 void usb_phy_recover(void)
 {
-	unsigned int efuse_val = 0;
-
 #ifdef CONFIG_MTK_UART_USB_SWITCH
 	if (in_uart_mode) {
 		DBG(0, "At UART mode. No usb_phy_recover\n");
@@ -738,8 +639,9 @@ void usb_phy_recover(void)
 	/* RG_USB20_OTG_VBUSCMP_EN, 1'b1 */
 	USBPHY_SET32(0x18, (0x1 << 20));
 
-	/* RG_USB20_PHY_REV[7:0] = 8'b01000000 */
-	usb_rev6_setting(0x40);
+	/* 18. PASS RX sensitivity HQA requirement */
+	USBPHY_CLR8(0x18, 0x08);
+	USBPHY_SET8(0x18, 0x06);
 
 	/* wait 800 usec. */
 	udelay(800);
@@ -748,15 +650,6 @@ void usb_phy_recover(void)
 	set_usb_phy_mode(PHY_DEV_ACTIVE);
 
 	hs_slew_rate_cal();
-
-	/* M_ANALOG8[4:0] => RG_USB20_INTR_CAL[4:0] */
-	efuse_val = (get_devinfo_with_index(107) & (0x1f<<0)) >> 0;
-	if (efuse_val) {
-		DBG(0, "apply efuse setting, RG_USB20_INTR_CAL=0x%x\n",
-			efuse_val);
-		USBPHY_CLR32(0x04, (0x1F<<19));
-		USBPHY_SET32(0x04, (efuse_val<<19));
-	}
 
 	/* disc threshold to max, RG_USB20_DISCTH[7:4], dft:1000, MAX:1111 */
 	USBPHY_SET32(0x18, (0xf0<<0));
