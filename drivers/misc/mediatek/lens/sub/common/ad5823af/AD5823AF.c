@@ -143,23 +143,23 @@ static int initAF(void)
 
 	if (*g_pAF_Opened == 1) {
 
-	int i4RetValue = 0;
-	char Mode[2] = {(char)(0x02), (char)(0x01)};
-	char MoveTime[2] = {(char)(0x03), (char)(0x4B)};
-	char VCMMSB[2] = {(char)(0x04), (char)(0x05)};
-	char VCMLSB[2] = {(char)(0x05), (char)(0x32)};
+		int i4RetValue = 0;
+		char Mode[2] = {(char)(0x02), (char)(0x01)};
+		char MoveTime[2] = {(char)(0x03), (char)(0x4B)};
+		char VCMMSB[2] = {(char)(0x04), (char)(0x05)};
+		char VCMLSB[2] = {(char)(0x05), (char)(0x32)};
 
-	LOG_INF("mode_init : 0x02\n");
+		LOG_INF("mode_init : 0x02\n");
 
-	g_pstAF_I2Cclient->addr = AF_I2C_SLAVE_ADDR;
+		g_pstAF_I2Cclient->addr = AF_I2C_SLAVE_ADDR;
 
-	g_pstAF_I2Cclient->addr = g_pstAF_I2Cclient->addr >> 1;
+		g_pstAF_I2Cclient->addr = g_pstAF_I2Cclient->addr >> 1;
 
-	i4RetValue = i2c_master_send(g_pstAF_I2Cclient, Mode, 2);
-	i4RetValue = i2c_master_send(g_pstAF_I2Cclient, MoveTime, 2);
+		i4RetValue = i2c_master_send(g_pstAF_I2Cclient, Mode, 2);
+		i4RetValue = i2c_master_send(g_pstAF_I2Cclient, MoveTime, 2);
 #if 1
-	i4RetValue = i2c_master_send(g_pstAF_I2Cclient, VCMMSB, 2);
-	i4RetValue = i2c_master_send(g_pstAF_I2Cclient, VCMLSB, 2);
+		i4RetValue = i2c_master_send(g_pstAF_I2Cclient, VCMMSB, 2);
+		i4RetValue = i2c_master_send(g_pstAF_I2Cclient, VCMLSB, 2);
 #endif
 
 		spin_lock(g_pAF_SpinLock);

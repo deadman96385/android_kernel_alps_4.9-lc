@@ -152,45 +152,45 @@ static int initAF(void)
 
 	if (*g_pAF_Opened == 1) {
 
-	int i4RetValue = 0;
-	int ret = 0;
-	int cnt = 0;
-	unsigned char Temp;
+		int i4RetValue = 0;
+		int ret = 0;
+		int cnt = 0;
+		unsigned char Temp;
 
-	#if POWER_ALWAYS_ON
-	if (g_SkipAFUninit == 1) {
-		LOG_INF("Skip init driver\n");
-		g_SkipAFUninit = 0;
-		return 1;
-	}
-	#endif
-
-	s4AF_WriteReg(0, 0xF6, 0x00);
-	s4AF_WriteReg(0, 0x96, 0x20);
-	s4AF_WriteReg(0, 0x98, 0x00);
-
-	s4AF_ReadReg(0xF0, &Temp);
-
-	if (Temp == 0x72) {
-		s4AF_WriteReg(0, 0xE0, 0x01);
-		while (1) {
-			mdelay(20);
-			ret = s4AF_ReadReg(0xB3, &Temp);
-
-			if (Temp == 0 && ret == 0) {
-				i4RetValue = 1;
-				break;
-			}
-
-			if (cnt >= 20)
-				break;
-			cnt++;
+		#if POWER_ALWAYS_ON
+		if (g_SkipAFUninit == 1) {
+			LOG_INF("Skip init driver\n");
+			g_SkipAFUninit = 0;
+			return 1;
 		}
-		s4AF_WriteReg(0, 0xA1, 0x02);
-		mdelay(2);
-	} else {
-		LOG_INF("Check HW version: %x\n", Temp);
-	}
+		#endif
+
+		s4AF_WriteReg(0, 0xF6, 0x00);
+		s4AF_WriteReg(0, 0x96, 0x20);
+		s4AF_WriteReg(0, 0x98, 0x00);
+
+		s4AF_ReadReg(0xF0, &Temp);
+
+		if (Temp == 0x72) {
+			s4AF_WriteReg(0, 0xE0, 0x01);
+			while (1) {
+				mdelay(20);
+				ret = s4AF_ReadReg(0xB3, &Temp);
+
+				if (Temp == 0 && ret == 0) {
+					i4RetValue = 1;
+					break;
+				}
+
+				if (cnt >= 20)
+					break;
+				cnt++;
+			}
+			s4AF_WriteReg(0, 0xA1, 0x02);
+			mdelay(2);
+		} else {
+			LOG_INF("Check HW version: %x\n", Temp);
+		}
 
 
 		spin_lock(g_pAF_SpinLock);
