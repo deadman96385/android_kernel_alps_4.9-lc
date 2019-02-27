@@ -559,13 +559,6 @@ firmware_class.path=/vendor/firmware";
 			clock-names = "infra-cqdma";
 		};
 
-		keypad: keypad@10003000 {
-			compatible = "mediatek,mt6735-keypad",
-					"mediatek,mt6735m-keypad";
-			reg = <0x10003000 0x1000>;
-			interrupts = <GIC_SPI 164 IRQ_TYPE_EDGE_FALLING>;
-		};
-
 		apirtx:irtx@11011000 {
 			compatible = "mediatek,irtx";
 			reg = <0x11011000 0x1000>;
@@ -701,10 +694,13 @@ firmware_class.path=/vendor/firmware";
 			compatible = "mediatek,FHCTL";
 			reg = <0x10209F00 0x100>;
 		};
-		KP@0x10003000 {
-			compatible = "mediatek,KP";
+
+		keypad: keypad@10003000 {
+			compatible = "mediatek,kp",
+				"mediatek,mt6735-keypad",
+				"mediatek,mt6735m-keypad";
 			reg = <0x10003000 0x1000>;
-			interrupts = <0 164 0x2>;
+			interrupts = <GIC_SPI 164 IRQ_TYPE_EDGE_FALLING>;
 		};
 
 		eintc: eintc@10005000 {
