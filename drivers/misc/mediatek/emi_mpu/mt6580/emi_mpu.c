@@ -40,6 +40,7 @@
 #include <mach/mtk_ccci_helper.h>
 #include <mach/emi_mpu.h>
 #include <primary_display.h>
+#include <asm/highmem.h>
 
 #define ENABLE_EMI_CHKER
 #define ENABLE_EMI_WATCH_POINT
