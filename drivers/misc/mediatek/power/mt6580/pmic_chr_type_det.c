@@ -51,6 +51,7 @@
 #ifdef CONFIG_MTK_SMART_BATTERY
 extern void Charger_Detect_Init(void);
 extern void Charger_Detect_Release(void);
+extern bool is_usb_rdy(void);
 bool is_dcp_type = false;
 #if defined(CONFIG_POWER_EXT) || defined(CONFIG_MTK_FPGA)
 
@@ -61,25 +62,15 @@ int hw_charging_get_charger_type(void)
 
 #else
 
-static void hw_bc11_dump_register(void)
-{
-/*
-    battery_xlog_printk(BAT_LOG_FULL, "Reg[0x%x]=0x%x,Reg[0x%x]=0x%x\n",
-	MT6325_CHR_CON20, upmu_get_reg_value(MT6325_CHR_CON20),
-	MT6325_CHR_CON21, upmu_get_reg_value(MT6325_CHR_CON21)
-	);
-*/
-}
-
 static void hw_bc11_init(void)
 {
 	int timeout_count = 20;
 
 	msleep(200);
 	/* add make sure USB Ready */
-	if (is_usb_rdy() == KAL_FALSE) {
+	if (is_usb_rdy() == false) {
 		battery_log(BAT_LOG_CRTI, "CDP, block\n");
-		while (is_usb_rdy() == KAL_FALSE) {
+		while (is_usb_rdy() == false) {
 			msleep(100);
 			timeout_count--;
 			if (!timeout_count) {
