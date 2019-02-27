@@ -2330,6 +2330,7 @@ mtk_eint_debounce_process(struct mtk_pinctrl *pctl, int index)
 	}
 }
 
+#if defined(CONFIG_PINCTRL_MTK_NO_UPSTREAM)
 /*
  * mt_eint_print_status: Print the EINT status register.
  */
@@ -2366,6 +2367,7 @@ void mt_eint_print_status(void)
 	pr_notice("\n");
 }
 EXPORT_SYMBOL(mt_eint_print_status);
+#endif
 
 static void mtk_eint_sw_debounce_end(unsigned long data)
 {

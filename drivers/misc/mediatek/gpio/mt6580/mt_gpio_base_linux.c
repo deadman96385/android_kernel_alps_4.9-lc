@@ -30,7 +30,7 @@
 #include <linux/debugfs.h>
 #include <linux/of_gpio.h>
 #include <linux/idr.h>
-#include <linux/irqchip/mt-eic.h>
+#include <linux/irqchip/mtk-eic.h>
 
 static const signed int pin_eint_map[MT_GPIO_BASE_MAX] = {
 
