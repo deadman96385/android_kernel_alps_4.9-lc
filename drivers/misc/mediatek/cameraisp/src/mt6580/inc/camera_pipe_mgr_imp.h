@@ -71,36 +71,36 @@ enum CAM_PIPE_MGR_STATUS_ENUM {
 #define CAM_PIPE_MGR_LOCK_TABLE_VSS     ((1<<CAM_PIPE_MGR_PIPE_CAM_IO)| \
 					    (1<<CAM_PIPE_MGR_PIPE_POST_PROC))
 /* -------------------------------------------- */
-struct {
+struct CAM_PIPE_MGR_PROC_STRUCT {
 	pid_t Pid;
 	pid_t Tgid;
 	char ProcName[TASK_COMM_LEN];
-	unsigned long PipeMask;
-	unsigned long TimeS;
-	unsigned long TimeUS;
-} CAM_PIPE_MGR_PROC_STRUCT;
+	unsigned int PipeMask;
+	unsigned int TimeS;
+	unsigned int TimeUS;
+};
 /*  */
-struct {
+struct CAM_PIPE_MGR_PIPE_STRUCT {
 	pid_t Pid;
 	pid_t Tgid;
 	char ProcName[TASK_COMM_LEN];
-	unsigned long TimeS;
-	unsigned long TimeUS;
-} CAM_PIPE_MGR_PIPE_STRUCT;
+	unsigned int TimeS;
+	unsigned int TimeUS;
+};
 /*  */
-struct {
+struct CAM_PIPE_MGR_STRUCT {
 	unsigned long PipeMask;
 	spinlock_t SpinLock;
 	dev_t DevNo;
 	struct cdev *pCharDrv;
 	struct class *pClass;
 	wait_queue_head_t WaitQueueHead;
-	CAM_PIPE_MGR_MODE_STRUCT Mode;
+	struct CAM_PIPE_MGR_MODE_STRUCT Mode;
 	struct CAM_PIPE_MGR_PIPE_STRUCT PipeInfo[CAM_PIPE_MGR_PIPE_AMOUNT];
 	char PipeName[CAM_PIPE_MGR_PIPE_AMOUNT][CAM_PIPE_MGR_PIPE_NAME_LEN];
 	unsigned long PipeLockTable[CAM_PIPE_MGR_SCEN_HW_AMOUNT];
 	unsigned long LogMask;
-} CAM_PIPE_MGR_STRUCT;
+};
 /* -------------------------------------------- */
 #endif
 /* -------------------------------------------- */

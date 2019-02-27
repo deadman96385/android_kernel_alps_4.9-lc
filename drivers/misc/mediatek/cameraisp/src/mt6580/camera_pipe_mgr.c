@@ -48,21 +48,21 @@
 #endif
 
 /* ---------------------------------------------- */
-static CAM_PIPE_MGR_STRUCT CamPipeMgr;
-static MUINT32 Keep_PipeMask;
+static struct CAM_PIPE_MGR_STRUCT CamPipeMgr;
+static unsigned int Keep_PipeMask;
 static bool Flush_before;
 /* ---------------------------------------------- */
-static void CamPipeMgr_GetTime(MUINT32 *pSec, MUINT32 *pUSec)
+static void CamPipeMgr_GetTime(unsigned int *pSec, unsigned int *pUSec)
 {
 	ktime_t Time;
-	MUINT64 TimeSec;
+	unsigned long long TimeSec;
 	/*  */
 	Time = ktime_get();	/* ns */
 	TimeSec = Time.tv64;
 	do_div(TimeSec, 1000);
 	*pUSec = do_div(TimeSec, 1000000);
 	/*  */
-	*pSec = (MUINT64) TimeSec;
+	*pSec = (unsigned long long) TimeSec;
 }
 
 /* ---------------------------------------------- */
@@ -80,7 +80,7 @@ static inline void CamPipeMgr_SpinUnlock(void)
 }
 
 /* ---------------------------------------------- */
-static unsigned long CamPipeMgr_MsToJiffies(MUINT32 Ms)
+static unsigned long CamPipeMgr_MsToJiffies(unsigned int Ms)
 {
 	return (Ms * HZ + 512) >> 10;
 }
@@ -88,14 +88,14 @@ static unsigned long CamPipeMgr_MsToJiffies(MUINT32 Ms)
 /* ---------------------------------------------- */
 static void CamPipeMgr_DumpPipeInfo(void)
 {
-	MUINT32 i;
+	unsigned int i;
 	/*  */
 	LOG_MSG("E");
 	for (i = 0; i < CAM_PIPE_MGR_PIPE_AMOUNT; i++) {
 		if (CamPipeMgr.PipeInfo[i].Pid != 0 &&
 			CamPipeMgr.PipeInfo[i].Tgid != 0) {
 			LOG_MSG(
-			"Pipe(%ld,%s),Proc:Name(%s),Pid(%d),Tgid(%d),Time(%ld.%06ld)",
+			"Pipe(%d,%s),Proc:Name(%s),Pid(%d),Tgid(%d),Time(%d.%06d)",
 			i,
 			CamPipeMgr.PipeName[i],
 			CamPipeMgr.PipeInfo[i].ProcName,
@@ -109,10 +109,10 @@ static void CamPipeMgr_DumpPipeInfo(void)
 }
 
 /* ---------------------------------------------- */
-static MUINT32 CamPipeMgr_GtePipeLockTable(CAM_PIPE_MGR_SCEN_SW_ENUM ScenSw,
-					   CAM_PIPE_MGR_SCEN_HW_ENUM ScenHw)
+static unsigned int CamPipeMgr_GtePipeLockTable(enum CAM_PIPE_MGR_SCEN_SW_ENUM ScenSw,
+					   enum CAM_PIPE_MGR_SCEN_HW_ENUM ScenHw)
 {
-	MUINT32 PipeLockTable = 0;
+	unsigned int PipeLockTable = 0;
 	/*  */
 	switch (ScenHw) {
 	case CAM_PIPE_MGR_SCEN_HW_NONE:
@@ -194,9 +194,9 @@ static MUINT32 CamPipeMgr_GtePipeLockTable(CAM_PIPE_MGR_SCEN_SW_ENUM ScenSw,
 }
 
 /* ---------------------------------------------- */
-static void CamPipeMgr_UpdatePipeLockTable(CAM_PIPE_MGR_SCEN_SW_ENUM ScenSw)
+static void CamPipeMgr_UpdatePipeLockTable(enum CAM_PIPE_MGR_SCEN_SW_ENUM ScenSw)
 {
-	MUINT32 i;
+	unsigned int i;
 	/*  */
 	for (i = 0; i < CAM_PIPE_MGR_SCEN_HW_AMOUNT; i++)
 		CamPipeMgr.PipeLockTable[i] =
@@ -204,9 +204,9 @@ static void CamPipeMgr_UpdatePipeLockTable(CAM_PIPE_MGR_SCEN_SW_ENUM ScenSw)
 }
 
 /* ---------------------------------------------- */
-static void CamPipeMgr_StorePipeInfo(MUINT32 PipeMask)
+static void CamPipeMgr_StorePipeInfo(unsigned int PipeMask)
 {
-	MUINT32 i;
+	unsigned int i;
 	/*  */
 	/* LOG_MSG("PipeMask(0x%08X)",PipeMask); */
 	/*  */
@@ -229,7 +229,7 @@ static void CamPipeMgr_StorePipeInfo(MUINT32 PipeMask)
 				&(CamPipeMgr.PipeInfo[i].TimeUS));
 			} else {
 				LOG_ERR(
-				"PipeMask(0x%lX),Pipe(%ld,%s),Pid(%d),Tgid(%d),Time(%ld.%06ld)",
+				"PipeMask(0x%X),Pipe(%d,%s),Pid(%d),Tgid(%d),Time(%d.%06d)",
 				PipeMask, i,
 				CamPipeMgr.PipeInfo[i].ProcName,
 				CamPipeMgr.PipeInfo[i].Pid,
@@ -242,9 +242,9 @@ static void CamPipeMgr_StorePipeInfo(MUINT32 PipeMask)
 }
 
 /* ---------------------------------------------- */
-static void CamPipeMgr_RemovePipeInfo(MUINT32 PipeMask)
+static void CamPipeMgr_RemovePipeInfo(unsigned int PipeMask)
 {
-	MUINT32 i;
+	unsigned int i;
 	/*  */
 	/* LOG_MSG("PipeMask(0x%08X)",PipeMask); */
 	/*  */
@@ -263,7 +263,7 @@ static void CamPipeMgr_RemovePipeInfo(MUINT32 PipeMask)
 				CamPipeMgr.PipeInfo[i].ProcName)-1] = '\0';
 			} else {
 				LOG_WRN(
-				"PipeMask(0x%lX),Pipe(%ld,%s),Pid(%d),Tgid(%d),Time(%ld.%06ld)",
+				"PipeMask(0x%X),Pipe(%d,%s),Pid(%d),Tgid(%d),Time(%d.%06d)",
 				PipeMask, i,
 				CamPipeMgr.PipeInfo[i].ProcName,
 				CamPipeMgr.PipeInfo[i].Pid,
@@ -276,11 +276,11 @@ static void CamPipeMgr_RemovePipeInfo(MUINT32 PipeMask)
 }
 
 /* ---------------------------------------------- */
-static CAM_PIPE_MGR_STATUS_ENUM CamPipeMgr_LockPipe(
-CAM_PIPE_MGR_LOCK_STRUCT *pLock)
+static enum CAM_PIPE_MGR_STATUS_ENUM CamPipeMgr_LockPipe(
+struct CAM_PIPE_MGR_LOCK_STRUCT *pLock)
 {
-	MUINT32 Timeout;
-	CAM_PIPE_MGR_STATUS_ENUM Result = CAM_PIPE_MGR_STATUS_OK;
+	unsigned int Timeout;
+	enum CAM_PIPE_MGR_STATUS_ENUM Result = CAM_PIPE_MGR_STATUS_OK;
 	/*  */
 	if ((CamPipeMgr.PipeMask & pLock->PipeMask) == 0) {
 		if ((pLock->PipeMask & CamPipeMgr.
@@ -322,7 +322,7 @@ CAM_PIPE_MGR_LOCK_STRUCT *pLock)
 }
 
 /* ---------------------------------------------- */
-static void CamPipeMgr_UnlockPipe(CAM_PIPE_MGR_UNLOCK_STRUCT *pUnlock)
+static void CamPipeMgr_UnlockPipe(struct CAM_PIPE_MGR_UNLOCK_STRUCT *pUnlock)
 {
 	CamPipeMgr_RemovePipeInfo(pUnlock->PipeMask);
 	wake_up_interruptible(&(CamPipeMgr.WaitQueueHead));
@@ -332,23 +332,23 @@ static void CamPipeMgr_UnlockPipe(CAM_PIPE_MGR_UNLOCK_STRUCT *pUnlock)
 static int CamPipeMgr_Open(struct inode *pInode, struct file *pFile)
 {
 	int Ret = 0;
-	MUINT32 Sec = 0, USec = 0;
-	CAM_PIPE_MGR_PROC_STRUCT *pProc;
+	unsigned int Sec = 0, USec = 0;
+	struct CAM_PIPE_MGR_PROC_STRUCT *pProc;
 	/*  */
 	CamPipeMgr_GetTime(&Sec, &USec);
 	/*  */
-	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%ld.%06ld)",
+	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%d.%06d)",
 		current->comm, current->pid, current->tgid, Sec, USec);
 	/*  */
 	CamPipeMgr_SpinLock();
 	/*  */
 	pFile->private_data = NULL;
 	pFile->private_data = kmalloc(sizeof(
-	CAM_PIPE_MGR_PROC_STRUCT), GFP_ATOMIC);
+	struct CAM_PIPE_MGR_PROC_STRUCT), GFP_ATOMIC);
 	if (pFile->private_data == NULL) {
 		Ret = -ENOMEM;
 	} else {
-		pProc = (CAM_PIPE_MGR_PROC_STRUCT *) pFile->private_data;
+		pProc = (struct CAM_PIPE_MGR_PROC_STRUCT *) pFile->private_data;
 		pProc->Pid = 0;
 		pProc->Tgid = 0;
 		strncpy(pProc->ProcName, CAM_PIPE_MGR_PROC_NAME,
@@ -380,23 +380,23 @@ static int CamPipeMgr_Open(struct inode *pInode, struct file *pFile)
 /* ---------------------------------------------- */
 static int CamPipeMgr_Release(struct inode *pInode, struct file *pFile)
 {
-	MUINT32 Sec = 0, USec = 0;
-	CAM_PIPE_MGR_PROC_STRUCT *pProc;
-	CAM_PIPE_MGR_UNLOCK_STRUCT Unlock;
+	unsigned int Sec = 0, USec = 0;
+	struct CAM_PIPE_MGR_PROC_STRUCT *pProc;
+	struct CAM_PIPE_MGR_UNLOCK_STRUCT Unlock;
 	/*  */
 	CamPipeMgr_GetTime(&Sec, &USec);
 	/*  */
-	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%ld.%06ld)",
+	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%d.%06d)",
 		current->comm, current->pid, current->tgid, Sec, USec);
 	/*  */
 	if (pFile->private_data != NULL) {
-		pProc = (CAM_PIPE_MGR_PROC_STRUCT *) pFile->private_data;
+		pProc = (struct CAM_PIPE_MGR_PROC_STRUCT *) pFile->private_data;
 		/*  */
 		if (pProc->Pid != 0 || pProc->Tgid != 0 ||
 			pProc->PipeMask != 0) {
 			/*  */
 			LOG_WRN(
-			"Proc:Name(%s),Pid(%d),Tgid(%d),PipeMask(0x%lX),Time(%ld.%06ld)",
+			"Proc:Name(%s),Pid(%d),Tgid(%d),PipeMask(0x%X),Time(%d.%06d)",
 			pProc->ProcName,
 			pProc->Pid,
 			pProc->Tgid, pProc->PipeMask,
@@ -441,23 +441,23 @@ static int CamPipeMgr_Release(struct inode *pInode, struct file *pFile)
 /* ---------------------------------------------- */
 static int CamPipeMgr_Flush(struct file *pFile, fl_owner_t Id)
 {
-	MUINT32 Sec = 0, USec = 0;
-	CAM_PIPE_MGR_PROC_STRUCT *pProc;
-	CAM_PIPE_MGR_UNLOCK_STRUCT Unlock;
+	unsigned int Sec = 0, USec = 0;
+	struct CAM_PIPE_MGR_PROC_STRUCT *pProc;
+	struct CAM_PIPE_MGR_UNLOCK_STRUCT Unlock;
 	/*  */
 	CamPipeMgr_GetTime(&Sec, &USec);
 	/*  */
-	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%ld.%06ld)",
+	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%d.%06d)",
 		current->comm, current->pid, current->tgid, Sec, USec);
 	/*  */
 	if (pFile->private_data != NULL) {
-		pProc = (CAM_PIPE_MGR_PROC_STRUCT *) pFile->private_data;
+		pProc = (struct CAM_PIPE_MGR_PROC_STRUCT *) pFile->private_data;
 		/*  */
 		if (pProc->Pid != 0 || pProc->Tgid != 0
 			|| pProc->PipeMask != 0) {
 			/*  */
 			LOG_WRN(
-			"Proc:Name(%s),Pid(%d),Tgid(%d),PipeMask(0x%lX),Time(%ld.%06ld)",
+			"Proc:Name(%s),Pid(%d),Tgid(%d),PipeMask(0x%X),Time(%d.%06d)",
 			pProc->ProcName,
 			pProc->Pid,
 			pProc->Tgid, pProc->PipeMask,
@@ -533,19 +533,19 @@ static int CamPipeMgr_Flush(struct file *pFile, fl_owner_t Id)
 static long CamPipeMgr_Ioctl(struct file *pFile,
 unsigned int Cmd, unsigned long Param)
 {
-	MINT32 Ret = 0;
-	MUINT32 Sec = 0, USec = 0;
+	signed int Ret = 0;
+	unsigned int Sec = 0, USec = 0;
 	pid_t Pid;
 	pid_t Tgid;
 	char ProcName[TASK_COMM_LEN];
-	CAM_PIPE_MGR_LOCK_STRUCT Lock;
-	CAM_PIPE_MGR_UNLOCK_STRUCT Unlock;
-	CAM_PIPE_MGR_MODE_STRUCT Mode;
-	CAM_PIPE_MGR_ENABLE_STRUCT Enable;
-	CAM_PIPE_MGR_DISABLE_STRUCT Disable;
-	CAM_PIPE_MGR_PROC_STRUCT *pProc =
-	(CAM_PIPE_MGR_PROC_STRUCT *) pFile->private_data;
-	CAM_PIPE_MGR_STATUS_ENUM Status;
+	struct CAM_PIPE_MGR_LOCK_STRUCT Lock;
+	struct CAM_PIPE_MGR_UNLOCK_STRUCT Unlock;
+	struct CAM_PIPE_MGR_MODE_STRUCT Mode;
+	struct CAM_PIPE_MGR_ENABLE_STRUCT Enable;
+	struct CAM_PIPE_MGR_DISABLE_STRUCT Disable;
+	struct CAM_PIPE_MGR_PROC_STRUCT *pProc =
+	(struct CAM_PIPE_MGR_PROC_STRUCT *) pFile->private_data;
+	enum CAM_PIPE_MGR_STATUS_ENUM Status;
 	/*  */
 	CamPipeMgr_GetTime(&Sec, &USec);
 /*
@@ -566,7 +566,7 @@ unsigned int Cmd, unsigned long Param)
 	case CAM_PIPE_MGR_LOCK:
 	{
 		if (copy_from_user(&Lock, (void *)Param,
-		sizeof(CAM_PIPE_MGR_LOCK_STRUCT))
+		sizeof(struct CAM_PIPE_MGR_LOCK_STRUCT))
 			  == 0) {
 		if ((Lock.PipeMask & CamPipeMgr.
 		PipeLockTable[CamPipeMgr.Mode.
@@ -605,7 +605,7 @@ unsigned int Cmd, unsigned long Param)
 						PipeLockTable[CamPipeMgr.
 						Mode.ScenHw]);
 						LOG_MSG(
-						"LOCK:Proc:Name(%s),Pid(%d),Tgid(%d),PipeMask(0x%lX)",
+						"LOCK:Proc:Name(%s),Pid(%d),Tgid(%d),PipeMask(0x%X)",
 						pProc->ProcName, pProc->Pid,
 						pProc->Tgid, pProc->PipeMask);
 					}
@@ -648,7 +648,7 @@ unsigned int Cmd, unsigned long Param)
 		{
 		if (copy_from_user
 			(&Unlock, (void *)Param,
-			sizeof(CAM_PIPE_MGR_UNLOCK_STRUCT)) == 0) {
+			sizeof(struct CAM_PIPE_MGR_UNLOCK_STRUCT)) == 0) {
 			CamPipeMgr_SpinLock();
 			if (pProc->PipeMask & Unlock.PipeMask) {
 				CamPipeMgr_UnlockPipe(&Unlock);
@@ -677,7 +677,7 @@ unsigned int Cmd, unsigned long Param)
 					(unsigned long)CamPipeMgr.
 					PipeLockTable[CamPipeMgr.Mode.ScenHw]);
 					LOG_MSG(
-					"UNLOCK:Proc:Name(%s),Pid(%d),Tgid(%d),PipeMask(0x%lX)",
+					"UNLOCK:Proc:Name(%s),Pid(%d),Tgid(%d),PipeMask(0x%X)",
 					ProcName, Pid, Tgid, pProc->PipeMask);
 				}
 			} else {
@@ -738,7 +738,7 @@ unsigned int Cmd, unsigned long Param)
 	case CAM_PIPE_MGR_SET_MODE:
 		{
 			if (copy_from_user(&Mode, (void *)Param,
-				sizeof(CAM_PIPE_MGR_MODE_STRUCT))
+				sizeof(struct CAM_PIPE_MGR_MODE_STRUCT))
 			    == 0) {
 				if ((Mode.ScenHw > CAM_PIPE_MGR_SCEN_HW_VSS) ||
 					(Mode.ScenHw < 0)) {
@@ -783,7 +783,7 @@ unsigned int Cmd, unsigned long Param)
 				/*  */
 				CamPipeMgr_SpinLock();
 				memcpy(&(CamPipeMgr.Mode), &Mode,
-				sizeof(CAM_PIPE_MGR_MODE_STRUCT));
+				sizeof(struct CAM_PIPE_MGR_MODE_STRUCT));
 				CamPipeMgr_UpdatePipeLockTable(
 				CamPipeMgr.Mode.ScenSw);
 				CamPipeMgr_SpinUnlock();
@@ -828,7 +828,7 @@ unsigned int Cmd, unsigned long Param)
 			/*  */
 			if (copy_to_user
 			    ((void *)Param, &(CamPipeMgr.Mode),
-			     sizeof(CAM_PIPE_MGR_MODE_STRUCT)) == 0) {
+			     sizeof(struct CAM_PIPE_MGR_MODE_STRUCT)) == 0) {
 				/* do nothing. */
 			} else {
 				LOG_ERR("GET_MODE:copy_to_user fail");
@@ -840,7 +840,7 @@ unsigned int Cmd, unsigned long Param)
 	case CAM_PIPE_MGR_ENABLE_PIPE:
 		{
 			if (copy_from_user(&Enable, (void *)Param,
-				sizeof(CAM_PIPE_MGR_ENABLE_STRUCT)) == 0) {
+				sizeof(struct CAM_PIPE_MGR_ENABLE_STRUCT)) == 0) {
 				LOG_MSG(
 				"ENABLE_PIPE:Sw(%d),Hw(%d):EPM(0x%X),PLT(0x%lX)",
 				CamPipeMgr.Mode.ScenSw,
@@ -874,7 +874,7 @@ unsigned int Cmd, unsigned long Param)
 	case CAM_PIPE_MGR_DISABLE_PIPE:
 		{
 			if (copy_from_user(&Disable, (void *)Param,
-				sizeof(CAM_PIPE_MGR_DISABLE_STRUCT)) == 0) {
+				sizeof(struct CAM_PIPE_MGR_DISABLE_STRUCT)) == 0) {
 				LOG_MSG(
 				"DISABLE_PIPE:Sw(%d),Hw(%d):DPM(0x%X),PLT(0x%lX)",
 				CamPipeMgr.Mode.ScenSw,
@@ -919,12 +919,12 @@ EXIT:
 		    (CamPipeMgr.Mode.ScenSw == CAM_PIPE_MGR_SCEN_SW_NONE)) {
 			LOG_ERR("Fail");
 			LOG_ERR(
-			"Cur:Name(%s),pid(%d),tgid(%d),Time(%ld.%06ld)",
+			"Cur:Name(%s),pid(%d),tgid(%d),Time(%d.%06d)",
 			current->comm, current->pid,
 			current->tgid, Sec, USec);
 			if (pFile->private_data != NULL) {
 				LOG_ERR(
-				"Proc:Name(%s),Pid(%d),Tgid(%d),PipeMask(0x%lX),Time(%ld.%06ld)",
+				"Proc:Name(%s),Pid(%d),Tgid(%d),PipeMask(0x%X),Time(%d.%06d)",
 				pProc->ProcName, pProc->Pid, pProc->Tgid,
 				pProc->PipeMask, Sec, USec);
 			}
@@ -949,7 +949,7 @@ static const struct file_operations CamPipeMgr_FileOper = {
 /* ---------------------------------------------- */
 static int CamPipeMgr_RegCharDev(void)
 {
-	MINT32 Ret = 0;
+	signed int Ret = 0;
 	/*  */
 	LOG_MSG("E");
 	/*  */
@@ -958,7 +958,7 @@ static int CamPipeMgr_RegCharDev(void)
 				  CAM_PIPE_MGR_DEV_NO_MINOR,
 				  CAM_PIPE_MGR_DEV_NUM, CAM_PIPE_MGR_DEV_NAME);
 	if (Ret < 0) {
-		LOG_ERR("alloc_chrdev_region fail:Ret(%ld)", Ret);
+		LOG_ERR("alloc_chrdev_region fail:Ret(%d)", Ret);
 		return Ret;
 	}
 	/* Allocate memory for driver */
@@ -1002,22 +1002,22 @@ static inline void CamPipeMgr_UnregCharDev(void)
  */
 static int/*MINT32*/ CamPipeMgr_Probe(struct platform_device *pDev)
 {
-	MINT32 Ret = 0;
-	MUINT32 i;
+	signed int Ret = 0;
+	unsigned int i;
 	struct device *pDevice = NULL;
 	/*  */
 	LOG_MSG("CamPipeMgr_Probe E");
 	/*  */
 	Ret = CamPipeMgr_RegCharDev();
 	if (Ret < 0) {
-		LOG_ERR("RegCharDev fail:Ret(%ld)", Ret);
+		LOG_ERR("RegCharDev fail:Ret(%d)", Ret);
 		return (int) Ret;
 	}
 
 	CamPipeMgr.pClass = class_create(THIS_MODULE, CAM_PIPE_MGR_DEV_NAME);
 	if (IS_ERR(CamPipeMgr.pClass)) {
 		Ret = PTR_ERR(CamPipeMgr.pClass);
-		LOG_ERR("class_create fail:Ret(%ld)", Ret);
+		LOG_ERR("class_create fail:Ret(%d)", Ret);
 		return (int) Ret;
 	}
 	pDevice = device_create(CamPipeMgr.pClass,
@@ -1121,13 +1121,13 @@ static struct platform_driver CamPipeMgr_PlatformDriver = {
 /* ---------------------------------------------- */
 static int __init CamPipeMgr_Init(void)
 {
-	MINT32 Ret = 0;
+	signed int Ret = 0;
 	/*  */
 	LOG_MSG("E");
 	/*  */
 	Ret = platform_driver_register(&CamPipeMgr_PlatformDriver);
 	if (Ret < 0) {
-		LOG_ERR("Failed to register driver:Ret(%ld)", Ret);
+		LOG_ERR("Failed to register driver:Ret(%d)", Ret);
 		return Ret;
 	}
 	/*  */

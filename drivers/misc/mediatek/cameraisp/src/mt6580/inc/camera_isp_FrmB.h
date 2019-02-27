@@ -55,13 +55,13 @@ enum ISP_IRQ_WAITIRQ_SPEUSER_ENUM {
 	ISP_IRQ_WAITIRQ_SPEUSER_EIS = 1,
 	ISP_IRQ_WAITIRQ_SPEUSER_NUM
 };
-struct {
+struct ISP_IRQ_USER_STRUCT_FRMB {
 	enum ISP_IRQ_TYPE_ENUM_FRMB Type;
 	unsigned int Status;
 	int UserKey;		/* user key for doing interrupt operation */
-} ISP_IRQ_USER_STRUCT_FRMB;
+};
 
-struct {
+struct ISP_IRQ_TIME_STRUCT_FRMB {
 /* time stamp of the latest occurring signal */
 	unsigned int tLastSig_sec;
 /* time stamp of the latest occurring signal */
@@ -83,9 +83,9 @@ struct {
  */
 	unsigned int tLastSig2GetSig_usec;
 	int passedbySigcnt;	/* the count for the signal passed by  */
-} ISP_IRQ_TIME_STRUCT_FRMB;
+};
 
-struct {
+struct ISP_EIS_META_STRUCT {
 /* time stamp of the last closest occurring
  * sof signal for pass1 done
  */
@@ -94,9 +94,9 @@ struct {
  * sof signal for pass1 done
  */
 	unsigned int tLastSOF2P1done_usec;
-} ISP_EIS_META_STRUCT;
+};
 
-struct {
+struct ISP_WAIT_IRQ_STRUCT_FRMB {
 	enum ISP_IRQ_CLEAR_ENUM_FRMB Clear;
 	struct ISP_IRQ_USER_STRUCT_FRMB UserInfo;
 	struct ISP_IRQ_TIME_STRUCT_FRMB TimeInfo;
@@ -105,39 +105,39 @@ struct {
 /* time out for waiting for a specific interrupt */
 	unsigned int Timeout;
 	unsigned int bDumpReg;
-} ISP_WAIT_IRQ_STRUCT_FRMB;
+};
 
-struct {
+struct ISP_REGISTER_USERKEY_STRUCT_FRMB {
 	int userKey;
 	char *userName;
-} ISP_REGISTER_USERKEY_STRUCT_FRMB;
+};
 
 
-struct {
-	ISP_IRQ_TYPE_ENUM Type;
+struct ISP_READ_IRQ_STRUCT_FRMB {
+	enum ISP_IRQ_TYPE_ENUM Type;
 	unsigned int Status;
-} ISP_READ_IRQ_STRUCT_FRMB;
+};
 
-struct {
-	ISP_IRQ_TYPE_ENUM Type;
+struct ISP_CLEAR_IRQ_STRUCT_FRMB {
+	enum ISP_IRQ_TYPE_ENUM Type;
 	unsigned int Status;
-} ISP_CLEAR_IRQ_STRUCT_FRMB;
+};
 
 enum ISP_HOLD_TIME_ENUM_FRMB {
 	ISP_HOLD_TIME_VD_FRMB,
 	ISP_HOLD_TIME_EXPDONE_FRMB
 };
 
-struct {
+struct ISP_REG_STRUCT_FRMB {
 	unsigned int Addr_FrmB;	/* register's addr */
 	unsigned int Val_FrmB;	/* register's value */
-} ISP_REG_STRUCT_FRMB;
+};
 
-struct {
+struct ISP_REG_IO_STRUCT_FRMB {
 	/* unsigned int Data_FrmB;   // pointer to ISP_REG_STRUCT */
 	struct ISP_REG_STRUCT_FRMB *pData_FrmB;
 	unsigned int Count_FrmB;	/* count */
-} ISP_REG_IO_STRUCT_FRMB;
+};
 
 /* typedef void (*pIspCallback)(void); */
 
@@ -155,10 +155,10 @@ enum ISP_CALLBACK_ENUM_FRMB {
 	ISP_CALLBACK_AMOUNT_FRMB
 };
 
-struct {
-	ISP_CALLBACK_ENUM Type_FrmB;
+struct ISP_CALLBACK_STRUCT_FRMB {
+	enum ISP_CALLBACK_ENUM Type_FrmB;
 	pIspCallback Func_FrmB;
-} ISP_CALLBACK_STRUCT_FRMB;
+};
 
 /*  */
 /* length of the two memory areas */
@@ -183,7 +183,7 @@ enum _isp_tg_enum_ {
 };
 
 /*  */
-struct {
+struct ISP_RT_IMAGE_INFO_STRUCT {
 	unsigned int w;
 	unsigned int h;
 	unsigned int xsize;
@@ -196,26 +196,26 @@ struct {
 	unsigned int rpg;
 	unsigned int m_num_0;
 	unsigned int frm_cnt;
-} ISP_RT_IMAGE_INFO_STRUCT;
+};
 
-struct {
+struct ISP_RT_HRZ_INFO_STRUCT {
 	unsigned int srcX;	/* crop window start point */
 	unsigned int srcY;
 	unsigned int srcW;	/* crop window size */
 	unsigned int srcH;
 	unsigned int dstW;	/* rrz out size */
 	unsigned int dstH;
-} ISP_RT_HRZ_INFO_STRUCT;
+};
 
-struct {
+struct ISP_RT_DMAO_CROPPING_STRUCT {
 	unsigned int x;		/* in pix */
 	unsigned int y;		/* in pix */
 	unsigned int w;		/* in byte */
 	unsigned int h;		/* in byte */
-} ISP_RT_DMAO_CROPPING_STRUCT;
+};
 
 
-struct {
+struct ISP_RT_BUF_INFO_STRUCT_FRMB {
 	unsigned int memID;
 	unsigned int size;
 	long long base_vAddr;
@@ -228,20 +228,20 @@ struct {
 	struct ISP_RT_DMAO_CROPPING_STRUCT dmaoCrop;	/* imgo */
 	unsigned int bDequeued;
 	signed int bufIdx;	/* used for replace buffer */
-} ISP_RT_BUF_INFO_STRUCT_FRMB;
+};
 
 /*  */
-struct {
+struct ISP_DEQUE_BUF_INFO_STRUCT_FRMB {
 	unsigned int count;
 	unsigned int sof_cnt;	/* cnt for current sof */
 	unsigned int img_cnt;	/* cnt for mapping to which sof */
 	/*support only deque 1 image at a time */
 	/* ISP_RT_BUF_INFO_STRUCT  data[ISP_RT_BUF_SIZE]; */
 	struct ISP_RT_BUF_INFO_STRUCT_FRMB data[P1_DEQUE_CNT];
-} ISP_DEQUE_BUF_INFO_STRUCT_FRMB;
+};
 
 /*  */
-struct {
+struct ISP_RT_RING_BUF_INFO_STRUCT_FRMB {
 	unsigned int start;	/* current DMA accessing buffer */
 /* total buffer number.Include Filled and empty */
 	unsigned int total_count;
@@ -257,7 +257,7 @@ struct {
 	unsigned int read_idx;
 	unsigned int img_cnt;	/* cnt for mapping to which sof */
 	struct ISP_RT_BUF_INFO_STRUCT_FRMB data[ISP_RT_BUF_SIZE];
-} ISP_RT_RING_BUF_INFO_STRUCT_FRMB;
+};
 
 /*  */
 enum ISP_RT_BUF_CTRL_ENUM_FRMB {
@@ -279,21 +279,21 @@ enum ISP_RT_BUF_CTRL_ENUM_FRMB {
 	ISP_RT_BUF_CTRL_MAX_FRMB
 };
 
-struct {
-	ISP_RTBC_STATE_ENUM state;
+struct ISP_RT_BUF_STRUCT_FRMB {
+	enum ISP_RTBC_STATE_ENUM state;
 	unsigned long dropCnt;
 	struct ISP_RT_RING_BUF_INFO_STRUCT_FRMB ring_buf[_rt_dma_max_];
-} ISP_RT_BUF_STRUCT_FRMB;
+};
 /*  */
-struct {
+struct ISP_BUFFER_CTRL_STRUCT_FRMB {
 	enum ISP_RT_BUF_CTRL_ENUM_FRMB ctrl;
-	_isp_dma_enum_ buf_id;
+	enum _isp_dma_enum_ buf_id;
 	/* unsigned int            data_ptr; */
 	/* unsigned int            ex_data_ptr; //exchanged buffer */
 	struct ISP_RT_BUF_INFO_STRUCT_FRMB *data_ptr;
 	struct ISP_RT_BUF_INFO_STRUCT_FRMB *ex_data_ptr;
 	unsigned char *pExtend;
-} ISP_BUFFER_CTRL_STRUCT_FRMB;
+};
 
 
 /*  */
@@ -321,11 +321,11 @@ enum ISP_REF_CNT_ID_ENUM_FRMB {
 	ISP_REF_CNT_ID_MAX_FRMB,
 };
 
-struct {
+struct ISP_REF_CNT_CTRL_STRUCT_FRMB {
 	enum ISP_REF_CNT_CTRL_ENUM_FRMB ctrl;
 	enum ISP_REF_CNT_ID_ENUM_FRMB id;
 	signed int *data_ptr;
-} ISP_REF_CNT_CTRL_STRUCT_FRMB;
+};
 
 
 /* struct for enqueue/dequeue control in ihalpipe wrapper */
@@ -345,14 +345,14 @@ enum ISP_ED_BUFQUE_CTRL_ENUM {
 	ISP_ED_BUFQUE_CTRL_MAX
 };
 
-struct {
+struct ISP_ED_BUFQUE_STRUCT_FRMB {
 	enum ISP_ED_BUFQUE_CTRL_ENUM ctrl;
 	unsigned int processID;
 	unsigned int callerID;
 	int p2burstQIdx;
 	int p2dupCQIdx;
 	unsigned int timeoutUs;
-} ISP_ED_BUFQUE_STRUCT_FRMB;
+};
 
 enum ISP_ED_BUF_STATE_ENUM {
 	ISP_ED_BUF_STATE_NONE = -1,
@@ -374,72 +374,72 @@ enum ISP_ED_BUF_STATE_ENUM {
 
 #if defined(_rtbc_use_cq0c_)
 /*  */
-struct _cq_info_rtbc_st_frmb_ {
-	CQ_CMD_ST imgo_frmb;
-	CQ_CMD_ST img2o_frmb;	/* rrzo */
-	CQ_CMD_ST next_cq0ci_frmb;
-	CQ_CMD_ST end_frmb;
+struct CQ_INFO_RTBC_ST_FRMB {
+	struct CQ_CMD_ST imgo_frmb;
+	struct CQ_CMD_ST img2o_frmb;	/* rrzo */
+	struct CQ_CMD_ST next_cq0ci_frmb;
+	struct CQ_CMD_ST end_frmb;
 	unsigned long imgo_base_pAddr_frmb;
 	unsigned long img2o_base_pAddr_frmb;	/* rrzo */
 	signed int imgo_buf_idx_frmb;	/* used for replace buffer */
 	signed int img2o_buf_idx_frmb;	/* used for replace buffer//rrzo */
-} CQ_INFO_RTBC_ST_FRMB;
+};
 
-struct _cq_ring_cmd_st_frmb_ {
+struct CQ_RING_CMD_ST_FRMB {
 	struct CQ_INFO_RTBC_ST_FRMB cq_rtbc_frmb;
 	unsigned long next_pa_frmb;
-	struct _cq_ring_cmd_st_frmb_ *pNext_frmb;
-} CQ_RING_CMD_ST_FRMB;
+	struct CQ_RING_CMD_ST_FRMB *pNext_frmb;
+};
 
-struct _cq_rtbc_ring_st_frmb_ {
+struct CQ_RTBC_RING_ST_FRMB {
 	struct CQ_RING_CMD_ST_FRMB rtbc_ring_frmb[ISP_RT_CQ0C_BUF_SIZE];
 	unsigned long imgo_ring_size_frmb;
 	unsigned long img2o_ring_size_frmb;	/* rrzo */
-} CQ_RTBC_RING_ST_FRMB;
+};
 
 #endif
 
 /* CQ0B for AE smoothing, set obc_gain0~3 */
-struct _cq0b_info_rtbc_st_frmb_ {
-	CQ_CMD_ST ob_frmb;
-	CQ_CMD_ST end_frmb;
-} CQ0B_INFO_RTBC_ST_FRMB;
+struct CQ0B_INFO_RTBC_ST_FRMB {
+	struct CQ_CMD_ST ob_frmb;
+	struct CQ_CMD_ST end_frmb;
+};
 
-struct _cq0b_ring_cmd_st_frmb_ {
+struct CQ0B_RING_CMD_ST_FRMB {
 	struct CQ0B_INFO_RTBC_ST_FRMB cq0b_rtbc_frmb;
 	unsigned long next_pa_frmb;
-	struct _cq0b_ring_cmd_st_frmb_ *pNext_frmb;
-} CQ0B_RING_CMD_ST_FRMB;
+	struct CQ0B_RING_CMD_ST_FRMB *pNext_frmb;
+};
 
-struct _cq0b_rtbc_ring_st_frmb_ {
+struct CQ0B_RTBC_RING_ST_FRMB {
 	struct CQ0B_RING_CMD_ST_FRMB rtbc_ring_frmb;
-} CQ0B_RTBC_RING_ST_FRMB;
+};
 
 
 #ifdef CONFIG_COMPAT
-struct {
+struct compat_ISP_REGISTER_USERKEY_STRUCT_FRMB {
 	int userKey;
 	compat_uptr_t userName;
-} compat_ISP_REGISTER_USERKEY_STRUCT_FRMB;
+};
 
-struct {
+struct compat_ISP_REG_IO_STRUCT_FRMB {
 	compat_uptr_t pData;
 	unsigned int Count;	/* count */
-} compat_ISP_REG_IO_STRUCT_FRMB;
+};
 
-struct {
+struct compat_ISP_BUFFER_CTRL_STRUCT_FRMB {
 	ISP_RT_BUF_CTRL_ENUM ctrl;
-	_isp_dma_enum_ buf_id;
+	enum _isp_dma_enum_ buf_id;
 	compat_uptr_t data_ptr;
 	compat_uptr_t ex_data_ptr;	/* exchanged buffer */
 	compat_uptr_t pExtend;
-} compat_ISP_BUFFER_CTRL_STRUCT_FRMB;
+};
 
-struct {
+struct compat_ISP_REF_CNT_CTRL_STRUCT_FRMB {
 	ISP_REF_CNT_CTRL_ENUM ctrl;
 	ISP_REF_CNT_ID_ENUM id;
 	compat_uptr_t data_ptr;
-} compat_ISP_REF_CNT_CTRL_STRUCT_FRMB;
+};
 #endif
 
 /*  */
@@ -628,7 +628,7 @@ ISP_CMD_GET_CUR_SOF_FRMB, compat_uptr_t)
 
 /* basically , should separate into p1/p1_d/p2/camsv/camsv_d, */
 /* currently, only use camsv/camsv_d/others */
-enum _eISPIrq {
+enum eISPIrq {
 	_IRQ = 0,
 	_IRQ_D = 1,
 	_CAMSV_IRQ = 2,

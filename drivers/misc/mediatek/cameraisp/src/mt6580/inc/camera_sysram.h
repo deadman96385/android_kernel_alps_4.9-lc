@@ -40,13 +40,13 @@ enum SYSRAM_USER_ENUM {
 	SYSRAM_USER_NONE
 };
 /*  */
-struct {
+struct SYSRAM_ALLOC_STRUCT {
 	unsigned int Alignment;
 	unsigned int Size;
 	enum SYSRAM_USER_ENUM User;
 	unsigned int Addr;	/* In/Out : address */
 	unsigned int TimeoutMS;	/* In : millisecond */
-} SYSRAM_ALLOC_STRUCT;
+};
 /*  */
 enum SYSRAM_CMD_ENUM {
 	SYSRAM_CMD_ALLOC,
@@ -64,13 +64,13 @@ enum compat_SYSRAM_USER_ENUM {
 	compat_SYSRAM_USER_NONE
 };
 /*  */
-struct {
+struct compat_SYSRAM_ALLOC_STRUCT {
 	unsigned int Alignment;
 	unsigned int Size;
 	enum compat_SYSRAM_USER_ENUM User;
 	unsigned int Addr;	/* In/Out : address */
 	unsigned int TimeoutMS;	/* In : millisecond */
-} compat_SYSRAM_ALLOC_STRUCT;
+};
 #endif
 
 

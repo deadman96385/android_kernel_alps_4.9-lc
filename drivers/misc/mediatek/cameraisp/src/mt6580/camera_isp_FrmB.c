@@ -298,7 +298,7 @@ static signed int P2_Support_BurstQNum = 1;
 (_MAX_SUPPORT_P2_FRAME_NUM_/_MAX_SUPPORT_P2_BURSTQ_NUM_)
 #define P2_EDBUF_MLIST_TAG 1
 #define P2_EDBUF_RLIST_TAG 2
-struct {
+struct ISP_EDBUF_STRUCT {
 	unsigned int processID;	/* caller process ID */
 	unsigned int callerID;	/* caller thread ID */
 	/* p2 duplicate CQ index(for recognize
@@ -306,15 +306,15 @@ struct {
 	 */
 	signed int p2dupCQIdx;
 
-	ISP_ED_BUF_STATE_ENUM bufSts;	/* buffer status */
-} ISP_EDBUF_STRUCT;
+	enum ISP_ED_BUF_STATE_ENUM bufSts;	/* buffer status */
+};
 static signed int P2_EDBUF_RList_FirstBufIdx;
 static signed int P2_EDBUF_RList_CurBufIdx;
 static signed int P2_EDBUF_RList_LastBufIdx;
 static struct ISP_EDBUF_STRUCT P2_EDBUF_RingList[
 _MAX_SUPPORT_P2_FRAME_NUM_];
 
-struct {
+struct ISP_EDBUF_MGR_STRUCT {
 	unsigned int processID;	/* caller process ID */
 	unsigned int callerID;	/* caller thread ID */
 	/* p2 duplicate CQ index(for recognize belong
@@ -325,14 +325,14 @@ struct {
 	 * success or fail
 	 */
 	signed int dequedNum;
-} ISP_EDBUF_MGR_STRUCT;
+};
 static signed int P2_EDBUF_MList_FirstBufIdx;
 /* static volatile signed int P2_EDBUF_MList_CurBufIdx=0; */
 static signed int P2_EDBUF_MList_LastBufIdx;
 static struct ISP_EDBUF_MGR_STRUCT P2_EDBUF_MgrList[
 _MAX_SUPPORT_P2_PACKAGE_NUM_];
 
-static unsigned int g_regScen = 0xa5a5a5a5;
+// static unsigned int g_regScen = 0xa5a5a5a5;
 static spinlock_t SpinLockRegScen;
 
 /* m4u_callback_ret_t ISP_M4U_TranslationFault_
@@ -350,7 +350,7 @@ static int *pTbl_RTBuf;
 static void *pBuf_kmalloc;
 /*  */
 /*static volatile ISP_RT_BUF_STRUCT_FRMB *pstRTBuf_FrmB = NULL;*/
-static ISP_RT_BUF_STRUCT_FRMB *pstRTBuf_FrmB;
+static struct ISP_RT_BUF_STRUCT_FRMB *pstRTBuf_FrmB;
 
 /* static ISP_DEQUE_BUF_INFO_STRUCT g_deque_buf = {0,{}};
  * Marked to remove build warning.
@@ -359,7 +359,7 @@ static ISP_RT_BUF_STRUCT_FRMB *pstRTBuf_FrmB;
 unsigned long g_Flash_SpinLock;
 
 
-static unsigned int G_u4EnableClockCount;
+// static unsigned int G_u4EnableClockCount;
 
 
 /*************************************************
@@ -375,16 +375,16 @@ enum ISP_BUF_STATUS_ENUM_FRMB {
 	ISP_BUF_STATUS_READY_FRMB
 };
 
-struct {
+struct ISP_BUF_STRUCT_FRMB {
 	enum ISP_BUF_STATUS_ENUM_FRMB Status;
 	unsigned int Size;
 	unsigned char *pData;
-} ISP_BUF_STRUCT_FRMB;
+};
 
-struct {
+struct ISP_BUF_INFO_STRUCT_FRMB {
 	struct ISP_BUF_STRUCT_FRMB Read;
 	struct ISP_BUF_STRUCT_FRMB Write[ISP_BUF_WRITE_AMOUNT];
-} ISP_BUF_INFO_STRUCT_FRMB;
+};
 
 
 /*************************************************
@@ -473,11 +473,11 @@ enum _eLOG_OP {
 
 #define LOG_PPNUM 2
 static unsigned int m_CurrentPPB;
-struct _SV_LOG_STR {
+struct SV_LOG_STR {
 	unsigned int _cnt[LOG_PPNUM][_LOG_MAX];
 	/* char   _str[_LOG_MAX][SV_LOG_STR_LEN]; */
 	char *_str[LOG_PPNUM][_LOG_MAX];
-} SV_LOG_STR, *PSV_LOG_STR;
+} *PSV_LOG_STR;
 
 static void *pLog_kmalloc;
 static struct SV_LOG_STR gSvLog[_IRQ_MAX];
@@ -486,7 +486,7 @@ static struct SV_LOG_STR gSvLog[_IRQ_MAX];
 /* static SV_LOG_STR gSvLog_CAMSV_D_IRQ= {0}; */
 static bool g_bDmaERR_p1 = MFALSE;
 static bool g_bDmaERR_p1_d = MFALSE;
-static bool g_bDmaERR_p2 = MFALSE;
+// static bool g_bDmaERR_p2 = MFALSE;
 static bool g_bDmaERR_deepDump = MFALSE;
 static unsigned int g_ISPIntErr[_IRQ_MAX] = { 0 };
 
@@ -628,17 +628,17 @@ static spinlock_t SpinLock_UserKey;
 static signed int FirstUnusedIrqUserKey = 1;
 #define USERKEY_STR_LEN 128
 
-struct {
+struct UserKeyInfo {
 	/* name for the user that register a userKey */
 	char userName[USERKEY_STR_LEN];
 	int userKey;		/* the user key for that user */
-} UserKeyInfo;
+};
 /* array for recording the user name for
  * a specific user key
  */
 static struct UserKeyInfo IrqUserKey_UserInfo[
 IRQ_USER_NUM_MAX];
-struct {
+struct ISP_IRQ_INFO_STRUCT_FRMB {
 /* interrupt status for each user in irqType/irqBit */
 	unsigned int Status[IRQ_USER_NUM_MAX][ISP_IRQ_TYPE_AMOUNT];
 	unsigned int Mask[ISP_IRQ_TYPE_AMOUNT];
@@ -670,12 +670,12 @@ struct {
 	unsigned int LastestSigTime_usec[ISP_IRQ_TYPE_AMOUNT][32];
 
 	/* eis meta only for p1 and p1_d */
-	ISP_EIS_META_STRUCT Eismeta[
+	struct ISP_EIS_META_STRUCT Eismeta[
 	ISP_IRQ_TYPE_INTB][EISMETA_RINGSIZE];
 
-} ISP_IRQ_INFO_STRUCT_FRMB;
+};
 
-struct {
+struct ISP_INFO_STRUCT_FRMB {
 /* currently, IRQ and IRQ_D share the same ISR ,
  * so share the same key,IRQ.
  */
@@ -700,7 +700,7 @@ struct {
  * ISP_TIME_LOG_STRUCT_FRMB TimeLog;
  * ISP_CALLBACK_STRUCT_FRMB Callback[ISP_CALLBACK_AMOUNT];
  */
-} ISP_INFO_STRUCT_FRMB;
+};
 
 static struct ISP_INFO_STRUCT_FRMB IspInfo_FrmB;
 unsigned int t_SOF;	/* (ns) */
@@ -715,14 +715,14 @@ unsigned int PrvAddr[_ChannelMax] = { 0 };
  *************************************************/
 #ifdef T_STAMP_2_0
 #define SlowMotion  100
-struct {
+struct T_STAMP {
 /* 1st frame start time, accurency in us,unit in ns */
 	unsigned long long T_ns;
 	unsigned long interval_us;	/* unit in us */
 	unsigned long compensation_us;
 	unsigned int fps;
 	unsigned int fcnt;
-} T_STAMP;
+};
 
 static struct T_STAMP m_T_STAMP = { 0 };
 #endif
@@ -756,7 +756,7 @@ static inline unsigned int ISP_JiffiesToMs_FrmB(unsigned int Jiffies)
 /*************************************************
  *
  *************************************************/
-static inline unsigned int ISP_GetIRQState_FrmB(eISPIrq
+static inline unsigned int ISP_GetIRQState_FrmB(enum eISPIrq
 eIrq, unsigned int type, unsigned int userKey, unsigned int stus)
 {
 	unsigned int ret;
@@ -961,23 +961,23 @@ static unsigned int avg_frame_time[_ChannelMax] = { 0, 0, 0, 0 };
  */
 static int sof_pass1done[2] = { 0, 0 };
 
-static unsigned int gSof_camsvdone[2] = { 0, 0 };
+// static unsigned int gSof_camsvdone[2] = { 0, 0 };
 static bool g1stSof[4] = { MTRUE, MTRUE };
 
 #ifdef _rtbc_buf_que_2_0_
-struct _FW_RCNT_CTRL {
+struct FW_RCNT_CTRL {
 	unsigned int INC[_IRQ_MAX][ISP_RT_BUF_SIZE];	/* rcnt_in */
 	unsigned int DMA_IDX[_rt_dma_max_];	/* enque cnt */
 	unsigned int rdIdx[_IRQ_MAX];	/* enque read cnt */
 	unsigned int curIdx[_IRQ_MAX];	/* record avail rcnt pair */
 	unsigned int bLoadBaseAddr[_IRQ_MAX];
-} FW_RCNT_CTRL;
+};
 static struct FW_RCNT_CTRL mFwRcnt = { {{0} }, {0}, {0}, {0}, {0} };
 static unsigned char dma_en_recorder[_rt_dma_max_][ISP_RT_BUF_SIZE] = { {0} };
 #endif
 /*  */
 static signed int ISP_RTBC_ENQUE_FRMB(signed int dma,
-ISP_RT_BUF_INFO_STRUCT_FRMB *prt_buf_info)
+struct ISP_RT_BUF_INFO_STRUCT_FRMB *prt_buf_info)
 {
 	signed int Ret = 0;
 	signed int rt_dma = dma;
@@ -1228,12 +1228,9 @@ unsigned int VF_2, unsigned int VF_3, unsigned int VF_4)
 			}
 			LOG_INF("%s", str);
 			LOG_INF("================================\n");
-			LOG_INF("cur_start_idx:%d",
-			pstRTBuf_FrmB->ring_buf[dma].start);
-			LOG_INF("cur_read_idx=%d",
-			pstRTBuf_FrmB->ring_buf[dma].read_idx);
-			LOG_INF("cur_empty_cnt:%d"
-			 pstRTBuf_FrmB->ring_buf[dma].empty_count);
+			LOG_INF("cur_start_idx:%d",	pstRTBuf_FrmB->ring_buf[dma].start);
+			LOG_INF("cur_read_idx=%d", pstRTBuf_FrmB->ring_buf[dma].read_idx);
+			LOG_INF("cur_empty_cnt:%d", pstRTBuf_FrmB->ring_buf[dma].empty_count);
 			LOG_INF("================================\n");
 			LOG_INF("RCNT_RECORD:cur dma_en_recorder\n");
 			str[0] = '\0';
@@ -1272,7 +1269,7 @@ unsigned int VF_2, unsigned int VF_3, unsigned int VF_4)
 }
 
 static signed int ISP_RTBC_DEQUE_FRMB(signed int dma,
-ISP_DEQUE_BUF_INFO_STRUCT_FRMB *pdeque_buf)
+struct ISP_DEQUE_BUF_INFO_STRUCT_FRMB *pdeque_buf)
 {
 	signed int Ret = 0;
 	signed int rt_dma = dma;
@@ -1420,24 +1417,24 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 	unsigned int iBuf = 0;
 	unsigned int size = 0;
 	unsigned int bWaitBufRdy = 0;
-	ISP_BUFFER_CTRL_STRUCT_FRMB rt_buf_ctrl;
+	struct ISP_BUFFER_CTRL_STRUCT_FRMB rt_buf_ctrl;
 	bool _bFlag = MTRUE;
 	/* unsigned int buffer_exist = 0; */
-	CQ_RTBC_FBC p1_fbc[_rt_dma_max_];
+	union CQ_RTBC_FBC p1_fbc[_rt_dma_max_];
 	/* unsigned int p1_fbc_reg[_rt_dma_max_]; */
 	unsigned long p1_fbc_reg[_rt_dma_max_];
 	/* unsigned int p1_dma_addr_reg[_rt_dma_max_]; */
-	unsigned long p1_dma_addr_reg[_rt_dma_max_];
+	unsigned long p1_dma_addr_reg[_rt_dma_max_] = {0};
 	unsigned long flags;/*unsigned int flags;*/
-	ISP_RT_BUF_INFO_STRUCT_FRMB rt_buf_info;
-	ISP_DEQUE_BUF_INFO_STRUCT_FRMB deque_buf;
-	eISPIrq irqT = _IRQ_MAX;
-	eISPIrq irqT_Lock = _IRQ_MAX;
+	struct ISP_RT_BUF_INFO_STRUCT_FRMB rt_buf_info;
+	struct ISP_DEQUE_BUF_INFO_STRUCT_FRMB deque_buf;
+	enum eISPIrq irqT = _IRQ_MAX;
+	enum eISPIrq irqT_Lock = _IRQ_MAX;
 	bool CurVF_En = MFALSE;
 	bool bBufFilled = MFALSE;
 
-	memset(&rt_buf_info, 0, sizeof(ISP_RT_BUF_INFO_STRUCT_FRMB));
-	memset(&deque_buf, 0, sizeof(ISP_DEQUE_BUF_INFO_STRUCT_FRMB));
+	memset(&rt_buf_info, 0, sizeof(struct ISP_RT_BUF_INFO_STRUCT_FRMB));
+	memset(&deque_buf, 0, sizeof(struct ISP_DEQUE_BUF_INFO_STRUCT_FRMB));
 	/*  */
 	if (pstRTBuf_FrmB == NULL) {
 		LOG_ERR("[rtbc]NULL pstRTBuf_FrmB");
@@ -1445,7 +1442,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 	}
 	/*  */
 	if (copy_from_user(&rt_buf_ctrl, (void __user *)
-		Param, sizeof(ISP_BUFFER_CTRL_STRUCT_FRMB))
+		Param, sizeof(struct ISP_BUFFER_CTRL_STRUCT_FRMB))
 	    == 0) {
 		rt_dma = rt_buf_ctrl.buf_id;
 		/*  */
@@ -1530,7 +1527,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 		deque_buf.sof_cnt = 0;
 	if (copy_from_user(&rt_buf_info,
 	(void __user *)rt_buf_ctrl.data_ptr,
-	sizeof(ISP_RT_BUF_INFO_STRUCT_FRMB))
+	sizeof(struct ISP_RT_BUF_INFO_STRUCT_FRMB))
 	== 0) {
 		reg_val = ISP_RD32(ISP_REG_ADDR_TG_VF_CON);
 /* reg_val2 = ISP_RD32(ISP_REG_ADDR_TG2_VF_CON); */
@@ -1588,8 +1585,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 				(&deque_buf.data[0],
 				(void __user *)
 				rt_buf_ctrl.ex_data_ptr,
-				sizeof(
-				ISP_RT_BUF_INFO_STRUCT_FRMB))
+				sizeof(struct ISP_RT_BUF_INFO_STRUCT_FRMB))
 				== 0) {
 					spin_lock_irqsave(&
 					(IspInfo_FrmB.
@@ -1821,7 +1817,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 						pstRTBuf_FrmB->
 						ring_buf[rt_dma].
 						data[i].image.frm_cnt =
-						INVALID_FRM_CNT_;
+						_INVALID_FRM_CNT_;
 #ifdef _rtbc_buf_que_2_0_
 					if (pstRTBuf_FrmB->
 					ring_buf[rt_dma].
@@ -2617,7 +2613,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 					image.m_num_0) == 0)
 					deque_buf.data[i].
 					image.m_num_0 |=
-					UNCERTAIN_MAGIC_NUM_FLAG_;
+					_UNCERTAIN_MAGIC_NUM_FLAG_;
 							/*  */
 							IRQ_LOG_KEEPER(irqT,
 							0, _LOG_DBG,
@@ -2802,7 +2798,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
  */
 				if (copy_to_user((void __user *)
 					rt_buf_ctrl.pExtend, &deque_buf,
-				  sizeof(ISP_DEQUE_BUF_INFO_STRUCT_FRMB))
+				  sizeof(struct ISP_DEQUE_BUF_INFO_STRUCT_FRMB))
 				  != 0) {
 					LOG_ERR(
 					"[rtbc][DEQUE]:copy_to_user failed");
@@ -2938,7 +2934,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 				       sizeof(unsigned int) * 32);
 				memset((void *)IspInfo_FrmB.IrqInfo.
 				Eismeta[ISP_IRQ_TYPE_INT], 0,
-				sizeof(ISP_EIS_META_STRUCT) *
+				sizeof(struct ISP_EIS_META_STRUCT) *
 				EISMETA_RINGSIZE);
 				gEismetaRIdx = 0;
 				gEismetaWIdx = 0;
@@ -2981,7 +2977,7 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
 			/* active */
 			pstRTBuf_FrmB->ring_buf[rt_dma].active = MFALSE;
 			memset((char *)&pstRTBuf_FrmB->ring_buf[rt_dma], 0x00,
-			       sizeof(ISP_RT_RING_BUF_INFO_STRUCT_FRMB));
+			       sizeof(struct ISP_RT_RING_BUF_INFO_STRUCT_FRMB));
 			/* init. frmcnt before vf_en */
 			for (i = 0; i < ISP_RT_BUF_SIZE; i++) {
 				pstRTBuf_FrmB->ring_buf[rt_dma].
@@ -3136,14 +3132,14 @@ static signed int ISP_LostP1Done_ErrHandle(unsigned int dma)
 	}
 }
 #endif
-static signed int ISP_SOF_Buf_Get_FrmB(eISPIrq irqT,
+static signed int ISP_SOF_Buf_Get_FrmB(enum eISPIrq irqT,
 unsigned long long sec, unsigned long usec,
-bool bDrop, CQ_RTBC_FBC *pFbc, unsigned int *pCurr_pa)
+bool bDrop, union CQ_RTBC_FBC *pFbc, unsigned int *pCurr_pa)
 {
 #if defined(_rtbc_use_cq0c_)
 
-	CQ_RTBC_FBC imgo_fbc;
-	CQ_RTBC_FBC img2o_fbc;
+	union CQ_RTBC_FBC imgo_fbc;
+	union CQ_RTBC_FBC img2o_fbc;
 /* (imgo_fbc.Bits.WCNT+imgo_fbc.Bits.FB_NUM-1)%
  * imgo_fbc.Bits.FB_NUM; //[0,1,2,...]
  */
@@ -3509,9 +3505,9 @@ bool bDrop, CQ_RTBC_FBC *pFbc, unsigned int *pCurr_pa)
 	return 0;
 }				/*  */
 
-static signed int ISP_DONE_Buf_Time_FrmB(eISPIrq irqT,
+static signed int ISP_DONE_Buf_Time_FrmB(enum eISPIrq irqT,
 unsigned long long sec, unsigned long usec,
-CQ_RTBC_FBC *pFbc)
+union CQ_RTBC_FBC *pFbc)
 {
 	int i, k;
 	int i_dma;
@@ -3519,9 +3515,9 @@ CQ_RTBC_FBC *pFbc)
 	/* unsigned int reg_fbc; */
 	/* unsigned int reg_val = 0; */
 	unsigned int ch_imgo, ch_img2o;
-	CQ_RTBC_FBC imgo_fbc;
-	CQ_RTBC_FBC img2o_fbc;
-	CQ_RTBC_FBC _dma_cur_fbc;
+	union CQ_RTBC_FBC imgo_fbc;
+	union CQ_RTBC_FBC img2o_fbc;
+	union CQ_RTBC_FBC _dma_cur_fbc;
 	unsigned int _working_dma = 0;
 #ifdef _rtbc_buf_que_2_0_
 	/* for isr cb timing shift err hanlde */
@@ -3870,7 +3866,7 @@ static signed int ISP_ED_BufQue_Update_GPtr(int listTag)
 	signed int cnt = 0;
 	bool stop = false;
 	int i = 0;
-	ISP_ED_BUF_STATE_ENUM gPtrSts = ISP_ED_BUF_STATE_NONE;
+	enum ISP_ED_BUF_STATE_ENUM gPtrSts = ISP_ED_BUF_STATE_NONE;
 
 	switch (listTag) {
 	case P2_EDBUF_RLIST_TAG:
@@ -4106,7 +4102,7 @@ static signed int ISP_ED_BufQue_Erase(signed int idx, int listTag)
  * get first matched buffer
  *************************************************/
 static signed int ISP_ED_BufQue_Get_FirstMatBuf(
-ISP_ED_BUFQUE_STRUCT_FRMB param, int ListTag, int type)
+struct ISP_ED_BUFQUE_STRUCT_FRMB param, int ListTag, int type)
 {
 	signed int idx = -1;
 	signed int i = 0;
@@ -4273,7 +4269,7 @@ ISP_ED_BUFQUE_STRUCT_FRMB param, int ListTag, int type)
 /*************************************************
  *
  *************************************************/
-static signed int ISP_ED_BufQue_CTRL_FUNC_FRMB(ISP_ED_BUFQUE_STRUCT_FRMB param)
+static signed int ISP_ED_BufQue_CTRL_FUNC_FRMB(struct ISP_ED_BUFQUE_STRUCT_FRMB param)
 {
 	signed int ret = 0;
 	int i = 0;
@@ -4350,7 +4346,7 @@ static signed int ISP_ED_BufQue_CTRL_FUNC_FRMB(ISP_ED_BUFQUE_STRUCT_FRMB param)
 /* first node is not empty, but current/last is empty */
 				P2_EDBUF_RList_LastBufIdx =
 				    (P2_EDBUF_RList_LastBufIdx + 1) %
-				    MAX_SUPPORT_P2_FRAME_NUM_;
+				    _MAX_SUPPORT_P2_FRAME_NUM_;
 				P2_EDBUF_RList_CurBufIdx =
 				P2_EDBUF_RList_LastBufIdx;
 			} else {
@@ -4727,9 +4723,9 @@ static signed int ISP_REGISTER_IRQ_USERKEY(char *userName)
 /*************************************************
  *
  *************************************************/
-static signed int ISP_MARK_IRQ(ISP_WAIT_IRQ_STRUCT_FRMB irqinfo)
+static signed int ISP_MARK_IRQ(struct ISP_WAIT_IRQ_STRUCT_FRMB irqinfo)
 {
-	eISPIrq eIrq = _IRQ;
+	enum eISPIrq eIrq = _IRQ;
 	unsigned long flags;/*unsigned int flags;*/
 	int idx;
 	unsigned long long time_sec;
@@ -4797,11 +4793,11 @@ static signed int ISP_MARK_IRQ(ISP_WAIT_IRQ_STRUCT_FRMB irqinfo)
 /*************************************************
  *
  *************************************************/
-static signed int ISP_GET_MARKtoQEURY_TIME(ISP_WAIT_IRQ_STRUCT_FRMB *irqinfo)
+static signed int ISP_GET_MARKtoQEURY_TIME(struct ISP_WAIT_IRQ_STRUCT_FRMB *irqinfo)
 {
 	signed int Ret = 0;
 	unsigned long flags;/*unsigned int flags;*/
-	eISPIrq eIrq = _IRQ;
+	enum eISPIrq eIrq = _IRQ;
 	unsigned long long time_ready2return_sec;
 	unsigned long time_ready2return_usec;
 	int idx;
@@ -4905,9 +4901,9 @@ static signed int ISP_GET_MARKtoQEURY_TIME(ISP_WAIT_IRQ_STRUCT_FRMB *irqinfo)
 /*************************************************
  *
  *************************************************/
-static signed int ISP_FLUSH_IRQ(ISP_WAIT_IRQ_STRUCT_FRMB irqinfo)
+static signed int ISP_FLUSH_IRQ(struct ISP_WAIT_IRQ_STRUCT_FRMB irqinfo)
 {
-	eISPIrq eIrq = _IRQ;
+	enum eISPIrq eIrq = _IRQ;
 	unsigned long flags;/*unsigned int flags;*/
 
 	switch (irqinfo.UserInfo.Type) {
@@ -4950,12 +4946,12 @@ static signed int ISP_FLUSH_IRQ(ISP_WAIT_IRQ_STRUCT_FRMB irqinfo)
 /*************************************************
  *
  *************************************************/
-static signed int ISP_WaitIrq_FrmB(ISP_WAIT_IRQ_STRUCT_FRMB *WaitIrq)
+static signed int ISP_WaitIrq_FrmB(struct ISP_WAIT_IRQ_STRUCT_FRMB *WaitIrq)
 {
 	signed int Ret = 0, Timeout = WaitIrq->Timeout;
 	/*unsigned int i;*/
 	unsigned long flags;/*unsigned int flags;*/
-	eISPIrq eIrq = _IRQ;
+	enum eISPIrq eIrq = _IRQ;
 	/*int cnt = 0;*/
 	int idx = my_get_pow_idx(WaitIrq->UserInfo.Status);
 	bool freeze_passbysigcnt = false;
@@ -5424,7 +5420,7 @@ static void ISP_Irq_FrmB(unsigned int *IrqStatus)
 	/* signed int  idx=0; */
 /* unsigned int IrqStatus[ISP_IRQ_TYPE_AMOUNT]={0}; */
 	/* unsigned int IrqStatus_fbc_int; */
-	CQ_RTBC_FBC p1_fbc[2];
+	union CQ_RTBC_FBC p1_fbc[2];
 	unsigned int curr_pa[2];	/* debug only at sof */
 	unsigned int cur_v_cnt = 0;
 	/*unsigned int d_cur_v_cnt = 0;*/
@@ -5669,7 +5665,7 @@ ISP_IRQ_INT_STATUS_FLK_ERR_ST|ISP_IRQ_INT_STATUS_LSC_ERR_ST)
 			/* can chk fbc status compare to p1_fbc.
 			 * (the difference is the timing of reading)
 			 */
-			CQ_RTBC_FBC _fbc_chk[2];
+			union CQ_RTBC_FBC _fbc_chk[2];
 			/* in order to log newest fbc condition */
 			_fbc_chk[0].Reg_val = ISP_RD32(ISP_REG_ADDR_IMGO_FBC);
 			_fbc_chk[1].Reg_val = ISP_RD32(ISP_REG_ADDR_IMG2O_FBC);
@@ -5962,10 +5958,10 @@ static signed int __init ISP_Init_FrmB(void)
 	 */
 	/* RT_BUF_TBL_NPAGES*4096(1page) = 64k Bytes */
 
-	if (sizeof(ISP_RT_BUF_STRUCT_FRMB) >
+	if (sizeof(struct ISP_RT_BUF_STRUCT_FRMB) >
 		((RT_BUF_TBL_NPAGES) * PAGE_SIZE)) {
 		i = 0;
-		while (i < sizeof(ISP_RT_BUF_STRUCT_FRMB))
+		while (i < sizeof(struct ISP_RT_BUF_STRUCT_FRMB))
 			i += PAGE_SIZE;
 
 		pBuf_kmalloc = kmalloc(i + 2 * PAGE_SIZE, GFP_KERNEL);
@@ -5986,7 +5982,7 @@ static signed int __init ISP_Init_FrmB(void)
 	/* round it up to the page bondary */
 	pTbl_RTBuf = (int *)((((unsigned long)pBuf_kmalloc)
 	+ PAGE_SIZE - 1) & PAGE_MASK);
-	pstRTBuf_FrmB = (ISP_RT_BUF_STRUCT_FRMB *) pTbl_RTBuf;
+	pstRTBuf_FrmB = (struct ISP_RT_BUF_STRUCT_FRMB *) pTbl_RTBuf;
 	pstRTBuf_FrmB->state = ISP_RTBC_STATE_INIT;
 
 	/* isr log */

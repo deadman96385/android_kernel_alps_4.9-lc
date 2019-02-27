@@ -56,38 +56,38 @@ LOG_TAG "" fmt, ##arg)
 /*  */
 #define SYSRAM_MEM_NODE_AMOUNT_PER_POOL (SYSRAM_USER_AMOUNT*2 + 2)
 /* -------------------------------------------- */
-struct {
+struct SYSRAM_USER_STRUCT {
 	pid_t pid;		/* thread id */
 	pid_t tgid;		/* process id */
 	char ProcName[TASK_COMM_LEN];	/* executable name */
 	unsigned long long Time64;
-	unsigned long TimeS;
-	unsigned long TimeUS;
-} SYSRAM_USER_STRUCT;
+	unsigned int TimeS;
+	unsigned int TimeUS;
+};
 /*  */
-struct {
+struct SYSRAM_STRUCT {
 	spinlock_t SpinLock;
-	unsigned long TotalUserCount;
-	unsigned long AllocatedTbl;
-	unsigned long AllocatedSize[SYSRAM_USER_AMOUNT];
+	unsigned int TotalUserCount;
+	unsigned int AllocatedTbl;
+	unsigned int AllocatedSize[SYSRAM_USER_AMOUNT];
 	struct SYSRAM_USER_STRUCT UserInfo[SYSRAM_USER_AMOUNT];
 	wait_queue_head_t WaitQueueHead;
 	bool EnableClk;
-	unsigned long DebugFlag;
+	unsigned int DebugFlag;
 	dev_t DevNo;
 	struct cdev *pCharDrv;
 	struct class *pClass;
-} SYSRAM_STRUCT;
+};
 /*  */
-struct {
+struct SYSRAM_PROC_STRUCT {
 	pid_t Pid;
 	pid_t Tgid;
 	char ProcName[TASK_COMM_LEN];
-	unsigned long Table;
+	unsigned int Table;
 	unsigned long long Time64;
-	unsigned long TimeS;
-	unsigned long TimeUS;
-} SYSRAM_PROC_STRUCT;
+	unsigned int TimeS;
+	unsigned int TimeUS;
+};
 
 /*  */
 enum SYSRAM_MEM_BANK_ENUM {
@@ -96,23 +96,23 @@ enum SYSRAM_MEM_BANK_ENUM {
 	SYSRAM_MEM_BANK_BAD
 };
 /*  */
-struct SYSRAM_MEM_NODE {
-	SYSRAM_USER_ENUM User;
-	unsigned long Offset;
-	unsigned long Length;
-	unsigned long Index;
-	struct SYSRAM_MEM_NODE *pNext;
-	struct SYSRAM_MEM_NODE *pPrev;
-} SYSRAM_MEM_NODE_STRUCT;
+struct SYSRAM_MEM_NODE_STRUCT {
+	enum SYSRAM_USER_ENUM User;
+	unsigned int Offset;
+	unsigned int Length;
+	unsigned int Index;
+	struct SYSRAM_MEM_NODE_STRUCT *pNext;
+	struct SYSRAM_MEM_NODE_STRUCT *pPrev;
+};
 /*  */
-struct {
+struct SYSRAM_MEM_POOL_STRUCT {
 	struct SYSRAM_MEM_NODE_STRUCT * const pMemNode;
-	unsigned long const UserAmount;
-	unsigned long const Addr;
-	unsigned long const Size;
-	unsigned long IndexTbl;
-	unsigned long UserCount;
-} SYSRAM_MEM_POOL_STRUCT;
+	unsigned int const UserAmount;
+	unsigned int const Addr;
+	unsigned int const Size;
+	unsigned int IndexTbl;
+	unsigned int UserCount;
+};
 /* -------------------------------------------- */
 static struct SYSRAM_MEM_NODE_STRUCT
 SysramMemNodeBank0Tbl[SYSRAM_MEM_NODE_AMOUNT_PER_POOL];
@@ -150,7 +150,7 @@ enum {
 };
 /*  */
 static enum SYSRAM_MEM_BANK_ENUM SYSRAM_GetMemBankNo(
-SYSRAM_USER_ENUM const User)
+enum SYSRAM_USER_ENUM const User)
 {
 	unsigned long const UserMask = (1 << User);
 	/*  */

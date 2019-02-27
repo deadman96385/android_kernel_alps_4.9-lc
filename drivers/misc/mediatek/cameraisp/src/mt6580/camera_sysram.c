@@ -52,14 +52,14 @@
 /* --------------------------------------------- */
 #define ISP_VALID_REG_RANGE  0x10000
 #define IMGSYS_BASE_ADDR     0x15000000
-static SYSRAM_STRUCT Sysram;
-static MUINT32 Keep_Table;
+static struct SYSRAM_STRUCT Sysram;
+static unsigned int Keep_Table;
 static bool Flush_before;
 /* --------------------------------------------- */
-static void SYSRAM_GetTime(MUINT64 *pUS64, MUINT32 *pSec, MUINT32 *pUSec)
+static void SYSRAM_GetTime(unsigned long long *pUS64, unsigned int *pSec, unsigned int *pUSec)
 {
 	ktime_t Time;
-	MUINT64 TimeSec;
+	unsigned long long TimeSec;
 	/*  */
 	Time = ktime_get();	/* ns */
 	TimeSec = Time.tv64;
@@ -67,7 +67,7 @@ static void SYSRAM_GetTime(MUINT64 *pUS64, MUINT32 *pSec, MUINT32 *pUSec)
 	/*  */
 	*pUS64 = TimeSec;
 	*pUSec = do_div(TimeSec, 1000000);
-	*pSec = (MUINT64) TimeSec;
+	*pSec = (unsigned long long) TimeSec;
 }
 
 /* --------------------------------------------- */
@@ -102,15 +102,15 @@ static void SYSRAM_DumpResMgr(void)
 {
 	unsigned int u4Idx = 0;
 
-	LOG_MSG("TotalUserCount(%ld),AllocatedTbl(0x%lX)",
+	LOG_MSG("TotalUserCount(%d),AllocatedTbl(0x%X)",
 		Sysram.TotalUserCount, Sysram.AllocatedTbl);
 	/*  */
 	for (u4Idx = 0; u4Idx < SYSRAM_USER_AMOUNT; u4Idx++) {
 		if (Sysram.AllocatedSize[u4Idx] > 0) {
-			SYSRAM_USER_STRUCT * const pUserInfo =
+			struct SYSRAM_USER_STRUCT * const pUserInfo =
 			&Sysram.UserInfo[u4Idx];
 			LOG_MSG(
-			"[id:%u][%s][size:0x%lX][pid:%d][tgid:%d][%s][%5lu.%06lu]",
+			"[id:%u][%s][size:0x%X][pid:%d][tgid:%d][%s][%5u.%06u]",
 			u4Idx,
 			SysramUserName[u4Idx],
 			Sysram.AllocatedSize[u4Idx],
@@ -125,7 +125,7 @@ static void SYSRAM_DumpResMgr(void)
 }
 
 /* --------------------------------------------- */
-static inline MBOOL SYSRAM_IsBadOwner(SYSRAM_USER_ENUM const User)
+static inline bool SYSRAM_IsBadOwner(enum SYSRAM_USER_ENUM const User)
 {
 	if (User >= SYSRAM_USER_AMOUNT || User < 0)
 		return MTRUE;
@@ -134,10 +134,10 @@ static inline MBOOL SYSRAM_IsBadOwner(SYSRAM_USER_ENUM const User)
 }
 
 /* --------------------------------------------- */
-static void SYSRAM_SetUserTaskInfo(SYSRAM_USER_ENUM const User)
+static void SYSRAM_SetUserTaskInfo(enum SYSRAM_USER_ENUM const User)
 {
 	if (!SYSRAM_IsBadOwner(User)) {
-		SYSRAM_USER_STRUCT * const pUserInfo = &Sysram.UserInfo[User];
+		struct SYSRAM_USER_STRUCT * const pUserInfo = &Sysram.UserInfo[User];
 		/*  */
 		pUserInfo->pid = current->pid;
 		pUserInfo->tgid = current->tgid;
@@ -150,10 +150,10 @@ static void SYSRAM_SetUserTaskInfo(SYSRAM_USER_ENUM const User)
 }
 
 /* --------------------------------------------- */
-static void SYSRAM_ResetUserTaskInfo(SYSRAM_USER_ENUM const User)
+static void SYSRAM_ResetUserTaskInfo(enum SYSRAM_USER_ENUM const User)
 {
 	if (!SYSRAM_IsBadOwner(User)) {
-		SYSRAM_USER_STRUCT * const pUserInfo = &Sysram.UserInfo[User];
+		struct SYSRAM_USER_STRUCT * const pUserInfo = &Sysram.UserInfo[User];
 		memset(pUserInfo, 0, sizeof(*pUserInfo));
 	}
 }
@@ -171,7 +171,7 @@ static inline void SYSRAM_SpinUnlock(void)
 }
 
 /* --------------------------------------------- */
-static inline MBOOL SYSRAM_UserIsLocked(SYSRAM_USER_ENUM const User)
+static inline bool SYSRAM_UserIsLocked(enum SYSRAM_USER_ENUM const User)
 {
 	if ((1 << User) & Sysram.AllocatedTbl)
 		return MTRUE;
@@ -180,7 +180,7 @@ static inline MBOOL SYSRAM_UserIsLocked(SYSRAM_USER_ENUM const User)
 }
 
 /* --------------------------------------------- */
-static inline MBOOL SYSRAM_UserIsUnlocked(SYSRAM_USER_ENUM const User)
+static inline bool SYSRAM_UserIsUnlocked(enum SYSRAM_USER_ENUM const User)
 {
 	if (SYSRAM_UserIsLocked(User) == 0)
 		return MTRUE;
@@ -189,7 +189,7 @@ static inline MBOOL SYSRAM_UserIsUnlocked(SYSRAM_USER_ENUM const User)
 }
 
 /* --------------------------------------------- */
-static void SYSRAM_LockUser(SYSRAM_USER_ENUM const User, MUINT32 const Size)
+static void SYSRAM_LockUser(enum SYSRAM_USER_ENUM const User, unsigned int const Size)
 {
 	if (SYSRAM_UserIsLocked(User))
 		return;
@@ -200,9 +200,9 @@ static void SYSRAM_LockUser(SYSRAM_USER_ENUM const User, MUINT32 const Size)
 	SYSRAM_SetUserTaskInfo(User);
 	/* Debug Log. */
 	if ((1 << User) & SysramLogUserMask) {
-		SYSRAM_USER_STRUCT * const pUserInfo = &Sysram.UserInfo[User];
+		struct SYSRAM_USER_STRUCT * const pUserInfo = &Sysram.UserInfo[User];
 		LOG_MSG(
-		"[%s][%lu bytes]OK,Time(%lu.%06lu)",
+		"[%s][%u bytes]OK,Time(%u.%06u)",
 		SysramUserName[User],
 		Sysram.AllocatedSize[User],
 		pUserInfo->TimeS,
@@ -211,27 +211,27 @@ static void SYSRAM_LockUser(SYSRAM_USER_ENUM const User, MUINT32 const Size)
 }
 
 /* --------------------------------------------- */
-static void SYSRAM_UnlockUser(SYSRAM_USER_ENUM const User)
+static void SYSRAM_UnlockUser(enum SYSRAM_USER_ENUM const User)
 {
 	if (SYSRAM_UserIsUnlocked(User))
 		return;
 	/* Debug Log. */
 	if ((1 << User) & SysramLogUserMask) {
-		SYSRAM_USER_STRUCT * const pUserInfo = &Sysram.UserInfo[User];
-		MUINT32 Sec, USec;
-		MUINT64 Time64 = 0;
+		struct SYSRAM_USER_STRUCT * const pUserInfo = &Sysram.UserInfo[User];
+		unsigned int Sec, USec;
+		unsigned long long Time64 = 0;
 
 		SYSRAM_GetTime(&Time64, &Sec, &USec);
 		/*  */
-		LOG_MSG("[%s][%lu bytes]Time(%lu.%06lu - %lu.%06lu)(%lu.%06lu)",
+		LOG_MSG("[%s][%u bytes]Time(%u.%06u - %u.%06u)(%u.%06u)",
 			SysramUserName[User],
 			Sysram.AllocatedSize[User],
 			pUserInfo->TimeS,
 			pUserInfo->TimeUS,
 			Sec,
 			USec,
-			((MUINT32) (Time64 - pUserInfo->Time64)) / 1000,
-			((MUINT32) (Time64 - pUserInfo->Time64)) % 1000);
+			((unsigned int) (Time64 - pUserInfo->Time64)) / 1000,
+			((unsigned int) (Time64 - pUserInfo->Time64)) % 1000);
 	}
 	/*  */
 	if (Sysram.TotalUserCount > 0)
@@ -244,15 +244,15 @@ static void SYSRAM_UnlockUser(SYSRAM_USER_ENUM const User)
 /* --------------------------------------------- */
 static void SYSRAM_DumpLayout(void)
 {
-	MUINT32 Index = 0;
-	SYSRAM_MEM_NODE_STRUCT *pCurrNode = NULL;
+	unsigned int Index = 0;
+	struct SYSRAM_MEM_NODE_STRUCT *pCurrNode = NULL;
 	/*  */
 	LOG_DMP("[SYSRAM_DumpLayout]\n");
-	LOG_DMP("AllocatedTbl = 0x%08lX\n", Sysram.AllocatedTbl);
+	LOG_DMP("AllocatedTbl = 0x%08X\n", Sysram.AllocatedTbl);
 	LOG_DMP("=========================================\n");
 	for (Index = 0; Index < SYSRAM_MEM_BANK_AMOUNT; Index++) {
 		LOG_DMP(
-		"\n [Mem Pool %ld] (IndexTbl, UserCount)=(%lX, %ld)\n",
+		"\n [Mem Pool %d] (IndexTbl, UserCount)=(%X, %d)\n",
 		Index,
 		SysramMemPoolInfo[Index].IndexTbl,
 		SysramMemPoolInfo[Index].UserCount);
@@ -260,10 +260,10 @@ static void SYSRAM_DumpLayout(void)
 		"[Locked Time] [Owner   Offset   Size  Index pCurrent pPrevious pNext]  [pid tgid] [Proc Name / Owner Name]\n");
 		pCurrNode = &SysramMemPoolInfo[Index].pMemNode[0];
 		while (pCurrNode != NULL) {
-			SYSRAM_USER_ENUM const User = pCurrNode->User;
+			enum SYSRAM_USER_ENUM const User = pCurrNode->User;
 			if (SYSRAM_IsBadOwner(User)) {
 				LOG_DMP(
-				"------------ -------- %2d\t0x%05lX 0x%05lX  %ld    %p %p\t%p\n",
+				"------------ -------- %2d\t0x%05X 0x%05X  %d    %p %p\t%p\n",
 				pCurrNode->User,
 				pCurrNode->Offset,
 				pCurrNode->Length,
@@ -271,10 +271,10 @@ static void SYSRAM_DumpLayout(void)
 				pCurrNode, pCurrNode->pPrev,
 				pCurrNode->pNext);
 			} else {
-				SYSRAM_USER_STRUCT * const pUserInfo
+				struct SYSRAM_USER_STRUCT * const pUserInfo
 				= &Sysram.UserInfo[User];
 				LOG_DMP(
-				"%5lu.%06lu %2d\t0x%05lX 0x%05lX  %ld    %p %p\t%p  %-4d %-4d \"%s\" / \"%s\"\n",
+				"%5u.%06u %2d\t0x%05X 0x%05X  %d    %p %p\t%p  %-4d %-4d \"%s\" / \"%s\"\n",
 				pUserInfo->TimeS,
 				pUserInfo->TimeUS,
 				User,
@@ -297,11 +297,11 @@ static void SYSRAM_DumpLayout(void)
 }
 
 /* --------------------------------------------- */
-static SYSRAM_MEM_NODE_STRUCT *SYSRAM_AllocNode(
-SYSRAM_MEM_POOL_STRUCT * const pMemPoolInfo)
+static struct SYSRAM_MEM_NODE_STRUCT *SYSRAM_AllocNode(
+struct SYSRAM_MEM_POOL_STRUCT * const pMemPoolInfo)
 {
-	SYSRAM_MEM_NODE_STRUCT *pNode = NULL;
-	MUINT32 Index = 0;
+	struct SYSRAM_MEM_NODE_STRUCT *pNode = NULL;
+	unsigned int Index = 0;
 	/*  */
 	for (Index = 0; Index < pMemPoolInfo->UserAmount; Index += 1) {
 		if ((pMemPoolInfo->IndexTbl) & (1 << Index)) {
@@ -320,14 +320,14 @@ SYSRAM_MEM_POOL_STRUCT * const pMemPoolInfo)
 	/* Shouldn't happen. */
 	if (!pNode)
 		LOG_ERR(
-		"returns NULL - pMemPoolInfo->IndexTbl(%lX)",
+		"returns NULL - pMemPoolInfo->IndexTbl(%X)",
 		pMemPoolInfo->IndexTbl);
 	return pNode;
 }
 
 /* --------------------------------------------- */
-static void SYSRAM_FreeNode(SYSRAM_MEM_POOL_STRUCT * const pMemPoolInfo,
-			    SYSRAM_MEM_NODE_STRUCT * const pNode)
+static void SYSRAM_FreeNode(struct SYSRAM_MEM_POOL_STRUCT * const pMemPoolInfo,
+			    struct SYSRAM_MEM_NODE_STRUCT * const pNode)
 {
 	pMemPoolInfo->IndexTbl |= (1 << pNode->Index);
 	pNode->User = SYSRAM_USER_NONE;
@@ -339,11 +339,11 @@ static void SYSRAM_FreeNode(SYSRAM_MEM_POOL_STRUCT * const pMemPoolInfo,
 }
 
 /* --------------------------------------------- */
-static MBOOL SYSRAM_IsLegalSizeToAlloc(
-SYSRAM_MEM_BANK_ENUM const MemBankNo,
-SYSRAM_USER_ENUM const User, MUINT32 const Size)
+static bool SYSRAM_IsLegalSizeToAlloc(
+enum SYSRAM_MEM_BANK_ENUM const MemBankNo,
+enum SYSRAM_USER_ENUM const User, unsigned int const Size)
 {
-	MUINT32 MaxSize = 0;
+	unsigned int MaxSize = 0;
 	/* (1) Check the memory pool. */
 	switch (MemBankNo) {
 	case SYSRAM_MEM_BANK_BAD:
@@ -364,7 +364,7 @@ SYSRAM_USER_ENUM const User, MUINT32 const Size)
 	/*  */
 EXIT:
 	if (MaxSize < Size) {
-		LOG_ERR("[User:%s]requested size(0x%lX) > max size(0x%lX)",
+		LOG_ERR("[User:%s]requested size(0x%X) > max size(0x%X)",
 			SysramUserName[User], Size, MaxSize);
 		SYSRAM_DumpLayout();
 		return MFALSE;
@@ -377,17 +377,17 @@ EXIT:
  * Alignment should be 2^N, 4/8/2048 bytes alignment only
  * First fit algorithm
  */
-static MUINT32 SYSRAM_AllocUserPhy(SYSRAM_USER_ENUM const User,
-				   MUINT32 const Size,
-				   MUINT32 const Alignment,
-				   SYSRAM_MEM_BANK_ENUM const MemBankNo)
+static unsigned int SYSRAM_AllocUserPhy(enum SYSRAM_USER_ENUM const User,
+				   unsigned int const Size,
+				   unsigned int const Alignment,
+				   enum SYSRAM_MEM_BANK_ENUM const MemBankNo)
 {
-	SYSRAM_MEM_NODE_STRUCT *pSplitNode = NULL;
-	SYSRAM_MEM_NODE_STRUCT *pCurrNode = NULL;
-	MUINT32 AlingnedAddr = 0;
-	MUINT32 ActualSize = 0;
+	struct SYSRAM_MEM_NODE_STRUCT *pSplitNode = NULL;
+	struct SYSRAM_MEM_NODE_STRUCT *pCurrNode = NULL;
+	unsigned int AlingnedAddr = 0;
+	unsigned int ActualSize = 0;
 	/*  */
-	SYSRAM_MEM_POOL_STRUCT * const pMemPoolInfo
+	struct SYSRAM_MEM_POOL_STRUCT * const pMemPoolInfo
 	= SYSRAM_GetMemPoolInfo(MemBankNo);
 	if (!pMemPoolInfo)
 		return 0;
@@ -433,16 +433,16 @@ static MUINT32 SYSRAM_AllocUserPhy(SYSRAM_USER_ENUM const User,
 }
 
 /* --------------------------------------------- */
-static MBOOL SYSRAM_FreeUserPhy(
-SYSRAM_USER_ENUM const User,
-SYSRAM_MEM_BANK_ENUM const MemBankNo)
+static bool SYSRAM_FreeUserPhy(
+enum SYSRAM_USER_ENUM const User,
+enum SYSRAM_MEM_BANK_ENUM const MemBankNo)
 {
-	MBOOL Ret = MFALSE;
-	SYSRAM_MEM_NODE_STRUCT *pPrevOrNextNode = NULL;
-	SYSRAM_MEM_NODE_STRUCT *pCurrNode = NULL;
-	SYSRAM_MEM_NODE_STRUCT *pTempNode = NULL;
+	bool Ret = MFALSE;
+	struct SYSRAM_MEM_NODE_STRUCT *pPrevOrNextNode = NULL;
+	struct SYSRAM_MEM_NODE_STRUCT *pCurrNode = NULL;
+	struct SYSRAM_MEM_NODE_STRUCT *pTempNode = NULL;
 
-	SYSRAM_MEM_POOL_STRUCT * const pMemPoolInfo
+	struct SYSRAM_MEM_POOL_STRUCT * const pMemPoolInfo
 	= SYSRAM_GetMemPoolInfo(MemBankNo);
 	/*  */
 	if (!pMemPoolInfo) {
@@ -500,13 +500,13 @@ SYSRAM_MEM_BANK_ENUM const MemBankNo)
 }
 
 /* --------------------------------------------- */
-static MUINT32 SYSRAM_AllocUser(
-SYSRAM_USER_ENUM const User, MUINT32 Size,
-MUINT32 const Alignment)
+static unsigned int SYSRAM_AllocUser(
+enum SYSRAM_USER_ENUM const User, unsigned int Size,
+unsigned int const Alignment)
 {
-	MUINT32 Addr = 0;
+	unsigned int Addr = 0;
 
-	SYSRAM_MEM_BANK_ENUM const MemBankNo = SYSRAM_GetMemBankNo(User);
+	enum SYSRAM_MEM_BANK_ENUM const MemBankNo = SYSRAM_GetMemBankNo(User);
 	/*  */
 	if (SYSRAM_IsBadOwner(User)) {
 		LOG_ERR("User(%d) out of range(%d)", User, SYSRAM_USER_AMOUNT);
@@ -538,9 +538,9 @@ MUINT32 const Alignment)
 }
 
 /* --------------------------------------------- */
-static void SYSRAM_FreeUser(SYSRAM_USER_ENUM const User)
+static void SYSRAM_FreeUser(enum SYSRAM_USER_ENUM const User)
 {
-	SYSRAM_MEM_BANK_ENUM const MemBankNo = SYSRAM_GetMemBankNo(User);
+	enum SYSRAM_MEM_BANK_ENUM const MemBankNo = SYSRAM_GetMemBankNo(User);
 	/*  */
 	switch (MemBankNo) {
 	case SYSRAM_MEM_BANK_BAD:
@@ -563,16 +563,16 @@ static void SYSRAM_FreeUser(SYSRAM_USER_ENUM const User)
 }
 
 /* --------------------------------------------- */
-static MUINT32 SYSRAM_MsToJiffies(MUINT32 TimeMs)
+static unsigned int SYSRAM_MsToJiffies(unsigned int TimeMs)
 {
 	return (TimeMs * HZ + 512) >> 10;
 }
 
 /* --------------------------------------------- */
-static MUINT32 SYSRAM_TryAllocUser(SYSRAM_USER_ENUM const User,
-				   MUINT32 const Size, MUINT32 const Alignment)
+static unsigned int SYSRAM_TryAllocUser(enum SYSRAM_USER_ENUM const User,
+				   unsigned int const Size, unsigned int const Alignment)
 {
-	MUINT32 Addr = 0;
+	unsigned int Addr = 0;
 	/*  */
 	SYSRAM_SpinLock();
 	/*  */
@@ -593,12 +593,12 @@ static MUINT32 SYSRAM_TryAllocUser(SYSRAM_USER_ENUM const User,
 }
 
 /* --------------------------------------------- */
-static MUINT32 SYSRAM_IOC_Alloc(SYSRAM_USER_ENUM const User,
-MUINT32 const Size, MUINT32 Alignment,
-MUINT32 const TimeoutMS)
+static unsigned int SYSRAM_IOC_Alloc(enum SYSRAM_USER_ENUM const User,
+unsigned int const Size, unsigned int Alignment,
+unsigned int const TimeoutMS)
 {
-	MUINT32 Addr = 0;
-	INT32 TimeOut = 0;
+	unsigned int Addr = 0;
+	signed int TimeOut = 0;
 	/*  */
 	if (SYSRAM_IsBadOwner(User)) {
 		LOG_ERR("User(%d) out of range(%d)", User, SYSRAM_USER_AMOUNT);
@@ -628,14 +628,14 @@ MUINT32 const TimeoutMS)
 EXIT:
 	if (Addr == 0) {	/* Failure */
 		LOG_ERR(
-		"[User:%s]fails to allocate.Size(%lu),Alignment(%lu),TimeoutMS(%lu)",
+		"[User:%s]fails to allocate.Size(%u),Alignment(%u),TimeoutMS(%u)",
 		SysramUserName[User],
 		Size, Alignment, TimeoutMS);
 		SYSRAM_DumpLayout();
 	} else {		/* Success */
 		if ((1 << User) & SysramLogUserMask)
 			LOG_MSG(
-			"[User:%s]%lu bytes OK",
+			"[User:%s]%u bytes OK",
 			SysramUserName[User], Size);
 	}
 	/*  */
@@ -643,7 +643,7 @@ EXIT:
 }
 
 /* --------------------------------------------- */
-static void SYSRAM_IOC_Free(SYSRAM_USER_ENUM User)
+static void SYSRAM_IOC_Free(enum SYSRAM_USER_ENUM User)
 {
 	if (SYSRAM_IsBadOwner(User)) {
 		LOG_ERR("User(%d) out of range(%d)", User, SYSRAM_USER_AMOUNT);
@@ -664,22 +664,22 @@ static void SYSRAM_IOC_Free(SYSRAM_USER_ENUM User)
 static int SYSRAM_Open(struct inode *pInode, struct file *pFile)
 {
 	int Ret = 0;
-	MUINT32 Sec = 0, USec = 0;
-	MUINT64 Time64 = 0;
-	SYSRAM_PROC_STRUCT *pProc;
+	unsigned int Sec = 0, USec = 0;
+	unsigned long long Time64 = 0;
+	struct SYSRAM_PROC_STRUCT *pProc;
 	/*  */
 	SYSRAM_GetTime(&Time64, &Sec, &USec);
 	/*  */
-	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%ld.%06ld)",
+	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%d.%06d)",
 		current->comm, current->pid, current->tgid, Sec, USec);
 	/*  */
 	SYSRAM_SpinLock();
 	/*  */
-	pFile->private_data = kmalloc(sizeof(SYSRAM_PROC_STRUCT), GFP_ATOMIC);
+	pFile->private_data = kmalloc(sizeof(struct SYSRAM_PROC_STRUCT), GFP_ATOMIC);
 	if (pFile->private_data == NULL) {
 		Ret = -ENOMEM;
 	} else {
-		pProc = (SYSRAM_PROC_STRUCT *) (pFile->private_data);
+		pProc = (struct SYSRAM_PROC_STRUCT *) (pFile->private_data);
 		pProc->Pid = 0;
 		pProc->Tgid = 0;
 		strncpy(pProc->ProcName, SYSRAM_PROC_NAME,
@@ -711,23 +711,23 @@ static int SYSRAM_Open(struct inode *pInode, struct file *pFile)
 /* --------------------------------------------- */
 static int SYSRAM_Release(struct inode *pInode, struct file *pFile)
 {
-	MUINT32 Index = 0;
-	MUINT32 Sec = 0, USec = 0;
-	MUINT64 Time64 = 0;
-	SYSRAM_PROC_STRUCT *pProc;
+	unsigned int Index = 0;
+	unsigned int Sec = 0, USec = 0;
+	unsigned long long Time64 = 0;
+	struct SYSRAM_PROC_STRUCT *pProc;
 	/*  */
 	SYSRAM_GetTime(&Time64, &Sec, &USec);
 	/*  */
-	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%ld.%06ld)",
+	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%d.%06d)",
 		current->comm, current->pid, current->tgid, Sec, USec);
 	/*  */
 	if (pFile->private_data != NULL) {
-		pProc = (SYSRAM_PROC_STRUCT *) (pFile->private_data);
+		pProc = (struct SYSRAM_PROC_STRUCT *) (pFile->private_data);
 		/*  */
 		if (pProc->Pid != 0 || pProc->Tgid != 0 || pProc->Table != 0) {
 			/*  */
 			LOG_WRN(
-			"Proc:Name(%s),pid(%d),tgid(%d),Table(0x%08lX),Time(%ld.%06ld)",
+			"Proc:Name(%s),pid(%d),tgid(%d),Table(0x%08X),Time(%d.%06d)",
 			pProc->ProcName,
 			pProc->Pid, pProc->Tgid,
 			pProc->Table, pProc->TimeS,
@@ -750,7 +750,7 @@ static int SYSRAM_Release(struct inode *pInode, struct file *pFile)
 				SYSRAM_USER_AMOUNT; Index++) {
 					if (pProc->Table & (1 << Index))
 						SYSRAM_IOC_Free((
-						SYSRAM_USER_ENUM) Index);
+						enum SYSRAM_USER_ENUM) Index);
 				}
 			}
 		}
@@ -776,23 +776,23 @@ static int SYSRAM_Release(struct inode *pInode, struct file *pFile)
 /* --------------------------------------------- */
 static int SYSRAM_Flush(struct file *pFile, fl_owner_t Id)
 {
-	MUINT32 Index = 0;
-	MUINT32 Sec = 0, USec = 0;
-	MUINT64 Time64 = 0;
-	SYSRAM_PROC_STRUCT *pProc;
+	unsigned int Index = 0;
+	unsigned int Sec = 0, USec = 0;
+	unsigned long long Time64 = 0;
+	struct SYSRAM_PROC_STRUCT *pProc;
 	/*  */
 	SYSRAM_GetTime(&Time64, &Sec, &USec);
 	/*  */
-	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%ld.%06ld)",
+	LOG_MSG("Cur:Name(%s),pid(%d),tgid(%d),Time(%d.%06d)",
 		current->comm, current->pid, current->tgid, Sec, USec);
 	/*  */
 	if (pFile->private_data != NULL) {
-		pProc = (SYSRAM_PROC_STRUCT *) pFile->private_data;
+		pProc = (struct SYSRAM_PROC_STRUCT *) pFile->private_data;
 		/*  */
 		if (pProc->Pid != 0 || pProc->Tgid != 0 || pProc->Table != 0) {
 			/*  */
 			LOG_WRN(
-			"Proc:Name(%s),pid(%d),tgid(%d),Table(0x%08lX),Time(%ld.%06ld)",
+			"Proc:Name(%s),pid(%d),tgid(%d),Table(0x%08X),Time(%d.%06d)",
 			pProc->ProcName,
 			pProc->Pid, pProc->Tgid, pProc->Table,
 			pProc->TimeS, pProc->TimeUS);
@@ -840,7 +840,7 @@ static int SYSRAM_Flush(struct file *pFile, fl_owner_t Id)
 					if (pProc->Table &
 						(1 << Index))
 						SYSRAM_IOC_Free((
-						SYSRAM_USER_ENUM)
+						enum SYSRAM_USER_ENUM)
 						Index);
 					}
 					/*  */
@@ -873,7 +873,7 @@ static int SYSRAM_mmap(struct file *pFile, struct vm_area_struct *pVma)
 {
 	/* LOG_MSG(""); */
 	long length = 0;
-	MUINT32 pfn = 0x0;
+	unsigned int pfn = 0x0;
 
 	pVma->vm_page_prot = pgprot_noncached(pVma->vm_page_prot);
 	length = (long)(pVma->vm_end - pVma->vm_start);
@@ -886,7 +886,7 @@ static int SYSRAM_mmap(struct file *pFile, struct vm_area_struct *pVma)
 	if ((length > ISP_VALID_REG_RANGE) || (pfn < IMGSYS_BASE_ADDR)
 	    || (pfn > (IMGSYS_BASE_ADDR + ISP_VALID_REG_RANGE))) {
 		LOG_ERR(
-		"mmap range error : vm_start(0x%lx),vm_end(0x%lx),length(0x%lx),pfn(0x%lx)!",
+		"mmap range error : vm_start(0x%lx),vm_end(0x%lx),length(0x%lx),pfn(0x%x)!",
 		pVma->vm_start, pVma->vm_end, length, pfn);
 		return -EAGAIN;
 	}
@@ -904,12 +904,12 @@ static int SYSRAM_mmap(struct file *pFile, struct vm_area_struct *pVma)
 static long SYSRAM_Ioctl(struct file *pFile,
 unsigned int Cmd, unsigned long Param)
 {
-	MINT32 Ret = 0;
-	MUINT32 Sec = 0, USec = 0;
-	MUINT64 Time64 = 0;
-	SYSRAM_PROC_STRUCT *pProc = (SYSRAM_PROC_STRUCT *) pFile->private_data;
-	SYSRAM_ALLOC_STRUCT Alloc;
-	SYSRAM_USER_ENUM User;
+	signed int Ret = 0;
+	unsigned int Sec = 0, USec = 0;
+	unsigned long long Time64 = 0;
+	struct SYSRAM_PROC_STRUCT *pProc = (struct SYSRAM_PROC_STRUCT *) pFile->private_data;
+    struct SYSRAM_ALLOC_STRUCT Alloc;
+	enum SYSRAM_USER_ENUM User;
 	/*  */
 	SYSRAM_GetTime(&Time64, &Sec, &USec);
 /*
@@ -930,7 +930,7 @@ unsigned int Cmd, unsigned long Param)
 	case SYSRAM_ALLOC:
 	{
 		if (copy_from_user(&Alloc, (void *)Param,
-			sizeof(SYSRAM_ALLOC_STRUCT)) == 0) {
+			sizeof(struct SYSRAM_ALLOC_STRUCT)) == 0) {
 			if (SYSRAM_IsBadOwner(Alloc.User)) {
 				LOG_ERR(
 				"User(%d) out of range(%d)",
@@ -973,7 +973,7 @@ unsigned int Cmd, unsigned long Param)
 				/*  */
 				if (copy_to_user((void *)Param,
 					&Alloc, sizeof(
-					SYSRAM_ALLOC_STRUCT))) {
+					struct SYSRAM_ALLOC_STRUCT))) {
 					LOG_MSG(
 					"[christ test] SYSRAM_ALLOC E.7 ");
 					LOG_ERR("copy to user failed");
@@ -989,7 +989,7 @@ unsigned int Cmd, unsigned long Param)
 	case SYSRAM_FREE:
 		{
 		if (copy_from_user(&User, (void *)Param,
-			sizeof(SYSRAM_USER_ENUM)) == 0) {
+			sizeof(enum SYSRAM_USER_ENUM)) == 0) {
 			if (SYSRAM_IsBadOwner(User)) {
 				LOG_ERR("User(%d) out of range(%d)", User,
 					SYSRAM_USER_AMOUNT);
@@ -1064,11 +1064,11 @@ unsigned int Cmd, unsigned long Param)
 EXIT:
 	if (Ret != 0) {
 		LOG_ERR("Fail");
-		LOG_ERR("Cur:Name(%s),pid(%d),tgid(%d),Time(%ld.%06ld)",
+		LOG_ERR("Cur:Name(%s),pid(%d),tgid(%d),Time(%d.%06d)",
 			current->comm, current->pid, current->tgid, Sec, USec);
 		if (pFile->private_data != NULL) {
 			LOG_ERR(
-			"Proc:Name(%s),pid(%d),tgid(%d),Table(0x%08lX),Time(%ld.%06ld)",
+			"Proc:Name(%s),pid(%d),tgid(%d),Table(0x%08X),Time(%d.%06d)",
 			pProc->ProcName, pProc->Pid,
 			pProc->Tgid, pProc->Table,
 			Sec, USec);
@@ -1083,8 +1083,8 @@ EXIT:
 #ifdef CONFIG_COMPAT
 
 static int compat_get_sysram_alloc_data(
-compat_SYSRAM_ALLOC_STRUCT __user *data32,
-SYSRAM_ALLOC_STRUCT __user *data)
+struct compat_SYSRAM_ALLOC_STRUCT __user *data32,
+struct SYSRAM_ALLOC_STRUCT __user *data)
 {
 	compat_uint_t tmp;
 	int err;
@@ -1104,8 +1104,8 @@ SYSRAM_ALLOC_STRUCT __user *data)
 
 
 static int compat_put_sysram_alloc_data(
-compat_SYSRAM_ALLOC_STRUCT __user *data32,
-SYSRAM_ALLOC_STRUCT __user *data)
+struct compat_SYSRAM_ALLOC_STRUCT __user *data32,
+struct SYSRAM_ALLOC_STRUCT __user *data)
 {
 	compat_uint_t tmp;
 	int err;
@@ -1124,8 +1124,8 @@ SYSRAM_ALLOC_STRUCT __user *data)
 }
 
 static int compat_get_sysram_userenum_data(
-compat_SYSRAM_USER_ENUM __user *data32,
-SYSRAM_USER_ENUM __user *data)
+enum compat_SYSRAM_USER_ENUM __user *data32,
+enum SYSRAM_USER_ENUM __user *data)
 {
 	compat_uint_t tmp;
 	int err;
@@ -1137,8 +1137,8 @@ SYSRAM_USER_ENUM __user *data)
 
 
 static int compat_put_sysram_userenum_data(
-compat_SYSRAM_USER_ENUM __user *data32,
-SYSRAM_USER_ENUM __user *data)
+enum compat_SYSRAM_USER_ENUM __user *data32,
+enum SYSRAM_USER_ENUM __user *data)
 {
 	compat_uint_t tmp;
 	int err;
@@ -1169,8 +1169,8 @@ unsigned int cmd, unsigned long arg)
 	switch (cmd) {
 	case COMPAT_SYSRAM_ALLOC:	/*  */
 		{
-			compat_SYSRAM_ALLOC_STRUCT __user *data32;
-			SYSRAM_ALLOC_STRUCT __user *data;
+			struct compat_SYSRAM_ALLOC_STRUCT __user *data32;
+			struct SYSRAM_ALLOC_STRUCT __user *data;
 			int err;
 
 			data32 = compat_ptr(arg);
@@ -1179,16 +1179,14 @@ unsigned int cmd, unsigned long arg)
 				return -EFAULT;
 			err = compat_get_sysram_alloc_data(data32, data);
 			if (err) {
-				LOG_MSG("
-				compat_get_sysram_alloc_data error!!!\n");
+				LOG_MSG("compat_get_sysram_alloc_data error!!!\n");
 				return err;
 			}
 			ret = filp->f_op->unlocked_ioctl(
 			filp, SYSRAM_ALLOC, (unsigned long)data);
 			err = compat_put_sysram_alloc_data(data32, data);
 			if (err) {
-				LOG_MSG(
-				"compat_put_sysram_alloc_data error!!!\n");
+				LOG_MSG("compat_put_sysram_alloc_data error!!!\n");
 				return err;
 			}
 			return ret;
@@ -1271,8 +1269,8 @@ static inline void SYSRAM_UnregCharDrv(void)
 /* --------------------------------------------- */
 static int SYSRAM_Probe(struct platform_device *pDev)
 {
-	MINT32 Ret = 0;
-	MUINT32 Index = 0;
+	signed int Ret = 0;
+	unsigned int Index = 0;
 	struct device *sysram_device = NULL;
 	/*  */
 	LOG_MSG("SYSRAM_Probe E");
@@ -1286,7 +1284,7 @@ static int SYSRAM_Probe(struct platform_device *pDev)
 	Sysram.pClass = class_create(THIS_MODULE, "SysramDrv");
 	if (IS_ERR(Sysram.pClass)) {
 		Ret = PTR_ERR(Sysram.pClass);
-		LOG_ERR("Unable to create class, err(%ld)", Ret);
+		LOG_ERR("Unable to create class, err(%d)", Ret);
 		return Ret;
 	}
 	sysram_device = device_create(Sysram.pClass, NULL,
@@ -1400,9 +1398,9 @@ static int SYSRAM_DumpLayoutToProc(
 {
 #if FSOP_USE_OLD_TYLE
 	char *p = pPage;
-	MUINT32 len = 0;
-	MUINT32 Index = 0;
-	SYSRAM_MEM_NODE_STRUCT *pCurrNode = NULL;
+	unsigned int len = 0;
+	unsigned int Index = 0;
+	struct SYSRAM_MEM_NODE_STRUCT *pCurrNode = NULL;
 	/*  */
 	p += sprintf(p, "\n[SYSRAM_DumpLayoutToProc]\n");
 	p += sprintf(p, "AllocatedTbl = 0x%08lX\n", Sysram.AllocatedTbl);
@@ -1417,7 +1415,7 @@ static int SYSRAM_DumpLayoutToProc(
 		"[Locked Time] [Owner   Offset   Size  Index pCurrent pPrevious pNext]  [pid tgid] [Proc Name / Owner Name]\n");
 		pCurrNode = &SysramMemPoolInfo[Index].pMemNode[0];
 		while (pCurrNode != NULL) {
-			SYSRAM_USER_ENUM const User = pCurrNode->User;
+			enum SYSRAM_USER_ENUM const User = pCurrNode->User;
 			if (SYSRAM_IsBadOwner(User)) {
 				p += sprintf(p,
 					     "------------ -------- %2d\t0x%05lX 0x%05lX  %ld    %p %p\t%p\n",
@@ -1430,7 +1428,7 @@ static int SYSRAM_DumpLayoutToProc(
 					     pCurrNode->pPrev,
 					     pCurrNode->pNext);
 			} else {
-				SYSRAM_USER_STRUCT * const pUserInfo
+				struct SYSRAM_USER_STRUCT * const pUserInfo
 				= &Sysram.UserInfo[User];
 				p += sprintf(p,
 				"%5lu.%06lu %2d\t0x%05lX 0x%05lX  %ld    %p %p\t%p  %-4d %-4d \"%s\" / \"%s\"\n",
@@ -1488,7 +1486,7 @@ static int SYSRAM_ReadFlag(
 {
 #if FSOP_USE_OLD_TYLE
 	char *p = pPage;
-	MUINT32 len = 0;
+	unsigned int len = 0;
 	/*  */
 	p += sprintf(p, "\r\n[SYSRAM_ReadFlag]\r\n");
 	p += sprintf(p, "=========================================\r\n");
@@ -1529,8 +1527,8 @@ static ssize_t SYSRAM_WriteFlag(
 {
 #if FSOP_USE_OLD_TYLE
 	char acBuf[32];
-	MUINT32 u4CopySize = 0;
-	MUINT32 u4SysramDbgFlag = 0;
+	unsigned int u4CopySize = 0;
+	unsigned int u4SysramDbgFlag = 0;
 	/*  */
 	u4CopySize = (Count < (sizeof(acBuf) - 1)) ?
 	Count : (sizeof(acBuf) - 1);

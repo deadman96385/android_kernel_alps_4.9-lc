@@ -60,28 +60,28 @@ enum CAM_PIPE_MGR_DEV_ENUM {
 	CAM_PIPE_MGR_DEV_VT
 };
 /*  */
-struct {
+struct CAM_PIPE_MGR_LOCK_STRUCT {
 	unsigned int PipeMask;
 	unsigned int Timeout;
-} CAM_PIPE_MGR_LOCK_STRUCT;
+};
 /*  */
-struct {
+struct CAM_PIPE_MGR_UNLOCK_STRUCT {
 	unsigned int PipeMask;
-} CAM_PIPE_MGR_UNLOCK_STRUCT;
+};
 /*  */
-struct {
+struct CAM_PIPE_MGR_MODE_STRUCT {
 	enum CAM_PIPE_MGR_SCEN_SW_ENUM ScenSw;
 	enum CAM_PIPE_MGR_SCEN_HW_ENUM ScenHw;
 	enum CAM_PIPE_MGR_DEV_ENUM Dev;
-} CAM_PIPE_MGR_MODE_STRUCT;
+};
 /*  */
-struct {
+struct CAM_PIPE_MGR_ENABLE_STRUCT {
 	unsigned int PipeMask;
-} CAM_PIPE_MGR_ENABLE_STRUCT;
+};
 /*  */
-struct {
+struct CAM_PIPE_MGR_DISABLE_STRUCT {
 	unsigned int PipeMask;
-} CAM_PIPE_MGR_DISABLE_STRUCT;
+};
 /* --------------------------------------------- */
 enum CAM_PIPE_MGR_CMD_VECNPLL_CTRL_ENUM {
 	CAM_PIPE_MGR_CMD_VECNPLL_CTRL_SET_HIGH,
@@ -127,28 +127,28 @@ enum compat_CAM_PIPE_MGR_DEV_ENUM {
 	compat_CAM_PIPE_MGR_DEV_VT
 };
 /*  */
-struct {
+struct compat_CAM_PIPE_MGR_LOCK_STRUCT {
 	unsigned int PipeMask;
 	unsigned int Timeout;
-} compat_CAM_PIPE_MGR_LOCK_STRUCT;
+};
 /*  */
-struct {
+struct compat_CAM_PIPE_MGR_UNLOCK_STRUCT {
 	unsigned int PipeMask;
-} compat_CAM_PIPE_MGR_UNLOCK_STRUCT;
+};
 /*  */
-struct {
+struct compat_CAM_PIPE_MGR_MODE_STRUCT {
 	enum compat_CAM_PIPE_MGR_SCEN_SW_ENUM ScenSw;
 	enum compat_CAM_PIPE_MGR_SCEN_HW_ENUM ScenHw;
 	enum compat_CAM_PIPE_MGR_DEV_ENUM Dev;
-} compat_CAM_PIPE_MGR_MODE_STRUCT;
+};
 /*  */
-struct {
+struct compat_CAM_PIPE_MGR_ENABLE_STRUCT {
 	unsigned int PipeMask;
-} compat_CAM_PIPE_MGR_ENABLE_STRUCT;
+};
 /*  */
-struct {
+struct compat_CAM_PIPE_MGR_DISABLE_STRUCT {
 	unsigned int PipeMask;
-} compat_CAM_PIPE_MGR_DISABLE_STRUCT;
+};
 /* --------------------------------------------- */
 enum compat_CAM_PIPE_MGR_CMD_VECNPLL_CTRL_ENUM {
 	compat_CAM_PIPE_MGR_CMD_VECNPLL_CTRL_SET_HIGH,
@@ -177,7 +177,7 @@ CAM_PIPE_MGR_CMD_DUMP)
 #define CAM_PIPE_MGR_SET_MODE       _IOW(CAM_PIPE_MGR_MAGIC_NO, \
 CAM_PIPE_MGR_CMD_SET_MODE, struct CAM_PIPE_MGR_MODE_STRUCT)
 #define CAM_PIPE_MGR_GET_MODE       _IOW(CAM_PIPE_MGR_MAGIC_NO, \
-CAM_PIPE_MGR_CMD_GET_MODE, stryct CAM_PIPE_MGR_MODE_STRUCT)
+CAM_PIPE_MGR_CMD_GET_MODE, struct CAM_PIPE_MGR_MODE_STRUCT)
 #define CAM_PIPE_MGR_ENABLE_PIPE    _IOW(CAM_PIPE_MGR_MAGIC_NO, \
 CAM_PIPE_MGR_CMD_ENABLE_PIPE, struct CAM_PIPE_MGR_ENABLE_STRUCT)
 #define CAM_PIPE_MGR_DISABLE_PIPE   _IOW(CAM_PIPE_MGR_MAGIC_NO, \
