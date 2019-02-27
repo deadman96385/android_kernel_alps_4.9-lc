@@ -202,6 +202,7 @@ config MACH_MT6735M
 	select MTK_EIC
 	select MTK_GPIO
 	select MTK_GIC
+	select MTK_IRQ
 	select ARM_HAS_SG_CHAIN
 	select PINCTRL
 	select PINCTRL_MT6735

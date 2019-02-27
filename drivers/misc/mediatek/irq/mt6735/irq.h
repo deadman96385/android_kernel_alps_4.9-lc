@@ -14,6 +14,14 @@
 #ifndef __IRQ_H
 #define __IRQ_H
 
+void set_irq_flags(unsigned int irq, unsigned int flags);
+
+#define IRQF_VALID	(1 << 0)
+#define IRQF_PROBE	(1 << 1)
+#define IRQF_NOAUTOEN	(1 << 2)
+
+#define cpus_addr(src)	((src).bits)
+
 
 #define FIQ_START 0
 #define CPU_BRINGUP_SGI 1
