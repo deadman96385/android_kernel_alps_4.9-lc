@@ -881,6 +881,7 @@ static int do_sched_rt_period_timer(struct rt_bandwidth *rt_b, int overrun)
 		u64 runtime_pre = 0, rt_time_pre = 0; /* sched: get runtime */
 
 		raw_spin_lock(&rq->lock);
+		update_rq_clock(rq);
 		per_cpu(rt_period_time, i) = rq_clock_task(rq);
 
 		if (rt_rq->rt_time) {
