@@ -12,14 +12,18 @@
 * GNU General Public License for more details.
 */
 
+#include <linux/cpuidle.h>
+#include <linux/cpu_pm.h>
+#include <linux/psci.h>
+#include <linux/of_address.h>
+#include <linux/of.h>
+
 #include <asm/cacheflush.h>
 #include <asm/irqflags.h>
 #include <asm/neon.h>
 #include <asm/psci.h>
 #include <asm/suspend.h>
-
-#include <linux/of_address.h>
-#include <linux/of.h>
+#include <asm/cpuidle.h>
 
 #include <mt-plat/mt_dbg.h>
 #include <mt-plat/mt_io.h>
@@ -783,30 +787,6 @@ void mt_platform_restore_context(int flags)
 
 }
 
-#if !defined(CONFIG_ARM64) && !(defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
-int mt_cpu_dormant_psci(unsigned long flags)
-{
-	int ret = 1;
-	int cpuid, clusterid;
-
-	struct psci_power_state pps = {
-		.type = PSCI_POWER_STATE_TYPE_POWER_DOWN,
-		.affinity_level = 1,
-	};
-
-	read_id(&cpuid, &clusterid);
-
-	if (psci_ops.cpu_suspend) {
-		DORMANT_LOG(clusterid * MAX_CORES + cpuid, 0x203);
-		ret = psci_ops.cpu_suspend(pps, virt_to_phys(cpu_resume));
-	}
-
-	BUG();
-
-	return ret;
-}
-#endif
-
 #if (defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
 int mt_cpu_dormant_reset(unsigned long flags)
 {
@@ -890,7 +870,7 @@ int mt_cpu_dormant(unsigned long flags)
 	DORMANT_LOG(clusterid * MAX_CORES + cpuid, 0x102);
 
 #if !defined(CONFIG_ARM64) && !(defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
-	ret = cpu_suspend(flags, mt_cpu_dormant_psci);
+	ret = arm_cpuidle_suspend(2);
 #elif !(defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
 	ret = cpu_suspend(2);
 #else
