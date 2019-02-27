@@ -38,12 +38,12 @@
     /* if (irqnr >= NR_IRQS) return NO_IRQ (0) */
     cmp \irqnr, \tmp
     movcs \tmp, #0
-    bcs BSYM(702f)
+    bcs 702f
 
     /* if (irqnr >= 27) return HAVE_IRQ (1) */
     cmp \irqnr, #(27)
     movcs \tmp, #1
-    bcs BSYM(702f)
+    bcs 702f
 
     /* otherwise, return NO_IRQ (0) */
     mov \tmp, #0
