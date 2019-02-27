@@ -534,13 +534,7 @@ void mt_trace_rqlock_start(raw_spinlock_t *lock)
 void mt_trace_rqlock_end(raw_spinlock_t *lock)
 {
 	struct sched_lock_event *lock_e;
-#ifdef CONFIG_DEBUG_SPINLOCK
-	struct task_struct *owner = NULL;
 
-
-	if (lock->owner && lock->owner != SPINLOCK_OWNER_INIT)
-		owner = lock->owner;
-#endif
 	lock_e = &__raw_get_cpu_var(rq_lock_mon);
 
 	lock_e->lock_te = sched_clock();
