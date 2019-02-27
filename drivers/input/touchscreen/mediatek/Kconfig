@@ -68,6 +68,17 @@ config TOUCHSCREEN_MTK_GT1151
 
 source "drivers/input/touchscreen/mediatek/GT1151/Kconfig"
 
+config TOUCHSCREEN_MTK_GT9XXTB_HN_NEW
+	bool "GT9XXTB hotknot new driver for Mediatek package"
+	default n
+	help
+	  This is new driver for goodix GT9XX series touch screen.
+	  This driver upgrade FW with request_firmware method.
+	  Say Y here if you use gt9xx series new touch driver.
+	  If unsure, say N.
+
+source "drivers/input/touchscreen/mediatek/gt9xxtb_hn_new/Kconfig"
+
 config TOUCHSCREEN_MTK_NT36xxx
 	bool "NT36xxx for Mediatek package"
 	default n
