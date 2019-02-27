@@ -2783,6 +2783,7 @@ static const struct of_device_id apuart_of_ids[] = {
 	{.compatible = "mediatek,mtk-uart",},
 	{.compatible = "mediatek,AP_UART0",},
 	{.compatible = "mediatek,AP_UART1",},
+	{.compatible = "mediatek,mt6735-uart",},
 	{}
 };
 
