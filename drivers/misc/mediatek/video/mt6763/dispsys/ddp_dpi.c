@@ -107,7 +107,7 @@ static int dpi_undflow_irq_count;
 
 /*static DPI_REGS regBackup;*/
 struct DPI_REGS *DPI_REG;
-static const LCM_UTIL_FUNCS lcm_utils_dpi;
+static const struct LCM_UTIL_FUNCS lcm_utils_dpi;
 
 const unsigned BACKUP_DPI_REG_OFFSETS[] = {
 	DPI_REG_OFFSET(INT_ENABLE),
@@ -499,7 +499,7 @@ int ddp_dpi_power_off(enum DISP_MODULE_ENUM module, void *cmdq_handle)
 int ddp_dpi_config(enum DISP_MODULE_ENUM module, struct disp_ddp_path_config *config, void *cmdq_handle)
 {
 	if (s_isDpiConfig == FALSE) {
-		LCM_DPI_PARAMS *dpi_config = &(config->dispif_config.dpi);
+		struct LCM_DPI_PARAMS *dpi_config = &(config->dispif_config.dpi);
 
 		pr_warn("DISP/DPI,ddp_dpi_config DPI status:%x, cmdq:%p\n", INREG32(&DPI_REG->STATUS), cmdq_handle);
 
@@ -525,7 +525,7 @@ int ddp_dpi_config(enum DISP_MODULE_ENUM module, struct disp_ddp_path_config *co
 	}
 
 	if (s_isDpiConfig == TRUE) {
-		LCM_DPI_PARAMS *dpi_config = &(config->dispif_config.dpi);
+		struct LCM_DPI_PARAMS *dpi_config = &(config->dispif_config.dpi);
 		int now_bg_parameters = dpi_config->bg_width << 16 | dpi_config->bg_height;
 
 		/*pr_warn("DISP/DPI,now_bg_parameters: 0x%x, cache_bg_parameter: 0x%x\n",*/
@@ -701,9 +701,9 @@ int ddp_dpi_deinit(enum DISP_MODULE_ENUM module, void *cmdq_handle)
 	return 0;
 }
 
-int ddp_dpi_set_lcm_utils(enum DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv)
+int ddp_dpi_set_lcm_utils(enum DISP_MODULE_ENUM module, struct LCM_DRIVER *lcm_drv)
 {
-	LCM_UTIL_FUNCS *utils = NULL;
+	struct LCM_UTIL_FUNCS *utils = NULL;
 
 	DISPFUNC();
 	if (lcm_drv == NULL) {
@@ -711,7 +711,7 @@ int ddp_dpi_set_lcm_utils(enum DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv)
 		return -1;
 	}
 
-	utils = (LCM_UTIL_FUNCS *)&lcm_utils_dpi;
+	utils = (struct LCM_UTIL_FUNCS *)&lcm_utils_dpi;
 
 	utils->set_reset_pin = lcm_set_reset_pin;
 	utils->udelay = lcm_udelay;

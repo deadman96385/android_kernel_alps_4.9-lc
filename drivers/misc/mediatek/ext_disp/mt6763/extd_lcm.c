@@ -75,7 +75,7 @@ static unsigned int ovl_layer_num;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~the gloable variable~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-LCM_PARAMS  extd_interface_params;
+struct LCM_PARAMS  extd_interface_params;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -146,16 +146,16 @@ int lcm_ioctl(unsigned int ioctl_cmd, int param1, int param2, unsigned long *par
 int lcm_post_init(void)
 {
 	struct disp_lcm_handle *plcm;
-	LCM_PARAMS *lcm_param;
+	struct LCM_PARAMS *lcm_param;
 
 	EXTDFUNC();
-	memset((void *)&extd_interface_params, 0, sizeof(LCM_PARAMS));
+	memset((void *)&extd_interface_params, 0, sizeof(struct LCM_PARAMS));
 
 	extd_disp_get_interface((struct disp_lcm_handle **)&plcm);
 	if (plcm && plcm->params && plcm->drv) {
 		lcm_param = disp_lcm_get_params(plcm);
 		if (lcm_param)
-			memcpy(&extd_interface_params, lcm_param, sizeof(LCM_PARAMS));
+			memcpy(&extd_interface_params, lcm_param, sizeof(struct LCM_PARAMS));
 	}
 
 	Extd_DBG_Init();

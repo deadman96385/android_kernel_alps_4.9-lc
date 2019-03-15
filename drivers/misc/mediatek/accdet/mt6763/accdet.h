@@ -33,7 +33,7 @@
 #include <linux/uaccess.h>
 #include <linux/io.h>
 #include <linux/workqueue.h>
-#include <linux/switch.h>
+/*#include <linux/switch.h>*/
 #include <linux/delay.h>
 
 #include <linux/device.h>
@@ -43,7 +43,7 @@
 #include <linux/uaccess.h>
 #include <linux/kthread.h>
 #include <linux/input.h>
-#include <linux/wakelock.h>
+/*#include <linux/wakelock.h>*/
 #include <linux/time.h>
 
 #include <linux/string.h>

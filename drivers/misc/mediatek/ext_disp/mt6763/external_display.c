@@ -105,7 +105,7 @@ struct ext_disp_path_context {
 
 #define pgc	_get_context()
 
-LCM_PARAMS extd_lcm_params;
+struct LCM_PARAMS extd_lcm_params
 
 atomic_t g_extd_trigger_ticket = ATOMIC_INIT(1);
 atomic_t g_extd_release_ticket = ATOMIC_INIT(1);
@@ -914,7 +914,7 @@ static int ext_disp_init_hdmi(unsigned int session)
 	data_config = dpmgr_path_get_last_config(pgc->dpmgr_handle);
 	if (data_config) {
 		memset((void *)data_config, 0, sizeof(struct disp_ddp_path_config));
-		memcpy(&(data_config->dispif_config), &extd_lcm_params, sizeof(LCM_PARAMS));
+		memcpy(&(data_config->dispif_config), &extd_lcm_params, sizeof(struct LCM_PARAMS));
 
 		if (dst_is_dsi) {
 			data_config->dst_w = extd_lcm_params.width;
@@ -964,7 +964,7 @@ static int ext_disp_init_lcm(char *lcm_name, unsigned int session)
 {
 	int ret = 0;
 	struct disp_ddp_path_config *data_config = NULL;
-	LCM_PARAMS *lcm_param = NULL;
+	struct LCM_PARAMS *lcm_param = NULL;
 
 	EXTDFUNC();
 
@@ -983,7 +983,7 @@ static int ext_disp_init_lcm(char *lcm_name, unsigned int session)
 		ret = EXT_DISP_STATUS_ERROR;
 		goto done;
 	} else {
-		memcpy(&extd_lcm_params, lcm_param, sizeof(LCM_PARAMS));
+		memcpy(&extd_struct LCM_PARAMS, lcm_param, sizeof(struct LCM_PARAMS));
 	}
 
 	if (ext_disp_use_cmdq == CMDQ_ENABLE) {
@@ -1024,7 +1024,7 @@ static int ext_disp_init_lcm(char *lcm_name, unsigned int session)
 
 	data_config = dpmgr_path_get_last_config(pgc->dpmgr_handle);
 	memset(&(lcm_param->dpi), 0, sizeof(LCM_DPI_PARAMS));
-	memcpy(&(data_config->dispif_config), lcm_param, sizeof(LCM_PARAMS));
+	memcpy(&(data_config->dispif_config), lcm_param, sizeof(struct LCM_PARAMS));
 	data_config->dst_w = ext_disp_get_width(session);
 	data_config->dst_h = ext_disp_get_height(session);
 	data_config->p_golden_setting_context = get_golden_setting_pgc();
@@ -1086,7 +1086,7 @@ void ext_disp_esd_check_unlock(void)
 int ext_disp_esd_recovery(void)
 {
 	int ret = 0;
-	LCM_PARAMS *lcm_param = NULL;
+	struct LCM_PARAMS *lcm_param = NULL;
 	struct cmdqRecStruct *handle = NULL;
 
 	EXTDFUNC();
@@ -1446,7 +1446,7 @@ int ext_disp_resume(unsigned int session)
 
 	if (DISP_SESSION_DEV(session) == DEV_LCM) {
 		data_config = dpmgr_path_get_last_config(pgc->dpmgr_handle);
-		memcpy(&(data_config->dispif_config), &extd_lcm_params, sizeof(LCM_PARAMS));
+		memcpy(&(data_config->dispif_config), &extd_lcm_params, sizeof(struct LCM_PARAMS));
 		data_config->dst_w = ext_disp_get_width(session);
 		data_config->dst_h = ext_disp_get_height(session);
 		data_config->p_golden_setting_context = get_golden_setting_pgc();
@@ -1793,14 +1793,14 @@ int ext_disp_frame_cfg_input(struct disp_frame_cfg_t *cfg)
 			dprec_mmp_dump_ovl_layer(&(data_config->ovl_config[config_layer_id]), config_layer_id, 2);
 
 			if (init_roi == 1) {
-				memcpy(&(data_config->dispif_config), &extd_lcm_params, sizeof(LCM_PARAMS));
+				memcpy(&(data_config->dispif_config), &extd_struct LCM_PARAMS, sizeof(struct LCM_PARAMS));
 
 			if (DISP_SESSION_DEV(session) == DEV_LCM)
 				EXTDINFO("set dest w:%d, h:%d\n",
 						data_config->dst_w, data_config->dst_h);
 			else
 				EXTDINFO("set dest w:%d, h:%d\n",
-						extd_lcm_params.dpi.width, extd_lcm_params.dpi.height);
+						extd_struct LCM_PARAMS.dpi.width, extd_struct LCM_PARAMS.dpi.height);
 
 				data_config->dst_dirty = 1;
 				data_config->rdma_config.address = 0;
@@ -1833,7 +1833,7 @@ int ext_disp_frame_cfg_input(struct disp_frame_cfg_t *cfg)
 	if (_should_wait_path_idle())
 		dpmgr_wait_event_timeout(pgc->dpmgr_handle, DISP_PATH_EVENT_FRAME_DONE, HZ / 2);
 
-	memcpy(&(data_config->dispif_config), &extd_lcm_params, sizeof(LCM_PARAMS));
+	memcpy(&(data_config->dispif_config), &extd_lcm_params,, sizeof(struct LCM_PARAMS));
 	ret = dpmgr_path_config(pgc->dpmgr_handle, data_config,
 				ext_disp_cmdq_enabled() ? pgc->cmdq_handle_config : NULL);
 
@@ -2026,10 +2026,10 @@ int ext_disp_set_ovl1_status(int status)
 	return 0;
 }
 
-int ext_disp_set_lcm_param(LCM_PARAMS *pLCMParam)
+int ext_disp_set_lcm_param(struct LCM_PARAMS *pLCMParam)
 {
 	if (pLCMParam)
-		memcpy(&extd_lcm_params, pLCMParam, sizeof(LCM_PARAMS));
+		memcpy(&extd_lcm_params, pLCMParam, sizeof(struct LCM_PARAMS));
 
 	return 0;
 }

@@ -23,7 +23,7 @@
 #include <linux/of.h>
 #include <linux/of_irq.h>
 #include <linux/slab.h>
-#include <linux/switch.h>
+/*#include <linux/switch.h>*/
 
 #include "disp_drv_platform.h"
 #include "debug.h"

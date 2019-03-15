@@ -705,7 +705,7 @@ static void hdmi_resolution_setting(int arg)
 
 		if (dst_is_dsi) {
 			memcpy(&extd_dpi_params.dispif_config.dsi, (void *)(&hdmi_params->dsi_params),
-					sizeof(LCM_DSI_PARAMS));
+					sizeof(struct LCM_DSI_PARAMS));
 
 			p->bg_height = ((hdmi_params->height * p->scaling_factor) / 100 >> 2) << 2;
 			p->bg_width = ((hdmi_params->width * p->scaling_factor) / 100 >> 2) << 2;

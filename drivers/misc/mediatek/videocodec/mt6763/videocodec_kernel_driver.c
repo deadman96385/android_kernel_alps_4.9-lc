@@ -37,7 +37,7 @@
 #include <mt-plat/dma.h>
 #include <linux/delay.h>
 #include "mt-plat/sync_write.h"
-#include <linux/wakelock.h>
+/*#include <linux/wakelock.h>*/
 #include <linux/sched.h>
 #include <linux/suspend.h>
 

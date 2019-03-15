@@ -31,7 +31,7 @@
 #include <linux/types.h>
 #include <linux/sched.h>
 
-#include <mach/mt_rtc_hw.h>
+#include <mach/mtk_rtc_hw.h>
 #include <mach/mtk_rtc_hal.h>
 #include <mtk_rtc_hal_common.h>
 #include <mt_pmic_wrap.h>

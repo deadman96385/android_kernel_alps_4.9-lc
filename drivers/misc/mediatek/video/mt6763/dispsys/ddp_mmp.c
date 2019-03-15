@@ -372,8 +372,8 @@ void ddp_mmp_ovl_layer(struct OVL_CONFIG_STRUCT *pLayer, unsigned int down_sampl
 		       unsigned int down_sample_y,
 		       unsigned int session /*1:primary, 2:external, 3:memory */)
 {
-	mmp_metadata_bitmap_t Bitmap;
-	mmp_metadata_t meta;
+	struct mmp_metadata_bitmap_t Bitmap;
+	struct mmp_metadata_t meta;
 	int raw = 0;
 	int yuv = 0;
 	enum DISP_MODULE_ENUM module = DISP_MODULE_OVL0;
@@ -524,8 +524,8 @@ void ddp_mmp_ovl_layer(struct OVL_CONFIG_STRUCT *pLayer, unsigned int down_sampl
 void ddp_mmp_wdma_layer(struct WDMA_CONFIG_STRUCT *wdma_layer, unsigned int wdma_num,
 			unsigned int down_sample_x, unsigned int down_sample_y)
 {
-	mmp_metadata_bitmap_t Bitmap;
-	mmp_metadata_t meta;
+	struct mmp_metadata_bitmap_t Bitmap;
+	struct mmp_metadata_t meta;
 	int raw = 0;
 
 	if (wdma_num > 1) {
@@ -612,8 +612,8 @@ void ddp_mmp_wdma_layer(struct WDMA_CONFIG_STRUCT *wdma_layer, unsigned int wdma
 void ddp_mmp_rdma_layer(struct RDMA_CONFIG_STRUCT *rdma_layer, unsigned int rdma_num,
 			unsigned int down_sample_x, unsigned int down_sample_y)
 {
-	mmp_metadata_bitmap_t Bitmap;
-	mmp_metadata_t meta;
+	struct mmp_metadata_bitmap_t Bitmap;
+	struct mmp_metadata_t meta;
 	int raw = 0;
 	enum DISP_MODULE_ENUM module = DISP_MODULE_RDMA0;
 

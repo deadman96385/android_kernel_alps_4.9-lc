@@ -786,8 +786,9 @@ static int input_config_preprocess(struct disp_frame_cfg_t *cfg)
 
 		if (cfg->input_cfg[i].layer_enable) {
 			unsigned int Bpp, x, y, pitch;
+#ifdef DISP_SYNC_ENABLE
 			struct sync_fence *src_fence = NULL;
-
+#endif
 			if (cfg->input_cfg[i].buffer_source == DISP_BUFFER_ALPHA) {
 				DISPPR_FENCE("%sL %d is dim layer,fence %d\n",
 						 disp_session_mode_spy(session_id), cfg->input_cfg[i].layer_id,
@@ -821,6 +822,7 @@ static int input_config_preprocess(struct disp_frame_cfg_t *cfg)
 				is_err = 1;
 			}
 			/* get src fence */
+#ifdef DISP_SYNC_ENABLE
 			src_fence = sync_fence_fdget(cfg->input_cfg[i].src_fence_fd);
 			if (!src_fence && cfg->input_cfg[i].src_fence_fd != -1) {
 				DISPERR("error to get src_fence from fd %d\n",
@@ -828,6 +830,7 @@ static int input_config_preprocess(struct disp_frame_cfg_t *cfg)
 				is_err = 1;
 			}
 			cfg->input_cfg[i].src_fence_struct = src_fence;
+#endif
 			/* OVL addr is not the start address of buffer, which is calculated by pitch and ROI. */
 			x = cfg->input_cfg[i].src_offset_x;
 			y = cfg->input_cfg[i].src_offset_y;
@@ -866,7 +869,9 @@ static int output_config_preprocess(struct disp_frame_cfg_t *cfg)
 	unsigned long dst_mva = 0;
 	unsigned int dst_size;
 	struct disp_session_sync_info *session_info;
+#ifdef DISP_SYNC_ENABLE
 	struct sync_fence *src_fence;
+#endif
 
 	session_id = cfg->session_id;
 	session_info = disp_get_session_sync_info_for_debug(session_id);
@@ -885,12 +890,14 @@ static int output_config_preprocess(struct disp_frame_cfg_t *cfg)
 		goto out;
 	}
 /* get src fence */
+#ifdef DISP_SYNC_ENABLE
 	src_fence = sync_fence_fdget(cfg->output_cfg.src_fence_fd);
 	if (!src_fence && cfg->output_cfg.src_fence_fd != -1) {
 		DISPERR("error to get src_fence from output fd %d\n",
 			cfg->output_cfg.src_fence_fd);
 	}
 	cfg->output_cfg.src_fence_struct = src_fence;
+#endif
 	if (DISP_SESSION_TYPE(session_id) == DISP_SESSION_PRIMARY) {
 		/* must be mirror mode */
 		if (primary_display_is_decouple_mode()) {
@@ -963,6 +970,7 @@ static int __frame_config(struct frame_queue_t *frame_node)
 	frame_cfg->setter = SESSION_USER_HWC;
 
 	/* get present fence */
+#ifdef DISP_SYNC_ENABLE
 	if (frame_cfg->prev_present_fence_fd != -1) {
 		present_fence = sync_fence_fdget(frame_cfg->prev_present_fence_fd);
 		if (!present_fence) {
@@ -970,6 +978,7 @@ static int __frame_config(struct frame_queue_t *frame_node)
 				frame_cfg->prev_present_fence_fd);
 		}
 	}
+#endif
 	frame_cfg->prev_present_fence_struct = present_fence;
 
 	frame_node->do_frame_cfg = do_frame_config;

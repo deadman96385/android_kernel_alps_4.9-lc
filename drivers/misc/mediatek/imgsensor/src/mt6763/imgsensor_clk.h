@@ -27,7 +27,7 @@ struct IMGSENSOR_CLK {
 };
 
 enum IMGSENSOR_RETURN imgsensor_clk_init(struct IMGSENSOR_CLK *pclk);
-int  imgsensor_clk_set(struct IMGSENSOR_CLK *pclk, ACDK_SENSOR_MCLK_STRUCT *pmclk);
+int  imgsensor_clk_set(struct IMGSENSOR_CLK *pclk, struct ACDK_SENSOR_MCLK_STRUCT *pmclk);
 void imgsensor_clk_enable_all(struct IMGSENSOR_CLK *pclk);
 void imgsensor_clk_disable_all(struct IMGSENSOR_CLK *pclk);
 #endif

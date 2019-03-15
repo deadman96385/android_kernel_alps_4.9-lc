@@ -20,7 +20,7 @@
 #include <linux/of.h>
 /* #include <linux/leds-mt65xx.h> */
 #include <linux/workqueue.h>
-#include <linux/wakelock.h>
+/*#include <linux/wakelock.h>*/
 #include <linux/slab.h>
 #include <linux/delay.h>
 

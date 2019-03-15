@@ -909,7 +909,7 @@ uint32_t cmdq_mdp_wdma_get_reg_offset_dst_addr(void)
 	return 0xF00;
 }
 
-const char *cmdq_mdp_parse_error_module(const struct TaskStruct *task)
+const char *cmdq_mdp_parse_error_module(const struct cmdqRecStruct *task)
 {
 	const char *module = NULL;
 	const u32 ISP_ONLY[2] = {

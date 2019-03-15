@@ -157,7 +157,7 @@ imgsensor_sensor_open(struct IMGSENSOR_SENSOR *psensor)
 {
 	MINT32 ret = ERROR_NONE;
 	struct IMGSENSOR_SENSOR_INST *psensor_inst = &psensor->inst;
-	SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
+	struct SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
 
 #ifdef CONFIG_MTK_CCU
 	struct ccu_sensor_info ccuSensorInfo;
@@ -222,7 +222,7 @@ imgsensor_sensor_get_info(
 {
 	MUINT32 ret = ERROR_NONE;
 	struct IMGSENSOR_SENSOR_INST *psensor_inst = &psensor->inst;
-	SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
+	struct SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
 
 	IMGSENSOR_FUNCTION_ENTRY();
 
@@ -236,7 +236,7 @@ imgsensor_sensor_get_info(
 
 		psensor_func->psensor_inst = psensor_inst;
 
-		ret = psensor_func->SensorGetInfo((MSDK_SCENARIO_ID_ENUM)(ScenarioId), pSensorInfo, pSensorConfigData);
+		ret = psensor_func->SensorGetInfo((enum MSDK_SCENARIO_ID_ENUM)(ScenarioId), pSensorInfo, pSensorConfigData);
 		if (ret != ERROR_NONE)
 			PK_PR_ERR("[%s] Get info fail\n", __func__);
 
@@ -255,7 +255,7 @@ imgsensor_sensor_get_resolution(
 {
 	MUINT32 ret = ERROR_NONE;
 	struct IMGSENSOR_SENSOR_INST *psensor_inst = &psensor->inst;
-	SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
+	struct SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
 
 	IMGSENSOR_FUNCTION_ENTRY();
 
@@ -288,7 +288,7 @@ imgsensor_sensor_feature_control(
 {
 	MUINT32 ret = ERROR_NONE;
 	struct IMGSENSOR_SENSOR_INST *psensor_inst = &psensor->inst;
-	SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
+	struct SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
 
 	IMGSENSOR_FUNCTION_ENTRY();
 
@@ -315,11 +315,11 @@ imgsensor_sensor_feature_control(
 MUINT32
 imgsensor_sensor_control(
 	struct IMGSENSOR_SENSOR *psensor,
-	MSDK_SCENARIO_ID_ENUM ScenarioId)
+	enum MSDK_SCENARIO_ID_ENUM ScenarioId)
 {
 	MUINT32 ret = ERROR_NONE;
 	struct IMGSENSOR_SENSOR_INST *psensor_inst = &psensor->inst;
-	SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
+	struct SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
 
 	MSDK_SENSOR_EXPOSURE_WINDOW_STRUCT image_window;
 	MSDK_SENSOR_CONFIG_STRUCT sensor_config_data;
@@ -356,7 +356,7 @@ imgsensor_sensor_close(struct IMGSENSOR_SENSOR *psensor)
 {
 	MINT32 ret = ERROR_NONE;
 	struct IMGSENSOR_SENSOR_INST *psensor_inst = &psensor->inst;
-	SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
+	struct SENSOR_FUNCTION_STRUCT       *psensor_func =  psensor->pfunc;
 
 	IMGSENSOR_FUNCTION_ENTRY();
 
@@ -1205,16 +1205,16 @@ inline static int  adopt_CAMERA_HW_FeatureControl(void *pBuf)
 
 	case SENSOR_FEATURE_GET_CROP_INFO:
 	{
-		SENSOR_WINSIZE_INFO_STRUCT *pCrop = NULL;
+		struct SENSOR_WINSIZE_INFO_STRUCT *pCrop = NULL;
 		unsigned long long *pFeaturePara_64 = (unsigned long long *)pFeaturePara;
 		void *usr_ptr = (void *)(uintptr_t) (*(pFeaturePara_64 + 1));
-		pCrop = kmalloc(sizeof(SENSOR_WINSIZE_INFO_STRUCT), GFP_KERNEL);
+		pCrop = kmalloc(sizeof(struct SENSOR_WINSIZE_INFO_STRUCT), GFP_KERNEL);
 		if (pCrop == NULL) {
 			kfree(pFeaturePara);
 			PK_PR_ERR(" ioctl allocate mem failed\n");
 			return -ENOMEM;
 		}
-		memset(pCrop, 0x0, sizeof(SENSOR_WINSIZE_INFO_STRUCT));
+		memset(pCrop, 0x0, sizeof(struct SENSOR_WINSIZE_INFO_STRUCT));
 		*(pFeaturePara_64 + 1) = (uintptr_t)pCrop;
 
 		ret = imgsensor_sensor_feature_control(psensor,
@@ -1228,7 +1228,7 @@ inline static int  adopt_CAMERA_HW_FeatureControl(void *pBuf)
 
 		if (copy_to_user
 		    ((void __user *)usr_ptr, (void *)pCrop,
-		     sizeof(SENSOR_WINSIZE_INFO_STRUCT))) {
+		     sizeof(struct SENSOR_WINSIZE_INFO_STRUCT))) {
 			PK_DBG("[CAMERA_HW]ERROR: copy_to_user fail \n");
 		}
 		kfree(pCrop);
@@ -1238,16 +1238,16 @@ inline static int  adopt_CAMERA_HW_FeatureControl(void *pBuf)
 
 	case SENSOR_FEATURE_GET_VC_INFO:
 	{
-		SENSOR_VC_INFO_STRUCT *pVcInfo = NULL;
+		struct SENSOR_VC_INFO_STRUCT *pVcInfo = NULL;
 		unsigned long long *pFeaturePara_64 = (unsigned long long *)pFeaturePara;
 		void *usr_ptr = (void *)(uintptr_t) (*(pFeaturePara_64 + 1));
-		pVcInfo = kmalloc(sizeof(SENSOR_VC_INFO_STRUCT), GFP_KERNEL);
+		pVcInfo = kmalloc(sizeof(struct SENSOR_VC_INFO_STRUCT), GFP_KERNEL);
 		if (pVcInfo == NULL) {
 			PK_PR_ERR(" ioctl allocate mem failed\n");
 			kfree(pFeaturePara);
 			return -ENOMEM;
 		}
-		memset(pVcInfo, 0x0, sizeof(SENSOR_VC_INFO_STRUCT));
+		memset(pVcInfo, 0x0, sizeof(struct SENSOR_VC_INFO_STRUCT));
 		*(pFeaturePara_64 + 1) = (uintptr_t)pVcInfo;
 
 		ret = imgsensor_sensor_feature_control(psensor,
@@ -1259,7 +1259,7 @@ inline static int  adopt_CAMERA_HW_FeatureControl(void *pBuf)
 
 		if (copy_to_user
 		    ((void __user *)usr_ptr, (void *)pVcInfo,
-		     sizeof(SENSOR_VC_INFO_STRUCT))) {
+		     sizeof(struct SENSOR_VC_INFO_STRUCT))) {
 			PK_DBG("[CAMERA_HW]ERROR: copy_to_user fail \n");
 		}
 		kfree(pVcInfo);
@@ -1269,16 +1269,16 @@ inline static int  adopt_CAMERA_HW_FeatureControl(void *pBuf)
 
 	case SENSOR_FEATURE_GET_PDAF_INFO:
 	{
-		SET_PD_BLOCK_INFO_T *pPdInfo = NULL;
+		struct SET_PD_BLOCK_INFO_T *pPdInfo = NULL;
 		unsigned long long *pFeaturePara_64 = (unsigned long long *)pFeaturePara;
 		void *usr_ptr = (void *)(uintptr_t) (*(pFeaturePara_64 + 1));
-		pPdInfo = kmalloc(sizeof(SET_PD_BLOCK_INFO_T), GFP_KERNEL);
+		pPdInfo = kmalloc(sizeof(struct SET_PD_BLOCK_INFO_T), GFP_KERNEL);
 		if (pPdInfo == NULL) {
 			kfree(pFeaturePara);
 			PK_PR_ERR(" ioctl allocate mem failed\n");
 			return -ENOMEM;
 		}
-		memset(pPdInfo, 0x0, sizeof(SET_PD_BLOCK_INFO_T));
+		memset(pPdInfo, 0x0, sizeof(struct SET_PD_BLOCK_INFO_T));
 		*(pFeaturePara_64 + 1) = (uintptr_t)pPdInfo;
 
 		ret = imgsensor_sensor_feature_control(psensor,
@@ -1290,7 +1290,7 @@ inline static int  adopt_CAMERA_HW_FeatureControl(void *pBuf)
 
 		if (copy_to_user
 		    ((void __user *)usr_ptr, (void *)pPdInfo,
-		     sizeof(SET_PD_BLOCK_INFO_T))) {
+		     sizeof(struct SET_PD_BLOCK_INFO_T))) {
 			PK_DBG("[CAMERA_HW]ERROR: copy_to_user fail \n");
 		}
 		kfree(pPdInfo);
@@ -1958,7 +1958,7 @@ static long imgsensor_ioctl(
 		i4RetValue = adopt_CAMERA_HW_Control(pBuff);
 		break;
 	case KDIMGSENSORIOC_X_SET_MCLK_PLL:
-		i4RetValue = imgsensor_clk_set(&pgimgsensor->clk, (ACDK_SENSOR_MCLK_STRUCT *)pBuff);
+		i4RetValue = imgsensor_clk_set(&pgimgsensor->clk, (struct ACDK_SENSOR_MCLK_STRUCT *)pBuff);
 		break;
 	case KDIMGSENSORIOC_X_GET_ISP_CLK:
 	/*E1(High):490, (Medium):364, (low):273*/

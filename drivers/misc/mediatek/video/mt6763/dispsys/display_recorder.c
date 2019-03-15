@@ -150,7 +150,7 @@ static mmp_event dprec_mmp_event_spy(enum DPREC_LOGGER_ENUM l)
 	return 0xffff;
 }
 
-static void dprec_to_mmp(unsigned int type_logsrc, mmp_log_type mmp_log, unsigned int data1,
+static void dprec_to_mmp(unsigned int type_logsrc, enum mmp_log_type mmp_log, unsigned int data1,
 			 unsigned data2)
 {
 	int mmp_event = dprec_mmp_event_spy(type_logsrc);

@@ -47,7 +47,7 @@
 #include "mtk_ovl.h"
 
 #include "mtkfb_fence.h"
-#include <linux/wakelock.h>
+/*#include <linux/wakelock.h>*/
 
 #include <linux/atomic.h>
 

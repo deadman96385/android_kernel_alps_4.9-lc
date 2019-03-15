@@ -29,7 +29,7 @@
 #include <linux/bug.h>
 #include <linux/workqueue.h>
 #include "mt-plat/mtk_mdm_monitor.h"
-#include <mach/mt_thermal.h>
+#include <mach/mtk_thermal.h>
 #include <mt-plat/aee.h>
 #include <mtk_gpu_utility.h>
 #include <mt-plat/mtk_thermal_platform.h>

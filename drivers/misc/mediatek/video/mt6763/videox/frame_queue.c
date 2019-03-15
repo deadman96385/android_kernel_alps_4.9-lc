@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include <../drivers/staging/android/sw_sync.h>
+/*#include <../drivers/staging/android/sw_sync.h>*/
 #include <linux/slab.h>
 #include <linux/kthread.h>
 
@@ -50,7 +50,7 @@ void disp_init_ged_log_handle(void)
 	if (ret != 0)
 		DISPERR("ged_log_buf_get_early Failed!\n");
 }
-
+#ifdef DISP_SYNC_ENABLE
 static int disp_dump_fence_info(struct sync_fence *fence, int is_err)
 {
 	int i;
@@ -130,9 +130,10 @@ static int _do_wait_fence(struct sync_fence **src_fence, int session_id,
 	*src_fence = NULL;
 	return ret;
 }
-
+#endif
 static int frame_wait_all_fence(struct disp_frame_cfg_t *cfg)
 {
+#ifdef DISP_SYNC_ENABLE
 	int i, ret = 0, tmp;
 	int session_id = cfg->session_id;
 	unsigned int present_fence_idx = cfg->present_fence_idx;
@@ -190,6 +191,9 @@ static int frame_wait_all_fence(struct disp_frame_cfg_t *cfg)
 	}
 
 	return ret;
+#else
+	return 0;
+#endif
 }
 static int fence_wait_worker_func(void *data);
 

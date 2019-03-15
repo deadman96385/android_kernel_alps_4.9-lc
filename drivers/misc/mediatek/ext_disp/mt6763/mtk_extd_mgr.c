@@ -24,7 +24,7 @@
 #include <linux/cdev.h>
 #include <linux/module.h>
 #include <linux/list.h>
-#include <linux/switch.h>
+/*#include <linux/switch.h>*/
 #include <linux/types.h>
 #include <linux/fb.h>
 

@@ -77,7 +77,7 @@
 #include <mt-plat/mt_boot.h>
 #include <mt-plat/mtk_rtc.h>
 
-#include <mach/mt_charging.h>
+#include <mach/mtk_charging.h>
 #include <mt-plat/upmu_common.h>
 
 #include <mt-plat/charging.h>

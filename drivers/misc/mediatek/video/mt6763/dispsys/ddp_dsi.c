@@ -152,7 +152,7 @@ struct t_dsi_context {
 	unsigned int lcm_width; /* config dsi */
 	unsigned int lcm_height;
 	struct DSI_REGS regBackup; /* backup dsi */
-	LCM_DSI_PARAMS dsi_params; /* config dsi */
+	struct LCM_DSI_PARAMS dsi_params; /* config dsi */
 	struct mutex lock; /* init dsi */
 	int is_power_on; /* init dsi / suspend / resume */
 	struct t_condition_wq cmddone_wq; /* init dsi */
@@ -176,9 +176,9 @@ static int def_data_rate;
 static int dsi_currect_mode;
 static int dsi_force_config;
 static int dsi0_te_enable = 1;
-static const LCM_UTIL_FUNCS lcm_utils_dsi0;
-static const LCM_UTIL_FUNCS lcm_utils_dsi1;
-static const LCM_UTIL_FUNCS lcm_utils_dsidual;
+static const struct LCM_UTIL_FUNCS lcm_utils_dsi0;
+static const struct LCM_UTIL_FUNCS lcm_utils_dsi1;
+static const struct LCM_UTIL_FUNCS lcm_utils_dsidual;
 static cmdqBackupSlotHandle _h_intstat;
 unsigned int impendance0[2] = { 0 }; /* MIPITX_DSI_IMPENDANCE0 */
 unsigned int impendance1[2] = { 0 }; /* MIPITX_DSI_IMPENDANCE1 */
@@ -351,7 +351,7 @@ enum DSI_STATUS DSI_DumpRegisters(enum DISP_MODULE_ENUM module, int level)
 	return DSI_STATUS_OK;
 }
 
-void _dump_dsi_params(LCM_DSI_PARAMS *dsi_config)
+void _dump_dsi_params(struct LCM_DSI_PARAMS *dsi_config)
 {
 	if (dsi_config) {
 		switch (dsi_config->mode) {
@@ -895,7 +895,7 @@ static void DSI_Get_Porch_Addr(enum DISP_MODULE_ENUM module, unsigned long *pAdd
 	}
 }
 
-void DSI_Config_VDO_Timing(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, LCM_DSI_PARAMS *dsi_params)
+void DSI_Config_VDO_Timing(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, struct LCM_DSI_PARAMS *dsi_params)
 {
 	int i = 0;
 	unsigned int line_byte;
@@ -997,7 +997,7 @@ int DSI_LFR_Status_Check(void)
 	return status;
 }
 
-int _dsi_ps_type_to_bpp(LCM_PS_TYPE ps)
+int _dsi_ps_type_to_bpp(enum LCM_PS_TYPE ps)
 {
 	switch (ps) {
 	case LCM_PACKED_PS_16BIT_RGB565:
@@ -1012,7 +1012,7 @@ int _dsi_ps_type_to_bpp(LCM_PS_TYPE ps)
 	return 0;
 }
 
-enum DSI_STATUS DSI_PS_Control(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, LCM_DSI_PARAMS *dsi_params,
+enum DSI_STATUS DSI_PS_Control(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, struct LCM_DSI_PARAMS *dsi_params,
 			  int w, int h)
 {
 	int i = 0;
@@ -1067,7 +1067,7 @@ enum DSI_STATUS DSI_PS_Control(enum DISP_MODULE_ENUM module, struct cmdqRecStruc
 }
 
 enum DSI_STATUS DSI_TXRX_Control(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq,
-			    LCM_DSI_PARAMS *dsi_params)
+			    struct LCM_DSI_PARAMS *dsi_params)
 {
 	int i = 0;
 	unsigned int lane_num_bitvalue = 0;
@@ -1178,7 +1178,7 @@ unsigned int dsi_phy_get_clk(enum DISP_MODULE_ENUM module)
 	return 0;
 }
 
-void DSI_PHY_clk_change(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, LCM_DSI_PARAMS *dsi_params)
+void DSI_PHY_clk_change(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, struct LCM_DSI_PARAMS *dsi_params)
 {
 #if 0
 	int i = 0;
@@ -1318,7 +1318,7 @@ void DSI_PHY_clk_change(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq
 #endif
 }
 
-static void _DSI_PHY_clk_setting(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, LCM_DSI_PARAMS *dsi_params)
+static void _DSI_PHY_clk_setting(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, struct LCM_DSI_PARAMS *dsi_params)
 {
 	int i = 0;
 	unsigned int j = 0;
@@ -1637,7 +1637,7 @@ int mipi_clk_change(int msg, int en)
 		def_data_rate = 1030;
 		DSI_MIPI_clk_change(DISP_MODULE_DSI0, 1030);
 	} else {
-		LCM_DSI_PARAMS *dsi_params = &_dsi_context[0].dsi_params;
+		struct LCM_DSI_PARAMS *dsi_params = &_dsi_context[0].dsi_params;
 		unsigned int data_rate = dsi_params->data_rate != 0 ?
 					 dsi_params->data_rate : dsi_params->PLL_CLOCK * 2;
 		def_data_rate = data_rate;
@@ -1693,7 +1693,7 @@ void DSI_PHY_clk_switch(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq
 }
 
 
-void DSI_PHY_TIMCONFIG(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, LCM_DSI_PARAMS *dsi_params)
+void DSI_PHY_TIMCONFIG(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, struct LCM_DSI_PARAMS *dsi_params)
 {
 	struct DSI_PHY_TIMCON0_REG timcon0;
 	struct DSI_PHY_TIMCON1_REG timcon1;
@@ -2391,7 +2391,7 @@ void DSI_set_cmdq_V2(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, u
 }
 
 
-void DSI_set_cmdq_V3(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, LCM_setting_table_V3 *para_tbl,
+void DSI_set_cmdq_V3(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq, struct LCM_setting_table_V3 *para_tbl,
 		     unsigned int size, unsigned char force_update)
 {
 
@@ -2724,19 +2724,19 @@ void DSI_set_cmdq_V2_Wrapper_DSIDual(unsigned cmd, unsigned char count, unsigned
 	DSI_set_cmdq_V2(DISP_MODULE_DSIDUAL, NULL, cmd, count, para_list, force_update);
 }
 
-void DSI_set_cmdq_V3_Wrapper_DSI0(LCM_setting_table_V3 *para_tbl, unsigned int size,
+void DSI_set_cmdq_V3_Wrapper_DSI0(struct LCM_setting_table_V3 *para_tbl, unsigned int size,
 				  unsigned char force_update)
 {
 	DSI_set_cmdq_V3(DISP_MODULE_DSI0, NULL, para_tbl, size, force_update);
 }
 
-void DSI_set_cmdq_V3_Wrapper_DSI1(LCM_setting_table_V3 *para_tbl, unsigned int size,
+void DSI_set_cmdq_V3_Wrapper_DSI1(struct LCM_setting_table_V3 *para_tbl, unsigned int size,
 				  unsigned char force_update)
 {
 	DSI_set_cmdq_V3(DISP_MODULE_DSI1, NULL, para_tbl, size, force_update);
 }
 
-void DSI_set_cmdq_V3_Wrapper_DSIDual(LCM_setting_table_V3 *para_tbl, unsigned int size,
+void DSI_set_cmdq_V3_Wrapper_DSIDual(struct LCM_setting_table_V3 *para_tbl, unsigned int size,
 				     unsigned char force_update)
 {
 	DSI_set_cmdq_V3(DISP_MODULE_DSIDUAL, NULL, para_tbl, size, force_update);
@@ -2782,9 +2782,9 @@ long lcd_enp_bias_setting(unsigned int value)
 
 	return ret;
 }
-int ddp_dsi_set_lcm_utils(enum DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv)
+int ddp_dsi_set_lcm_utils(enum DISP_MODULE_ENUM module, struct LCM_DRIVER *lcm_drv)
 {
-	LCM_UTIL_FUNCS *utils = NULL;
+	struct LCM_UTIL_FUNCS *utils = NULL;
 
 	if (lcm_drv == NULL) {
 		DISPERR("lcm_drv is null\n");
@@ -2792,11 +2792,11 @@ int ddp_dsi_set_lcm_utils(enum DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv)
 	}
 
 	if (module == DISP_MODULE_DSI0) {
-		utils = (LCM_UTIL_FUNCS *)&lcm_utils_dsi0;
+		utils = (struct LCM_UTIL_FUNCS *)&lcm_utils_dsi0;
 	} else if (module == DISP_MODULE_DSI1) {
-		utils = (LCM_UTIL_FUNCS *)&lcm_utils_dsi1;
+		utils = (struct LCM_UTIL_FUNCS *)&lcm_utils_dsi1;
 	} else if (module == DISP_MODULE_DSIDUAL) {
-		utils = (LCM_UTIL_FUNCS *)&lcm_utils_dsidual;
+		utils = (struct LCM_UTIL_FUNCS *)&lcm_utils_dsidual;
 	} else {
 		DISPERR("wrong module: %d\n", module);
 		return -1;
@@ -2826,7 +2826,7 @@ int ddp_dsi_set_lcm_utils(enum DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv)
 		utils->dsi_set_cmdq_V23 = DSI_set_cmdq_V2_DSI1;
 	} else if (module == DISP_MODULE_DSIDUAL) {
 		/* TODO: Ugly workaround, hope we can found better resolution */
-		LCM_PARAMS lcm_param;
+		struct LCM_PARAMS lcm_param;
 
 		lcm_drv->get_params(&lcm_param);
 
@@ -2877,7 +2877,7 @@ void DSI_ChangeClk(DISP_MODULE_ENUM module, UINT32 clk)
 		return;
 
 	for (i = DSI_MODULE_BEGIN(module); i <= DSI_MODULE_END(module); i++) {
-		LCM_DSI_PARAMS *dsi_params = &_dsi_context[i].dsi_params;
+		struct LCM_DSI_PARAMS *dsi_params = &_dsi_context[i].dsi_params;
 		dsi_params->PLL_CLOCK = clk;
 		DSI_WaitForNotBusy(module, NULL);
 		DSI_PHY_clk_setting(module, NULL, dsi_params);
@@ -2986,7 +2986,7 @@ int ddp_dsi_deinit(enum DISP_MODULE_ENUM module, void *cmdq_handle)
 }
 
 static void DSI_PHY_CLK_LP_PerLine_config(enum DISP_MODULE_ENUM module, struct cmdqRecStruct *cmdq,
-					  LCM_DSI_PARAMS *dsi_params)
+					  struct LCM_DSI_PARAMS *dsi_params)
 {
 	int i;
 	struct DSI_PHY_TIMCON0_REG timcon0;	/* LPX */
@@ -2999,7 +2999,7 @@ static void DSI_PHY_CLK_LP_PerLine_config(enum DISP_MODULE_ENUM module, struct c
 	struct DSI_PSCTRL_REG ps;
 	UINT32 hstx_ckl_wc, new_hstx_ckl_wc;
 	UINT32 v_a, v_b, v_c, lane_num;
-	LCM_DSI_MODE_CON dsi_mode;
+	enum LCM_DSI_MODE_CON dsi_mode;
 
 	for (i = DSI_MODULE_BEGIN(module); i <= DSI_MODULE_END(module); i++) {
 		lane_num = dsi_params->LANE_NUM;
@@ -3196,7 +3196,7 @@ static void _dsi_basic_irq_enable(enum DISP_MODULE_ENUM module, void *cmdq)
 int ddp_dsi_config(enum DISP_MODULE_ENUM module, struct disp_ddp_path_config *config, void *cmdq)
 {
 	int i = 0;
-	LCM_DSI_PARAMS *dsi_config;
+	struct LCM_DSI_PARAMS *dsi_config;
 
 	DISPFUNC();
 
@@ -3209,7 +3209,7 @@ int ddp_dsi_config(enum DISP_MODULE_ENUM module, struct disp_ddp_path_config *co
 	dsi_config = &(config->dispif_config.dsi);
 
 	for (i = DSI_MODULE_BEGIN(module); i <= DSI_MODULE_END(module); i++) {
-		memcpy(&(_dsi_context[i].dsi_params), dsi_config, sizeof(LCM_DSI_PARAMS));
+		memcpy(&(_dsi_context[i].dsi_params), dsi_config, sizeof(struct LCM_DSI_PARAMS));
 		_dsi_context[i].lcm_width = config->dst_w;
 		_dsi_context[i].lcm_height = config->dst_h;
 		_dump_dsi_params(&(_dsi_context[i].dsi_params));
@@ -3471,7 +3471,7 @@ int ddp_dsi_stop(enum DISP_MODULE_ENUM module, void *cmdq_handle)
 int ddp_dsi_switch_lcm_mode(enum DISP_MODULE_ENUM module, void *params)
 {
 	int i = 0;
-	LCM_DSI_MODE_SWITCH_CMD lcm_cmd = *((LCM_DSI_MODE_SWITCH_CMD *) (params));
+	struct LCM_DSI_MODE_SWITCH_CMD lcm_cmd = *((LCM_DSI_MODE_SWITCH_CMD *) (params));
 	int mode = (int)(lcm_cmd.mode);
 
 	if (dsi_currect_mode == mode) {
@@ -3503,8 +3503,8 @@ int ddp_dsi_switch_lcm_mode(enum DISP_MODULE_ENUM module, void *params)
 int ddp_dsi_switch_mode(enum DISP_MODULE_ENUM module, void *cmdq_handle, void *params)
 {
 	int i = 0;
-	LCM_DSI_MODE_SWITCH_CMD lcm_cmd = *((LCM_DSI_MODE_SWITCH_CMD *) (params));
-	LCM_DSI_PARAMS *dsi_params = &_dsi_context[0].dsi_params;
+	struct LCM_DSI_MODE_SWITCH_CMD lcm_cmd = *((LCM_DSI_MODE_SWITCH_CMD *) (params));
+	struct LCM_DSI_PARAMS *dsi_params = &_dsi_context[0].dsi_params;
 	int mode = (int)(lcm_cmd.mode);
 	int wait_count = 100;
 
@@ -3809,7 +3809,7 @@ int ddp_dsi_ioctl(enum DISP_MODULE_ENUM module, void *cmdq_handle, enum DDP_IOCT
 		}
 	case DDP_PHY_CLK_CHANGE:
 		{
-			LCM_DSI_PARAMS *dsi_params = &_dsi_context[0].dsi_params;
+			struct LCM_DSI_PARAMS *dsi_params = &_dsi_context[0].dsi_params;
 			unsigned int *p = params;
 
 			dsi_params->PLL_CLOCK = *p;
@@ -3820,7 +3820,7 @@ int ddp_dsi_ioctl(enum DISP_MODULE_ENUM module, void *cmdq_handle, enum DDP_IOCT
 		}
 	case DDP_UPDATE_PLL_CLK_ONLY:
 		{
-			LCM_DSI_PARAMS *dsi_params = &_dsi_context[0].dsi_params;
+			struct LCM_DSI_PARAMS *dsi_params = &_dsi_context[0].dsi_params;
 			unsigned int *p = params;
 
 			dsi_params->PLL_CLOCK = *p;
@@ -4028,7 +4028,7 @@ int ddp_dsi_is_idle(enum DISP_MODULE_ENUM module)
 	return !ddp_dsi_is_busy(module);
 }
 
-static const char *dsi_mode_spy(LCM_DSI_MODE_CON mode)
+static const char *dsi_mode_spy(enum LCM_DSI_MODE_CON mode)
 {
 	switch (mode) {
 	case CMD_MODE:
@@ -4096,7 +4096,7 @@ int ddp_dsi_build_cmdq(enum DISP_MODULE_ENUM module, void *cmdq_trigger_handle, 
 	int ret = 0;
 	int i = 0;
 	int dsi_i = 0;
-	LCM_DSI_PARAMS *dsi_params = NULL;
+	struct LCM_DSI_PARAMS *dsi_params = NULL;
 	struct DSI_T0_INS t0;
 	struct DSI_RX_DATA_REG read_data0;
 	static cmdqBackupSlotHandle hSlot;
@@ -4423,7 +4423,7 @@ struct DDP_MODULE_DRIVER ddp_driver_dsidual = {
 	.ioctl = ddp_dsi_ioctl
 };
 
-const LCM_UTIL_FUNCS PM_lcm_utils_dsi0 = {
+const struct LCM_UTIL_FUNCS PM_lcm_utils_dsi0 = {
 	.set_reset_pin = lcm_set_reset_pin,
 	.udelay = lcm_udelay,
 	.mdelay = lcm_mdelay,
@@ -4475,7 +4475,7 @@ void PanelMaster_set_CC(UINT32 dsi_index, UINT32 enable)
 void PanelMaster_DSI_set_timing(UINT32 dsi_index, struct MIPI_TIMING timing)
 {
 	UINT32 hbp_byte;
-	LCM_DSI_PARAMS *dsi_params;
+	struct LCM_DSI_PARAMS *dsi_params;
 	int fbconfig_dsiTmpBufBpp = 0;
 
 	if (_dsi_context[dsi_index].dsi_params.data_format.format == LCM_DSI_FORMAT_RGB565)
@@ -4870,7 +4870,7 @@ UINT32 PanelMaster_get_dsi_timing(UINT32 dsi_index, enum MIPI_SETTING_TYPE type)
 	case HBP:
 		{
 			struct DSI_HBP_WC_REG tmp_hbp;
-			LCM_DSI_PARAMS *dsi_params;
+			struct LCM_DSI_PARAMS *dsi_params;
 
 			dsi_params = get_dsi_params_handle(dsi_index);
 			OUTREG32(&tmp_hbp, AS_UINT32(&dsi_reg->DSI_HBP_WC));

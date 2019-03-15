@@ -31,7 +31,7 @@
 #include <linux/io.h>
 #include <linux/spinlock.h>
 #include <linux/sched.h>
-#include <linux/wakelock.h>
+/*#include <linux/wakelock.h>*/
 #ifdef CONFIG_OF
 #include <linux/of.h>
 #include <linux/of_irq.h>
