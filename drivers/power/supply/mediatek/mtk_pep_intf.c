@@ -13,6 +13,7 @@
 
 #include <linux/errno.h>
 #include <linux/mutex.h>
+#include <linux/device.h>
 #include <linux/pm_wakeup.h>
 #include <linux/delay.h>
 #include <mt-plat/battery_meter.h>

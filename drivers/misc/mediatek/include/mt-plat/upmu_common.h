@@ -186,10 +186,6 @@ extern void pmic_register_interrupt_callback(unsigned int intNo
 
 extern unsigned short is_battery_remove_pmic(void);
 
-extern signed int PMIC_IMM_GetCurrent(void);
-extern unsigned int PMIC_IMM_GetOneChannelValue(pmic_adc_ch_list_enum dwChannel, int deCount,
-		int trimd);
-extern void pmic_auxadc_init(void);
 extern void lockadcch3(void);
 extern void unlockadcch3(void);
 
@@ -203,8 +199,24 @@ extern int dlpt_check_power_off(void);
 extern unsigned int pmic_read_vbif28_volt(unsigned int *val);
 extern unsigned int pmic_get_vbif28_volt(void);
 extern void pmic_auxadc_debug(int index);
+#ifndef CONFIG_MACH_MT8167
+#ifndef CONFIG_MTK_PMIC_NEW_ARCH
+#ifndef CONFIG_FPGA_EARLY_PORTING
+extern void pmic_auxadc_init(void);
+extern signed int PMIC_IMM_GetCurrent(void);
+extern unsigned int PMIC_IMM_GetOneChannelValue(
+					pmic_adc_ch_list_enum dwChannel,
+					int deCount,
+					int trimd);
 extern bool hwPowerOn(MT65XX_POWER powerId, int voltage_uv, char *mode_name);
 extern bool hwPowerDown(MT65XX_POWER powerId, char *mode_name);
+#endif
+#endif
+#else
+extern int PMIC_IMM_GetOneChannelValue(unsigned int dwChannel,
+				       int deCount,
+				       int trimd);
+#endif
 
 extern int get_battery_plug_out_status(void);
 

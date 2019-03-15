@@ -533,7 +533,7 @@ static int __init mtk_extd_mgr_init(void)
 
 	extd_driver[DEV_MHL] = EXTD_HDMI_Driver();
 	extd_driver[DEV_EINK] = EXTD_EPD_Driver();
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	extd_driver[DEV_LCM] = EXTD_LCM_Driver();
 #endif
 	extd_factory_driver[DEV_MHL] = EXTD_Factory_HDMI_Driver();

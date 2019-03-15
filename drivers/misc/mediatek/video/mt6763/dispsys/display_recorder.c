@@ -153,10 +153,10 @@ static mmp_event dprec_mmp_event_spy(enum DPREC_LOGGER_ENUM l)
 static void dprec_to_mmp(unsigned int type_logsrc, enum mmp_log_type mmp_log, unsigned int data1,
 			 unsigned data2)
 {
-	int mmp_event = dprec_mmp_event_spy(type_logsrc);
+	int event = dprec_mmp_event_spy(type_logsrc);
 
-	if (mmp_event < 0xffff)
-		mmprofile_log_ex(mmp_event, mmp_log, data1, data2);
+	if (event < 0xffff)
+		mmprofile_log_ex(event, mmp_log, data1, data2);
 
 }
 

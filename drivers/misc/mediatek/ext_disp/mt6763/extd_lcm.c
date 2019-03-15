@@ -36,7 +36,7 @@
 /*****************************************************************************/
 #include "extd_info.h"
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 #include <linux/mm.h>
 
 
@@ -167,7 +167,7 @@ int lcm_post_init(void)
 const struct EXTD_DRIVER *EXTD_LCM_Driver(void)
 {
 	static const struct EXTD_DRIVER extd_driver_lcm = {
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 		.post_init =	lcm_post_init,
 		.get_dev_info =	lcm_get_dev_info,
 		.ioctl =		lcm_ioctl,

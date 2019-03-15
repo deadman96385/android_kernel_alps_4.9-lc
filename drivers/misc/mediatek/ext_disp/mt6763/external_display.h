@@ -140,7 +140,7 @@ int ext_disp_manual_unlock(void);
 void _cmdq_start_extd_trigger_loop(void);
 void _cmdq_stop_extd_trigger_loop(void);
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 /* defined in mtkfb.c should move to mtkfb.h*/
 extern char ext_mtkfb_lcm_name[];
 

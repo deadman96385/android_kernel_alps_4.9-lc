@@ -11,7 +11,8 @@
  * GNU General Public License for more details.
  */
 
-#if ((defined CONFIG_MTK_HDMI_SUPPORT) || (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2))
+#if ((defined CONFIG_MTK_HDMI_SUPPORT) || \
+(defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) &&(CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)))
 #include <linux/string.h>
 #include <linux/time.h>
 #include <linux/uaccess.h>
@@ -22,7 +23,7 @@
 /*#include <mach/mt_gpio.h>*/
 /*#include <mt-plat/mt_gpio.h>*/
 /* #include <cust_gpio_usage.h> */
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 #include "m4u.h"
 #endif
 #include <linux/vmalloc.h>
@@ -62,7 +63,7 @@ static const char STR_HELP[] =
 	"	fix resolution or 3d enable(high 16 bit)\n"
 	"\n";
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 #define LCM_WIDTH     1080
 #define LCM_HEIGHT    1920
 #define BUFFER_COUNT 1
@@ -254,7 +255,7 @@ static void process_dbg_opt(const char *opt)
 	EXTDMSG("[Debug] Not enable 'CONFIG_MTK_HDMI_SUPPORT'\n");
 #endif
 	} else if (strncmp(opt, "duallcm:on", 10) == 0) {
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 		unsigned int frame_cnts = 0;
 		unsigned int image_size = 0;
 		unsigned int created_session[5];

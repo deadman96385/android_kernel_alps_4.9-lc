@@ -1054,7 +1054,7 @@ struct disp_lcm_handle *disp_ext_lcm_probe(char *plcm_name, enum LCM_INTERFACE_I
 		return NULL;
 	} else if (_lcm_count() == 2) {
 		if (plcm_name == NULL) {
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 			lcm_drv = lcm_driver_list[1];
 #else
 			lcm_drv = NULL;
@@ -1456,7 +1456,7 @@ void *disp_lcm_switch_mode(struct disp_lcm_handle *plcm, int mode)
 		}
 		lcm_drv = plcm->drv;
 		if (lcm_drv->switch_mode) {
-			lcm_cmd = (LCM_DSI_MODE_SWITCH_CMD *) lcm_drv->switch_mode(mode);
+			lcm_cmd = (struct LCM_DSI_MODE_SWITCH_CMD *) lcm_drv->switch_mode(mode);
 			lcm_cmd->cmd_if = (unsigned int)(plcm->params->lcm_cmd_if);
 		} else {
 			DISPERR("FATAL ERROR, lcm_drv->switch_mode is null\n");

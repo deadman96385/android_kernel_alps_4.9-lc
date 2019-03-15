@@ -3678,8 +3678,8 @@ static struct SENSOR_FUNCTION_STRUCT sensor_func = {
 	close
 };
 
-UINT32 IMX258_MIPI_RAW_SensorInit(PSENSOR_FUNCTION_STRUCT *pfFunc)
-	/*UINT32 IMX258_MIPI_SensorInit(PSENSOR_FUNCTION_STRUCT *pfFunc)*/
+UINT32 IMX258_MIPI_RAW_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc)
+	/*UINT32 IMX258_MIPI_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc)*/
 {
 	/* To Do : Check Sensor status here */
 	if (pfFunc != NULL)

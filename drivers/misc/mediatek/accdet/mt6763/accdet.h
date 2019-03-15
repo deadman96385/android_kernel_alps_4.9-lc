@@ -43,7 +43,7 @@
 #include <linux/uaccess.h>
 #include <linux/kthread.h>
 #include <linux/input.h>
-/*#include <linux/wakelock.h>*/
+#include <linux/pm_wakeup.h>
 #include <linux/time.h>
 
 #include <linux/string.h>

@@ -366,7 +366,7 @@ void external_display_control_init(void)
 	extd_driver[DEV_MHL]  = EXTD_HDMI_Driver();
 	extd_driver[DEV_EINK] = EXTD_EPD_Driver();
 	extd_driver[DEV_WFD] = NULL;
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	extd_driver[DEV_LCM] = EXTD_LCM_Driver();
 #endif
 

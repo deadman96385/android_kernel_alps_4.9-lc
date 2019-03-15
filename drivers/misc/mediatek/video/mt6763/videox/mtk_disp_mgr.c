@@ -631,7 +631,8 @@ static int _get_max_layer(unsigned int session_id)
 {
 	if (DISP_SESSION_TYPE(session_id) == DISP_SESSION_PRIMARY)
 		return primary_display_get_max_layer();
-#if ((defined CONFIG_MTK_HDMI_SUPPORT) || (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2))
+#if ((defined CONFIG_MTK_HDMI_SUPPORT) || \
+(defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) &&(CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)))
 	else if (DISP_SESSION_TYPE(session_id) == DISP_SESSION_EXTERNAL)
 		return ext_disp_get_max_layer();
 #endif
@@ -940,7 +941,8 @@ static int do_frame_config(struct frame_queue_t *frame_node)
 
 	if (DISP_SESSION_TYPE(frame_cfg->session_id) == DISP_SESSION_PRIMARY)
 		primary_display_frame_cfg(frame_cfg);
-#if ((defined CONFIG_MTK_HDMI_SUPPORT) || (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2))
+#if ((defined CONFIG_MTK_HDMI_SUPPORT) || \
+(defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) &&(CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)))
 	else if (DISP_SESSION_TYPE(frame_cfg->session_id) == DISP_SESSION_EXTERNAL)
 		external_display_frame_cfg(frame_cfg);
 #endif
@@ -1051,7 +1053,8 @@ int disp_mgr_get_session_info(struct disp_session_info *info)
 
 	if (DISP_SESSION_TYPE(session_id) == DISP_SESSION_PRIMARY) {
 		primary_display_get_info(info);
-#if ((defined CONFIG_MTK_HDMI_SUPPORT) || (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2))
+#if ((defined CONFIG_MTK_HDMI_SUPPORT) || \
+(defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) &&(CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)))
 	} else if (DISP_SESSION_TYPE(session_id) == DISP_SESSION_EXTERNAL) {
 		external_display_get_info(info, session_id);
 #endif

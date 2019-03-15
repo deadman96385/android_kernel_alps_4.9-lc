@@ -2955,7 +2955,7 @@ int ddp_dsi_init(enum DISP_MODULE_ENUM module, void *cmdq)
 		/*__close_dsi_default_clock(module); */
 	}
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	if (module == DISP_MODULE_DSI1) {
 		/*set DSI1 TE source*/
 		DSI_MASKREG32(NULL, DISP_REG_CONFIG_MMSYS_MISC, 0x2, 0x2);
@@ -3503,7 +3503,7 @@ int ddp_dsi_switch_lcm_mode(enum DISP_MODULE_ENUM module, void *params)
 int ddp_dsi_switch_mode(enum DISP_MODULE_ENUM module, void *cmdq_handle, void *params)
 {
 	int i = 0;
-	struct LCM_DSI_MODE_SWITCH_CMD lcm_cmd = *((LCM_DSI_MODE_SWITCH_CMD *) (params));
+	struct LCM_DSI_MODE_SWITCH_CMD lcm_cmd = *((struct LCM_DSI_MODE_SWITCH_CMD *) (params));
 	struct LCM_DSI_PARAMS *dsi_params = &_dsi_context[0].dsi_params;
 	int mode = (int)(lcm_cmd.mode);
 	int wait_count = 100;

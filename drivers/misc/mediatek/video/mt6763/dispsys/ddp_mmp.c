@@ -148,7 +148,8 @@ void init_ddp_mmp_events(void)
 		DDP_MMP_Events.primary_set_cmd =
 		    mmprofile_register_event(DDP_MMP_Events.primary_Parent, "primary_set_cmd");
 
-#if ((defined CONFIG_MTK_HDMI_SUPPORT) || (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2))
+#if ((defined CONFIG_MTK_HDMI_SUPPORT) || \
+(defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) &&(CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)))
 		DDP_MMP_Events.Extd_Parent = mmprofile_register_event(DDP_MMP_Events.DDP, "ext_disp");
 		DDP_MMP_Events.Extd_State =
 		    mmprofile_register_event(DDP_MMP_Events.Extd_Parent, "ext_State");

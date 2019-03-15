@@ -983,7 +983,7 @@ static int ext_disp_init_lcm(char *lcm_name, unsigned int session)
 		ret = EXT_DISP_STATUS_ERROR;
 		goto done;
 	} else {
-		memcpy(&extd_struct LCM_PARAMS, lcm_param, sizeof(struct LCM_PARAMS));
+		memcpy(&extd_lcm_params, lcm_param, sizeof(struct LCM_PARAMS));
 	}
 
 	if (ext_disp_use_cmdq == CMDQ_ENABLE) {
@@ -1023,7 +1023,7 @@ static int ext_disp_init_lcm(char *lcm_name, unsigned int session)
 	dpmgr_path_reset(pgc->dpmgr_handle, ext_disp_use_cmdq);
 
 	data_config = dpmgr_path_get_last_config(pgc->dpmgr_handle);
-	memset(&(lcm_param->dpi), 0, sizeof(LCM_DPI_PARAMS));
+	memset(&(lcm_param->dpi), 0, sizeof(struct LCM_DPI_PARAMS));
 	memcpy(&(data_config->dispif_config), lcm_param, sizeof(struct LCM_PARAMS));
 	data_config->dst_w = ext_disp_get_width(session);
 	data_config->dst_h = ext_disp_get_height(session);
@@ -1060,7 +1060,7 @@ static int ext_disp_init_lcm(char *lcm_name, unsigned int session)
 	atomic_set(&g_extd_trigger_ticket, 1);
 	atomic_set(&g_extd_release_ticket, 0);
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	external_display_lowpower_init();
 #endif
 
@@ -1108,7 +1108,7 @@ int ext_disp_esd_recovery(void)
 		goto done;
 	}
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	external_display_idlemgr_kick((char *)__func__, 0);
 #endif
 	mmprofile_log_ex(ddp_mmp_get_events()->esd_recovery_t, MMPROFILE_FLAG_PULSE, 0, 2);
@@ -1180,7 +1180,7 @@ void ext_disp_probe(void)
 {
 	EXTDFUNC();
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	if (plcm_interface == NULL) {
 		plcm_interface = disp_ext_lcm_probe(ext_mtkfb_lcm_name, LCM_INTERFACE_NOTDEFINED, 0);
 		if (plcm_interface == NULL)
@@ -1194,7 +1194,7 @@ void ext_disp_probe(void)
 	ext_disp_use_m4u = 1;
 	ext_disp_mode = EXTD_DIRECT_LINK_MODE;
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	external_display_check_recovery_init();
 	mutex_init(&esd_check_lock);
 #endif
@@ -1311,7 +1311,7 @@ int ext_disp_wait_for_vsync(void *config, unsigned int session)
 		return -1;
 	}
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	if ((pgc->lcm_state == EXTD_LCM_SUSPEND) || (pgc->lcm_state == EXTD_LCM_NO_INIT)) {
 		EXTDERR("%s: SUB LCM is suspended\n", __func__);
 		return -1;
@@ -1353,7 +1353,7 @@ int ext_disp_suspend(unsigned int session)
 
 	EXTDFUNC();
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	ext_disp_esd_check_lock();
 #endif
 	_ext_disp_path_lock(__func__);
@@ -1363,7 +1363,7 @@ int ext_disp_suspend(unsigned int session)
 		goto done;
 	}
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	external_display_idlemgr_kick((char *)__func__, 0);
 #endif
 
@@ -1397,12 +1397,12 @@ int ext_disp_suspend(unsigned int session)
 	dpmgr_unregister_cmdq_dump_callback(ext_disp_cmdq_dump);
 
 	pgc->state = EXTD_SUSPEND;
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	ext_disp_set_state(EXTD_SUSPEND);
 #endif
  done:
 	_ext_disp_path_unlock(__func__);
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	ext_disp_esd_check_unlock();
 #endif
 
@@ -1513,7 +1513,7 @@ int ext_disp_resume(unsigned int session)
 		pgc->suspend_config = 0;
 
 	pgc->state = EXTD_RESUME;
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	ext_disp_set_state(EXTD_RESUME);
 #endif
 
@@ -1614,7 +1614,7 @@ int ext_disp_trigger(int blocking, void *callback, unsigned int userdata, unsign
 		return -1;
 	}
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	external_display_idlemgr_kick((char *)__func__, 0);
 #endif
 
@@ -1712,7 +1712,7 @@ int ext_disp_frame_cfg_input(struct disp_frame_cfg_t *cfg)
 		return -2;
 	}
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	external_display_idlemgr_kick((char *)__func__, 0);
 #endif
 
@@ -1765,7 +1765,7 @@ int ext_disp_frame_cfg_input(struct disp_frame_cfg_t *cfg)
 		}
 	}
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	external_display_idlemgr_kick((char *)__func__, 0);
 #endif
 
@@ -1793,14 +1793,14 @@ int ext_disp_frame_cfg_input(struct disp_frame_cfg_t *cfg)
 			dprec_mmp_dump_ovl_layer(&(data_config->ovl_config[config_layer_id]), config_layer_id, 2);
 
 			if (init_roi == 1) {
-				memcpy(&(data_config->dispif_config), &extd_struct LCM_PARAMS, sizeof(struct LCM_PARAMS));
+				memcpy(&(data_config->dispif_config), &extd_lcm_params, sizeof(struct LCM_PARAMS));
 
 			if (DISP_SESSION_DEV(session) == DEV_LCM)
 				EXTDINFO("set dest w:%d, h:%d\n",
 						data_config->dst_w, data_config->dst_h);
 			else
 				EXTDINFO("set dest w:%d, h:%d\n",
-						extd_struct LCM_PARAMS.dpi.width, extd_struct LCM_PARAMS.dpi.height);
+						extd_lcm_params.dpi.width, extd_lcm_params.dpi.height);
 
 				data_config->dst_dirty = 1;
 				data_config->rdma_config.address = 0;
@@ -2155,7 +2155,7 @@ void extd_disp_get_interface(struct disp_lcm_handle **plcm)
 	*plcm = plcm_interface;
 }
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 static DECLARE_WAIT_QUEUE_HEAD(ext_disp_state_wait_queue);
 
 enum EXTD_POWER_STATE ext_disp_get_state(void)

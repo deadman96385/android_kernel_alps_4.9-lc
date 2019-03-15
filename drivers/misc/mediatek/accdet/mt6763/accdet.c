@@ -110,10 +110,10 @@ static int g_cur_eint0_state = EINT_PIN_PLUG_OUT;
 static int g_cur_eint1_state = EINT_PIN_PLUG_OUT;
 #endif
 
-static struct wake_lock accdet_suspend_lock;
-static struct wake_lock accdet_irq_lock;
-static struct wake_lock accdet_key_lock;
-static struct wake_lock accdet_timer_lock;
+static struct wakeup_source accdet_suspend_lock;
+static struct wakeup_source accdet_irq_lock;
+static struct wakeup_source accdet_key_lock;
+static struct wakeup_source accdet_timer_lock;
 static struct timer_list micbias_timer;
 static struct timer_list  accdet_init_timer;
 
@@ -2290,10 +2290,11 @@ int mt_accdet_probe(struct platform_device *dev)
 		ACCDET_ERROR("[mt_accdet_probe]kpd_accdet_dev register : fail!\n");
 
 	/* wake lock */
-	wake_lock_init(&accdet_suspend_lock, WAKE_LOCK_SUSPEND, "accdet wakelock");
-	wake_lock_init(&accdet_irq_lock, WAKE_LOCK_SUSPEND, "accdet irq wakelock");
-	wake_lock_init(&accdet_key_lock, WAKE_LOCK_SUSPEND, "accdet key wakelock");
-	wake_lock_init(&accdet_timer_lock, WAKE_LOCK_SUSPEND, "accdet timer wakelock");
+	wakeup_source_init(&accdet_suspend_lock, "accdet wakelock");
+	wakeup_source_init(&accdet_irq_lock, "accdet irq wakelock");
+	wakeup_source_init(&accdet_key_lock, "accdet key wakelock");
+	wakeup_source_init(&accdet_timer_lock, "accdet timer wakelock");
+
 
 	/* INIT the timer to disable micbias */
 	init_timer(&micbias_timer);

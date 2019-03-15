@@ -15,7 +15,7 @@
 /*****************************************************************************/
 #include "extd_info.h"
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 1)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 1)
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/dma-mapping.h>

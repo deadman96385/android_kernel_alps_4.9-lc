@@ -43,7 +43,7 @@
 #include "disp_utils.h"
 #include "disp_session.h"
 #include "primary_display.h"
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 #include "external_display.h"
 #endif
 #include "disp_helper.h"
@@ -85,7 +85,7 @@ static unsigned int kick_buf_length;
 static atomic_t idlemgr_task_wakeup = ATOMIC_INIT(1);
 unsigned int idle_test_enable;
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 static atomic_t ext_idlemgr_task_wakeup = ATOMIC_INIT(1);
 #endif
 #ifdef MTK_FB_MMDVFS_SUPPORT
@@ -97,7 +97,7 @@ static atomic_t dvfs_ovl_req_status = ATOMIC_INIT(HRT_LEVEL_ULPM);
 /* Local API */
 /*********************************************************************************************************************/
 static int _primary_path_idlemgr_monitor_thread(void *data);
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 static int _external_path_idlemgr_monitor_thread(void *data);
 #endif
 
@@ -115,7 +115,7 @@ static struct disp_idlemgr_context *_get_idlemgr_context(void)
 		g_idlemgr_context.cur_lp_cust_mode = 0;
 		g_idlemgr_context.primary_display_idlemgr_task
 			= kthread_create(_primary_path_idlemgr_monitor_thread, NULL, "disp_idlemgr");
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 		init_waitqueue_head(&(g_idlemgr_context.ext_idlemgr_wait_queue));
 		g_idlemgr_context.is_external_idle = 0;
 		g_idlemgr_context.ext_idlemgr_last_kick_time = ~(0ULL);
@@ -579,7 +579,7 @@ void _primary_display_disable_mmsys_clk(void)
 		do_primary_display_switch_mode(DISP_SESSION_DIRECT_LINK_MODE,
 					primary_get_sess_id(), 0, NULL, 1);
 	}
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	if (primary_get_sess_mode() != DISP_SESSION_DIRECT_LINK_MODE &&
 		primary_get_sess_mode() != DISP_SESSION_DECOUPLE_MIRROR_MODE)
 		return;
@@ -633,7 +633,7 @@ void _primary_display_enable_mmsys_clk(void)
 	struct disp_ddp_path_config *data_config;
 	struct ddp_io_golden_setting_arg gset_arg;
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 	if (primary_get_sess_mode() != DISP_SESSION_DIRECT_LINK_MODE &&
 		primary_get_sess_mode() != DISP_SESSION_DECOUPLE_MIRROR_MODE)
 		return;
@@ -1313,7 +1313,7 @@ unsigned int time_to_line(unsigned int ms, unsigned int width)
 	return line;
 }
 
-#if (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
+#if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && (CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
 int external_display_idlemgr_init(void)
 {
 	wake_up_process(idlemgr_pgc->external_display_idlemgr_task);

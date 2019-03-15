@@ -23,6 +23,8 @@
 #include <linux/of.h>
 #include <linux/of_irq.h>
 #include <linux/slab.h>
+#include <linux/device.h>
+#include <linux/pm_wakeup.h>
 /*#include <linux/switch.h>*/
 #include <asm/cacheflush.h>
 /* #include "mtk_idle.h" */
@@ -187,7 +189,7 @@ static atomic_t delayed_trigger_kick = ATOMIC_INIT(0);
 static atomic_t od_trigger_kick = ATOMIC_INIT(0);
 
 /* hold the wakelock to make kernel awake when primary display is on*/
-struct wake_lock pri_wk_lock;
+struct wakeup_source pri_wk_lock;
 
 static unsigned long long mutex_time_start;
 static unsigned long long mutex_time_end;
@@ -4106,8 +4108,8 @@ int primary_display_init(char *lcm_name, unsigned int lcm_fps, int is_lcm_inited
 
 done:
 	DISPDBG("init and hold wakelock...\n");
-	wake_lock_init(&pri_wk_lock, WAKE_LOCK_SUSPEND, "pri_disp_wakelock");
-	wake_lock(&pri_wk_lock);
+	wakeup_source_init(&pri_wk_lock, "pri_disp_wakelock");
+	__pm_stay_awake(&pri_wk_lock);
 
 	if (disp_helper_get_stage() != DISP_HELPER_STAGE_NORMAL)
 		primary_display_diagnose();
@@ -4664,7 +4666,7 @@ done:
 	dpmgr_unregister_cmdq_dump_callback(primary_display_cmdq_dump);
 
 	DISPDBG("release wakelock...\n");
-	wake_unlock(&pri_wk_lock);
+	__pm_relax(&pri_wk_lock);
 
 	_primary_path_unlock(__func__);
 	disp_sw_mutex_unlock(&(pgc->capture_lock));
@@ -5019,7 +5021,7 @@ done:
 		primary_display_esd_check_enable(1);
 
 	DISPDBG("hold the wakelock...\n");
-	wake_lock(&pri_wk_lock);
+	__pm_stay_awake(&pri_wk_lock);
 
 	_primary_path_unlock(__func__);
 	DISPMSG("skip_update:%d\n", skip_update);

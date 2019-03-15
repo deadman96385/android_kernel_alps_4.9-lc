@@ -31,7 +31,7 @@
 #include <linux/io.h>
 #include <linux/spinlock.h>
 #include <linux/sched.h>
-/*#include <linux/wakelock.h>*/
+#include <linux/pm_wakeup.h>
 #ifdef CONFIG_OF
 #include <linux/of.h>
 #include <linux/of_irq.h>
@@ -98,7 +98,7 @@ struct mt_spi_t {
 	int running;
 	u32 pad_macro;
 	u32 dma_addrmask;
-	struct wake_lock wk_lock;
+	struct wakeup_source wk_lock;
 	struct mt_chip_conf *config;
 	struct spi_master *master;
 
@@ -1062,7 +1062,7 @@ static void mt_spi_msg_done(struct mt_spi_t *ms, struct spi_message *msg, int st
 
 		/* schedule_work(&mt_spi_msgdone_workqueue);//disable clock */
 
-		wake_unlock(&ms->wk_lock);
+		__pm_relax(&ms->wk_lock);
 	} else
 		mt_spi_next_message(ms);
 }
@@ -1118,7 +1118,7 @@ static int mt_spi_transfer(struct spi_device *spidev, struct spi_message *msg)
 	master = spidev->master;
 	ms = spi_master_get_devdata(master);
 
-	/* wake_lock(&ms->wk_lock); */
+	/* __pm_stay_awake(&ms->wk_lock); */
 	SPI_DBG("enter,start add msg:0x%p\n", msg);
 
 	if (unlikely(!msg)) {
@@ -1181,7 +1181,7 @@ static int mt_spi_transfer(struct spi_device *spidev, struct spi_message *msg)
 	list_add_tail(&msg->queue, &ms->queue);
 	SPI_DBG("add msg %p to queue\n", msg);
 	if (!ms->cur_transfer) {
-		wake_lock(&ms->wk_lock);
+		__pm_stay_awake(&ms->wk_lock);
 		spi_gpio_set(ms);
 
 		/* enable_clk(); */
@@ -1628,7 +1628,7 @@ static int mt_spi_probe(struct platform_device *pdev)
 	ms->running = IDLE;
 	ms->cur_transfer = NULL;
 	ms->next_transfer = NULL;
-	wake_lock_init(&ms->wk_lock, WAKE_LOCK_SUSPEND, "spi_wakelock");
+	wakeup_source_init(&ms->wk_lock, "spi_wakelock");
 
 	spin_lock_init(&ms->lock);
 	INIT_LIST_HEAD(&ms->queue);
