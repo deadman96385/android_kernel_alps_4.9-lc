@@ -23,7 +23,7 @@
 #include "accdet.h"
 
 #include "mtk_auxadc_intf.h"
-
+#include <mach/mtk_pmic.h>
 #define DEBUG_THREAD			(1)
 #define ACCDET_INIT0_ONCE	0/* reset accdet sw, enable clock...  */
 #define ACCDET_INIT1_ONCE	1/* config analog, enable accdet eint, top interrupt...  */
@@ -841,7 +841,7 @@ static void accdet_eint_work_callback(struct work_struct *work)
 		mutex_lock(&accdet_eint_irq_sync_mutex);
 		s_eint_accdet_sync_flag = 1;
 		mutex_unlock(&accdet_eint_irq_sync_mutex);
-		wake_lock_timeout(&accdet_timer_lock, 7 * HZ);
+		__pm_wakeup_event(&accdet_timer_lock, 7 * HZ);
 		accdet_init();	/* do set pwm_idle on in accdet_init */
 
 #if 0
@@ -891,7 +891,7 @@ static void accdet_eint_work_callback(struct work_struct *work)
 		mutex_lock(&accdet_eint_irq_sync_mutex);
 		s_eint_accdet_sync_flag = 1;
 		mutex_unlock(&accdet_eint_irq_sync_mutex);
-		wake_lock_timeout(&accdet_timer_lock, 7 * HZ);
+		__pm_wakeup_event(&accdet_timer_lock, 7 * HZ);
 
 		accdet_init();	/* do set pwm_idle on in accdet_init*/
 		reg_val = pmic_pwrap_read(ACCDET_CON02);
@@ -1087,7 +1087,7 @@ static void accdet_work_callback(struct work_struct *work)
 	unsigned int reg_val = 0;
 
 	reg_val = 0;
-	wake_lock(&accdet_irq_lock);
+	__pm_stay_awake(&accdet_irq_lock);
 #if 0
 #if	HW_MODE_SUPPORT/* open HW-mode for plug-out to avoid pop-noise */
 	reg_val = pmic_pwrap_read(ACCDET_CON24);
@@ -1115,7 +1115,7 @@ static void accdet_work_callback(struct work_struct *work)
 	else
 		ACCDET_ERROR("[accdet]Headset has plugged out don't set accdet state\n");
 	mutex_unlock(&accdet_eint_irq_sync_mutex);
-	wake_unlock(&accdet_irq_lock);
+	__pm_relax(&accdet_irq_lock);
 
 	ACCDET_DEBUG("[accdet] report cable_type:%d\n", s_cable_type);
 }

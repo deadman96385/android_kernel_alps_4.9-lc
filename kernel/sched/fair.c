@@ -5732,7 +5732,7 @@ end:
  * The required scaling will be performed just one time, by the calling
  * functions, once we accumulated the contributons for all the SGs.
  */
-static void calc_sg_energy(struct energy_env *eenv)
+static void calc_sg_energy(struct energy_env *eenv, struct sched_domain *sd)
 {
 	struct sched_group *sg = eenv->sg;
 	int busy_energy, idle_energy;
@@ -5901,7 +5901,7 @@ static int compute_energy(struct energy_env *eenv)
 				 * CPUs in the current visited SG.
 				 */
 				eenv->sg = sg;
-				calc_sg_energy(eenv);
+				calc_sg_energy(eenv, sd);
 
 				if (!sd->child) {
 					/*
@@ -5928,10 +5928,8 @@ static int compute_energy(struct energy_env *eenv)
 				 * while racing with hotplug and
 				 * avoid entering a infinite loop.
 				 */
-				if (only_lv1_sd) {
-					eenv->energy = total_energy;
+				if (only_lv1_sd)
 					return 0;
-				}
 #endif
 
 				if (cpumask_equal(sched_group_cpus(sg), sched_group_cpus(eenv->sg_top)))
@@ -5985,32 +5983,11 @@ static inline int select_energy_cpu_idx(struct energy_env *eenv)
 	int sd_cpu = -1;
 	int cpu_idx;
 	int margin;
-#ifdef CONFIG_MTK_SCHED_EAS_POWER_SUPPORT
-	int i;
-#endif
 
 	sd_cpu = eenv->cpu[EAS_CPU_PRV].cpu_id;
 	sd = rcu_dereference(per_cpu(sd_ea, sd_cpu));
 	if (!sd)
 		return EAS_CPU_PRV;
-
-#ifdef CONFIG_MTK_SCHED_EAS_POWER_SUPPORT
-	/* To get max opp index of every cluster for power estimation of
-	 * share buck
-	 */
-	for (i = 0; i < arch_get_nr_clusters(); i++) {
-		/* for energy before */
-		eenv_before.opp_idx[i]  =
-			mtk_cluster_capacity_idx(i, &eenv_before);
-
-		/* for energy after */
-		eenv->opp_idx[i] = mtk_cluster_capacity_idx(i, eenv);
-
-		mt_sched_printf(sched_eas_energy_calc,
-			"cid=%d, before max_opp:%d, after max_opp:%d\n",
-			i, eenv_before.opp_idx[i], eenv->opp_idx[i]);
-	}
-#endif
 
 	cpumask_clear(&eenv->cpus_mask);
 	for (cpu_idx = EAS_CPU_PRV; cpu_idx < EAS_CPU_CNT; ++cpu_idx) {

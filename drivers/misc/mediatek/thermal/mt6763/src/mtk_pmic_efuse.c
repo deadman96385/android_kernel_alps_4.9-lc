@@ -28,6 +28,7 @@
 #include "mach/mtk_thermal.h"
 #include <mt-plat/upmu_common.h>
 #include <mt-plat/mtk_auxadc_intf.h>
+#include <mach/mtk_pmic.h>
 #include <tspmic_settings.h>
 /*=============================================================
  *Local variable definition

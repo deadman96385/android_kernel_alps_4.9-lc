@@ -119,7 +119,7 @@ static unsigned int backlight_PWM_div_hal = CLK_DIV1;	/* this para come from cus
 /****************************************************************************
  * func:return global variables
  ***************************************************************************/
-static unsigned long long current_time, last_time;
+static unsigned long long current_t, last_time;
 static int count;
 static char buffer[4096] = "[BL] Set Backlight directly ";
 
@@ -128,8 +128,8 @@ static void backlight_debug_log(int level, int mappingLevel)
 	unsigned long cur_time_mod = 0;
 	unsigned long long cur_time_display = 0;
 
-	current_time = sched_clock();
-	cur_time_display = current_time;
+	current_t = sched_clock();
+	cur_time_display = current_t;
 	cur_time_mod = do_div(cur_time_display, 1000000000);
 
 	sprintf(buffer + strlen(buffer), "T:%lld.%ld,L:%d map:%d    ",
@@ -137,7 +137,7 @@ static void backlight_debug_log(int level, int mappingLevel)
 
 	count++;
 
-	if (level == 0 || count >= 5 || (current_time - last_time) > 1000000000) {
+	if (level == 0 || count >= 5 || (current_t - last_time) > 1000000000) {
 		LEDS_DEBUG("%s", buffer);
 		count = 0;
 		buffer[strlen("[BL] Set Backlight directly ")] = '\0';
