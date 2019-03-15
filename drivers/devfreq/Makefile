@@ -28,7 +28,6 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/emi/submodule/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/smi/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/$(CONFIG_MTK_PLATFORM)\
 
-obj-y					+= helio-dvfsrc.o helio-dvfsrc-opp.o helio-dvfsrc-sysfs.o helio-dvfsrc-ipi.o
-obj-$(CONFIG_MACH_MT6765)		+= helio-dvfsrc-mt6765.o helio-dvfsrc-opp-mt6765.o
-obj-$(CONFIG_MACH_MT6761)	+= helio-dvfsrc-mt6761.o helio-dvfsrc-opp-mt6761.o
+obj-$(CONFIG_MACH_MT6765)		+= helio-dvfsrc.o helio-dvfsrc-opp.o helio-dvfsrc-sysfs.o helio-dvfsrc-ipi.o helio-dvfsrc-mt6765.o helio-dvfsrc-opp-mt6765.o
+obj-$(CONFIG_MACH_MT6761)	+= helio-dvfsrc.o helio-dvfsrc-opp.o helio-dvfsrc-sysfs.o helio-dvfsrc-ipi.o helio-dvfsrc-mt6761.o helio-dvfsrc-opp-mt6761.o
 endif
