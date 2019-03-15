@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 MediaTek Inc.
+ * Copyright (C) 2016 MediaTek Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -24,83 +24,82 @@
 #define PMIC_WRAP_SUPPORT
 /****** For BringUp. if BringUp doesn't had PMIC, need open this ***********/
 #if (PMIC_WRAP_PRELOADER)
-#if CFG_FPGA_PLATFORM
-#define PMIC_WRAP_NO_PMIC
-#else
+	#if CFG_FPGA_PLATFORM
+		#define PMIC_WRAP_NO_PMIC
+	#else
 		/* #define PWRAP_TIMEOUT */
-#endif
+	#endif
 #elif (PMIC_WRAP_LK)
-#if defined(MACH_FPGA)
-#define PMIC_WRAP_NO_PMIC
-#else
-#define PWRAP_TIMEOUT
-#endif
+	#if defined(MACH_FPGA)
+		#define PMIC_WRAP_NO_PMIC
+	#else
+		#define PWRAP_TIMEOUT
+	#endif
 #elif (PMIC_WRAP_KERNEL)
-#if defined(CONFIG_MTK_FPGA) || defined(CONFIG_FPGA_EARLY_PORTING)
-#define PMIC_WRAP_NO_PMIC
-#else
+	#if defined(CONFIG_MTK_FPGA) || defined(CONFIG_FPGA_EARLY_PORTING)
+		#define PMIC_WRAP_NO_PMIC
+	#else
 		/* #define PWRAP_TIMEOUT */
-#endif
+	#endif
 #elif (PMIC_WRAP_CTP)
-#if defined(CONFIG_MTK_FPGA)
-#define PMIC_WRAP_NO_PMIC
-#else
+	#if defined(CONFIG_MTK_FPGA)
+		#define PMIC_WRAP_NO_PMIC
+	#else
 		/* #define PWRAP_TIMEOUT */
-#endif
+	#endif
 #else
-#define PWRAP_TIMEOUT
+	#define PWRAP_TIMEOUT
 #endif
 
 #define MTK_PLATFORM_MT6356      1
 
 /******  SW ENV header define *****************************/
 #if (PMIC_WRAP_PRELOADER)
-#include <sync_write.h>
-#include <typedefs.h>
-#include <gpio.h>
-#include <mt6763.h>
+	#include <sync_write.h>
+	#include <typedefs.h>
+	#include <gpio.h>
+	#include <mt6763.h>
 #elif (PMIC_WRAP_LK)
-#include <debug.h>
-#include <platform/mt_typedefs.h>
-#include <platform/mt_reg_base.h>
-#include <platform/mt_gpt.h>
-#include <platform/mt_irq.h>
-#include <sys/types.h>
-#include <platform/sync_write.h>
-#include <platform/upmu_hw.h>
+	#include <debug.h>
+	#include <platform/mt_typedefs.h>
+	#include <platform/mt_reg_base.h>
+	#include <platform/mt_gpt.h>
+	#include <platform/mt_irq.h>
+	#include <sys/types.h>
+	#include <platform/sync_write.h>
+	#include <platform/upmu_hw.h>
 #elif (PMIC_WRAP_KERNEL)
-#ifndef CONFIG_OF
-#include <mach/mtk_reg_base.h>
-#include <mach/mtk_irq.h>
-#endif
-#include "mt-plat/sync_write.h"
+	#ifndef CONFIG_OF
+		#include <mach/mtk_reg_base.h>
+		#include <mach/mtk_irq.h>
+	#endif
+	#include "mt-plat/sync_write.h"
 #elif (PMIC_WRAP_SCP)
-#include "stdio.h"
-#include <string.h>
-#include "FreeRTOS.h"
+	#include "stdio.h"
+	#include <string.h>
+	#include "FreeRTOS.h"
 #elif (PMIC_WRAP_CTP)
-#include <sync_write.h>
-#include <typedefs.h>
-#include <reg_base.H>
+	#include <sync_write.h>
+	#include <typedefs.h>
+	#include <reg_base.H>
 #else
-### Compile error, check SW ENV define
+	### Compile error, check SW ENV define
 #endif
 
 /*******************macro for  regsister@PMIC *******************************/
 #if (PMIC_WRAP_KERNEL)
-#include <mach/upmu_hw.h>
+	#include <mach/upmu_hw.h>
 #else
-#include <upmu_hw.h>
+	#include <upmu_hw.h>
 #endif
 /*******************start ---external API********************************/
 extern signed int pwrap_read(unsigned int adr, unsigned int *rdata);
 extern signed int pwrap_write(unsigned int adr, unsigned int wdata);
 extern signed int pwrap_write_nochk(unsigned int adr, unsigned int wdata);
 extern signed int pwrap_read_nochk(unsigned int adr, unsigned int *rdata);
-extern signed int pwrap_wacs2(unsigned int write, unsigned int adr,
-			      unsigned int wdata, unsigned int *rdata);
-extern signed int pwrap_wacs2_read(unsigned int adr, unsigned int *rdata);
-extern signed int pwrap_wacs2_write(unsigned int adr, unsigned int wdata);
+extern signed int pwrap_wacs2(unsigned int write, unsigned int adr, unsigned int wdata, unsigned int *rdata);
+extern signed int pwrap_wacs2_read(unsigned int  adr, unsigned int *rdata);
+extern signed int pwrap_wacs2_write(unsigned int  adr, unsigned int  wdata);
 extern void pwrap_dump_all_register(void);
 extern signed int pwrap_init_preloader(void);
 extern signed int pwrap_init_lk(void);
@@ -110,59 +109,56 @@ extern signed int pwrap_init(void);
 /******  DEBUG marco define *******************************/
 #define PWRAPTAG                "[PWRAP] "
 #if (PMIC_WRAP_PRELOADER)
-#ifdef PMIC_WRAP_DEBUG
-#define PWRAPFUC(fmt, arg...)   print(PWRAPTAG "%s\n", __func__)
-#define PWRAPLOG(fmt, arg...)   print(PWRAPTAG fmt, ##arg)
-#else
-#define PWRAPFUC(fmt, arg...)
-#define PWRAPLOG(fmt, arg...)
-#endif				/* end of #ifdef PMIC_WRAP_DEBUG */
-#define PWRAPERR(fmt, arg...) \
-	print(PWRAPTAG "ERROR,line=%d " fmt, __LINE__, ##arg)
+	#ifdef PMIC_WRAP_DEBUG
+		#define PWRAPFUC(fmt, arg...)   print(PWRAPTAG "%s\n", __func__)
+		#define PWRAPLOG(fmt, arg...)   print(PWRAPTAG fmt, ##arg)
+	#else
+		#define PWRAPFUC(fmt, arg...)
+		#define PWRAPLOG(fmt, arg...)
+	#endif /* end of #ifdef PMIC_WRAP_DEBUG */
+	#define PWRAPERR(fmt, arg...)   print(PWRAPTAG "ERROR,line=%d " fmt, __LINE__, ##arg)
 #elif (PMIC_WRAP_LK)
-#ifdef PMIC_WRAP_DEBUG
-#define PWRAPFUC(fmt, arg...)   dprintf(CRITICAL, PWRAPTAG "%s\n", __func__)
-#define PWRAPLOG(fmt, arg...)   dprintf(CRITICAL, PWRAPTAG fmt, ##arg)
-#else
-#define PWRAPFUC(fmt, arg...)
-#define PWRAPLOG(fmt, arg...)
-#endif				/* end of #ifdef PMIC_WRAP_DEBUG */
-#define PWRAPERR(fmt, arg...) \
-	dprintf(CRITICAL, PWRAPTAG "ERROR,line=%d " fmt, __LINE__, ##arg)
+	#ifdef PMIC_WRAP_DEBUG
+		#define PWRAPFUC(fmt, arg...)   dprintf(CRITICAL, PWRAPTAG "%s\n", __func__)
+		#define PWRAPLOG(fmt, arg...)   dprintf(CRITICAL, PWRAPTAG fmt, ##arg)
+	#else
+		#define PWRAPFUC(fmt, arg...)
+		#define PWRAPLOG(fmt, arg...)
+	#endif /* end of #ifdef PMIC_WRAP_DEBUG */
+	#define PWRAPERR(fmt, arg...)   dprintf(CRITICAL, PWRAPTAG "ERROR,line=%d " fmt, __LINE__, ##arg)
 #elif (PMIC_WRAP_KERNEL)
-#ifdef PMIC_WRAP_DEBUG
-#define PWRAPDEB(fmt, arg...)
-#define PWRAPLOG(fmt, arg...) pr_debug(PWRAPTAG fmt, ##arg)
-#define PWRAPFUC(fmt, arg...)
-#define PWRAPREG(fmt, arg...)   pr_debug(PWRAPTAG fmt, ##arg)
-#else
-#define PWRAPDEB(fmt, arg...)
-#define PWRAPLOG(fmt, arg...)
-#define PWRAPFUC(fmt, arg...)
-#define PWRAPREG(fmt, arg...)
-#endif				/* end of #ifdef PMIC_WRAP_DEBUG */
+	#ifdef PMIC_WRAP_DEBUG
+		#define PWRAPDEB(fmt, arg...)   pr_debug(PWRAPTAG "cpuid=%d," fmt, raw_smp_processor_id(), ##arg)
+		#define PWRAPLOG(fmt, arg...)   pr_debug(PWRAPTAG fmt, ##arg)
+		#define PWRAPFUC(fmt, arg...)   pr_debug(PWRAPTAG "cpuid=%d,%s\n", raw_smp_processor_id(), __func__)
+		#define PWRAPREG(fmt, arg...)   pr_debug(PWRAPTAG fmt, ##arg)
+	#else
+		#define PWRAPDEB(fmt, arg...)
+		#define PWRAPLOG(fmt, arg...)
+		#define PWRAPFUC(fmt, arg...)
+		#define PWRAPREG(fmt, arg...)
+	#endif /* end of #ifdef PMIC_WRAP_DEBUG */
+	#define PWRAP_PR_ERR(fmt, arg...)   pr_err(PWRAPTAG "ERROR,line=%d " fmt, __LINE__, ##arg)
 #elif (PMIC_WRAP_SCP)
-#ifdef PMIC_WRAP_DEBUG
-#define PWRAPFUC(fmt, arg...)   PRINTF_D(PWRAPTAG "%s\n", __func__)
-#define PWRAPLOG(fmt, arg...)   PRINTF_D(PWRAPTAG fmt, ##arg)
-#else
-#define PWRAPFUC(fmt, arg...)	/*PRINTF_D(PWRAPTAG "%s\n", __FUNCTION__) */
-#define PWRAPLOG(fmt, arg...)	/*PRINTF_D(PWRAPTAG fmt, ##arg) */
-#endif				/* end of #ifdef PMIC_WRAP_DEBUG */
-#define PWRAPERR(fmt, arg...) \
-	PRINTF_E(PWRAPTAG "ERROR, line=%d " fmt, __LINE__, ##arg)
+	#ifdef PMIC_WRAP_DEBUG
+		#define PWRAPFUC(fmt, arg...)   PRINTF_D(PWRAPTAG "%s\n", __func__)
+		#define PWRAPLOG(fmt, arg...)   PRINTF_D(PWRAPTAG fmt, ##arg)
+	#else
+		#define PWRAPFUC(fmt, arg...)   /*PRINTF_D(PWRAPTAG "%s\n", __FUNCTION__)*/
+		#define PWRAPLOG(fmt, arg...)   /*PRINTF_D(PWRAPTAG fmt, ##arg)*/
+	#endif /* end of #ifdef PMIC_WRAP_DEBUG */
+	#define PWRAPERR(fmt, arg...)   PRINTF_E(PWRAPTAG "ERROR, line=%d " fmt, __LINE__, ##arg)
 #elif (PMIC_WRAP_CTP)
-#ifdef PMIC_WRAP_DEBUG
-#define PWRAPFUC(fmt, arg...)   dbg_print(PWRAPTAG "%s\n", __func__)
-#define PWRAPLOG(fmt, arg...)   dbg_print(PWRAPTAG fmt, ##arg)
+	#ifdef PMIC_WRAP_DEBUG
+		#define PWRAPFUC(fmt, arg...)   dbg_print(PWRAPTAG "%s\n", __func__)
+		#define PWRAPLOG(fmt, arg...)   dbg_print(PWRAPTAG fmt, ##arg)
+	#else
+		#define PWRAPFUC(fmt, arg...)   dbg_print(PWRAPTAG "%s\n", __func__)
+		#define PWRAPLOG(fmt, arg...)   dbg_print(PWRAPTAG fmt, ##arg)
+	#endif /* end of #ifdef PMIC_WRAP_DEBUG */
+	#define PWRAPERR(fmt, arg...)   dbg_print(PWRAPTAG "ERROR,line=%d " fmt, __LINE__, ##arg)
 #else
-#define PWRAPFUC(fmt, arg...)   dbg_print(PWRAPTAG "%s\n", __func__)
-#define PWRAPLOG(fmt, arg...)   dbg_print(PWRAPTAG fmt, ##arg)
-#endif				/* end of #ifdef PMIC_WRAP_DEBUG */
-#define PWRAPERR(fmt, arg...) \
-	dbg_print(PWRAPTAG "ERROR,line=%d " fmt, __LINE__, ##arg)
-#else
-### Compile error, check SW ENV define
+	### Compile error, check SW ENV define
 #endif
 /**********************************************************/
 
@@ -176,20 +172,20 @@ extern signed int pwrap_init(void);
 
 
 #ifdef CONFIG_OF
-extern void __iomem *pwrap_base;
-#define PMIC_WRAP_BASE		(pwrap_base)
-#define MT_PMIC_WRAP_IRQ_ID	(pwrap_irq)
-#define INFRACFG_AO_REG_BASE	(infracfg_ao_base)
-#define TOPCKGEN_BASE		(topckgen_base)
-#define SCP_CLK_CTRL_BASE       (scp_clk_ctrl_base)
-#define PMIC_WRAP_P2P_BASE      (pwrap_p2p_base)
+	extern void __iomem *pwrap_base;
+	#define PMIC_WRAP_BASE		(pwrap_base)
+	#define MT_PMIC_WRAP_IRQ_ID	(pwrap_irq)
+	#define INFRACFG_AO_REG_BASE	(infracfg_ao_base)
+	#define TOPCKGEN_BASE		(topckgen_base)
+	#define SCP_CLK_CTRL_BASE       (scp_clk_ctrl_base)
+	#define PMIC_WRAP_P2P_BASE      (pwrap_p2p_base)
 #else
-#define PMIC_WRAP_BASE          (PWRAP_BASE)
-#define MT_PMIC_WRAP_IRQ_ID     (PMIC_WRAP_ERR_IRQ_BIT_ID)
-#define INFRACFG_AO_BASE        (0x10001000)
-#define INFRACFG_AO_REG_BASE    (INFRACFG_AO_BASE)
-#define CKSYS_BASE              (0x10000000)
-#define TOPCKGEN_BASE           (CKSYS_BASE)
+	#define PMIC_WRAP_BASE          (PWRAP_BASE)
+	#define MT_PMIC_WRAP_IRQ_ID     (PMIC_WRAP_ERR_IRQ_BIT_ID)
+	#define INFRACFG_AO_BASE        (0x10001000)
+	#define INFRACFG_AO_REG_BASE    (INFRACFG_AO_BASE)
+	#define CKSYS_BASE              (0x10000000)
+	#define TOPCKGEN_BASE           (CKSYS_BASE)
 #endif
 
 #define UINT32  unsigned int
@@ -201,8 +197,6 @@ extern void __iomem *pwrap_base;
 #define DISABLE         (0)
 #define DISABLE_ALL     (0)
 
-/* HIPRIS_ARB */
-
 /* MUX SEL */
 #define WRAPPER_MODE    (0)
 #define MANUAL_MODE     (1)
@@ -211,14 +205,14 @@ extern void __iomem *pwrap_base;
 #define MAN_FSM_NO_REQ             (0x00)
 #define MAN_FSM_IDLE               (0x00)
 #define MAN_FSM_REQ                (0x02)
-#define MAN_FSM_WFDLE              (0x04)
+#define MAN_FSM_WFDLE              (0x04) /* wait for dle,wait for read data done, */
 #define MAN_FSM_WFVLDCLR           (0x06)
 
 /* macro for WACS_FSM */
 #define WACS_FSM_IDLE               (0x00)
-#define WACS_FSM_REQ                (0x02)
-#define WACS_FSM_WFDLE              (0x04)
-#define WACS_FSM_WFVLDCLR           (0x06)
+#define WACS_FSM_REQ                (0x02) /* request in process */
+#define WACS_FSM_WFDLE              (0x04) /* wait for dle,wait for read data done, */
+#define WACS_FSM_WFVLDCLR           (0x06) /* finish read data , wait for valid flag clearing */
 #define WACS_INIT_DONE              (0x01)
 #define WACS_SYNC_IDLE              (0x01)
 #define WACS_SYNC_BUSY              (0x00)
@@ -285,10 +279,8 @@ extern void __iomem *pwrap_base;
 #define WRAP_RD32(addr)            __raw_readl((void *)addr)
 #define WRAP_WR32(addr, val)        mt_reg_sync_writel((val), ((void *)addr))
 
-#define WRAP_SET_BIT(BS, REG) \
-mt_reg_sync_writel((__raw_readl((void *)REG) | (u32)(BS)), ((void *)REG))
-#define WRAP_CLR_BIT(BS, REG) \
-mt_reg_sync_writel((__raw_readl((void *)REG) & (~(u32)(BS))), ((void *)REG))
+#define WRAP_SET_BIT(BS, REG)       mt_reg_sync_writel((__raw_readl((void *)REG) | (u32)(BS)), ((void *)REG))
+#define WRAP_CLR_BIT(BS, REG)       mt_reg_sync_writel((__raw_readl((void *)REG) & (~(u32)(BS))), ((void *)REG))
 
 
 
@@ -297,24 +289,24 @@ mt_reg_sync_writel((__raw_readl((void *)REG) & (~(u32)(BS))), ((void *)REG))
 
 /************* macro for spi clock config ******************************/
 /* #if (MTK_PLATFORM_MT6757) || (MTK_PLATFORM_MT6757_OE2) */
-#define CLK_CFG_4_SET				(TOPCKGEN_BASE+0x084)
-#define CLK_CFG_4_CLR				(TOPCKGEN_BASE+0x088)
-#define CLK_CFG_5_SET				(TOPCKGEN_BASE+0x094)
-#define CLK_CFG_5_CLR				(TOPCKGEN_BASE+0x098)
+#define CLK_CFG_4_SET						(TOPCKGEN_BASE+0x084)
+#define CLK_CFG_4_CLR						(TOPCKGEN_BASE+0x088)
+#define CLK_CFG_5_SET						(TOPCKGEN_BASE+0x094)
+#define CLK_CFG_5_CLR						(TOPCKGEN_BASE+0x098)
 
-#define CLK_SPI_CK_26M				0x1
-#define INFRA_GLOBALCON_RST0			(INFRACFG_AO_REG_BASE+0x140)
-#define INFRA_GLOBALCON_RST1			(INFRACFG_AO_REG_BASE+0x144)
-#define PMIC_CLOCK_DCM				(INFRACFG_AO_REG_BASE+0x074)
-#define APB_CLOCK_GATING			(INFRACFG_AO_REG_BASE+0xF0C)
-/* #endif *//* end of MTK_PLATFORM_MT6757 */
-#define MODULE_SW_CG_0_SET			(INFRACFG_AO_REG_BASE+0x080)
-#define MODULE_SW_CG_0_CLR			(INFRACFG_AO_REG_BASE+0x084)
-#define MODULE_CLK_SEL				(INFRACFG_AO_REG_BASE+0x098)
-#define MODULE_SW_CG_2_SET			(INFRACFG_AO_REG_BASE+0x0A4)
-#define MODULE_SW_CG_2_CLR			(INFRACFG_AO_REG_BASE+0x0A8)
-#define INFRA_GLOBALCON_RST2_SET		(INFRACFG_AO_REG_BASE+0x140)
-#define INFRA_GLOBALCON_RST2_CLR		(INFRACFG_AO_REG_BASE+0x144)
+#define CLK_SPI_CK_26M						0x1
+#define INFRA_GLOBALCON_RST0				(INFRACFG_AO_REG_BASE+0x140)
+#define INFRA_GLOBALCON_RST1				(INFRACFG_AO_REG_BASE+0x144)
+#define PMIC_CLOCK_DCM						(INFRACFG_AO_REG_BASE+0x074)
+#define APB_CLOCK_GATING                    (INFRACFG_AO_REG_BASE+0xF0C)
+/* #endif */ /* end of MTK_PLATFORM_MT6757 */
+#define MODULE_SW_CG_0_SET					(INFRACFG_AO_REG_BASE+0x080)
+#define MODULE_SW_CG_0_CLR					(INFRACFG_AO_REG_BASE+0x084)
+#define MODULE_CLK_SEL						(INFRACFG_AO_REG_BASE+0x098)
+#define MODULE_SW_CG_2_SET					(INFRACFG_AO_REG_BASE+0x0A4)
+#define MODULE_SW_CG_2_CLR					(INFRACFG_AO_REG_BASE+0x0A8)
+#define INFRA_GLOBALCON_RST2_SET			(INFRACFG_AO_REG_BASE+0x140)
+#define INFRA_GLOBALCON_RST2_CLR			(INFRACFG_AO_REG_BASE+0x144)
 
 /*****************************************************************/
 #define PMIC_WRAP_MUX_SEL	((UINT32P)(PMIC_WRAP_BASE+0x0))
@@ -436,47 +428,47 @@ mt_reg_sync_writel((__raw_readl((void *)REG) & (~(u32)(BS))), ((void *)REG))
 #define PMIC_WRAP_DCM_EN	((UINT32P)(PMIC_WRAP_BASE+0x1D0))
 #define PMIC_WRAP_DCM_SPI_DBC_PRD	((UINT32P)(PMIC_WRAP_BASE+0x1D4))
 #define PMIC_WRAP_DCM_DBC_PRD	((UINT32P)(PMIC_WRAP_BASE+0x1D8))
-#define PMIC_WRAP_INT_GPS_AUXADC_CMD_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x1DC))
+#define PMIC_WRAP_INT_GPS_AUXADC_CMD_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x1DC))
 #define PMIC_WRAP_INT_GPS_AUXADC_CMD	((UINT32P)(PMIC_WRAP_BASE+0x1E0))
-#define PMIC_WRAP_INT_GPS_AUXADC_RDATA_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x1E4))
-#define PMIC_WRAP_EXT_GPS_AUXADC_RDATA_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x1E8))
+#define PMIC_WRAP_INT_GPS_AUXADC_RDATA_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x1E4))
+#define PMIC_WRAP_EXT_GPS_AUXADC_RDATA_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x1E8))
 #define PMIC_WRAP_GPSINF_0_STA	((UINT32P)(PMIC_WRAP_BASE+0x1EC))
 #define PMIC_WRAP_GPSINF_1_STA	((UINT32P)(PMIC_WRAP_BASE+0x1F0))
 #define PMIC_WRAP_MD_ADCINF_CTRL	((UINT32P)(PMIC_WRAP_BASE+0x1F4))
-#define PMIC_WRAP_MD_AUXADC_RDATA_LATEST_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x1F8))
-#define PMIC_WRAP_MD_AUXADC_RDATA_WP_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x1FC))
-#define PMIC_WRAP_MD_AUXADC_RDATA_0_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x200))
-#define PMIC_WRAP_MD_AUXADC_RDATA_1_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x204))
-#define PMIC_WRAP_MD_AUXADC_RDATA_2_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x208))
-#define PMIC_WRAP_MD_AUXADC_RDATA_3_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x20C))
-#define PMIC_WRAP_MD_AUXADC_RDATA_4_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x210))
-#define PMIC_WRAP_MD_AUXADC_RDATA_5_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x214))
-#define PMIC_WRAP_MD_AUXADC_RDATA_6_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x218))
-#define PMIC_WRAP_MD_AUXADC_RDATA_7_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x21C))
-#define PMIC_WRAP_MD_AUXADC_RDATA_8_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x220))
-#define PMIC_WRAP_MD_AUXADC_RDATA_9_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x224))
-#define PMIC_WRAP_MD_AUXADC_RDATA_10_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x228))
-#define PMIC_WRAP_MD_AUXADC_RDATA_11_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x22C))
-#define PMIC_WRAP_MD_AUXADC_RDATA_12_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x230))
-#define PMIC_WRAP_MD_AUXADC_RDATA_13_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x234))
-#define PMIC_WRAP_MD_AUXADC_RDATA_14_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x238))
-#define PMIC_WRAP_MD_AUXADC_RDATA_15_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x23C))
-#define PMIC_WRAP_MD_AUXADC_RDATA_16_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x240))
-#define PMIC_WRAP_MD_AUXADC_RDATA_17_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x244))
-#define PMIC_WRAP_MD_AUXADC_RDATA_18_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x248))
-#define PMIC_WRAP_MD_AUXADC_RDATA_19_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x24C))
-#define PMIC_WRAP_MD_AUXADC_RDATA_20_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x250))
-#define PMIC_WRAP_MD_AUXADC_RDATA_21_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x254))
-#define PMIC_WRAP_MD_AUXADC_RDATA_22_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x258))
-#define PMIC_WRAP_MD_AUXADC_RDATA_23_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x25C))
-#define PMIC_WRAP_MD_AUXADC_RDATA_24_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x260))
-#define PMIC_WRAP_MD_AUXADC_RDATA_25_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x264))
-#define PMIC_WRAP_MD_AUXADC_RDATA_26_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x268))
-#define PMIC_WRAP_MD_AUXADC_RDATA_27_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x26C))
-#define PMIC_WRAP_MD_AUXADC_RDATA_28_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x270))
-#define PMIC_WRAP_MD_AUXADC_RDATA_29_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x274))
-#define PMIC_WRAP_MD_AUXADC_RDATA_30_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x278))
-#define PMIC_WRAP_MD_AUXADC_RDATA_31_ADDR ((UINT32P)(PMIC_WRAP_BASE+0x27C))
+#define PMIC_WRAP_MD_AUXADC_RDATA_LATEST_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x1F8))
+#define PMIC_WRAP_MD_AUXADC_RDATA_WP_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x1FC))
+#define PMIC_WRAP_MD_AUXADC_RDATA_0_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x200))
+#define PMIC_WRAP_MD_AUXADC_RDATA_1_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x204))
+#define PMIC_WRAP_MD_AUXADC_RDATA_2_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x208))
+#define PMIC_WRAP_MD_AUXADC_RDATA_3_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x20C))
+#define PMIC_WRAP_MD_AUXADC_RDATA_4_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x210))
+#define PMIC_WRAP_MD_AUXADC_RDATA_5_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x214))
+#define PMIC_WRAP_MD_AUXADC_RDATA_6_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x218))
+#define PMIC_WRAP_MD_AUXADC_RDATA_7_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x21C))
+#define PMIC_WRAP_MD_AUXADC_RDATA_8_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x220))
+#define PMIC_WRAP_MD_AUXADC_RDATA_9_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x224))
+#define PMIC_WRAP_MD_AUXADC_RDATA_10_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x228))
+#define PMIC_WRAP_MD_AUXADC_RDATA_11_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x22C))
+#define PMIC_WRAP_MD_AUXADC_RDATA_12_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x230))
+#define PMIC_WRAP_MD_AUXADC_RDATA_13_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x234))
+#define PMIC_WRAP_MD_AUXADC_RDATA_14_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x238))
+#define PMIC_WRAP_MD_AUXADC_RDATA_15_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x23C))
+#define PMIC_WRAP_MD_AUXADC_RDATA_16_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x240))
+#define PMIC_WRAP_MD_AUXADC_RDATA_17_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x244))
+#define PMIC_WRAP_MD_AUXADC_RDATA_18_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x248))
+#define PMIC_WRAP_MD_AUXADC_RDATA_19_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x24C))
+#define PMIC_WRAP_MD_AUXADC_RDATA_20_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x250))
+#define PMIC_WRAP_MD_AUXADC_RDATA_21_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x254))
+#define PMIC_WRAP_MD_AUXADC_RDATA_22_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x258))
+#define PMIC_WRAP_MD_AUXADC_RDATA_23_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x25C))
+#define PMIC_WRAP_MD_AUXADC_RDATA_24_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x260))
+#define PMIC_WRAP_MD_AUXADC_RDATA_25_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x264))
+#define PMIC_WRAP_MD_AUXADC_RDATA_26_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x268))
+#define PMIC_WRAP_MD_AUXADC_RDATA_27_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x26C))
+#define PMIC_WRAP_MD_AUXADC_RDATA_28_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x270))
+#define PMIC_WRAP_MD_AUXADC_RDATA_29_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x274))
+#define PMIC_WRAP_MD_AUXADC_RDATA_30_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x278))
+#define PMIC_WRAP_MD_AUXADC_RDATA_31_ADDR	((UINT32P)(PMIC_WRAP_BASE+0x27C))
 #define PMIC_WRAP_MD_ADCINF_0_STA_0	((UINT32P)(PMIC_WRAP_BASE+0x280))
 #define PMIC_WRAP_MD_ADCINF_0_STA_1	((UINT32P)(PMIC_WRAP_BASE+0x284))
 #define PMIC_WRAP_MD_ADCINF_1_STA_0	((UINT32P)(PMIC_WRAP_BASE+0x288))
@@ -511,23 +503,23 @@ mt_reg_sync_writel((__raw_readl((void *)REG) & (~(u32)(BS))), ((void *)REG))
 #define PMIC_WRAP_STARV_COUNTER_14	((UINT32P)(PMIC_WRAP_BASE+0x2FC))
 #define PMIC_WRAP_STARV_COUNTER_15	((UINT32P)(PMIC_WRAP_BASE+0x300))
 #define PMIC_WRAP_STARV_COUNTER_16	((UINT32P)(PMIC_WRAP_BASE+0x304))
-#define PMIC_WRAP_STARV_COUNTER_0_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x308))
-#define PMIC_WRAP_STARV_COUNTER_1_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x30C))
-#define PMIC_WRAP_STARV_COUNTER_2_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x310))
-#define PMIC_WRAP_STARV_COUNTER_3_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x314))
-#define PMIC_WRAP_STARV_COUNTER_4_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x318))
-#define PMIC_WRAP_STARV_COUNTER_5_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x31C))
-#define PMIC_WRAP_STARV_COUNTER_6_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x320))
-#define PMIC_WRAP_STARV_COUNTER_7_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x324))
-#define PMIC_WRAP_STARV_COUNTER_8_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x328))
-#define PMIC_WRAP_STARV_COUNTER_9_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x32C))
-#define PMIC_WRAP_STARV_COUNTER_10_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x330))
-#define PMIC_WRAP_STARV_COUNTER_11_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x334))
-#define PMIC_WRAP_STARV_COUNTER_12_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x338))
-#define PMIC_WRAP_STARV_COUNTER_13_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x33C))
-#define PMIC_WRAP_STARV_COUNTER_14_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x340))
-#define PMIC_WRAP_STARV_COUNTER_15_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x344))
-#define PMIC_WRAP_STARV_COUNTER_16_STATUS ((UINT32P)(PMIC_WRAP_BASE+0x348))
+#define PMIC_WRAP_STARV_COUNTER_0_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x308))
+#define PMIC_WRAP_STARV_COUNTER_1_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x30C))
+#define PMIC_WRAP_STARV_COUNTER_2_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x310))
+#define PMIC_WRAP_STARV_COUNTER_3_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x314))
+#define PMIC_WRAP_STARV_COUNTER_4_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x318))
+#define PMIC_WRAP_STARV_COUNTER_5_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x31C))
+#define PMIC_WRAP_STARV_COUNTER_6_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x320))
+#define PMIC_WRAP_STARV_COUNTER_7_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x324))
+#define PMIC_WRAP_STARV_COUNTER_8_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x328))
+#define PMIC_WRAP_STARV_COUNTER_9_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x32C))
+#define PMIC_WRAP_STARV_COUNTER_10_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x330))
+#define PMIC_WRAP_STARV_COUNTER_11_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x334))
+#define PMIC_WRAP_STARV_COUNTER_12_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x338))
+#define PMIC_WRAP_STARV_COUNTER_13_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x33C))
+#define PMIC_WRAP_STARV_COUNTER_14_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x340))
+#define PMIC_WRAP_STARV_COUNTER_15_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x344))
+#define PMIC_WRAP_STARV_COUNTER_16_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x348))
 #define PMIC_WRAP_STARV_COUNTER_CLR	((UINT32P)(PMIC_WRAP_BASE+0x34C))
 #define PMIC_WRAP_STARV_PRIO_STATUS	((UINT32P)(PMIC_WRAP_BASE+0x350))
 #define PMIC_WRAP_MONITOR_CTRL_0	((UINT32P)(PMIC_WRAP_BASE+0x354))
@@ -1183,3 +1175,4 @@ mt_reg_sync_writel((__raw_readl((void *)REG) & (~(u32)(BS))), ((void *)REG))
 #define GET_WACS3_VLDCLR(x)          ((x>>0)  & 0x00000001)
 
 #endif
+
