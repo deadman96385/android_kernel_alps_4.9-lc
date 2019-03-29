@@ -2,6 +2,7 @@
 # Makefile for the kernel software RAID and LVM drivers.
 #
 
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/include
 ifeq ($(CONFIG_MTK_HW_FDE),y)
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include
 endif
