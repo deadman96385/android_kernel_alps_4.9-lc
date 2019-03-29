@@ -1563,7 +1563,6 @@ static int mtkfb_pan_display_proxy(struct fb_var_screeninfo *var, struct fb_info
 static void mtkfb_blank_suspend(void);
 static void mtkfb_blank_resume(void);
 
-#if defined(CONFIG_PM_AUTOSLEEP)
 static int mtkfb_blank(int blank_mode, struct fb_info *info)
 {
 	switch (blank_mode) {
@@ -1582,7 +1581,6 @@ static int mtkfb_blank(int blank_mode, struct fb_info *info)
 
 	return 0;
 }
-#endif
 
 /* Callback table for the frame buffer framework. Some of these pointers
  * will be changed according to the current setting of fb_info->accel_flags.
@@ -1602,9 +1600,7 @@ static struct fb_ops mtkfb_ops = {
 #ifdef CONFIG_COMPAT
 	.fb_compat_ioctl = mtkfb_compat_ioctl,
 #endif
-#if defined(CONFIG_PM_AUTOSLEEP)
 	.fb_blank = mtkfb_blank,
-#endif
 };
 
 /**
