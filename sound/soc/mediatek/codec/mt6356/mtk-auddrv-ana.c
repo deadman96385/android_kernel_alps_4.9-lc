@@ -72,7 +72,8 @@ unsigned int Ana_Get_Reg(unsigned int offset)
 	int ret = 0;
 
 	ret = pwrap_read(offset, &Rdata);
-	PRINTK_ANA_REG("Ana_Get_Reg offset=0x%x,Rdata=0x%x,ret=%d\n", offset, Rdata, ret);
+	/* PRINTK_ANA_REG("Ana_Get_Reg offset=0x%x,Rdata=0x%x,ret=%d\n", offset, Rdata, ret);
+        */
 #endif
 
 	return Rdata;
@@ -88,8 +89,9 @@ void Ana_Set_Reg(unsigned int offset, unsigned int value, unsigned int mask)
 	unsigned int Reg_Value;
 	unsigned long flags = 0;
 
-	PRINTK_ANA_REG("Ana_Set_Reg offset= 0x%x , value = 0x%x mask = 0x%x\n", offset, value,
+	/* PRINTK_ANA_REG("Ana_Set_Reg offset= 0x%x , value = 0x%x mask = 0x%x\n", offset, value,
 		       mask);
+        */
 	spin_lock_irqsave(&ana_set_reg_lock, flags);
 	Reg_Value = Ana_Get_Reg(offset);
 	Reg_Value &= (~mask);

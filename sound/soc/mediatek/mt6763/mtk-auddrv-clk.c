@@ -664,7 +664,7 @@ void AudDrv_ADC_Clk_On(void)
 	spin_lock_irqsave(&auddrv_Clk_lock, flags);
 
 	if (Aud_ADC_Clk_cntr == 0) {
-		PRINTK_AUDDRV("+%s enable_clock ADC clk(%x)\n", __func__,
+		pr_debug("+%s enable_clock ADC clk(%x)\n", __func__,
 			      Aud_ADC_Clk_cntr);
 		/* Afe_Set_Reg(AUDIO_TOP_CON0, 0 << 24 , 1 << 24); */
 		if (aud_clks[CLOCK_ADC].clk_prepare) {
@@ -691,13 +691,13 @@ void AudDrv_ADC_Clk_Off(void)
 	spin_lock_irqsave(&auddrv_Clk_lock, flags);
 	Aud_ADC_Clk_cntr--;
 	if (Aud_ADC_Clk_cntr == 0) {
-		PRINTK_AUDDRV("+%s disable_clock ADC clk(%x)\n", __func__,
+		pr_debug("+%s disable_clock ADC clk(%x)\n", __func__,
 			      Aud_ADC_Clk_cntr);
 		if (aud_clks[CLOCK_ADC].clk_prepare)
 			clk_disable(aud_clks[CLOCK_ADC].clock);
 	}
 	if (Aud_ADC_Clk_cntr < 0) {
-		PRINTK_AUDDRV("!! %s, Aud_ADC_Clk_cntr<0 (%d)\n", __func__,
+		pr_debug("!! %s, Aud_ADC_Clk_cntr<0 (%d)\n", __func__,
 			      Aud_ADC_Clk_cntr);
 		Aud_ADC_Clk_cntr = 0;
 	}
@@ -1297,7 +1297,7 @@ void EnableI2SCLKDiv(unsigned int I2snum, bool bEnable)
 
 void EnableApll1(bool enable)
 {
-	pr_aud("%s enable = %d\n", __func__, enable);
+	pr_debug("%s enable = %d\n", __func__, enable);
 
 	if (enable) {
 		if (Aud_APLL_DIV_APLL1_cntr == 0) {
@@ -1317,7 +1317,7 @@ void EnableApll1(bool enable)
 
 void EnableApll2(bool enable)
 {
-	pr_aud("%s enable = %d\n", __func__, enable);
+	pr_debug("%s enable = %d\n", __func__, enable);
 
 	if (enable) {
 		if (Aud_APLL_DIV_APLL2_cntr == 0) {
