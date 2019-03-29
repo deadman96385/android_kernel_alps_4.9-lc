@@ -67,6 +67,7 @@
 
 #ifdef CONFIG_MTK_AUXADC_INTF
 #include <mt-plat/mtk_auxadc_intf.h>
+#include <mach/mtk_pmic.h>
 #endif
 
 #include "mtk-auddrv-def.h"
@@ -4983,12 +4984,6 @@ static struct snd_soc_codec_driver soc_mtk_codec = {
 
 static int mtk_mt6356_codec_dev_probe(struct platform_device *pdev)
 {
-	pdev->dev.coherent_dma_mask = DMA_BIT_MASK(64);
-
-	if (pdev->dev.dma_mask == NULL)
-		pdev->dev.dma_mask = &pdev->dev.coherent_dma_mask;
-
-
 	if (pdev->dev.of_node) {
 		dev_set_name(&pdev->dev, "%s", MT_SOC_CODEC_NAME);
 
