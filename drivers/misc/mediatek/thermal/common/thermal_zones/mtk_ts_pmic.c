@@ -24,7 +24,7 @@
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 #include "mt-plat/mtk_thermal_monitor.h"
-#include "mach/mt_thermal.h"
+#include "mach/mtk_thermal.h"
 #include <mt-plat/upmu_common.h>
 #include <tspmic_settings.h>
 #include <linux/uidgid.h>
@@ -250,9 +250,11 @@ static int tspmic_sysrst_set_cur_state(struct thermal_cooling_device *cdev, unsi
 		mtktspmic_info("*****************************************");
 		mtktspmic_info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
-/* BUG(); */
-		*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
-		/* arch_reset(0,NULL); */
+		/* To trigger data abort to reset the system
+		 * for thermal protection.
+		 */
+		BUG();
+
 	}
 	return 0;
 }

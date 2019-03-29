@@ -1909,7 +1909,7 @@ static void mt_eint_irq_ack(struct irq_data *data)
 static int mt_eint_get_level(unsigned int eint_num)
 {
 	int vgpio = EINT_FUNC.gpio[eint_num];
-	return __gpio_get_value(vgpio);
+	return gpio_get_value(vgpio);
 }
 
 static unsigned int mt_eint_flip_edge(struct eint_chip *chip,

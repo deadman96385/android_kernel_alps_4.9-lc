@@ -25,15 +25,14 @@
 #include <tscpu_settings.h> /* needed by tscpu_warn */
 #include <ap_thermal_limit.h>
 #include <mt-plat/aee.h>
-#if !defined(CONFIG_ARCH_MT6757)
-#include <mt_ptp.h>
-#endif
+
+
 #if defined(ATM_USES_PPM)
-#include "mach/mt_ppm_api.h"
+#include "mach/mtk_ppm_api.h"
 #else
 #include "mt_cpufreq.h"
 #endif
-#include "mt_gpufreq.h"
+#include "mtk_gpufreq.h"
 
 /*=============================================================
  * Local variable definition

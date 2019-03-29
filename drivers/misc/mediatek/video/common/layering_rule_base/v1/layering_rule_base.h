@@ -155,6 +155,8 @@ struct layering_rule_ops {
 #define HRT_GET_AEE_FLAG(hrt_num) ((hrt_num & 0x100) >> 8)
 #define HRT_SET_AEE_FLAG(hrt_num, value) \
 	(hrt_num = ((hrt_num & ~(0x100)) | ((value & 0x1) << 8)))
+#define HRT_GET_DC_FLAG(hrt_num) ((hrt_num & 0x200) >> 9)
+#define HRT_SET_DC_FLAG(hrt_num, value) (hrt_num = ((hrt_num & ~(0x200)) | (((value) & 0x1) << 9)))
 #define HRT_GET_PATH_SCENARIO(hrt_num) ((hrt_num & 0xFFFF0000) >> 16)
 #define HRT_SET_PATH_SCENARIO(hrt_num, value) \
 	(hrt_num = ((hrt_num & ~(0xFFFF0000)) | ((value & 0xFFFF) << 16)))

@@ -35,7 +35,7 @@
 #define MCUSYS_SMC_WRITE(addr, val)  mcusys_smc_write_phy(addr##_PHYS, val)
 #ifndef mcsi_reg_read
 #define mcsi_reg_read(offset) \
-	mt_secure_call(MTK_SIP_KERENL_MCSI_NS_ACCESS, 0, offset, 0)
+	mt_secure_call(MTK_SIP_KERENL_MCSI_NS_ACCESS, 0, offset, 0, 0)
 #endif
 #ifndef mcsi_reg_write
 #define mcsi_reg_write(val, offset) \

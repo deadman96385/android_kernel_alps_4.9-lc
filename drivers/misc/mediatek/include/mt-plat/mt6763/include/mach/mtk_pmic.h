@@ -56,10 +56,13 @@
 
 /* ADC Channel Number, not uesed and removed */
 
+
+extern const char *pmic_auxadc_channel_name[];
+
 enum {
 	/* mt6356 */
 	AUXADC_LIST_BATADC,
-	AUXADC_LIST_MT6356_START = AUXADC_LIST_BATADC,
+	AUXADC_LIST_START = AUXADC_LIST_BATADC,
 	AUXADC_LIST_VCDT,
 	AUXADC_LIST_BATTEMP,
 	AUXADC_LIST_BATID,
@@ -72,7 +75,13 @@ enum {
 	AUXADC_LIST_ISENSE,
 	AUXADC_LIST_MT6356_BUCK1_TEMP,
 	AUXADC_LIST_MT6356_BUCK2_TEMP,
-	AUXADC_LIST_MT6356_END = AUXADC_LIST_MT6356_BUCK2_TEMP,
+	AUXADC_LIST_END = AUXADC_LIST_MT6356_BUCK2_TEMP,
 	AUXADC_LIST_MAX,
 };
+extern void pmic_auxadc_init(void);
+extern void pmic_auxadc_dump_regs(char *buf);
+extern int pmic_get_auxadc_channel_max(void);
+extern int mt_get_auxadc_value(u8 channel);
+extern void pmic_auxadc_lock(void);
+extern void pmic_auxadc_unlock(void);
 #endif /* _CUST_PMIC_H_ */

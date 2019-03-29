@@ -74,7 +74,7 @@
 /* local includes (kernel-4.4)*/
 #ifdef __KERNEL__
 	#include <mt-plat/mtk_chip.h>
-	#include <mt-plat/mtk_gpio.h>
+	#include <mt-plat/mt_gpio.h>
 	#include "upmu_common.h"
 	#include "mach/mtk_freqhopping.h"
 	#include "mtk_thermal.h"

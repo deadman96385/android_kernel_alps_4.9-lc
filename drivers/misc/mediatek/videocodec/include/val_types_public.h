@@ -29,6 +29,22 @@
  *===========================================================================
  */
 
+typedef void                VAL_VOID_T;         /* /< void type definition */
+typedef char                VAL_BOOL_T;         /* /< char type definition */
+typedef char                VAL_CHAR_T;         /* /< char type definition */
+typedef signed char         VAL_INT8_T;         /* /< signed char type definition */
+typedef signed short        VAL_INT16_T;        /* /< signed short type definition */
+typedef signed int         VAL_INT32_T;        /* /< signed int type definition */
+typedef unsigned char       VAL_UCHAR_T;        /* /< unsigned char type definition */
+typedef unsigned char       VAL_UINT8_T;        /* /< unsigned char type definition */
+typedef unsigned short      VAL_UINT16_T;       /* /< unsigned short definition */
+typedef unsigned int       VAL_UINT32_T;       /* /< unsigned int type definition */
+typedef unsigned long long  VAL_UINT64_T;       /* /< unsigned long long type definition */
+typedef long long           VAL_INT64_T;        /* /< long long type definition */
+typedef unsigned long       VAL_HANDLE_T;       /* /< unsigned int (handle) type definition */
+typedef signed long         VAL_LONG_T;       /* / */
+typedef unsigned long       VAL_ULONG_T;       /* / */
+
 #define VAL_NULL        (0)                     /* /< VAL_NULL = 0 */
 #define VAL_TRUE        (1)                     /* /< VAL_TRUE = 1 */
 #define VAL_FALSE       (0)                     /* /< VAL_FALSE = 0 */

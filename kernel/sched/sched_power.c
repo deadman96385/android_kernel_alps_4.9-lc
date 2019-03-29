@@ -95,7 +95,7 @@ mtk_cluster_max_usage(int cid, struct energy_env *eenv, int *max_cpu)
 	unsigned long max_usage = 0;
 	int cpu = -1;
 	struct cpumask cls_cpus;
-	int delta;
+	int delta = 0;
 
 	*max_cpu = -1;
 
@@ -107,7 +107,7 @@ mtk_cluster_max_usage(int cid, struct energy_env *eenv, int *max_cpu)
 		if (!cpu_online(cpu))
 			continue;
 
-		delta = calc_util_delta(eenv, cpu);
+		/* delta = calc_util_delta(eenv, cpu); */
 		cpu_usage = __cpu_util(cpu, delta);
 
 		if (cpu_usage >= max_usage) {

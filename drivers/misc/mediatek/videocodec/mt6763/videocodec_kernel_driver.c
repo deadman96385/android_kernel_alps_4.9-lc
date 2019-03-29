@@ -61,7 +61,9 @@
 #include "val_api_private.h"
 #include "val_log.h"
 #include "drv_api.h"
+#ifdef CONFIG_MTK_SMI_EXT
 #include "smi_public.h"
+#endif
 
 #include <linux/of.h>
 #include <linux/of_address.h>
@@ -119,9 +121,9 @@ static DEFINE_SPINLOCK(DecISRCountLock);
 static DEFINE_SPINLOCK(EncISRCountLock);
 
 
-static VAL_EVENT_T HWLockEvent;    /* mutex : HWLockEventTimeoutLock */
-static VAL_EVENT_T DecIsrEvent;    /* mutex : HWLockEventTimeoutLock */
-static VAL_EVENT_T EncIsrEvent;    /* mutex : HWLockEventTimeoutLock */
+static struct VAL_EVENT_T HWLockEvent;   /* mutex : HWLockEventTimeoutLock */
+static struct VAL_EVENT_T DecIsrEvent;    /* mutex : HWLockEventTimeoutLock */
+static struct VAL_EVENT_T EncIsrEvent;    /* mutex : HWLockEventTimeoutLock */
 static VAL_INT32_T Driver_Open_Count;         /* mutex : DriverOpenCountLock */
 static VAL_UINT32_T gu4PWRCounter;      /* mutex : PWRLock */
 static VAL_UINT32_T gu4EncEMICounter;   /* mutex : EncEMILock */
@@ -279,8 +281,9 @@ void vdec_power_on(void)
 	/* enable_clock(MT_CG_INFRA_L2C_SRAM, "VDEC"); */
 #endif
 #else
+#ifdef CONFIG_MTK_SMI_EXT
 	smi_bus_enable(SMI_LARB_VENCSYS, "vcodec-vdec");
-
+#endif
 	ret = clk_prepare_enable(clk_MT_SCP_SYS_VDE);
 	if (ret) {
 		/* print error log & error handling */
@@ -322,7 +325,9 @@ void vdec_power_off(void)
 #else
 		clk_disable_unprepare(clk_MT_CG_VDEC);
 		clk_disable_unprepare(clk_MT_SCP_SYS_VDE);
+#ifdef CONFIG_MTK_SMI_EXT
 		smi_bus_disable(SMI_LARB_VENCSYS, "vcodec-vdec");
+#endif
 #endif
 #endif
 	}
@@ -348,9 +353,9 @@ void venc_power_on(void)
 	enable_clock(MT_CG_INFRA_L2C_SRAM, "VENC");
 #endif
 #else
-
+#ifdef CONFIG_MTK_SMI_EXT
 	smi_bus_enable(SMI_LARB_VENCSYS, "vcodec-venc");
-
+#endif
 	ret = clk_prepare_enable(clk_MT_SCP_SYS_VEN);
 	if (ret) {
 		/* print error log & error handling */
@@ -392,7 +397,9 @@ void venc_power_off(void)
 #else
 		clk_disable_unprepare(clk_MT_CG_VENC);
 		clk_disable_unprepare(clk_MT_SCP_SYS_VEN);
+#ifdef CONFIG_MTK_SMI_EXT
 		smi_bus_disable(SMI_LARB_VENCSYS, "vcodec-venc");
+#endif
 #endif
 #endif
 		MODULE_MFV_PR_DEBUG("[VCODEC] venc_power_off -\n");
@@ -495,7 +502,7 @@ void venc_break(void)
 
 void dec_isr(void)
 {
-	VAL_RESULT_T    eValRet;
+	enum VAL_RESULT_T    eValRet;
 	VAL_ULONG_T     ulFlags, ulFlagsISR, ulFlagsLockHW;
 
 	VAL_UINT32_T u4TempDecISRCount = 0;
@@ -530,7 +537,7 @@ void dec_isr(void)
 	VDO_HW_WRITE(KVA_VDEC_MISC_BASE+41*4, VDO_HW_READ(KVA_VDEC_MISC_BASE + 41*4) & ~0x10);
 
 	spin_lock_irqsave(&DecIsrLock, ulFlags);
-	eValRet = eVideoSetEvent(&DecIsrEvent, sizeof(VAL_EVENT_T));
+	eValRet = eVideoSetEvent(&DecIsrEvent, sizeof(struct VAL_EVENT_T));
 	if (eValRet != VAL_RESULT_NO_ERROR) {
 		/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
 		MODULE_MFV_PR_ERR("[VCODEC][ERROR] ISR set DecIsrEvent error\n");
@@ -541,7 +548,7 @@ void dec_isr(void)
 
 void enc_isr(void)
 {
-	VAL_RESULT_T  eValRet;
+	enum VAL_RESULT_T  eValRet;
 	VAL_ULONG_T ulFlagsISR, ulFlagsLockHW;
 
 
@@ -613,7 +620,7 @@ void enc_isr(void)
 			grVcodecHWLock.eDriverType);
 	}
 
-	eValRet = eVideoSetEvent(&EncIsrEvent, sizeof(VAL_EVENT_T));
+	eValRet = eVideoSetEvent(&EncIsrEvent, sizeof(struct VAL_EVENT_T));
 	if (eValRet != VAL_RESULT_NO_ERROR) {
 		/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
 		MODULE_MFV_PR_ERR("[VCODEC][ERROR] ISR set EncIsrEvent error\n");
@@ -632,7 +639,7 @@ static irqreturn_t video_intr_dlr2(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-static long vcodec_lockhw_dec_fail(VAL_HW_LOCK_T rHWLock, VAL_UINT32_T FirstUseDecHW)
+static long vcodec_lockhw_dec_fail(struct VAL_HW_LOCK_T rHWLock, VAL_UINT32_T FirstUseDecHW)
 {
 	MODULE_MFV_PR_ERR("[ERROR] VCODEC_LOCKHW, Dec HWLockEvent TimeOut, CurrentTID = %d\n", current->pid);
 	if (FirstUseDecHW != 1) {
@@ -650,7 +657,7 @@ static long vcodec_lockhw_dec_fail(VAL_HW_LOCK_T rHWLock, VAL_UINT32_T FirstUseD
 	return 0;
 }
 
-static long vcodec_lockhw_enc_fail(VAL_HW_LOCK_T rHWLock, VAL_UINT32_T FirstUseEncHW)
+static long vcodec_lockhw_enc_fail(struct VAL_HW_LOCK_T rHWLock, VAL_UINT32_T FirstUseEncHW)
 {
 	MODULE_MFV_PR_ERR("[ERROR] VCODEC_LOCKHW Enc HWLockEvent TimeOut, CurrentTID = %d\n", current->pid);
 
@@ -695,13 +702,13 @@ static long vcodec_lockhw_enc_fail(VAL_HW_LOCK_T rHWLock, VAL_UINT32_T FirstUseE
 static long vcodec_lockhw(unsigned long arg)
 {
 	VAL_UINT8_T *user_data_addr;
-	VAL_HW_LOCK_T rHWLock;
-	VAL_RESULT_T eValRet;
+	struct VAL_HW_LOCK_T rHWLock;
+	enum VAL_RESULT_T eValRet;
 	VAL_LONG_T ret;
 	VAL_BOOL_T bLockedHW = VAL_FALSE;
 	VAL_UINT32_T FirstUseDecHW = 0;
 	VAL_UINT32_T FirstUseEncHW = 0;
-	VAL_TIME_T rCurTime;
+	struct VAL_TIME_T rCurTime;
 	VAL_UINT32_T u4TimeInterval;
 	VAL_ULONG_T ulFlagsLockHW;
 	VAL_UINT32_T u4VcodecSel;
@@ -714,7 +721,7 @@ static long vcodec_lockhw(unsigned long arg)
 	MODULE_MFV_PR_DEBUG("VCODEC_LOCKHW + tid = %d\n", current->pid);
 
 	user_data_addr = (VAL_UINT8_T *)arg;
-	ret = copy_from_user(&rHWLock, user_data_addr, sizeof(VAL_HW_LOCK_T));
+	ret = copy_from_user(&rHWLock, user_data_addr, sizeof(struct VAL_HW_LOCK_T));
 	if (ret) {
 		MODULE_MFV_PR_ERR("[ERROR] VCODEC_LOCKHW, copy_from_user failed: %lu\n", ret);
 		return -EFAULT;
@@ -741,7 +748,7 @@ static long vcodec_lockhw(unsigned long arg)
 
 			if (FirstUseDecHW == 1) {
 				/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
-				eValRet = eVideoWaitEvent(&HWLockEvent, sizeof(VAL_EVENT_T));
+				eValRet = eVideoWaitEvent(&HWLockEvent, sizeof(struct VAL_EVENT_T));
 			}
 			mutex_lock(&HWLockEventTimeoutLock);
 			if (HWLockEvent.u4TimeoutMs != 1000) {
@@ -765,7 +772,7 @@ static long vcodec_lockhw(unsigned long arg)
 			if (FirstUseDecHW == 0) {
 				MODULE_MFV_PR_DEBUG("VCODEC_LOCKHW, Not first time use HW, timeout = %d\n",
 					 HWLockEvent.u4TimeoutMs);
-				eValRet = eVideoWaitEvent(&HWLockEvent, sizeof(VAL_EVENT_T));
+				eValRet = eVideoWaitEvent(&HWLockEvent, sizeof(struct VAL_EVENT_T));
 			}
 
 			if (eValRet == VAL_RESULT_INVALID_ISR) {
@@ -800,7 +807,7 @@ static long vcodec_lockhw(unsigned long arg)
 				grVcodecHWLock.pvHandle =
 					(VAL_VOID_T *)pmem_user_v2p_video((VAL_ULONG_T)rHWLock.pvHandle);
 				grVcodecHWLock.eDriverType = rHWLock.eDriverType;
-				eVideoGetTimeOfDay(&grVcodecHWLock.rLockedTime, sizeof(VAL_TIME_T));
+				eVideoGetTimeOfDay(&grVcodecHWLock.rLockedTime, sizeof(struct VAL_TIME_T));
 
 				MODULE_MFV_PR_DEBUG("VCODEC_LOCKHW, No process use dec HW, so current process can use HW\n");
 				MODULE_MFV_PR_DEBUG("LockInstance = 0x%lx CurrentTID = %d, rLockedTime(s, us) = %d, %d\n",
@@ -825,7 +832,7 @@ static long vcodec_lockhw(unsigned long arg)
 				}
 			} else { /* Another one holding dec hw now */
 				MODULE_MFV_PR_ERR("VCODEC_LOCKHW E\n");
-				eVideoGetTimeOfDay(&rCurTime, sizeof(VAL_TIME_T));
+				eVideoGetTimeOfDay(&rCurTime, sizeof(struct VAL_TIME_T));
 				u4TimeInterval = (((((rCurTime.u4Sec - grVcodecHWLock.rLockedTime.u4Sec) * 1000000)
 						    + rCurTime.u4uSec) - grVcodecHWLock.rLockedTime.u4uSec) / 1000);
 
@@ -870,7 +877,7 @@ static long vcodec_lockhw(unsigned long arg)
 			mutex_unlock(&HWLockEventTimeoutLock);
 			if (FirstUseEncHW == 1) {
 				/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
-				eValRet = eVideoWaitEvent(&HWLockEvent, sizeof(VAL_EVENT_T));
+				eValRet = eVideoWaitEvent(&HWLockEvent, sizeof(struct VAL_EVENT_T));
 			}
 
 			mutex_lock(&HWLockEventTimeoutLock);
@@ -900,7 +907,7 @@ static long vcodec_lockhw(unsigned long arg)
 
 			if (FirstUseEncHW == 0) {
 				/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
-				eValRet = eVideoWaitEvent(&HWLockEvent, sizeof(VAL_EVENT_T));
+				eValRet = eVideoWaitEvent(&HWLockEvent, sizeof(struct VAL_EVENT_T));
 			}
 
 			if (eValRet == VAL_RESULT_INVALID_ISR) {
@@ -936,7 +943,7 @@ static long vcodec_lockhw(unsigned long arg)
 					grVcodecHWLock.pvHandle =
 						(VAL_VOID_T *)pmem_user_v2p_video((VAL_ULONG_T)rHWLock.pvHandle);
 					grVcodecHWLock.eDriverType = rHWLock.eDriverType;
-					eVideoGetTimeOfDay(&grVcodecHWLock.rLockedTime, sizeof(VAL_TIME_T));
+					eVideoGetTimeOfDay(&grVcodecHWLock.rLockedTime, sizeof(struct VAL_TIME_T));
 
 					MODULE_MFV_PR_DEBUG("VCODEC_LOCKHW, No process use HW, so current process can use HW\n");
 					MODULE_MFV_PR_DEBUG("VCODEC_LOCKHW, handle = 0x%lx\n",
@@ -964,7 +971,7 @@ static long vcodec_lockhw(unsigned long arg)
 					break;
 				}
 
-				eVideoGetTimeOfDay(&rCurTime, sizeof(VAL_TIME_T));
+				eVideoGetTimeOfDay(&rCurTime, sizeof(struct VAL_TIME_T));
 				u4TimeInterval = (((((rCurTime.u4Sec - grVcodecHWLock.rLockedTime.u4Sec) * 1000000)
 					+ rCurTime.u4uSec) - grVcodecHWLock.rLockedTime.u4uSec) / 1000);
 
@@ -1073,14 +1080,14 @@ static long vcodec_lockhw(unsigned long arg)
 static long vcodec_unlockhw(unsigned long arg)
 {
 	VAL_UINT8_T *user_data_addr;
-	VAL_HW_LOCK_T rHWLock;
-	VAL_RESULT_T eValRet;
+	struct VAL_HW_LOCK_T rHWLock;
+	enum VAL_RESULT_T eValRet;
 	VAL_LONG_T ret;
 
 	MODULE_MFV_PR_DEBUG("VCODEC_UNLOCKHW + tid = %d\n", current->pid);
 
 	user_data_addr = (VAL_UINT8_T *)arg;
-	ret = copy_from_user(&rHWLock, user_data_addr, sizeof(VAL_HW_LOCK_T));
+	ret = copy_from_user(&rHWLock, user_data_addr, sizeof(struct VAL_HW_LOCK_T));
 	if (ret) {
 		MODULE_MFV_PR_ERR("[ERROR] VCODEC_UNLOCKHW, copy_from_user failed: %lu\n", ret);
 		return -EFAULT;
@@ -1122,7 +1129,7 @@ static long vcodec_unlockhw(unsigned long arg)
 		MODULE_MFV_PR_DEBUG("wake_unlock(&vcodec_wake_lock) -");
 #endif
 		mutex_unlock(&HWLock);
-		eValRet = eVideoSetEvent(&HWLockEvent, sizeof(VAL_EVENT_T));
+		eValRet = eVideoSetEvent(&HWLockEvent, sizeof(struct VAL_EVENT_T));
 	} else if (rHWLock.eDriverType == VAL_DRIVER_TYPE_H264_ENC ||
 			 rHWLock.eDriverType == VAL_DRIVER_TYPE_HEVC_ENC ||
 			 rHWLock.eDriverType == VAL_DRIVER_TYPE_JPEG_ENC) {
@@ -1158,7 +1165,7 @@ static long vcodec_unlockhw(unsigned long arg)
 		MODULE_MFV_PR_DEBUG("wake_unlock(&vcodec_wake_lock2) -");
 #endif
 		mutex_unlock(&HWLock);
-		eValRet = eVideoSetEvent(&HWLockEvent, sizeof(VAL_EVENT_T));
+		eValRet = eVideoSetEvent(&HWLockEvent, sizeof(struct VAL_EVENT_T));
 	} else {
 		MODULE_MFV_PR_ERR("[WARNING] VCODEC_UNLOCKHW Unknown instance\n");
 		return -EFAULT;
@@ -1172,18 +1179,18 @@ static long vcodec_unlockhw(unsigned long arg)
 static long vcodec_waitisr(unsigned long arg)
 {
 	VAL_UINT8_T *user_data_addr;
-	VAL_ISR_T val_isr;
+	struct VAL_ISR_T val_isr;
 	VAL_BOOL_T bLockedHW = VAL_FALSE;
 	VAL_ULONG_T ulFlags;
 	VAL_LONG_T ret;
-	VAL_RESULT_T eValRet;
+	enum VAL_RESULT_T eValRet;
 	VAL_UINT32_T u4TimeoutMs = 0;
 	VAL_UINT32_T u4CheckIntervalMs = 5;
 
 	MODULE_MFV_PR_DEBUG("VCODEC_WAITISR + tid = %d\n", current->pid);
 
 	user_data_addr = (VAL_UINT8_T *)arg;
-	ret = copy_from_user(&val_isr, user_data_addr, sizeof(VAL_ISR_T));
+	ret = copy_from_user(&val_isr, user_data_addr, sizeof(struct VAL_ISR_T));
 	if (ret) {
 		MODULE_MFV_PR_ERR("[ERROR] VCODEC_WAITISR, copy_from_user failed: %lu\n", ret);
 		return -EFAULT;
@@ -1215,7 +1222,7 @@ static long vcodec_waitisr(unsigned long arg)
 			spin_lock_irqsave(&DecIsrLock, ulFlags);
 			DecIsrEvent.u4TimeoutMs = u4CheckIntervalMs;
 			spin_unlock_irqrestore(&DecIsrLock, ulFlags);
-			eValRet = eVideoWaitEvent(&DecIsrEvent, sizeof(VAL_EVENT_T));
+			eValRet = eVideoWaitEvent(&DecIsrEvent, sizeof(struct VAL_EVENT_T));
 			if (eValRet == VAL_RESULT_NO_ERROR)
 				break;
 		} while (u4TimeoutMs -= u4CheckIntervalMs > 0);
@@ -1247,7 +1254,7 @@ static long vcodec_waitisr(unsigned long arg)
 		EncIsrEvent.u4TimeoutMs = val_isr.u4TimeoutMs;
 		spin_unlock_irqrestore(&EncIsrLock, ulFlags);
 
-		eValRet = eVideoWaitEvent(&EncIsrEvent, sizeof(VAL_EVENT_T));
+		eValRet = eVideoWaitEvent(&EncIsrEvent, sizeof(struct VAL_EVENT_T));
 		if (eValRet == VAL_RESULT_INVALID_ISR) {
 			return -2;
 		} else if (eValRet == VAL_RESULT_RESTARTSYS) {
@@ -1257,7 +1264,7 @@ static long vcodec_waitisr(unsigned long arg)
 
 		if (val_isr.u4IrqStatusNum > 0) {
 			val_isr.u4IrqStatus[0] = gu4HwVencIrqStatus;
-			ret = copy_to_user(user_data_addr, &val_isr, sizeof(VAL_ISR_T));
+			ret = copy_to_user(user_data_addr, &val_isr, sizeof(struct VAL_ISR_T));
 			if (ret) {
 				MODULE_MFV_PR_ERR("[ERROR] VCODEC_WAITISR, copy_to_user failed: %lu\n", ret);
 				return -EFAULT;
@@ -1277,10 +1284,10 @@ static long vcodec_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned 
 {
 	VAL_LONG_T ret;
 	VAL_UINT8_T *user_data_addr;
-	VAL_VCODEC_CORE_LOADING_T rTempCoreLoading;
-	VAL_VCODEC_CPU_OPP_LIMIT_T rCpuOppLimit;
+	struct VAL_VCODEC_CORE_LOADING_T rTempCoreLoading;
+	struct VAL_VCODEC_CPU_OPP_LIMIT_T rCpuOppLimit;
 	VAL_INT32_T temp_nr_cpu_ids;
-	VAL_POWER_T rPowerParam;
+	struct VAL_POWER_T rPowerParam;
 	VAL_BOOL_T rIncLogCount;
 
 #if 0
@@ -1421,7 +1428,7 @@ static long vcodec_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned 
 	{
 		MODULE_MFV_PR_DEBUG("VCODEC_INC_PWR_USER + tid = %d\n", current->pid);
 		user_data_addr = (VAL_UINT8_T *)arg;
-		ret = copy_from_user(&rPowerParam, user_data_addr, sizeof(VAL_POWER_T));
+		ret = copy_from_user(&rPowerParam, user_data_addr, sizeof(struct VAL_POWER_T));
 		if (ret) {
 			MODULE_MFV_PR_ERR("[ERROR] VCODEC_INC_PWR_USER, copy_from_user failed: %lu\n", ret);
 			return -EFAULT;
@@ -1454,7 +1461,7 @@ static long vcodec_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned 
 	{
 		MODULE_MFV_PR_DEBUG("VCODEC_DEC_PWR_USER + tid = %d\n", current->pid);
 		user_data_addr = (VAL_UINT8_T *)arg;
-		ret = copy_from_user(&rPowerParam, user_data_addr, sizeof(VAL_POWER_T));
+		ret = copy_from_user(&rPowerParam, user_data_addr, sizeof(struct VAL_POWER_T));
 		if (ret) {
 			MODULE_MFV_PR_ERR("[ERROR] VCODEC_DEC_PWR_USER, copy_from_user failed: %lu\n", ret);
 			return -EFAULT;
@@ -1510,7 +1517,7 @@ static long vcodec_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned 
 	case VCODEC_GET_CPU_LOADING_INFO:
 	{
 		VAL_UINT8_T *user_data_addr;
-		VAL_VCODEC_CPU_LOADING_INFO_T _temp = {0};
+		struct VAL_VCODEC_CPU_LOADING_INFO_T _temp = {0};
 
 		MODULE_MFV_PR_DEBUG("VCODEC_GET_CPU_LOADING_INFO +\n");
 		user_data_addr = (VAL_UINT8_T *)arg;
@@ -1523,7 +1530,7 @@ static long vcodec_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned 
 		spin_unlock_irqrestore(&OalHWContextLock, ulFlags);
 		_temp._sched_clock = mt_sched_clock();
 #endif
-		ret = copy_to_user(user_data_addr, &_temp, sizeof(VAL_VCODEC_CPU_LOADING_INFO_T));
+		ret = copy_to_user(user_data_addr, &_temp, sizeof(struct VAL_VCODEC_CPU_LOADING_INFO_T));
 		if (ret) {
 			MODULE_MFV_PR_ERR("[ERROR] VCODEC_GET_CPU_LOADING_INFO, copy_to_user failed: %lu\n", ret);
 			return -EFAULT;
@@ -1538,7 +1545,7 @@ static long vcodec_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned 
 		MODULE_MFV_PR_DEBUG("VCODEC_GET_CORE_LOADING + - tid = %d\n", current->pid);
 
 		user_data_addr = (VAL_UINT8_T *)arg;
-		ret = copy_from_user(&rTempCoreLoading, user_data_addr, sizeof(VAL_VCODEC_CORE_LOADING_T));
+		ret = copy_from_user(&rTempCoreLoading, user_data_addr, sizeof(struct VAL_VCODEC_CORE_LOADING_T));
 		if (ret) {
 			MODULE_MFV_PR_ERR("[ERROR] VCODEC_GET_CORE_LOADING, copy_from_user failed: %lu\n", ret);
 			return -EFAULT;
@@ -1555,8 +1562,9 @@ static long vcodec_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned 
 			return -EFAULT;
 		}
 
-		rTempCoreLoading.Loading = get_cpu_load(rTempCoreLoading.CPUid);
-		ret = copy_to_user(user_data_addr, &rTempCoreLoading, sizeof(VAL_VCODEC_CORE_LOADING_T));
+	    /*get_cpu_load(rTempCoreLoading.CPUid);*/
+		rTempCoreLoading.Loading = 0;
+		ret = copy_to_user(user_data_addr, &rTempCoreLoading, sizeof(struct VAL_VCODEC_CORE_LOADING_T));
 		if (ret) {
 			MODULE_MFV_PR_ERR("[ERROR] VCODEC_GET_CORE_LOADING, copy_to_user failed: %lu\n", ret);
 			return -EFAULT;
@@ -1584,7 +1592,7 @@ static long vcodec_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned 
 	{
 		MODULE_MFV_PR_DEBUG("VCODEC_SET_CPU_OPP_LIMIT [EMPTY] + - tid = %d\n", current->pid);
 		user_data_addr = (VAL_UINT8_T *)arg;
-		ret = copy_from_user(&rCpuOppLimit, user_data_addr, sizeof(VAL_VCODEC_CPU_OPP_LIMIT_T));
+		ret = copy_from_user(&rCpuOppLimit, user_data_addr, sizeof(struct VAL_VCODEC_CPU_OPP_LIMIT_T));
 		if (ret) {
 			MODULE_MFV_PR_ERR("[ERROR] VCODEC_SET_CPU_OPP_LIMIT, copy_from_user failed: %lu\n", ret);
 			return -EFAULT;
@@ -1774,7 +1782,7 @@ static int compat_copy_struct(
 	{
 		if (eDirection == COPY_FROM_USER) {
 			struct COMPAT_VAL_HW_LOCK_T __user *from32 = (struct COMPAT_VAL_HW_LOCK_T *)data32;
-			VAL_HW_LOCK_T __user *to = (VAL_HW_LOCK_T *)data;
+			struct VAL_HW_LOCK_T __user *to = (struct VAL_HW_LOCK_T *)data;
 
 			err = get_user(p, &(from32->pvHandle));
 			err |= put_user(compat_ptr(p), &(to->pvHandle));
@@ -1794,7 +1802,7 @@ static int compat_copy_struct(
 			err |= put_user(c, &(to->bSecureInst));
 		} else {
 			struct COMPAT_VAL_HW_LOCK_T __user *to32 = (struct COMPAT_VAL_HW_LOCK_T *)data32;
-			VAL_HW_LOCK_T __user *from = (VAL_HW_LOCK_T *)data;
+			struct VAL_HW_LOCK_T __user *from = (struct VAL_HW_LOCK_T *)data;
 
 			err = get_uptr_to_32(&p, &(from->pvHandle));
 			err |= put_user(p, &(to32->pvHandle));
@@ -1819,7 +1827,7 @@ static int compat_copy_struct(
 	{
 		if (eDirection == COPY_FROM_USER) {
 			struct COMPAT_VAL_POWER_T __user *from32 = (struct COMPAT_VAL_POWER_T *)data32;
-			VAL_POWER_T __user *to = (VAL_POWER_T *)data;
+			struct VAL_POWER_T __user *to = (struct VAL_POWER_T *)data;
 
 			err = get_user(p, &(from32->pvHandle));
 			err |= put_user(compat_ptr(p), &(to->pvHandle));
@@ -1835,7 +1843,7 @@ static int compat_copy_struct(
 			err |= put_user(u, &(to->u4ReservedSize));
 		} else {
 			struct COMPAT_VAL_POWER_T __user *to32 = (struct COMPAT_VAL_POWER_T *)data32;
-			VAL_POWER_T __user *from = (VAL_POWER_T *)data;
+			struct VAL_POWER_T __user *from = (struct VAL_POWER_T *)data;
 
 			err = get_uptr_to_32(&p, &(from->pvHandle));
 			err |= put_user(p, &(to32->pvHandle));
@@ -1858,7 +1866,7 @@ static int compat_copy_struct(
 
 		if (eDirection == COPY_FROM_USER) {
 			struct COMPAT_VAL_ISR_T __user *from32 = (struct COMPAT_VAL_ISR_T *)data32;
-			VAL_ISR_T __user *to = (VAL_ISR_T *)data;
+			struct VAL_ISR_T __user *to = (struct VAL_ISR_T *)data;
 
 			err = get_user(p, &(from32->pvHandle));
 			err |= put_user(compat_ptr(p), &(to->pvHandle));
@@ -1884,7 +1892,7 @@ static int compat_copy_struct(
 
 		} else {
 			struct COMPAT_VAL_ISR_T __user *to32 = (struct COMPAT_VAL_ISR_T *)data32;
-			VAL_ISR_T __user *from = (VAL_ISR_T *)data;
+			struct VAL_ISR_T __user *from = (struct VAL_ISR_T *)data;
 
 			err = get_uptr_to_32(&p, &(from->pvHandle));
 			err |= put_user(p, &(to32->pvHandle));
@@ -1913,7 +1921,7 @@ static int compat_copy_struct(
 	{
 		if (eDirection == COPY_FROM_USER) {
 			struct COMPAT_VAL_MEMORY_T __user *from32 = (struct COMPAT_VAL_MEMORY_T *)data32;
-			VAL_MEMORY_T __user *to = (VAL_MEMORY_T *)data;
+			struct VAL_MEMORY_T __user *to = (struct VAL_MEMORY_T *)data;
 
 			err = get_user(u, &(from32->eMemType));
 			err |= put_user(u, &(to->eMemType));
@@ -1942,7 +1950,7 @@ static int compat_copy_struct(
 			} else {
 			struct COMPAT_VAL_MEMORY_T __user *to32 = (struct COMPAT_VAL_MEMORY_T *)data32;
 
-			VAL_MEMORY_T __user *from = (VAL_MEMORY_T *)data;
+			struct VAL_MEMORY_T __user *from = (struct VAL_MEMORY_T *)data;
 
 			err = get_user(u, &(from->eMemType));
 			err |= put_user(u, &(to32->eMemType));
@@ -1988,11 +1996,11 @@ static long vcodec_unlocked_compat_ioctl(struct file *file, unsigned int cmd, un
 	case VCODEC_FREE_NON_CACHE_BUFFER:
 	{
 		struct COMPAT_VAL_MEMORY_T __user *data32;
-		VAL_MEMORY_T __user *data;
+		struct VAL_MEMORY_T __user *data;
 		int err;
 
 		data32 = compat_ptr(arg);
-		data = compat_alloc_user_space(sizeof(VAL_MEMORY_T));
+		data = compat_alloc_user_space(sizeof(struct VAL_MEMORY_T));
 		if (data == NULL)
 			return -EFAULT;
 
@@ -2013,11 +2021,11 @@ static long vcodec_unlocked_compat_ioctl(struct file *file, unsigned int cmd, un
 	case VCODEC_UNLOCKHW:
 	{
 		struct COMPAT_VAL_HW_LOCK_T __user *data32;
-		VAL_HW_LOCK_T __user *data;
+		struct VAL_HW_LOCK_T __user *data;
 		int err;
 
 		data32 = compat_ptr(arg);
-		data = compat_alloc_user_space(sizeof(VAL_HW_LOCK_T));
+		data = compat_alloc_user_space(sizeof(struct VAL_HW_LOCK_T));
 		if (data == NULL)
 			return -EFAULT;
 
@@ -2039,11 +2047,11 @@ static long vcodec_unlocked_compat_ioctl(struct file *file, unsigned int cmd, un
 	case VCODEC_DEC_PWR_USER:
 	{
 		struct COMPAT_VAL_POWER_T __user *data32;
-		VAL_POWER_T __user *data;
+		struct VAL_POWER_T __user *data;
 		int err;
 
 		data32 = compat_ptr(arg);
-		data = compat_alloc_user_space(sizeof(VAL_POWER_T));
+		data = compat_alloc_user_space(sizeof(struct VAL_POWER_T));
 		if (data == NULL)
 			return -EFAULT;
 
@@ -2065,11 +2073,11 @@ static long vcodec_unlocked_compat_ioctl(struct file *file, unsigned int cmd, un
 	case VCODEC_WAITISR:
 	{
 		struct COMPAT_VAL_ISR_T __user *data32;
-		VAL_ISR_T __user *data;
+		struct VAL_ISR_T __user *data;
 		int err;
 
 		data32 = compat_ptr(arg);
-		data = compat_alloc_user_space(sizeof(VAL_ISR_T));
+		data = compat_alloc_user_space(sizeof(struct VAL_ISR_T));
 		if (data == NULL)
 			return -EFAULT;
 
@@ -2503,7 +2511,7 @@ static struct platform_driver vcodec_driver = {
 
 static int __init vcodec_driver_init(void)
 {
-	VAL_RESULT_T  eValHWLockRet;
+	enum VAL_RESULT_T  eValHWLockRet;
 	VAL_ULONG_T ulFlags, ulFlagsLockHW, ulFlagsISR;
 
 	MODULE_MFV_PR_DEBUG("+vcodec_driver_init !!\n");
@@ -2601,7 +2609,7 @@ static int __init vcodec_driver_init(void)
 	HWLockEvent.u4HandleSize = sizeof("HWLOCK_EVENT")+1;
 	HWLockEvent.u4TimeoutMs = 1;
 	mutex_unlock(&HWLockEventTimeoutLock);
-	eValHWLockRet = eVideoCreateEvent(&HWLockEvent, sizeof(VAL_EVENT_T));
+	eValHWLockRet = eVideoCreateEvent(&HWLockEvent, sizeof(struct VAL_EVENT_T));
 	if (eValHWLockRet != VAL_RESULT_NO_ERROR) {
 		/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
 		MODULE_MFV_PR_ERR("[VCODEC][ERROR] create hwlock event error\n");
@@ -2613,7 +2621,7 @@ static int __init vcodec_driver_init(void)
 	DecIsrEvent.u4HandleSize = sizeof("DECISR_EVENT")+1;
 	DecIsrEvent.u4TimeoutMs = 1;
 	spin_unlock_irqrestore(&DecIsrLock, ulFlags);
-	eValHWLockRet = eVideoCreateEvent(&DecIsrEvent, sizeof(VAL_EVENT_T));
+	eValHWLockRet = eVideoCreateEvent(&DecIsrEvent, sizeof(struct VAL_EVENT_T));
 	if (eValHWLockRet != VAL_RESULT_NO_ERROR) {
 		/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
 		MODULE_MFV_PR_ERR("[VCODEC][ERROR] create dec isr event error\n");
@@ -2624,7 +2632,7 @@ static int __init vcodec_driver_init(void)
 	EncIsrEvent.u4HandleSize = sizeof("ENCISR_EVENT")+1;
 	EncIsrEvent.u4TimeoutMs = 1;
 	spin_unlock_irqrestore(&EncIsrLock, ulFlags);
-	eValHWLockRet = eVideoCreateEvent(&EncIsrEvent, sizeof(VAL_EVENT_T));
+	eValHWLockRet = eVideoCreateEvent(&EncIsrEvent, sizeof(struct VAL_EVENT_T));
 	if (eValHWLockRet != VAL_RESULT_NO_ERROR) {
 		/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
 		MODULE_MFV_PR_ERR("[VCODEC][ERROR] create enc isr event error\n");
@@ -2644,7 +2652,7 @@ static int __init vcodec_driver_init(void)
 
 static void __exit vcodec_driver_exit(void)
 {
-	VAL_RESULT_T  eValHWLockRet;
+	enum VAL_RESULT_T  eValHWLockRet;
 
 	MODULE_MFV_PR_DEBUG("vcodec_driver_exit\n");
 #if USE_WAKELOCK == 1
@@ -2677,20 +2685,20 @@ static void __exit vcodec_driver_exit(void)
 	free_irq(VDEC_IRQ_ID, NULL);
 
 	/* MT6589_HWLockEvent part */
-	eValHWLockRet = eVideoCloseEvent(&HWLockEvent, sizeof(VAL_EVENT_T));
+	eValHWLockRet = eVideoCloseEvent(&HWLockEvent, sizeof(struct VAL_EVENT_T));
 	if (eValHWLockRet != VAL_RESULT_NO_ERROR) {
 		/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
 		MODULE_MFV_PR_ERR("[VCODEC][ERROR] close hwlock event error\n");
 	}
 
 	/* MT6589_IsrEvent part */
-	eValHWLockRet = eVideoCloseEvent(&DecIsrEvent, sizeof(VAL_EVENT_T));
+	eValHWLockRet = eVideoCloseEvent(&DecIsrEvent, sizeof(struct VAL_EVENT_T));
 	if (eValHWLockRet != VAL_RESULT_NO_ERROR) {
 		/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
 		MODULE_MFV_PR_ERR("[VCODEC][ERROR] close dec isr event error\n");
 	}
 
-	eValHWLockRet = eVideoCloseEvent(&EncIsrEvent, sizeof(VAL_EVENT_T));
+	eValHWLockRet = eVideoCloseEvent(&EncIsrEvent, sizeof(struct VAL_EVENT_T));
 	if (eValHWLockRet != VAL_RESULT_NO_ERROR) {
 		/* Add one line comment for avoid kernel coding style, WARNING:BRACES: */
 		MODULE_MFV_PR_ERR("[VCODEC][ERROR] close enc isr event error\n");

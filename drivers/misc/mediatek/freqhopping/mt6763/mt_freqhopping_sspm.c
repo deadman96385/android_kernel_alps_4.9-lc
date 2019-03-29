@@ -27,7 +27,7 @@
 #include "mach/mtk_freqhopping.h"
 #include "mach/mtk_fhreg.h"
 #include "sync_write.h"
-#include "mtk_freqhopping_drv.h"
+#include "mt_freqhopping_drv.h"
 #ifdef HP_EN_REG_SEMAPHORE_PROTECT
 #include "mtk_cpufreq_hybrid.h"
 #endif
@@ -1032,7 +1032,7 @@ int mt_pause_armpll(unsigned int pll, unsigned int pause)
 /*TODO init freqhopping in hal. Should find a proper place to init*/
 static int __init mt_fh_driver_init(void)
 {
-	mt_freqhopping_init();
+	/* mt_freqhopping_init() ;*/
 	return 0;
 }
 

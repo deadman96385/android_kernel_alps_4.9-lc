@@ -241,7 +241,7 @@ struct ion_handle *disp_ion_import_handle(struct ion_client *client, int fd)
 		return handle;
 	}
 
-	handle = ion_import_dma_buf(client, fd);
+	handle = ion_import_dma_buf_fd(client, fd);
 	if (IS_ERR(handle)) {
 		DDPERR("import ion handle failed!\n");
 		return NULL;

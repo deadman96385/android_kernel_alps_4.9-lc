@@ -100,7 +100,7 @@ void spm_sodi_pcm_setup_before_wfi(
 	resource_usage = spm_get_resource_usage();
 
 	mt_secure_call(MTK_SIP_KERNEL_SPM_SODI_ARGS,
-		pwrctrl->pcm_flags, resource_usage, pwrctrl->timer_val);
+		pwrctrl->pcm_flags, resource_usage, pwrctrl->timer_val, 0);
 }
 
 void spm_sodi3_pcm_setup_before_wfi(
@@ -116,7 +116,7 @@ void spm_sodi3_pcm_setup_before_wfi(
 	resource_usage = spm_get_resource_usage();
 
 	mt_secure_call(MTK_SIP_KERNEL_SPM_SODI_ARGS,
-		pwrctrl->pcm_flags, resource_usage, pwrctrl->timer_val);
+		pwrctrl->pcm_flags, resource_usage, pwrctrl->timer_val, 0);
 	mt_secure_call(MTK_SIP_KERNEL_SPM_PWR_CTRL_ARGS,
-		SPM_PWR_CTRL_SODI3, PWR_WDT_DISABLE, pwrctrl->wdt_disable);
+		SPM_PWR_CTRL_SODI3, PWR_WDT_DISABLE, pwrctrl->wdt_disable, 0);
 }

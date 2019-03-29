@@ -25,7 +25,7 @@
 /* For using net dev - */
 #include <mt-plat/mtk_wcn_cmb_stub.h>
 #include <mt-plat/aee.h>
-#include "mach/mt_thermal.h"
+#include "mach/mtk_thermal.h"
 #include <linux/uidgid.h>
 #include <linux/slab.h>
 /*=============================================================
@@ -84,8 +84,10 @@ struct wmt_stats {
 
 #define NR_TS_SENSORS		4
 static int (*ts_get_temp_wrap[4]) (void) = {
-	mtk_wcn_cmb_stub_query_ctrl,	/* 0 is for WMT sensor */
-mtkts_get_ts1_temp, mtkts_get_ts2_temp, mtkts_get_ts3_temp};
+	mtk_wcn_cmb_stub_query_ctrl /* 0 is for WMT sensor */
+	, get_immediate_ts1_wrap
+	, get_immediate_ts2_wrap
+	, get_immediate_ts3_wrap};
 
 static struct timer_list wmt_stats_timer;
 static struct wmt_stats wmt_stats_info;
@@ -724,8 +726,7 @@ static int wmt_cl_set_cur_state(struct thermal_cooling_device *cool_dev, unsigne
 	if (cl_dev_state == 1) {
 		wmt_tm_printk("wmt_cl_set_cur_state = 1\n");
 		/* the temperature is over than the critical, system reboot. */
-/* BUG(); */
-		*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
+		BUG();
 	}
 
 	return 0;

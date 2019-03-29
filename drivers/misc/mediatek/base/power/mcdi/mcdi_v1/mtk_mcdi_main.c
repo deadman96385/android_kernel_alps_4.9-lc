@@ -704,7 +704,7 @@ static void __init mcdi_pm_qos_init(void)
 static int __init mcdi_sysram_init(void)
 {
 	/* of init */
-	mcdi_of_init(&mcdi_sysram_base);
+	mcdi_of_init();
 
 	if (!mcdi_sysram_base)
 		return -1;

@@ -157,7 +157,7 @@ int mt_dfs_general_pll(unsigned int pll_id, unsigned int target_dds);
 int freqhopping_config(unsigned int pll_id, unsigned long def_set_idx, unsigned int enable);
 int mt_freqhopping_devctl(unsigned int cmd, void *args);
 void mt_freqhopping_pll_init(void);
-void mt_freqhopping_init(void);
+/* void mt_freqhopping_init(void); */
 void mt_fh_popod_save(void);
 void mt_fh_popod_restore(void);
 void mt_fh_unlock(void);

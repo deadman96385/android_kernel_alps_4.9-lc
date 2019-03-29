@@ -1044,7 +1044,7 @@ int ccci_modem_suspend(struct platform_device *dev, pm_message_t state)
 {
 	struct ccci_modem *md = (struct ccci_modem *)dev->dev.platform_data;
 
-	ccci_garbage_filter(ON);
+	/* ccci_garbage_filter(ON); */
 
 	CCCI_DEBUG_LOG(md->index, TAG, "ccci_modem_suspend\n");
 	return 0;
@@ -1054,7 +1054,7 @@ int ccci_modem_resume(struct platform_device *dev)
 {
 	struct ccci_modem *md = (struct ccci_modem *)dev->dev.platform_data;
 
-	ccci_garbage_filter(OFF);
+	/* ccci_garbage_filter(OFF); */
 
 	CCCI_DEBUG_LOG(md->index, TAG, "ccci_modem_resume\n");
 	return 0;

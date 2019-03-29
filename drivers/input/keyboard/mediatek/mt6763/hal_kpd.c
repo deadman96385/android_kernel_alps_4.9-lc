@@ -303,7 +303,7 @@ void kpd_wakeup_src_setting(int enable)
 }
 
 /********************************************************************/
-void kpd_init_keymap(u16 keymap[])
+void kpd_init_keymap(u32 keymap[])
 {
 	int i = 0;
 

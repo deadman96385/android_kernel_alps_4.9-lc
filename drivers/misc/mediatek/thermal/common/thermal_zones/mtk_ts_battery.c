@@ -27,10 +27,14 @@
 #include <linux/writeback.h>
 #include <asm/uaccess.h>
 #include "mt-plat/mtk_thermal_monitor.h"
-#include "mach/mt_thermal.h"
-#include <tmp_battery.h>
+#include "mach/mtk_thermal.h"
 #include <linux/uidgid.h>
 #include <linux/slab.h>
+#if (CONFIG_MTK_GAUGE_VERSION == 30)
+#include <mtk_battery.h>
+#else
+#include <tmp_battery.h>
+#endif
 
 /* ************************************ */
 /* Weak functions */
@@ -390,9 +394,7 @@ static int tsbat_sysrst_set_cur_state(struct thermal_cooling_device *cdev, unsig
 		pr_debug("*****************************************");
 		pr_debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
-/* BUG(); */
-		/* arch_reset(0,NULL); */
-		*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
+		BUG();
 	}
 	return 0;
 }

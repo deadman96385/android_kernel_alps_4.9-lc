@@ -276,6 +276,7 @@ static DEFINE_RAW_SPINLOCK(die_lock);
  */
 void die(const char *str, struct pt_regs *regs, int err)
 {
+	struct thread_info *thread = current_thread_info();
 	int ret;
 	int cpu = -1;
 	static int die_owner = -1;

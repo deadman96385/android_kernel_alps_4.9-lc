@@ -62,10 +62,10 @@ void spm_dpidle_pcm_setup_before_wfi(bool sleep_dpidle, u32 cpu, struct pcm_desc
 	/* Get SPM resource request and update reg_spm_xxx_req */
 	resource_usage = (!sleep_dpidle) ? spm_get_resource_usage() : 0;
 
-	mt_secure_call(MTK_SIP_KERNEL_SPM_DPIDLE_ARGS, pwrctrl->pcm_flags, resource_usage, 0);
+	mt_secure_call(MTK_SIP_KERNEL_SPM_DPIDLE_ARGS, pwrctrl->pcm_flags, resource_usage, 0, 0);
 
 	if (sleep_dpidle)
-		mt_secure_call(MTK_SIP_KERNEL_SPM_SLEEP_DPIDLE_ARGS, pwrctrl->timer_val, pwrctrl->wake_src, 0);
+		mt_secure_call(MTK_SIP_KERNEL_SPM_SLEEP_DPIDLE_ARGS, pwrctrl->timer_val, pwrctrl->wake_src, 0, 0);
 }
 
 void spm_deepidle_chip_init(void)

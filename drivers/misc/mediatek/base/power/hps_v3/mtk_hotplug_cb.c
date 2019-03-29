@@ -31,7 +31,7 @@
 /*#include "include/pmic_regulator.h"*/
 /*#include "mtk_pmic_regulator.h"*/
 #ifdef CONFIG_MTK_FREQ_HOPPING
-#include "mt_freqhopping.h"
+#include "mach/mtk_freqhopping.h"
 #else
 #define FH_PLL0 0
 #define FH_PLL1 1

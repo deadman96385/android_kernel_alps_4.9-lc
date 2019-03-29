@@ -25,7 +25,7 @@
 #include <asm/suspend.h>
 #include <asm/cpuidle.h>
 
-#include <mt-plat/mt_dbg.h>
+/* #include <mt-plat/mt_dbg.h> */
 #include <mt-plat/mt_io.h>
 #include <mt-plat/sync_write.h>
 
@@ -774,7 +774,7 @@ void mt_platform_restore_context(int flags)
 	/* SODI/DPIDLE */
 	if (!IS_DORMANT_INNER_OFF(flags)) {
 		if (cpuid == 0)
-			mt_secure_call(MC_FC_SLEEP_CANCELLED, 0, 0, 0);
+			mt_secure_call(MC_FC_SLEEP_CANCELLED, 0, 0, 0, 0);
 	}
 #elif defined(CONFIG_TRUSTY)
 	/* SODI/DPIDLE */
@@ -825,10 +825,10 @@ static int mt_cpu_dormant_abort(unsigned long index)
 
 #ifdef CONFIG_TRUSTONIC_TEE_SUPPORT
 	if (cpuid == 0)
-		mt_secure_call(MC_FC_SLEEP_CANCELLED, 0, 0, 0);
+		mt_secure_call(MC_FC_SLEEP_CANCELLED, 0, 0, 0, 0);
 #elif defined(CONFIG_TRUSTY) && (defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
 	if (cpuid == 0)
-		mt_trusty_call(SMC_FC_CPU_DORMANT_CANCEL, 0, 0, 0);
+		mt_trusty_call(SMC_FC_CPU_DORMANT_CANCEL, 0, 0, 0, 0);
 #endif
 
 	/* restore l2rstdisable setting */
@@ -877,7 +877,8 @@ int mt_cpu_dormant(unsigned long flags)
 	dormant_data[0].poc.cpu_resume_phys = (void (*)(void))(long)virt_to_phys(cpu_resume);
 #ifdef CONFIG_TRUSTONIC_TEE_SUPPORT
 	/* CPU_DEEP_SLEEP (0), CPU_MCDI_SLEEP (1)  */
-	mt_secure_call(MC_FC_MTK_SLEEP, virt_to_phys(cpu_resume), cpuid, IS_DORMANT_INNER_OFF(flags) ? 0 : 1);
+	mt_secure_call(MC_FC_MTK_SLEEP, virt_to_phys(cpu_resume),
+			cpuid, IS_DORMANT_INNER_OFF(flags) ? 0 : 1, 0);
 #elif defined(CONFIG_TRUSTY) && (defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
 	mt_trusty_call(SMC_FC_CPU_DORMANT, virt_to_phys(cpu_resume), cpuid, 0);
 #else
@@ -892,10 +893,10 @@ int mt_cpu_dormant(unsigned long flags)
 		reg_write(DMT_BOOTROM_BOOT_ADDR, virt_to_phys(cpu_wake_up_errata_802022));
 
 #ifdef CONFIG_TRUSTONIC_TEE_SUPPORT
-		mt_secure_call(MC_FC_SET_RESET_VECTOR, virt_to_phys(cpu_wake_up_errata_802022), 1, 0);
+		mt_secure_call(MC_FC_SET_RESET_VECTOR, virt_to_phys(cpu_wake_up_errata_802022), 1, 0, 0);
 		if (num_possible_cpus() == 4) {
-			mt_secure_call(MC_FC_SET_RESET_VECTOR, virt_to_phys(cpu_wake_up_errata_802022), 2, 0);
-			mt_secure_call(MC_FC_SET_RESET_VECTOR, virt_to_phys(cpu_wake_up_errata_802022), 3, 0);
+			mt_secure_call(MC_FC_SET_RESET_VECTOR, virt_to_phys(cpu_wake_up_errata_802022), 2, 0, 0);
+			mt_secure_call(MC_FC_SET_RESET_VECTOR, virt_to_phys(cpu_wake_up_errata_802022), 3, 0, 0);
 		}
 #elif defined(CONFIG_TRUSTY) && (defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
 		mt_trusty_call(SMC_FC_CPU_ON, virt_to_phys(cpu_wake_up_errata_802022), 1, 1);
@@ -915,7 +916,7 @@ int mt_cpu_dormant(unsigned long flags)
 		spm_mtcmos_ctrl_cpu1(STA_POWER_DOWN, 1);
 
 #ifdef CONFIG_TRUSTONIC_TEE_SUPPORT
-		mt_secure_call(MC_FC_ERRATA_808022, 0, 0, 0);
+		mt_secure_call(MC_FC_ERRATA_808022, 0, 0, 0, 0);
 #elif defined(CONFIG_TRUSTY) && (defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
 		mt_trusty_call(SMC_FC_CPU_ERRATA_802022, 0, 0, 0);
 #endif

@@ -21,7 +21,7 @@
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 #include "mt-plat/mtk_thermal_monitor.h"
-#include "mach/mt_thermal.h"
+#include "mach/mtk_thermal.h"
 #include <linux/uidgid.h>
 #include <linux/slab.h>
 
@@ -73,7 +73,7 @@ do { \
 		pr_debug("[thermal/img_sensor]" fmt, ##args); \
 } while (0)
 
-static int mtktsimgsensor_get_temp(struct thermal_zone_device *thermal, unsigned long *t)
+static int mtktsimgsensor_get_temp(struct thermal_zone_device *thermal, int *t)
 {
 	*t = max(g_temp_imgsensor0, max(g_temp_imgsensor1, max(g_temp_imgsensor2, g_temp_imgsensor3)));
 	return 0;
@@ -172,13 +172,13 @@ static int mtktsimgsensor_get_trip_type(struct thermal_zone_device *thermal, int
 }
 
 static int mtktsimgsensor_get_trip_temp(struct thermal_zone_device *thermal, int trip,
-				   unsigned long *temp)
+				   int *temp)
 {
 	*temp = trip_temp[trip];
 	return 0;
 }
 
-static int mtktsimgsensor_get_crit_temp(struct thermal_zone_device *thermal, unsigned long *temperature)
+static int mtktsimgsensor_get_crit_temp(struct thermal_zone_device *thermal, int *temperature)
 {
 	*temperature = mtktsimgsensor_TEMP_CRIT;
 	return 0;

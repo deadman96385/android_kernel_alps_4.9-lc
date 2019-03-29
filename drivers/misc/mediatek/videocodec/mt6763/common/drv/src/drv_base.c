@@ -32,7 +32,7 @@
 /* ============================================================== */
 /* For Hybrid HW */
 /* spinlock : OalHWContextLock */
-VAL_VCODEC_OAL_HW_CONTEXT_T oal_hw_context[VCODEC_MULTIPLE_INSTANCE_NUM];
+struct VAL_VCODEC_OAL_HW_CONTEXT_T oal_hw_context[VCODEC_MULTIPLE_INSTANCE_NUM];
 /* mutex : NonCacheMemoryListLock */
 struct VAL_NON_CACHE_MEMORY_LIST_T grNonCacheMemoryList[VCODEC_MULTIPLE_INSTANCE_NUM_x_10];
 
@@ -87,7 +87,7 @@ VAL_INT32_T search_HWLockSlot_ByHandle(VAL_ULONG_T ulpa, VAL_HANDLE_T handle)
 	return -1;
 }
 
-VAL_VCODEC_OAL_HW_CONTEXT_T *setCurr_HWLockSlot(VAL_ULONG_T ulpa, VAL_UINT32_T tid)
+struct VAL_VCODEC_OAL_HW_CONTEXT_T *setCurr_HWLockSlot(VAL_ULONG_T ulpa, VAL_UINT32_T tid)
 {
 
 	int i, j;
@@ -131,8 +131,9 @@ VAL_VCODEC_OAL_HW_CONTEXT_T *setCurr_HWLockSlot(VAL_ULONG_T ulpa, VAL_UINT32_T t
 }
 
 
-VAL_VCODEC_OAL_HW_CONTEXT_T *setCurr_HWLockSlot_Thread_ID(VAL_VCODEC_THREAD_ID_T a_prVcodecThreadID,
-							  VAL_UINT32_T *a_prIndex)
+struct VAL_VCODEC_OAL_HW_CONTEXT_T 
+	*setCurr_HWLockSlot_Thread_ID(struct VAL_VCODEC_THREAD_ID_T a_prVcodecThreadID,
+	VAL_UINT32_T *a_prIndex)
 {
 	int i;
 	int j;
@@ -205,7 +206,7 @@ VAL_VCODEC_OAL_HW_CONTEXT_T *setCurr_HWLockSlot_Thread_ID(VAL_VCODEC_THREAD_ID_T
 }
 
 
-VAL_VCODEC_OAL_HW_CONTEXT_T *freeCurr_HWLockSlot(VAL_ULONG_T ulpa)
+struct VAL_VCODEC_OAL_HW_CONTEXT_T *freeCurr_HWLockSlot(VAL_ULONG_T ulpa)
 {
 	int i;
 	int j;
@@ -220,7 +221,7 @@ VAL_VCODEC_OAL_HW_CONTEXT_T *freeCurr_HWLockSlot(VAL_ULONG_T ulpa)
 				oal_hw_context[i].u4VCodecThreadID[j] = -1;
 			}
 			oal_hw_context[i].u4VCodecThreadNum = VCODEC_THREAD_MAX_NUM;
-			oal_hw_context[i].Oal_HW_reg = (VAL_VCODEC_OAL_HW_REGISTER_T  *)0;
+			oal_hw_context[i].Oal_HW_reg = (struct VAL_VCODEC_OAL_HW_REGISTER_T  *)0;
 			MODULE_MFV_PR_DEBUG("[VCODEC] freeCurr_HWLockSlot %d Slot\n", i);
 			return &oal_hw_context[i];
 		}

@@ -13,7 +13,7 @@
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/mcdi/include/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/mcdi/$(CONFIG_MTK_PLATFORM)/
-
+obj-$(CONFIG_MACH_MT6763) += mcdi_v1/
 ifeq ($(CONFIG_MACH_MT6758), y)
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/mcdi/include/mcdi_v1/
 obj-y += mcdi_v1/

@@ -105,7 +105,7 @@ struct ext_disp_path_context {
 
 #define pgc	_get_context()
 
-struct LCM_PARAMS extd_lcm_params
+struct LCM_PARAMS extd_lcm_params;
 
 atomic_t g_extd_trigger_ticket = ATOMIC_INIT(1);
 atomic_t g_extd_release_ticket = ATOMIC_INIT(1);
@@ -1833,7 +1833,7 @@ int ext_disp_frame_cfg_input(struct disp_frame_cfg_t *cfg)
 	if (_should_wait_path_idle())
 		dpmgr_wait_event_timeout(pgc->dpmgr_handle, DISP_PATH_EVENT_FRAME_DONE, HZ / 2);
 
-	memcpy(&(data_config->dispif_config), &extd_lcm_params,, sizeof(struct LCM_PARAMS));
+	memcpy(&(data_config->dispif_config), &extd_lcm_params, sizeof(struct LCM_PARAMS));
 	ret = dpmgr_path_config(pgc->dpmgr_handle, data_config,
 				ext_disp_cmdq_enabled() ? pgc->cmdq_handle_config : NULL);
 

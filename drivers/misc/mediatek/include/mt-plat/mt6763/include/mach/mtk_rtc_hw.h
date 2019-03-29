@@ -288,9 +288,8 @@ extern unsigned int pmic_config_interface_nospinlock(unsigned int RegNum,
 #define RTC_CON_GPI            (1U << 14)
 #define RTC_CON_LPSTA_RAW        (1U << 15)    /* 32K was stopped */
 
-#define RTC_INT_CNT            (RTC_BASE + 0x0202)
-#define RTC_INT_CNT_MASK        0x7FF
-#define RTC_INT_CNT_SHIFT       0
+
+
 
 /* power on alarm time setting */
 

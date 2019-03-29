@@ -26,7 +26,7 @@
 #include <asm/neon.h>
 #include <asm/suspend.h>
 
-#include <mt-plat/mtk_dbg.h>
+#include <mt-plat/mt_dbg.h>
 #include <mt-plat/mtk_io.h>
 #include <mt-plat/sync_write.h>
 
@@ -66,7 +66,7 @@ static void mtk_spm_wakeup_src_restore(void)
 static void mtk_cpuidle_timestamp_init(void)
 {
 #if MTK_CPUIDLE_TIME_PROFILING
-	kernel_smc_msg(0, 1, virt_to_phys(mtk_cpuidle_timestamp));
+	kernel_smc_msg(0, 1, virt_to_phys(mtk_cpuidle_timestamp), 0);
 #endif
 }
 
@@ -201,7 +201,7 @@ static void mtk_cpuidle_ram_console_init(void)
 
 	WARN_ON(!mtk_cpuidle_aee_virt_addr || !mtk_cpuidle_aee_phys_addr);
 
-	kernel_smc_msg(0, 2, (long)mtk_cpuidle_aee_phys_addr);
+	kernel_smc_msg(0, 2, (long)mtk_cpuidle_aee_phys_addr, 0);
 #endif
 }
 

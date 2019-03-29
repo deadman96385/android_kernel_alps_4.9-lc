@@ -42,7 +42,7 @@ void kpd_auto_test_for_factorymode(void);
 void kpd_wakeup_src_setting(int enable);
 void kpd_get_keymap_state(u16 state[]);
 void kpd_set_debounce(u16 val);
-void kpd_init_keymap(u16 keymap[]);
+void kpd_init_keymap(u32 keymap[]);
 void kpd_init_keymap_state(u16 keymap_state[]);
 void kpd_pmic_rstkey_hal(unsigned long pressed);
 void kpd_pmic_pwrkey_hal(unsigned long pressed);

@@ -18,7 +18,7 @@
 #include <linux/sched.h>
 
 #include <mt-plat/mtk_boot.h>
-#include <mt_gpufreq.h>
+#include <mtk_gpufreq.h>
 
 #ifdef CONFIG_MTK_QOS_SUPPORT
 #include <mtk_gpu_bw.h>
@@ -124,7 +124,6 @@ static int g_VsyncOffsetLevel;
 
 static int g_probe_pid = GED_NO_UM_SERVICE;
 
-typedef void (*gpufreq_input_boost_notify)(unsigned int);
 
 extern void mt_gpufreq_input_boost_notify_registerCB(gpufreq_input_boost_notify pCB);
 extern void mt_gpufreq_power_limit_notify_registerCB(gpufreq_power_limit_notify pCB);

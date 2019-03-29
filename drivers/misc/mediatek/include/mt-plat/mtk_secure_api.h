@@ -45,6 +45,10 @@
 	(0x82000204 | MTK_SIP_SMC_AARCH_BIT)
 #define MTK_SIP_KERNEL_DFD \
 	(0x82000205 | MTK_SIP_SMC_AARCH_BIT)
+#define MTK_SIP_KERNEL_GET_RND \
+	(0x82000206 | MTK_SIP_SMC_AARCH_BIT)
+#define MTK_SIP_KERNEL_DAPC_DUMP \
+	(0x82000207 | MTK_SIP_SMC_AARCH_BIT)
 
 /* CPU operations */
 #define MTK_SIP_POWER_DOWN_CLUSTER \
@@ -82,6 +86,9 @@
 #define MTK_SIP_KERNEL_SPM_SODI_ARGS \
 	(0x82000228 | MTK_SIP_SMC_AARCH_BIT)
 
+/* SPM DCS S1 control */
+#define MTK_SIP_KERNEL_SPM_DCS_S1 \
+	(0x82000224 | MTK_SIP_SMC_AARCH_BIT)
 /* SPM sleep deepidle related SMC call */
 #define MTK_SIP_KERNEL_SPM_SLEEP_DPIDLE_ARGS \
 	(0x82000229 | MTK_SIP_SMC_AARCH_BIT)
@@ -111,20 +118,47 @@
 #define MTK_SIP_KERNEL_AMMS_GET_FREE_LENGTH \
 	(0x82000251 | MTK_SIP_SMC_AARCH_BIT)
 
-/* EMI MPU */
+/* MPU */
 #define MTK_SIP_KERNEL_EMIMPU_WRITE (0x82000260 | MTK_SIP_SMC_AARCH_BIT)
 #define MTK_SIP_KERNEL_EMIMPU_READ  (0x82000261 | MTK_SIP_SMC_AARCH_BIT)
 #define MTK_SIP_KERNEL_EMIMPU_SET \
 	(0x82000262 | MTK_SIP_SMC_AARCH_BIT)
 #define MTK_SIP_KERNEL_EMIMPU_CLEAR \
 	(0x82000263 | MTK_SIP_SMC_AARCH_BIT)
+#define MTK_SIP_KERNEL_DEVMPU_VIO_GET \
+	(0x82000264 | MTK_SIP_SMC_AARCH_BIT)
+#define MTK_SIP_KERNEL_DEVMPU_PERM_GET \
+	(0x82000265 | MTK_SIP_SMC_AARCH_BIT)
 
+/* Storage Encryption related SMC call */
+/* HW FDE related SMC call */
+#define MTK_SIP_KERNEL_HW_FDE_UFS_CTL \
+	(0x82000270 | MTK_SIP_SMC_AARCH_BIT)
+#define MTK_SIP_KERNEL_HW_FDE_AES_INIT \
+	(0x82000271 | MTK_SIP_SMC_AARCH_BIT)
+#define MTK_SIP_KERNEL_HW_FDE_KEY   \
+	(0x82000272 | MTK_SIP_SMC_AARCH_BIT)
+#define MTK_SIP_KERNEL_HW_FDE_MSDC_CTL \
+	(0x82000273 | MTK_SIP_SMC_AARCH_BIT)
+/* HIE related SMC call */
+#define MTK_SIP_KERNEL_CRYPTO_HIE_CFG_REQUEST \
+	(0x82000274 | MTK_SIP_SMC_AARCH_BIT)
+#define MTK_SIP_KERNEL_CRYPTO_HIE_INIT \
+	(0x82000275 | MTK_SIP_SMC_AARCH_BIT)
+#define MTK_SIP_KERNEL_PMU_EVA \
+	(0x82000256 | MTK_SIP_SMC_AARCH_BIT)
+
+/* UFS generic SMC call */
+#define MTK_SIP_KERNEL_UFS_CTL \
+	(0x82000276 | MTK_SIP_SMC_AARCH_BIT)
 /* Cache related SMC call */
 #define MTK_SIP_KERNEL_CACHE_FLUSH_FIQ \
 	(0x82000280 | MTK_SIP_SMC_AARCH_BIT)
 
 #define MTK_SIP_KERNEL_CACHE_FLUSH_INIT \
 	(0x82000281 | MTK_SIP_SMC_AARCH_BIT)
+#define MTK_SIP_KERNEL_MSG \
+     (0x820002ff | MTK_SIP_SMC_AARCH_BIT)
 
 /* SCP DVFS related SMC call */
 #define MTK_SIP_KERNEL_SCP_DVFS_CTRL \
@@ -186,7 +220,6 @@ extern size_t mt_secure_call_all(size_t function_id,
 
 #endif				/* _MTK_SECURE_API_H_ */
 
-
 #define emi_mpu_smc_write(offset, val) \
 mt_secure_call(MTK_SIP_KERNEL_EMIMPU_WRITE, offset, val, 0, 0)
 
@@ -207,3 +240,9 @@ mt_secure_call(MTK_SIP_KERNEL_EMIMPU_CLEAR, region, 0, 0, 0)
 
 #define emi_mpu_smc_protect(start, end, apc) \
 mt_secure_call(MTK_SIP_KERNEL_EMIMPU_SET, start, end, apc, 0)
+#define dcm_smc_msg(init_type) \
+mt_secure_call(MTK_SIP_KERNEL_DCM, init_type, 0, 0, 0)
+#define dcm_smc_read_cnt(type) \
+mt_secure_call(MTK_SIP_KERNEL_DCM, type, 1, 0, 0)
+#define kernel_smc_msg(x1, x2, x3, x4) \
+	mt_secure_call(MTK_SIP_KERNEL_MSG, x1, x2, x3, x4)

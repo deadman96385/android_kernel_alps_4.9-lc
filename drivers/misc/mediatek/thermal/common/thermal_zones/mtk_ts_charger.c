@@ -24,7 +24,7 @@
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 #include "mt-plat/mtk_thermal_monitor.h"
-#include "mach/mt_thermal.h"
+#include "mach/mtk_thermal.h"
 #include <linux/uidgid.h>
 #include <linux/slab.h>
 #include <charging.h>
@@ -68,7 +68,7 @@ do {								\
 		pr_debug("[Power/charger_Thermal]" fmt, ##args);	\
 } while (0)
 
-static int mtktscharger_get_temp(struct thermal_zone_device *thermal, unsigned long *t)
+static int mtktscharger_get_temp(struct thermal_zone_device *thermal, int *t)
 {
 	/*unsigned char val = 0;*/
 	int ret = 0;
@@ -181,13 +181,13 @@ static int mtktscharger_get_trip_type(struct thermal_zone_device *thermal, int t
 }
 
 static int mtktscharger_get_trip_temp(struct thermal_zone_device *thermal, int trip,
-				   unsigned long *temp)
+				   int *temp)
 {
 	*temp = trip_temp[trip];
 	return 0;
 }
 
-static int mtktscharger_get_crit_temp(struct thermal_zone_device *thermal, unsigned long *temperature)
+static int mtktscharger_get_crit_temp(struct thermal_zone_device *thermal, int *temperature)
 {
 	*temperature = mtktscharger_TEMP_CRIT;
 	return 0;
@@ -229,13 +229,8 @@ static int mtktscharger_sysrst_set_cur_state(struct thermal_cooling_device *cdev
 		pr_debug("*****************************************");
 		pr_debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
-#if 0 /* ??? */
-#ifndef CONFIG_ARM64
+		/* To trigger data abort to reset the system for thermal protection. */
 		BUG();
-#else
-		*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
-#endif
-#endif
 	}
 
 	return 0;
@@ -350,18 +345,28 @@ static ssize_t mtktscharger_write(struct file *file, const char __user *buffer, 
 			g_bind9[i] = ptr_mtktscharger_data->bind9[i];
 		}
 
-		mtktscharger_dprintk("[mtktscharger_write]
-			g_THERMAL_TRIP_0=%d,g_THERMAL_TRIP_1=%d,g_THERMAL_TRIP_2=%d,",
-			g_THERMAL_TRIP[0], g_THERMAL_TRIP[1], g_THERMAL_TRIP[2]);
-		mtktscharger_dprintk("g_THERMAL_TRIP_3=%d,g_THERMAL_TRIP_4=%d,
-			g_THERMAL_TRIP_5=%d,g_THERMAL_TRIP_6=%d",
-			g_THERMAL_TRIP[3], g_THERMAL_TRIP[4], g_THERMAL_TRIP[5], g_THERMAL_TRIP[6]);
-		mtktscharger_dprintk("g_THERMAL_TRIP_7=%d,g_THERMAL_TRIP_8=%d,g_THERMAL_TRIP_9=%d,\n",
-			g_THERMAL_TRIP[7], g_THERMAL_TRIP[8], g_THERMAL_TRIP[9]);
-		mtktscharger_dprintk("[mtktscharger_write] cooldev0=%s,cooldev1=%s,cooldev2=%s,
-			cooldev3=%s,cooldev4=%s,",
-			g_bind0, g_bind1, g_bind2, g_bind3, g_bind4);
-		mtktscharger_dprintk("cooldev5=%s,cooldev6=%s,cooldev7=%s,cooldev8=%s,cooldev9=%s\n",
+		mtktscharger_dprintk("%s g_THERMAL_TRIP_0=%d,", __func__,
+			g_THERMAL_TRIP[0]);
+		mtktscharger_dprintk("g_THERMAL_TRIP_1=%d g_THERMAL_TRIP_2=%d ",
+			g_THERMAL_TRIP[1], g_THERMAL_TRIP[2]);
+		mtktscharger_dprintk("g_THERMAL_TRIP_3=%d g_THERMAL_TRIP_4=%d ",
+			g_THERMAL_TRIP[3], g_THERMAL_TRIP[4]);
+		mtktscharger_dprintk("g_THERMAL_TRIP_5=%d g_THERMAL_TRIP_6=%d ",
+			g_THERMAL_TRIP[5], g_THERMAL_TRIP[6]);
+
+		mtktscharger_dprintk(
+			"g_THERMAL_TRIP_7=%d g_THERMAL_TRIP_8=%d g_THERMAL_TRIP_9=%d\n",
+			g_THERMAL_TRIP[7], g_THERMAL_TRIP[8],
+			g_THERMAL_TRIP[9]);
+
+		mtktscharger_dprintk("cooldev0=%s cooldev1=%s cooldev2=%s ",
+			g_bind0, g_bind1, g_bind2);
+
+		mtktscharger_dprintk("cooldev3=%s cooldev4=%s ",
+			g_bind3, g_bind4);
+
+		mtktscharger_dprintk(
+			"cooldev5=%s cooldev6=%s cooldev7=%s cooldev8=%s cooldev9=%s\n",
 			g_bind5, g_bind6, g_bind7, g_bind8, g_bind9);
 
 		for (i = 0; i < num_trip; i++)
@@ -369,23 +374,32 @@ static ssize_t mtktscharger_write(struct file *file, const char __user *buffer, 
 
 		interval = ptr_mtktscharger_data->time_msec / 1000;
 
-		mtktscharger_dprintk("[mtktscharger_write] trip_0_temp=%d,trip_1_temp=%d,
-			trip_2_temp=%d,trip_3_temp=%d,",
-			trip_temp[0], trip_temp[1], trip_temp[2], trip_temp[3]);
-		mtktscharger_dprintk("trip_4_temp=%d,trip_5_temp=%d,trip_6_temp=%d,
-			trip_7_temp=%d,trip_8_temp=%d,",
-			trip_temp[4], trip_temp[5], trip_temp[6], trip_temp[7], trip_temp[8]);
-		mtktscharger_dprintk("trip_9_temp=%d,time_ms=%d\n", trip_temp[9], interval * 1000);
+		mtktscharger_dprintk("%s trip_0_temp=%d trip_1_temp=%d ",
+					__func__, trip_temp[0], trip_temp[1]);
 
-		mtktscharger_dprintk("[mtktscharger_write] mtktscharger_register_thermal\n");
+		mtktscharger_dprintk("trip_2_temp=%d trip_3_temp=%d ",
+						trip_temp[2], trip_temp[3]);
+
+		mtktscharger_dprintk(
+				"trip_4_temp=%d trip_5_temp=%d trip_6_temp=%d ",
+				trip_temp[4], trip_temp[5], trip_temp[6]);
+
+		mtktscharger_dprintk("trip_7_temp=%d trip_8_temp=%d ",
+						trip_temp[7], trip_temp[8]);
+
+		mtktscharger_dprintk("trip_9_temp=%d time_ms=%d\n",
+						trip_temp[9], interval * 1000);
+
+		mtktscharger_dprintk("mtktscharger_register_thermal\n");
 		mtktscharger_register_thermal();
 		up(&sem_mutex);
 		kfree(ptr_mtktscharger_data);
 		return count;
 	}
 
-	mtktscharger_dprintk("[mtktscharger_write] bad argument\n");
+	mtktscharger_dprintk("%s bad argument\n", __func__);
 	kfree(ptr_mtktscharger_data);
+
 	return -EINVAL;
 }
 

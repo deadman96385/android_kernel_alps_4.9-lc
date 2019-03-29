@@ -16,82 +16,34 @@ MTK_PLATFORM := $(subst ",,$(CONFIG_MTK_PLATFORM))
 subdir-ccflags-y += -Werror -I$(srctree)/drivers/misc/mediatek/include
 subdir-ccflags-y += -Werror -I$(srctree)/drivers/misc/mediatek/include/mt-plat/$(MTK_PLATFORM)/include
 subdir-ccflags-y += -Werror -I$(srctree)/drivers/misc/mediatek/include/mt-plat
-subdir-ccflags-y += -Werror -I$(srctree)/drivers/misc/mediatek/usb_c/tcpc/inc/
+subdir-ccflags-y += -Werror -I$(srctree)/drivers/misc/mediatek/pmic/include
 
-obj-$(CONFIG_MTK_PUMP_EXPRESS_PLUS_SUPPORT) += mtk_pep_intf.o
-obj-$(CONFIG_MTK_PUMP_EXPRESS_PLUS_20_SUPPORT) += mtk_pep20_intf.o
+ifneq ($(CONFIG_FPGA_EARLY_PORTING),y)
+ifeq ($(CONFIG_MTK_PMIC_COMMON),y)
+ifeq ($(CONFIG_MTK_GAUGE_VERSION),30)
+	obj-y += battery/
+endif
+endif
+endif
 
-ifeq ($(CONFIG_MTK_GAUGE_VERSION),20)
-	obj-$(CONFIG_MTK_SMART_BATTERY) += battery_meter_fg_20.o battery_common_fg_20.o
-else
+ifeq ($(CONFIG_MTK_GAUGE_VERSION),30)
+	obj-$(CONFIG_MTK_CHARGER) += charger/
+	obj-y += misc/
+else ifeq ($(CONFIG_MTK_GAUGE_VERSION),20)
 	obj-$(CONFIG_MTK_SMART_BATTERY) += battery_meter.o battery_common.o
 endif
 
-
-ifeq ($(CONFIG_MTK_FAN5402_SUPPORT),y)
-	obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-else ifeq ($(CONFIG_MTK_FAN5405_SUPPORT),y)
-	obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
+ifeq ($(CONFIG_MTK_GAUGE_VERSION),30)
+	#nothing
 else
 	ifeq ($(CONFIG_MTK_SWCHR_SUPPORT),y)
-			obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
+		obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
+	else ifeq ($(CONFIG_MTK_BQ24196_SUPPORT),y)
+		obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
+	else ifeq ($(CONFIG_MTK_BQ24296_SUPPORT),y)
+		obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
 	else
-		ifeq ($(CONFIG_MTK_BQ24158_SUPPORT),y)
-			obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-		else
-			ifeq ($(CONFIG_MTK_BQ24196_SUPPORT),y)
-				obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-			else
-				ifeq ($(CONFIG_MTK_BQ24296_SUPPORT),y)
-					obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-				else
-					ifeq ($(CONFIG_MTK_NCP1851_SUPPORT),y)
-						obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-					else
-						ifeq ($(CONFIG_MTK_NCP1854_SUPPORT),y)
-							obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-						else
-							ifeq ($(CONFIG_MTK_BQ24160_SUPPORT),y)
-								obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-							else
-								ifeq ($(CONFIG_MTK_BQ24157_SUPPORT),y)
-									obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-								else
-									ifeq ($(CONFIG_MTK_BQ24250_SUPPORT),y)
-										obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-									else
-										ifeq ($(CONFIG_MTK_BQ24261_SUPPORT),y)
-											obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-										else
-											ifeq ($(CONFIG_MTK_RT9536_SUPPORT),y)
-												obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-											else
-												ifeq ($(CONFIG_MTK_BQ25896_SUPPORT),y)
-													obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-												else
-													ifeq ($(CONFIG_MTK_BQ25898_DUAL_SUPPORT),y)
-														obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-													else
-														ifeq ($(CONFIG_MTK_RT9466_SUPPORT),y)
-															obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-														else
-															ifeq ($(CONFIG_RT5081A_PMU_CHARGER), y)
-																obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o
-															else
-																obj-$(CONFIG_MTK_SMART_BATTERY) += linear_charging.o
-															endif
-														endif
-													endif
-												endif
-											endif
-										endif
-									endif
-								endif
-							endif
-						endif
-					endif
-				endif
-			endif
-		endif
+		obj-$(CONFIG_MTK_SMART_BATTERY) += linear_charging.o
 	endif
 endif
+

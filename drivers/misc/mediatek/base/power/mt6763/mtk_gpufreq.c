@@ -52,7 +52,7 @@
 */
 #include "mt-plat/upmu_common.h"
 #include "mt-plat/sync_write.h"
-#include "mt-plat/mtk_pmic_wrap.h"
+#include "mach/mtk_pmic_wrap.h"
 
 #include "mach/mtk_fhreg.h"
 #include "mach/mtk_freqhopping.h"

@@ -71,9 +71,7 @@ typedef enum {
 } kal_bool;
 #endif
 
-#ifndef BOOL
-typedef unsigned char  BOOL;
-#endif
+
 
 
 typedef struct {

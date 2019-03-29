@@ -609,9 +609,9 @@ static int mt_freqhopping_init(void)
 		return -EINVAL;
 	}
 
-	ret = g_p_fh_hal_drv->mt_fh_hal_init();
-	if (ret != 0)
-		return ret;
+	/* ret = */g_p_fh_hal_drv->mt_fh_hal_init();
+	/* if (ret != 0)
+		return ret;*/
 
 	g_fh_drv_pll = g_p_fh_hal_drv->fh_pll;
 	g_drv_pll_count = g_p_fh_hal_drv->pll_cnt;

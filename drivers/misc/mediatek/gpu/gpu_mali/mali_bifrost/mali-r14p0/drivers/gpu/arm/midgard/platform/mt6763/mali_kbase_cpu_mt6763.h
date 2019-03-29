@@ -1,15 +1,11 @@
 /*
- * Copyright (C) 2016 MediaTek Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See http://www.gnu.org/licenses/gpl-2.0.html for more details.
+ * (C) COPYRIGHT 2012-2013, 2015-2016 ARM Limited. All rights reserved.
  */
+
+
+
+
+
 #ifndef _KBASE_CPU_VEXPRESS_H_
 #define _KBASE_CPU_VEXPRESS_H_
 

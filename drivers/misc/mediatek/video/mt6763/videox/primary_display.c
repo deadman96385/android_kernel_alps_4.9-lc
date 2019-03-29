@@ -99,7 +99,6 @@
 #include "disp_partial.h"
 #include "ddp_aal.h"
 #include "ddp_gamma.h"
-#include <linux/wakelock.h>
 
 #define MMSYS_CLK_LOW (0)
 #define MMSYS_CLK_HIGH (1)
@@ -4702,7 +4701,7 @@ int primary_display_get_lcm_index(void)
 
 static int check_switch_lcm_mode_for_debug(void)
 {
-	static LCM_DSI_MODE_CON vdo_mode_type;
+	static enum LCM_DSI_MODE_CON vdo_mode_type;
 	struct LCM_PARAMS *lcm_param_cv = NULL;
 
 	if (lcm_mode_status == 0)
@@ -5041,7 +5040,7 @@ int primary_display_ipoh_restore(void)
 	primary_display_esd_check_enable(0);
 	DISPCHECK("ESD check stop[end]\n");
 	if (pgc->cmdq_handle_trigger != NULL) {
-		struct TaskStruct *pTask = pgc->cmdq_handle_trigger->pRunningTask;
+		struct TaskStruct *pTask = pgc->cmdq_handle_trigger->running_task;
 
 		if (pTask != NULL) {
 			DISPCHECK("[Primary_display]display cmdq trigger loop stop[begin]\n");
@@ -8367,7 +8366,7 @@ int primary_display_resolution_test(void)
 	unsigned int h_backup = 0;
 	int dst_width = 0;
 	int dst_heigh = 0;
-	LCM_DSI_MODE_CON dsi_mode_backup = primary_display_is_video_mode();
+	enum LCM_DSI_MODE_CON dsi_mode_backup = primary_display_is_video_mode();
 
 	memset((void *)&data_config2, 0, sizeof(data_config2));
 	lcm_param2 = NULL;

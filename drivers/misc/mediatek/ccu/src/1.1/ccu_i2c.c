@@ -189,6 +189,61 @@ int ccu_i2c_set_channel(enum CCU_I2C_CHANNEL channel)
 		return -EFAULT;
 }
 
+int ccu_i2c_frame_reset(void)
+{
+	struct i2c_client *pClient = NULL;
+	struct mt_i2c *i2c;
+
+	pClient = getCcuI2cClient();
+	i2c = i2c_get_adapdata(pClient->adapter);
+
+	/* ccu_reset_i2c_apdma(i2c);*/
+
+	/*--todo:remove dump log on production*/
+	/*ccu_record_i2c_dma_info(i2c);*/
+
+	i2c_writew(I2C_FIFO_ADDR_CLR, i2c, OFFSET_FIFO_ADDR_CLR);
+	i2c_writew(I2C_HS_NACKERR | I2C_ACKERR | I2C_TRANSAC_COMP, i2c, OFFSET_INTR_MASK);
+
+	/**/
+	mb();
+	/*--todo:remove dump log on production*/
+	/*ccu_i2c_dump_info(i2c);*/
+
+	return 0;
+}
+int ccu_trigger_i2c(int transac_len, MBOOL do_dma_en)
+{
+	struct i2c_client *pClient = NULL;
+	struct mt_i2c *i2c;
+
+	u8 *dmaBufVa;
+
+	pClient = getCcuI2cClient();
+	i2c = i2c_get_adapdata(pClient->adapter);
+
+	dmaBufVa = i2c->dma_buf.vaddr;
+
+	/*LOG_DBG("i2c_dma_buf_content: %x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x\n",*/
+	/*  dmaBufVa[0],dmaBufVa[1],dmaBufVa[2],dmaBufVa[3],dmaBufVa[4],dmaBufVa[5],*/
+	/*dmaBufVa[18],dmaBufVa[19],dmaBufVa[20],dmaBufVa[21],dmaBufVa[22],dmaBufVa[23]);*/
+
+	/*set i2c transaction length & enable apdma*/
+	i2c_writew(transac_len, i2c, OFFSET_TRANSAC_LEN);
+
+	/*ccu_record_i2c_dma_info(i2c);*/
+
+	i2c_writel_dma(I2C_DMA_START_EN, i2c, OFFSET_EN);
+
+	/*ccu_i2c_dump_info(i2c);*/
+
+	/*trigger i2c start from n3d_a*/
+	ccu_trigger_i2c_hw(g_ccuI2cChannel, transac_len, do_dma_en);
+
+	/*ccu_i2c_dump_info(i2c);*/
+
+	return 0;
+}
 int ccu_i2c_buf_mode_init(unsigned char i2c_write_id, int transfer_len)
 {
 	if (ccu_i2c_buf_mode_en(1) == -1) {

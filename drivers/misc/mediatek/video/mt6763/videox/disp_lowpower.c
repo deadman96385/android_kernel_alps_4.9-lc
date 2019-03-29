@@ -1172,7 +1172,7 @@ void primary_display_idlemgr_kick(const char *source, int need_lock)
 void enter_share_sram(void)
 {
 	/* 1. register call back first */
-	cmdqCoreSetResourceCallback(CMDQ_SYNC_RESOURCE_WROT0,
+	cmdq_mdp_set_resource_callback(CMDQ_SYNC_RESOURCE_WROT0,
 		_acquire_wrot_resource, _release_wrot_resource);
 	mmprofile_log_ex(ddp_mmp_get_events()->share_sram, MMPROFILE_FLAG_PULSE, 0, 1);
 
@@ -1183,7 +1183,7 @@ void enter_share_sram(void)
 void leave_share_sram(void)
 {
 	/* 1. unregister call back */
-	cmdqCoreSetResourceCallback(CMDQ_SYNC_RESOURCE_WROT0, NULL, NULL);
+	cmdq_mdp_set_resource_callback(CMDQ_SYNC_RESOURCE_WROT0, NULL, NULL);
 	mmprofile_log_ex(ddp_mmp_get_events()->share_sram, MMPROFILE_FLAG_PULSE, 0, 0);
 
 	/* 2. try to release share sram */

@@ -34,6 +34,17 @@
 #define EINVALID 6
 #define EEXCESS4GADDR 7
 
+#define PWM_DEBUG
+#ifdef PWM_DEBUG
+#define PWMDBG(fmt, args ...)	pr_debug("pwm %5d: " fmt, __LINE__, ##args)
+#else
+#define PWMDBG(fmt, args ...)
+#endif
+
+#define PWMINFO(fmt, args ...)	pr_info("pwm[%s@%5d]: " fmt, __func__, __LINE__, ##args)
+
+#define PWMMSG(fmt, args ...)	pr_debug(fmt, ##args)
+
 #define PWM_DEVICE "mt-pwm"
 
 #if !defined(CONFIG_MTK_LEGACY)
