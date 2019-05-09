@@ -1,9 +1,16 @@
 /*
- * Mediatek's mt6763 SoC device tree source
+ * Mediatek's MT6763 SoC device tree source
  *
- * Copyright (c) 2013 MediaTek Co., Ltd.
- *              http://www.mediatek.com
+ * Copyright (C) 2015 MediaTek Inc.
  *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See http://www.gnu.org/licenses/gpl-2.0.html for more details.
  */
 #include <dt-bindings/clock/mt6763-clk.h>
 #include <dt-bindings/interrupt-controller/arm-gic.h>
@@ -26,10 +33,12 @@
 
 	/* chosen */
 	chosen: chosen {
-		bootargs = "console=tty0 console=ttyMT3,921600n1 \
-vmalloc=496M slub_max_order=0 slub_debug=OFZPU \
-androidboot.hardware=mt6763 maxcpus=8 \
-firmware_class.path=/vendor/firmware loop.max_part=7";
+		bootargs = "console=tty0 console=ttyMT3,921600n1 vmalloc=496M \
+				slub_debug=OFZPU page_owner=on \
+				swiotlb=noforce androidboot.hardware=mt6763 \
+				maxcpus=8 loop.max_part=7 \
+				firmware_class.path=/vendor/firmware";
+		kaslr-seed = <0 0>;
 	};
 
 	chipid@08000000 {
