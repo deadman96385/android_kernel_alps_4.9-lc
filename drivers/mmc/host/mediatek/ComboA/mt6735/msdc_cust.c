@@ -467,6 +467,29 @@ void msdc_clk_enable_and_stable(struct msdc_host *host)
 	msdc_clk_stable(host, mode, div, 0);
 }
 
+extern spinlock_t msdc_cg_lock;
+extern unsigned int msdc_cg_cnt;
+/* do we need sync object or not */
+/* MT_CG_PERI_MSDC30_0="13+32" defined in mt_clkmgr2.h */
+void msdc_clk_status(int *status)
+{
+	int g_clk_gate = 0;
+	int i = 0;
+	unsigned long flags;
+
+	for (i = 0; i < HOST_MAX_NUM; i++) {
+		if (!mtk_msdc_host[i])
+			continue;
+
+		spin_lock_irqsave(&msdc_cg_lock, flags);
+		if (msdc_cg_cnt > 0)
+
+			g_clk_gate |= 1 << ((i) + (MT_CG_PERI_MSDC30_0-32));
+
+		spin_unlock_irqrestore(&msdc_cg_lock, flags);
+	}
+	*status = g_clk_gate;
+}
 
 #endif /*if !defined(FPGA_PLATFORM)*/
 
