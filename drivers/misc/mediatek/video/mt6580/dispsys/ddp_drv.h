@@ -110,7 +110,9 @@ enum DISP_INTERLACE_FORMAT{
 #define DISP_IOCTL_AAL_INIT_REG    _IOW(DISP_IOCTL_MAGIC, 18 , struct DISP_AAL_INITREG)
 #define DISP_IOCTL_SET_GAMMALUT    _IOW(DISP_IOCTL_MAGIC, 23 , struct DISP_GAMMA_LUT_T)
 #define DISP_IOCTL_SET_CCORR       _IOW(DISP_IOCTL_MAGIC, 24 , struct DISP_CCORR_COEF_T)
-
+/* Get color transform support */
+#define DISP_IOCTL_SUPPORT_COLOR_TRANSFORM \
+	_IOW(DISP_IOCTL_MAGIC, 112, struct DISP_COLOR_TRANSFORM)
 
 /* Add for AAL control - E */
 /*-----------------------------------------------------------------------------
