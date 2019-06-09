@@ -53,6 +53,7 @@
 	#define BAT_TASK_PERIOD                     (10)
 #endif
 #define g_free_bat_temp					(100)0	/* 1 s */
+extern bool gDisableGM;
 
 /*****************************************************************************
  *  BATTERY Protection
@@ -175,7 +176,9 @@ typedef enum {
 } kal_bool;
 #endif
 
-
+#ifndef BOOL
+typedef unsigned char  BOOL;
+#endif
 
 #ifndef FALSE
   #define FALSE (0)

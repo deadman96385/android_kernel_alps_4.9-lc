@@ -15,7 +15,7 @@
 #define __FREQHOPPING_DRV_H
 
 #include <linux/proc_fs.h>
-#include "mach/mtk_freqhopping.h"
+#include "mach/mt_freqhopping.h"
 
 /* move to /mediatek/platform/prj, can config. by prj. */
 /* #define MEMPLL_SSC 0 */

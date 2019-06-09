@@ -27,7 +27,7 @@
 #include <linux/writeback.h>
 #include <asm/uaccess.h>
 #include "mt-plat/mtk_thermal_monitor.h"
-#include "mach/mtk_thermal.h"
+#include "mach/mt_thermal.h"
 #include <linux/uidgid.h>
 #include <linux/slab.h>
 #if (CONFIG_MTK_GAUGE_VERSION == 30)

@@ -25,7 +25,7 @@
 
 #include "spm_v3/mtk_sleep.h"
 
-#elif defined(CONFIG_MACH_MT6763) || defined(CONFIG_MACH_MT6739) || defined(CONFIG_MACH_MT6771)
+#elif defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6763) || defined(CONFIG_MACH_MT6739) || defined(CONFIG_MACH_MT6771)
 
 #include "spm_v4/mtk_sleep.h"
 

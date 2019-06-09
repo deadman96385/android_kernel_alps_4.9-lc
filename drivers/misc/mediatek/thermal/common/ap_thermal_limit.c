@@ -21,18 +21,18 @@
 #include <linux/seq_file.h>
 #include <linux/time.h>
 #include <linux/jiffies.h>
-#include <mach/mtk_thermal.h> /* needed by tscpu_settings.h */
+#include <mach/mt_thermal.h> /* needed by tscpu_settings.h */
 #include <tscpu_settings.h> /* needed by tscpu_warn */
 #include <ap_thermal_limit.h>
 #include <mt-plat/aee.h>
 
 
 #if defined(ATM_USES_PPM)
-#include "mach/mtk_ppm_api.h"
+#include "mach/mt_ppm_api.h"
 #else
 #include "mt_cpufreq.h"
 #endif
-#include "mtk_gpufreq.h"
+#include "mt_gpufreq.h"
 
 /*=============================================================
  * Local variable definition

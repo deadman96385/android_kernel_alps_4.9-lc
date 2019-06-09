@@ -85,7 +85,7 @@
 #include <mt-plat/charging.h>
 #include <mt-plat/battery_meter.h>
 #include <mt-plat/battery_common.h>
-#include <mach/mtk_battery_meter.h>
+#include <mach/mt_battery_meter.h>
 #include <mach/mt_charging.h>
 #include <mach/mt_pmic.h>
 

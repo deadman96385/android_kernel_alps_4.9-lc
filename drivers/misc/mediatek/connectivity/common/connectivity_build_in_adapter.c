@@ -103,13 +103,13 @@ EXPORT_SYMBOL(connectivity_export_tracing_record_cmdline);
 
 unsigned int connectivity_export_slp_get_wake_reason(void)
 {
-	return slp_get_wake_reason();
+	return 1; //slp_get_wake_reason();
 }
 EXPORT_SYMBOL(connectivity_export_slp_get_wake_reason);
 
 unsigned int connectivity_export_spm_get_last_wakeup_src(void)
 {
-	return spm_get_last_wakeup_src();
+	return 1; //spm_get_last_wakeup_src();
 }
 EXPORT_SYMBOL(connectivity_export_spm_get_last_wakeup_src);
 

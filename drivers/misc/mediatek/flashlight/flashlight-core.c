@@ -40,7 +40,7 @@
 #include "mach/upmu_sw.h" /* PT */
 
 #ifdef CONFIG_MTK_FLASHLIGHT_DLPT
-#include "mtk_pbm.h" /* DLPT */
+#include "mt_pbm.h" /* DLPT */
 #endif
 
 

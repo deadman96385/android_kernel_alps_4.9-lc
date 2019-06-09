@@ -31,7 +31,7 @@
 #include <linux/types.h>
 #include <linux/sched.h>
 
-#include <mach/mtk_rtc_hw.h>
+#include <mach/mt_rtc_hw.h>
 #include <mach/mtk_rtc_hal.h>
 #include <mtk_rtc_hal_common.h>
 #include <mt_pmic_wrap.h>
@@ -133,6 +133,24 @@ void rtc_set_writeif(bool enable)
 		rtc_write(RTC_PROT, 0);
 		rtc_write_trigger();
 	}
+}
+
+void rtc_bbpu_pwrdown(bool auto_boot)
+{
+	u16 bbpu;
+
+#ifdef CONFIG_MTK_GPUREGULATOR_INTF
+	/* Used for RT5735A SDA low workaround */
+	if (rt_is_hw_exist())
+		rt_i2c7_switch_gpio_shutdown();
+#endif
+
+	if (auto_boot)
+		bbpu = RTC_BBPU_KEY | RTC_BBPU_AUTO | RTC_BBPU_PWREN;
+	else
+		bbpu = RTC_BBPU_KEY | RTC_BBPU_PWREN;
+	rtc_write(RTC_BBPU, bbpu);
+	rtc_write_trigger();
 }
 
 void hal_rtc_set_spare_register(enum rtc_spare_enum cmd, u16 val)
@@ -296,6 +314,25 @@ void hal_rtc_read_rg(void)
 }
 
 #ifndef USER_BUILD_KERNEL
+static void rtc_lpd_reset(void)
+{
+	u16 con;
+
+	con = rtc_read(RTC_CON) | RTC_CON_LPEN;
+	con &= ~RTC_CON_LPRST;
+	rtc_write(RTC_CON, con);
+	rtc_write_trigger();
+
+	con |= RTC_CON_LPRST;
+	rtc_write(RTC_CON, con);
+	rtc_write_trigger();
+
+	con &= ~RTC_CON_LPRST;
+	rtc_write(RTC_CON, con);
+	rtc_write_trigger();
+
+}
+
 void rtc_lp_exception(void)
 {
 	u16 bbpu, irqsta, irqen, osc32;
@@ -312,7 +349,7 @@ void rtc_lp_exception(void)
 	sec1 = rtc_read(RTC_TC_SEC);
 	/*mdelay(2000);*/
 	sec2 = rtc_read(RTC_TC_SEC);
-
+	rtc_lpd_reset();
 	hal_rtc_xfatal("!!! 32K WAS STOPPED !!!\n"
 		       "RTC_BBPU      = 0x%x\n"
 		       "RTC_IRQ_STA   = 0x%x\n"

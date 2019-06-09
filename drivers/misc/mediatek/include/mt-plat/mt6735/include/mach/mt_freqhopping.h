@@ -131,11 +131,12 @@ extern int DFS_APDMA_Enable(void);
 extern void DFS_APDMA_dummy_read_preinit(void);
 extern void DFS_APDMA_dummy_read_deinit(void);
 
+/*
 #define FH_BUG_ON(x) \
 do {    \
 		if ((x)) \
 			pr_err("BUGON %s:%d %s:%d\n", __func__, __LINE__, current->comm, current->pid); \
 } while (0)
-
+*/
 
 #endif				/* !__MT_FREQHOPPING_H__ */

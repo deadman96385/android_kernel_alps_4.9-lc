@@ -77,13 +77,13 @@
 #include <mt-plat/mt_boot.h>
 #include <mt-plat/mtk_rtc.h>
 
-#include <mach/mtk_charging.h>
+#include <mach/mt_charging.h>
 #include <mt-plat/upmu_common.h>
 
 #include <mt-plat/charging.h>
  #include <mt-plat/battery_meter.h>
 #include <mt-plat/battery_common.h>
-#include <mach/mtk_battery_meter.h>
+#include <mach/mt_battery_meter.h>
 #include <mach/mt_charging.h>
 #include <mach/mt_pmic.h>
 #if defined(CONFIG_MACH_MT6735) || defined(CONFIG_MACH_MT6735M) || defined(CONFIG_MACH_MT6753)

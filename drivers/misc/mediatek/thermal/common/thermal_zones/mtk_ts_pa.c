@@ -29,11 +29,11 @@
 #include <asm/string.h>
 #include <linux/spinlock.h>
 #include "mt-plat/mtk_thermal_monitor.h"
-#include "mach/mtk_thermal.h"
+#include "mach/mt_thermal.h"
 #include "mt-plat/mtk_mdm_monitor.h"
 #include <linux/uidgid.h>
 #include <linux/slab.h>
-#include <mtk_ts_setting.h>
+#include <mt_ts_setting.h>
 
 #if Feature_Thro_update
 /* For using net dev + */

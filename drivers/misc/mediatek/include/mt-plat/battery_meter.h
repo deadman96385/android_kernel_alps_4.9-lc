@@ -15,7 +15,7 @@
 #define _BATTERY_METER_H
 
 #include <linux/platform_device.h>
-#include <mach/mtk_battery_meter.h>
+#include <mach/mt_battery_meter.h>
 #include <mt-plat/charging.h>
 #if 0
 #include <mt-plat/mt_typedefs.h>
@@ -71,8 +71,9 @@ typedef enum {
 } kal_bool;
 #endif
 
-
-
+#ifndef BOOL
+typedef unsigned char  BOOL;
+#endif
 
 typedef struct {
 	signed int BatteryTemp;

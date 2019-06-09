@@ -406,7 +406,7 @@ void rtc_bbpu_power_down(void)
 	unsigned long flags;
 
 	spin_lock_irqsave(&rtc_lock, flags);
-	hal_rtc_bbpu_pwdn(false);
+	hal_rtc_bbpu_pwdn();
 	spin_unlock_irqrestore(&rtc_lock, flags);
 }
 
