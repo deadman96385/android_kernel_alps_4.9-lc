@@ -76,7 +76,7 @@ BATTERY_METER_CONTROL battery_meter_ctrl = NULL;
 kal_bool gFG_Is_Charging = KAL_FALSE;
 signed int g_auxadc_solution = 0;
 unsigned int g_spm_timer = 600;
-kal_bool bat_spm_timeout = false;
+BOOL bat_spm_timeout = false;
 unsigned int _g_bat_sleep_total_time = NORMAL_WAKEUP_PERIOD;
 #ifdef MTK_ENABLE_AGING_ALGORITHM
 unsigned int suspend_time = 0;
