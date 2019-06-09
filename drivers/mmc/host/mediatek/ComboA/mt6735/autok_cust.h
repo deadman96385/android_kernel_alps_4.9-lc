@@ -163,14 +163,14 @@ struct AUTOK_PLAT_FUNC {
 		autok_para_tx.chip_hw_ver = mt_get_chip_sw_ver(); \
 		autok_para_tx.msdc0_hs400_clktx = 0; \
 		autok_para_tx.msdc0_hs400_cmdtx = 0; \
-		autok_para_tx.msdc0_hs400_dat0tx = 0; \
-		autok_para_tx.msdc0_hs400_dat1tx = 0; \
-		autok_para_tx.msdc0_hs400_dat2tx = 0; \
-		autok_para_tx.msdc0_hs400_dat3tx = 0; \
-		autok_para_tx.msdc0_hs400_dat4tx = 0; \
-		autok_para_tx.msdc0_hs400_dat5tx = 0; \
-		autok_para_tx.msdc0_hs400_dat6tx = 0; \
-		autok_para_tx.msdc0_hs400_dat7tx = 0; \
+		autok_para_tx.msdc0_hs400_dat0tx = 2; \
+		autok_para_tx.msdc0_hs400_dat1tx = 2; \
+		autok_para_tx.msdc0_hs400_dat2tx = 2; \
+		autok_para_tx.msdc0_hs400_dat3tx = 2; \
+		autok_para_tx.msdc0_hs400_dat4tx = 2; \
+		autok_para_tx.msdc0_hs400_dat5tx = 2; \
+		autok_para_tx.msdc0_hs400_dat6tx = 2; \
+		autok_para_tx.msdc0_hs400_dat7tx = 2; \
 		autok_para_tx.msdc0_hs400_txskew = 0; \
 		autok_para_tx.msdc0_ddr_ckd = 1; \
 		autok_para_tx.msdc1_ddr_ckd = 0; \
@@ -207,18 +207,18 @@ struct AUTOK_PLAT_FUNC {
 	do { \
 		autok_para_rx.chip_hw_ver = mt_get_chip_sw_ver(); \
 		autok_para_rx.ckgen_val = 0; \
-		autok_para_rx.latch_en_cmd_hs400 = 0; \
+		autok_para_rx.latch_en_cmd_hs400 = 3; \
 		autok_para_rx.latch_en_crc_hs400 = 0; \
 		autok_para_rx.latch_en_cmd_hs200 = 2; \
 		autok_para_rx.latch_en_crc_hs200 = 2; \
 		autok_para_rx.latch_en_cmd_ddr208 = 0; \
 		autok_para_rx.latch_en_crc_ddr208 = 0; \
-		autok_para_rx.latch_en_cmd_sd_sdr104 = 1; \
-		autok_para_rx.latch_en_crc_sd_sdr104 = 1; \
+		autok_para_rx.latch_en_cmd_sd_sdr104 = 2; \
+		autok_para_rx.latch_en_crc_sd_sdr104 = 2; \
 		autok_para_rx.latch_en_cmd_sdio_sdr104 = 2; \
 		autok_para_rx.latch_en_crc_sdio_sdr104 = 2; \
-		autok_para_rx.latch_en_cmd_hs = 1; \
-		autok_para_rx.latch_en_crc_hs = 1; \
+		autok_para_rx.latch_en_cmd_hs = 2; \
+		autok_para_rx.latch_en_crc_hs = 2; \
 		autok_para_rx.cmd_ta_val = 0; \
 		autok_para_rx.crc_ta_val = 0; \
 		autok_para_rx.busy_ma_val = 1; \
@@ -242,13 +242,13 @@ struct AUTOK_PLAT_FUNC {
 		autok_para_rx.old_stop_sdr104 = 0; \
 		autok_para_rx.old_water_hs = 8; \
 		autok_para_rx.old_stop_hs = 0; \
-		autok_para_rx.read_dat_cnt_hs400 = 0; \
+		autok_para_rx.read_dat_cnt_hs400 = 7; \
 		autok_para_rx.read_dat_cnt_ddr208 = 0; \
-		autok_para_rx.end_bit_chk_cnt_hs400 = 0; \
+		autok_para_rx.end_bit_chk_cnt_hs400 = 15; \
 		autok_para_rx.end_bit_chk_cnt_ddr208 = 0; \
-		autok_para_rx.latchck_switch_cnt_hs400 = 0; \
+		autok_para_rx.latchck_switch_cnt_hs400 = 7; \
 		autok_para_rx.latchck_switch_cnt_ddr208 = 0; \
-		autok_para_rx.ds_dly3_hs400 = 0; \
+		autok_para_rx.ds_dly3_hs400 = 20; \
 		autok_para_rx.ds_dly3_ddr208 = 0; \
 	} while (0)
 

@@ -73,7 +73,6 @@ int sd_execute_dvfs_autok(struct msdc_host *host, u32 opcode)
 	return ret;
 }
 
-
 int emmc_execute_dvfs_autok(struct msdc_host *host, u32 opcode)
 {
 	int ret = 0;
@@ -83,9 +82,7 @@ int emmc_execute_dvfs_autok(struct msdc_host *host, u32 opcode)
 	res = host->autok_res[vcore];
 
 	if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200) {
-#ifdef MSDC_HQA
-		msdc_HQA_set_voltage(host);
-#endif
+
 		if (opcode == MMC_SEND_STATUS) {
 			pr_notice("[AUTOK]eMMC HS200 Tune CMD only\n");
 			ret = hs200_execute_tuning_cmd(host, res);
@@ -94,6 +91,21 @@ int emmc_execute_dvfs_autok(struct msdc_host *host, u32 opcode)
 			ret = hs200_execute_tuning(host, res);
 		}
 
+		if (host->mmc->card &&
+				!(host->mmc->card->mmc_avail_type
+					& EXT_CSD_CARD_TYPE_HS400)) {
+			host->is_autok_done = 1;
+			complete(&host->autok_done);
+		}
+	} else if (host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
+
+		if (opcode == MMC_SEND_STATUS) {
+			pr_notice("[AUTOK]eMMC HS400 Tune CMD only\n");
+			ret = hs400_execute_tuning_cmd(host, res);
+		} else {
+			pr_notice("[AUTOK]eMMC HS400 Tune\n");
+			ret = hs400_execute_tuning(host, res);
+		}
 		host->is_autok_done = 1;
 		complete(&host->autok_done);
 	}
@@ -134,7 +146,6 @@ int emmc_autok(void)
 		pr_notice("eMMC 1st autok not done\n");
 		return -1;
 	}
-
 	pr_info("emmc autok\n");
 
 	return 0;

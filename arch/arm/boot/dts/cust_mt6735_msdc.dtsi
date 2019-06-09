@@ -18,10 +18,8 @@
 	bus-width = <8>;
 	max-frequency = <200000000>;
 	cap-mmc-highspeed;
-#if 0
 	mmc-hs200-1_8v;
 	mmc-hs400-1_8v;
-#endif
 	no-sd;
 	no-sdio;
 	non-removable;

@@ -54,15 +54,6 @@
 #define REG_VEMC_VOSEL 			MT6328_PMIC_RG_VEMC_3V3_VOSEL_ADDR
 #define REG_VEMC_EN             MT6328_PMIC_RG_VEMC_3V3_EN_ADDR
 
-
-#if 0
-5049#define MT6328_PMIC_RG_VEMC_3V3_EN_MASK                       0x1
-5050#define MT6328_PMIC_RG_VEMC_3V3_EN_SHIFT                      1
-
-5666#define MT6328_PMIC_RG_VEMC_3V3_VOSEL_ADDR                    MT6328_ADLDO_ANA_CON11
-5667#define MT6328_PMIC_RG_VEMC_3V3_VOSEL_MASK                    0x3
-5668#define MT6328_PMIC_RG_VEMC_3V3_VOSEL_SHIFT                   4
-#endif
 #define REG_VMC_VOSEL           MT6328_VMC_CON1
 #define REG_VMC_EN              MT6328_VMC_CON0
 
@@ -100,8 +91,9 @@
 /* Section 3: Clock                                           */
 /**************************************************************/
 
+
 #define MSDCPLL_FREQ            800000000
-#define MSDC_CLKSRC_DEFAULT      2         //For emmc is 400MHZ, for SD is 200MHZ
+#define MSDC_CLKSRC_DEFAULT2      2
 
 #define MSDC0_CLKSRC_0        	 26000000
 #define MSDC0_CLKSRC_1          800000000
@@ -166,6 +158,7 @@
 #define MSDC0_DAT2_PINMUX_ADDR  MSDC0_GPIO_MODE18_MWR_ADDR
 #define MSDC0_DAT2_PINMUX_BITS  (0x7 << 22)
 
+
 #define MSDC0_DAT3_PINMUX_ADDR  MSDC0_GPIO_MODE18_MWR_ADDR
 #define MSDC0_DAT3_PINMUX_BITS  (0x7 << 25)
 
@@ -205,6 +198,7 @@
 #define MSDC1_DAT1_PINMUX_ADDR  MSDC0_GPIO_MODE17_MWR_ADDR
 #define MSDC1_DAT1_PINMUX_BITS  (0x7 << 28)
 
+
 #define MSDC1_DAT2_PINMUX_ADDR  MSDC0_GPIO_MODE18_MWR_ADDR
 #define MSDC1_DAT2_PINMUX_BITS  (0x7 << 0)
 
@@ -232,9 +226,11 @@
 #define MSDC0_SMT_ALL_MASK		(0x1f << 0)
 
 
+
 #define MSDC0_TDSEL_CFG_OFFSET  (0xD20)
 #define MSDC0_TDSEL_BASE        (MSDC0_IO_PAD_BASE + 0xD20)
 #define MSDC0_TDSEL_ALL_MASK    (0xFFFFF << 0)
+
 
 
 #define MSDC0_RDSEL_CFG_OFFSET  (0xD28)
@@ -318,6 +314,7 @@
 #define MAX_REQ_SZ              (512 * 65536)
 #else
 #define MAX_REQ_SZ              (512 * 1024)
+
 #endif
 
 #ifdef FPGA_PLATFORM

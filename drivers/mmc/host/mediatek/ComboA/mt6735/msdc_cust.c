@@ -89,17 +89,6 @@ static void __iomem *gpio_base;
 
 static void __iomem *infracfg_ao_base;
 static void __iomem *topckgen_base;
-
-#if 0
-void __iomem *gpio_reg_base;
-void __iomem *infracfg_ao_reg_base;
-void __iomem *infracfg_reg_base;
-void __iomem *pericfg_reg_base;
-void __iomem *emi_reg_base;
-void __iomem *toprgu_reg_base;
-void __iomem *apmixed_reg_base1;
-void __iomem *topckgen_reg_base;
-#endif
 #endif
 
 void __iomem *msdc_io_cfg_bases[HOST_MAX_NUM];
@@ -387,7 +376,7 @@ int msdc_get_ccf_clk_pointer(struct platform_device *pdev,
 	sprintf(name, "MSDC%d", host->id);
 
     if((host->id == 0) || (host->id == 1))
-		clkmux_sel(MT_MUX_MSDC30_0 - host->id, MSDC_CLKSRC_DEFAULT, name);
+		clkmux_sel(MT_MUX_MSDC30_0 - host->id, MSDC_CLKSRC_DEFAULT2, name);
 	else
 		pr_err("%s host id is out of range, id=%d\n",__func__, host->id);
 
@@ -409,38 +398,7 @@ void msdc_select_clksrc(struct msdc_host *host, int clksrc)
 }
 
 #include <linux/seq_file.h>
-#if 0
-#define MSDC_MSDCPLL_CON0_OFFSET				(0x240)
-#define MSDC_MSDCPLL_CON1_OFFSET				(0x244)
-#define MSDC_MSDCPLL_PWR_CON0_OFFSET			(0x24C)
-#define MSDC_CLK_CFG_2_OFFSET					(0x060)
-#define MSDC_CLK_CFG_3_OFFSET					(0x070)
-#define MSDC_PERI_PDN_STA0_OFFSET				(0x0018)
-void msdc_dump_clock_sts(struct msdc_host *host)
-{
-	if (!(apmixed_reg_base1 && topckgen_reg_base && pericfg_reg_base)) {
-		pr_err("apmixed_reg_base=%p,topckgen_reg_base=%p,clk_pericfg_base=%p\n",
-			apmixed_reg_base1, topckgen_reg_base, pericfg_reg_base);
-		return;
-	}
 
-	pr_err("MSDCPLL_PWR_CON0[0x%p][bit0~1 should be 2b'01]=0x%x\n",
-		(apmixed_reg_base1 + MSDC_MSDCPLL_PWR_CON0_OFFSET),
-		MSDC_READ32(apmixed_reg_base1 + MSDC_MSDCPLL_PWR_CON0_OFFSET));
-	pr_err("MSDCPLL_CON0    [0x%p][bit0 should be 1b'1]=0x%x\n",
-		(apmixed_reg_base1 + MSDC_MSDCPLL_CON0_OFFSET),
-		MSDC_READ32(apmixed_reg_base1 + MSDC_MSDCPLL_CON0_OFFSET));
-	pr_err("CLK_CFG_2       [0x%p][bit[31:24]should be 0x01]=0x%x\n",
-		(topckgen_reg_base + MSDC_CLK_CFG_2_OFFSET),
-		MSDC_READ32(topckgen_reg_base + MSDC_CLK_CFG_2_OFFSET));
-	pr_err("CLK_CFG_3       [0x%p][bit[15:0]should be 0x0202]=0x%x\n",
-		(topckgen_reg_base + MSDC_CLK_CFG_3_OFFSET),
-		MSDC_READ32(topckgen_reg_base + MSDC_CLK_CFG_3_OFFSET));
-	pr_err("PERI_PDN_STA0  [0x%p][bit13=msdc0, bit14=msdc1,0:on,1:off]=0x%x\n",
-		(pericfg_reg_base + MSDC_PERI_PDN_STA0_OFFSET),
-		MSDC_READ32(pericfg_reg_base + MSDC_PERI_PDN_STA0_OFFSET));
-}
-#endif
 static void msdc_dump_clock_sts_core(char **buff, unsigned long *size,
 	struct seq_file *m, struct msdc_host *host)
 {
@@ -550,7 +508,7 @@ POWER_OFF:
 	return 0;
 }
 
-#define MSDC_IOC_ITEMS     10
+#define MSDC_IOC_ITEMS     8
 static unsigned int msdc_ioconfg_reg_offsets[HOST_MAX_NUM][MSDC_IOC_ITEMS] = {
 	{
 		MSDC0_IES_CFG_OFFSET,
@@ -570,28 +528,6 @@ static unsigned int msdc_ioconfg_reg_offsets[HOST_MAX_NUM][MSDC_IOC_ITEMS] = {
 		MSDC1_RDSEL_CFG_OFFSET,
 		MSDC1_PUPD_CMD_CLK_DAT_MASK,
 		MSDC1_DRVING_OFFSET
-	}
-};
-
-static unsigned int msdc_ioconfg_reg_masks[HOST_MAX_NUM][MSDC_IOC_ITEMS] = {
-	{
-		MSDC0_IES_ALL_MASK,
-		MSDC0_SR_ALL_MASK,
-		MSDC0_SMT_ALL_MASK,
-		MSDC0_TDSEL_ALL_MASK,
-		MSDC0_RDSEL_ALL_MASK,
-		MSDC0_DRV_ALL_MASK,
-		MSDC0_PUPD_CMD_DSL_CLK_DAT04_MASK,
-		MSDC0_PUPD_DAT567_MASK
-	},
-	{
-		MSDC1_IES_ALL_MASK,
-		MSDC1_SR_ALL_MASK,
-		MSDC1_SMT_ALL_MASK,
-		MSDC1_TDSEL_ALL_MASK,
-		MSDC1_RDSEL_ALL_MASK,
-		MSDC1_PUPD_CMD_CLK_DAT_MASK,
-		MSDC1_DRV_ALL_MASK
 	}
 };
 
@@ -640,7 +576,7 @@ void msdc_dump_padctl_by_id(char **buff, unsigned long *size,
 
 	for (i = 0; i < MSDC_IOC_ITEMS; i++) {
 		MSDC_GET_FIELD(base + msdc_ioconfg_reg_offsets[id][i],
-			msdc_ioconfg_reg_masks[id][i], val);
+		0xffffffff, val);
 		SPREAD_PRINTF(buff, size, m, "%s=%x\n",
 			msdc_ioconfig_names[i], val);
 	}
@@ -707,18 +643,7 @@ void msdc_set_smt_by_id(u32 id, int set_smt)
 void msdc_set_tdsel_by_id(u32 id, u32 flag, u32 value)
 {
 	/*fix ME : this func is different form kernel3.18 */
-#if 0
-	u32 cust_val;
-	if (flag == MSDC_TDRDSEL_CUST)
-		cust_val = value;
-	else
-		cust_val = 0xAAA;
 
-	if (id == 0)
-		MSDC_SET_FIELD(MSDC0_TDSEL_BASE, MSDC0_TDSEL_ALL_MASK, value);
-	else if (id == 1)
-		MSDC_SET_FIELD(MSDC1_TDSEL_BASE, MSDC1_TDSEL_ALL_MASK, value);
-#endif
 }
 
 void msdc_set_rdsel_by_id(u32 id, u32 flag, u32 value)
@@ -1086,11 +1011,7 @@ int msdc_dt_init(struct platform_device *pdev, struct mmc_host *mmc)
 		pr_debug("of_iomap for infracfg_ao base @ 0x%p\n",
 			infracfg_ao_base);
 	}
-
-
-
 #endif
-
 	return 0;
 }
 
