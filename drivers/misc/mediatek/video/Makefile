@@ -21,7 +21,7 @@ CONFIG_MTK_PLATFORM := mt8127
 endif
 
 ifeq (y, $(filter y, $(CONFIG_MACH_MT6580) $(CONFIG_MACH_MT6735) $(CONFIG_MACH_MT6735M) $(CONFIG_MACH_MT6753)))
-subdir -ccflags -y += -DCOMMON_DISP_LOG
+subdir-ccflags-y += -DCOMMON_DISP_LOG
 endif
 
 ifneq ($(CONFIG_MTK_LCM), y)
