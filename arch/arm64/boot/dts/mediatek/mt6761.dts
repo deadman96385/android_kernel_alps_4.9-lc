@@ -181,11 +181,6 @@
 		#size-cells = <2>;
 		ranges;
 
-		minirdump-reserved-memory@544f0000{
-			compatible = "mediatek,minirdump";
-			reg = <0 0x544f0000 0 0x10000>;
-		};
-
 		reserve-memory-sspm_share {
 			compatible = "mediatek,reserve-memory-sspm_share";
 			no-map;
