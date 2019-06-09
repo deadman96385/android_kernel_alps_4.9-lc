@@ -920,6 +920,7 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg
 
 	case MTKFB_CAPTURE_FRAMEBUFFER:
 	{
+#if 0 /* comment this for iofuzzer security issue */
 #if defined(MTK_NO_CAPTURE_SUPPORT)
 		DISPERR("[FB] no support capture frame buffer\n");
 		return 0;
@@ -948,6 +949,9 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg
 #endif
 		return r;
 #endif
+#endif
+		DISPERR("[FB Driver] MTKFB_CAPTURE_FRAMEBUFFER is not supported \n");
+		return -EINVAL;
 	}
 
 	case MTKFB_SLT_AUTO_CAPTURE:
