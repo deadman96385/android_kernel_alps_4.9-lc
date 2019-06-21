@@ -1053,7 +1053,7 @@ int port_proxy_stop_md(struct port_proxy *proxy_p, unsigned int stop_type)
 	int ret = 0;
 
 	proxy_p->sim_type = 0xEEEEEEEE; /* reset sim_type(MCC/MNC) to 0xEEEEEEEE */
-	ret = ccci_fsm_append_command(proxy_p->md_obj, CCCI_COMMAND_STOP, CCCI_CMD_FLAG_WAIT_FOR_COMPLETE |
+	ret = ccci_fsm_append_command(proxy_p->md_obj, CCCI_COMMAND_STOP,
 		(stop_type == MD_FLIGHT_MODE_ENTER ? CCCI_CMD_FLAG_FLIGHT_MODE : 0));
 	return ret;
 }
@@ -1063,7 +1063,7 @@ int port_proxy_start_md(struct port_proxy *proxy_p)
 	int ret = 0;
 
 	proxy_p->mdlog_dump_done = 0;
-	ret = ccci_fsm_append_command(proxy_p->md_obj, CCCI_COMMAND_START, CCCI_CMD_FLAG_WAIT_FOR_COMPLETE);
+	ret = ccci_fsm_append_command(proxy_p->md_obj, CCCI_COMMAND_START, 0);
 	return ret;
 }
 

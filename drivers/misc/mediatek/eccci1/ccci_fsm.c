@@ -18,6 +18,19 @@
 static void ccci_fsm_finish_command(struct ccci_modem *md, struct ccci_fsm_command *cmd, int result);
 static void ccci_fsm_finish_event(struct ccci_modem *md, struct ccci_fsm_event *event);
 
+static int needforcestop;
+
+int force_md_stop(struct ccci_modem *md)
+{
+	int ret = -1;
+
+	needforcestop = 1;
+	ret = ccci_fsm_append_command(md, CCCI_COMMAND_STOP, 0);
+	CCCI_NORMAL_LOG(md->index, FSM,
+			"force md stop\n");
+	return ret;
+}
+
 static struct ccci_fsm_command *ccci_check_for_ee(struct ccci_fsm_ctl *ctl, int xip)
 {
 	struct ccci_fsm_command *cmd, *next = NULL;
@@ -158,6 +171,7 @@ static void ccci_routine_exception(struct ccci_fsm_ctl *ctl, struct ccci_fsm_com
 	default:
 		break;
 	}
+	inject_md_status_event(md->index, MD_STA_EV_EXCEPTION, NULL);
 	/* 3. always end in exception state */
 	if (cmd)
 		ccci_fsm_finish_command(md, cmd, 1);
@@ -182,7 +196,7 @@ static void ccci_routine_start(struct ccci_fsm_ctl *ctl, struct ccci_fsm_command
 	ctl->last_state = ctl->curr_state;
 	ctl->curr_state = CCCI_FSM_STARTING;
 	/* 2. poll for critical users exit */
-	while (count < BOOT_TIMEOUT/EVENT_POLL_INTEVAL) {
+	while (count < BOOT_TIMEOUT/EVENT_POLL_INTEVAL && !needforcestop) {
 		if (port_proxy_check_critical_user(md->port_proxy_obj) == 0) {
 			user_exit = 1;
 			break;
@@ -210,7 +224,7 @@ static void ccci_routine_start(struct ccci_fsm_ctl *ctl, struct ccci_fsm_command
 	if (ret)
 		goto fail;
 	count = 0;
-	while (count < BOOT_TIMEOUT/EVENT_POLL_INTEVAL) {
+	while (count < BOOT_TIMEOUT/EVENT_POLL_INTEVAL && !needforcestop) {
 		spin_lock_irqsave(&md->fsm.event_lock, flags);
 		if (!list_empty(&ctl->event_queue)) {
 			event = list_first_entry(&ctl->event_queue, struct ccci_fsm_event, entry);
@@ -238,6 +252,10 @@ static void ccci_routine_start(struct ccci_fsm_ctl *ctl, struct ccci_fsm_command
 		else
 			count++;
 		msleep(EVENT_POLL_INTEVAL);
+	}
+	if (needforcestop) {
+		ccci_fsm_finish_command(md, cmd, -1);
+		return;
 	}
 	/* 4. check result, finish command */
 fail:
@@ -269,7 +287,8 @@ static void ccci_routine_stop(struct ccci_fsm_ctl *ctl, struct ccci_fsm_command 
 	/* 1. state sanity check */
 	if (ctl->curr_state == CCCI_FSM_GATED)
 		goto success;
-	if (ctl->curr_state != CCCI_FSM_READY && ctl->curr_state != CCCI_FSM_EXCEPTION) {
+	if (ctl->curr_state != CCCI_FSM_READY && ctl->curr_state != CCCI_FSM_EXCEPTION &&
+				!needforcestop) {
 		ccci_fsm_finish_command(md, cmd, -1);
 		ccci_routine_zombie(ctl);
 		return;
@@ -296,6 +315,9 @@ static void ccci_routine_stop(struct ccci_fsm_ctl *ctl, struct ccci_fsm_command 
 	spin_unlock_irqrestore(&md->fsm.event_lock, flags);
 	/* 6. always end in stopped state */
 success:
+	inject_md_status_event(md->index, MD_STA_EV_STOP, NULL);
+	if (needforcestop)
+		needforcestop = 0;
 	ctl->last_state = ctl->curr_state;
 	ctl->curr_state = CCCI_FSM_GATED;
 	ccci_fsm_finish_command(md, cmd, 1);

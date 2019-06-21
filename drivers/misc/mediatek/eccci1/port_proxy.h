@@ -175,6 +175,7 @@ void port_proxy_md_hs2_msg_notify(struct port_proxy *proxy_p, struct sk_buff *sk
 void *port_proxy_get_mdee(struct port_proxy *proxy_p);
 unsigned int port_proxy_get_poll_seq_num(struct port_proxy *proxy_p);
 int port_proxy_check_critical_user(struct port_proxy *proxy_p);
+int force_md_stop(struct ccci_modem *md);
 
 #ifdef FEATURE_SCP_CCCI_SUPPORT
 int port_proxy_ccism_shm_init_ack_hdlr(struct port_proxy *proxy_p, unsigned int data);

@@ -84,6 +84,8 @@ enum md_bc_event {
 	MD_STA_EV_LEAVE_FLIGHT_E_REQUEST,
 	MD_STA_EV_HS1,
 	MD_STA_EV_READY,
+	MD_STA_EV_EXCEPTION,
+	MD_STA_EV_STOP,
 };
 
 void inject_md_status_event(int md_id, int event_type, char reason[]);
