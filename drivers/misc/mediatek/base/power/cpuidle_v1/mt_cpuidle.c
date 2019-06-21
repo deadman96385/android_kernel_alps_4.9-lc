@@ -17,6 +17,7 @@
 #include <linux/psci.h>
 #include <linux/of_address.h>
 #include <linux/of.h>
+#include <linux/irq.h>
 
 #include <asm/cacheflush.h>
 #include <asm/irqflags.h>
@@ -1110,13 +1111,36 @@ static void get_dts_nodes_irq_bit(void)
 	c2k_wdt_irq_bit = get_dts_node_irq_bit("mediatek,ap2c2k_ccif", 6, 3);
 #endif
 #endif
+
 }
 #endif
 
+
 static int mt_dormant_dts_map(void)
 {
+	unsigned int irq_type;
+
 	get_dts_nodes_address();
 	get_dts_nodes_irq_bit();
+
+	irq_type = irq_get_trigger_type(kp_irq_bit);
+	irq_set_irq_type(kp_irq_bit, irq_type);
+
+	irq_type = irq_get_trigger_type(conn_wdt_irq_bit);
+	irq_set_irq_type(conn_wdt_irq_bit, irq_type);
+
+	irq_type = irq_get_trigger_type(lowbattery_irq_bit);
+	irq_set_irq_type(lowbattery_irq_bit, irq_type);
+
+	irq_type = irq_get_trigger_type(md1_wdt_irq_bit);
+	irq_set_irq_type(md1_wdt_irq_bit, irq_type);
+
+#ifdef CONFIG_MTK_MD3_SUPPORT
+#if CONFIG_MTK_MD3_SUPPORT /* Using this to check >0 */
+	irq_type = irq_get_trigger_type(c2k_wdt_irq_bit);
+	irq_set_irq_type(c2k_wdt_irq_bit, irq_type);
+#endif
+#endif
 
 	return 0;
 }
