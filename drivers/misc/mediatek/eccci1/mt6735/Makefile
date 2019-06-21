@@ -17,6 +17,8 @@ ccflags-y += -I$(srctree)/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/eccci1/$(MTK_PLATFORM)
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/eccci1/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include
+
 # security objects
 MASP_CORE_DRIVER_DIR := $(srctree)/drivers/misc/mediatek/drivers/masp
 

@@ -37,7 +37,7 @@
 #include "modem_reg_base.h"
 
 #ifdef FEATURE_RF_CLK_BUF
-#include <mt_clkbuf_ctl.h>
+#include <mtk_clkbuf_ctl.h>
 #endif
 #ifdef FEATURE_INFORM_NFC_VSIM_CHANGE
 #include <mach/mt6605.h>

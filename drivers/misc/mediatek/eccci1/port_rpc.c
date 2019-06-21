@@ -32,7 +32,7 @@
 #endif
 
 #ifdef FEATURE_RF_CLK_BUF
-#include <mt_clkbuf_ctl.h>
+#include <mtk_clkbuf_ctl.h>
 #endif
 
 #include "ccci_core.h"
