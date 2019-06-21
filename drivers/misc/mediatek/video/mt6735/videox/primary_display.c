@@ -7208,9 +7208,10 @@ int primary_display_user_cmd(unsigned int cmd, unsigned long arg)
 
 	if (cmd == DISP_IOCTL_AAL_GET_HIST || cmd == DISP_IOCTL_CCORR_GET_IRQ) {
 #ifndef MTK_FB_CMDQ_DISABLE
-		ret = cmdqRecCreate(CMDQ_SCENARIO_PRIMARY_DISP, &handle);
-		cmdqRecReset(handle);
-
+		if (disp_helper_get_option(DISP_HELPER_OPTION_USE_CMDQ)) {
+			ret = cmdqRecCreate(CMDQ_SCENARIO_PRIMARY_DISP, &handle);
+			cmdqRecReset(handle);
+		}
 		if (primary_display_is_video_mode())
 			cmdqRecWaitNoClear(handle, CMDQ_EVENT_DISP_RDMA0_EOF);
 		else
@@ -7243,9 +7244,10 @@ int primary_display_user_cmd(unsigned int cmd, unsigned long arg)
 #endif
 	} else {
 #ifndef MTK_FB_CMDQ_DISABLE
-		ret = cmdqRecCreate(CMDQ_SCENARIO_PRIMARY_DISP, &handle);
-		cmdqRecReset(handle);
-
+		if (disp_helper_get_option(DISP_HELPER_OPTION_USE_CMDQ)) {
+			ret = cmdqRecCreate(CMDQ_SCENARIO_PRIMARY_DISP, &handle);
+			cmdqRecReset(handle);
+		}
 		if (primary_display_is_video_mode())
 			cmdqRecWaitNoClear(handle, CMDQ_EVENT_DISP_RDMA0_EOF);
 		else
