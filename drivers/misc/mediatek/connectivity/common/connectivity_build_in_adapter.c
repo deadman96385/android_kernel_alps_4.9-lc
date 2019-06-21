@@ -50,7 +50,7 @@
 #include <sdio_ops.h>
 
 #include "mtk_spm_resource_req.h"
-#include <mtk_sleep.h>
+#include <mt_sleep.h>
 
 #ifdef CONFIG_ARCH_MT6570
 #define CPU_BOOST y
@@ -103,13 +103,13 @@ EXPORT_SYMBOL(connectivity_export_tracing_record_cmdline);
 
 unsigned int connectivity_export_slp_get_wake_reason(void)
 {
-	return 1; //slp_get_wake_reason();
+	return slp_get_wake_reason();
 }
 EXPORT_SYMBOL(connectivity_export_slp_get_wake_reason);
 
 unsigned int connectivity_export_spm_get_last_wakeup_src(void)
 {
-	return 1; //spm_get_last_wakeup_src();
+	return spm_get_last_wakeup_src();
 }
 EXPORT_SYMBOL(connectivity_export_spm_get_last_wakeup_src);
 
