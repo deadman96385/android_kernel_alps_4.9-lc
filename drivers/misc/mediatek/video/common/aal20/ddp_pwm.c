@@ -577,6 +577,7 @@ static int ddp_pwm_power_on(enum DISP_MODULE_ENUM module, void *handle)
 	if (g_pwm_led_mode != MT65XX_LED_MODE_CUST_BLS_PWM)
 		disp_pwm_backlight_status(true);
 
+	disp_pwm_set_backlight(DISP_PWM0, 500);
 	return 0;
 }
 
