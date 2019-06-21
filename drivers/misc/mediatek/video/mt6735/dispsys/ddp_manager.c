@@ -1229,10 +1229,10 @@ static unsigned int dpmgr_is_PQ(enum DISP_MODULE_ENUM module)
 
 	switch (module) {
 	case DISP_MODULE_COLOR0:
-	case DISP_MODULE_CCORR:
-	case DISP_MODULE_AAL:
-	case DISP_MODULE_GAMMA:
-	case DISP_MODULE_DITHER:
+	//case DISP_MODULE_CCORR:
+	//case DISP_MODULE_AAL:
+	//case DISP_MODULE_GAMMA:
+	//case DISP_MODULE_DITHER:
 		/* case DISP_MODULE_UFOE  : */
 		/* case DISP_MODULE_PWM0  : */
 		isPQ = 1;
