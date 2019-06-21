@@ -104,7 +104,7 @@
 /**
  * Bypass ALL display PQ engine.
  */
-/* #define MTKFB_FB_BYPASS_PQ */
+#define MTKFB_FB_BYPASS_PQ
 
 /**
  * Enable display auto-update testing.
