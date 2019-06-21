@@ -1246,7 +1246,7 @@ static int __reg_base_addr_init(void)
 #endif
 
 /* TODO: __init void mt_freqhopping_init(void) */
-static void mt_fh_hal_init(void)
+static int mt_fh_hal_init(void)
 {
 	int i = 0;
 	unsigned long flags = 0;
@@ -1255,7 +1255,7 @@ static void mt_fh_hal_init(void)
 	FH_MSG_DEBUG("EN: %s", __func__);
 
 	if (g_initialize == 1)
-		return;// 0;
+		return 0;
 
 #ifdef CONFIG_OF
 
@@ -1286,7 +1286,7 @@ static void mt_fh_hal_init(void)
 	}
 
 	g_initialize = 1;
-	return; // 0;
+	return 0;
 }
 
 static void mt_fh_hal_lock(unsigned long *flags)

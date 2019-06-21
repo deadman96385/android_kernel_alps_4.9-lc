@@ -15,7 +15,7 @@
 #define __FREQHOPPING_DRV_H
 
 #include <linux/proc_fs.h>
-#include "mtk_freqhopping.h"
+#include "mt_freqhopping.h"
 
 struct mt_fh_hal_driver {
 #ifdef CONFIG_MTK_TINYSYS_SSPM_SUPPORT
