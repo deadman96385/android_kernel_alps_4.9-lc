@@ -3854,8 +3854,6 @@ static int _mt_cpufreq_target(struct cpufreq_policy *policy, unsigned int target
 	FUNC_ENTER(FUNC_LV_MODULE);
 
 	if (policy->cpu >= num_possible_cpus()
-		|| cpufreq_frequency_table_target(policy,
-						  target_freq, relation)
 		|| (id_to_cpu_dvfs(id) && id_to_cpu_dvfs(id)->dvfs_disable_by_procfs)
 		)
 		return -EINVAL;
@@ -3864,7 +3862,9 @@ static int _mt_cpufreq_target(struct cpufreq_policy *policy, unsigned int target
 	aee_rr_rec_cpu_dvfs_status(aee_rr_curr_cpu_dvfs_status() |
 				   (1 << CPU_DVFS_LITTLE_IS_DOING_DVFS));
 #endif
-
+	/* Update the new_opp_idx from target_freq on the basis of relation */
+	new_opp_idx = cpufreq_frequency_table_target(policy,
+					target_freq, relation);
 	_mt_cpufreq_set(id, new_opp_idx);
 
 #ifdef CONFIG_CPU_DVFS_AEE_RR_REC
