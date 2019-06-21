@@ -31,8 +31,7 @@
 	/* chosen */
 	chosen: chosen {
 		bootargs = "console=tty0 console=ttyMT3,921600n1 vmalloc=496M \
-				slub_debug=OFZPU page_owner=on swiotlb=noforce \
-				androidboot.hardware=mt6735 \
+				androidboot.hardware=mt6735 slub_max_order=0 slub_debug=OFZPU \
 				firmware_class.path=/vendor/firmware";
 	};
 
@@ -830,7 +829,7 @@
 		};
 
 		sys_cirq: sys_cirq@10204000 {
-			compatible = "mediatek,mt6735-sys_cirq";
+			compatible = "mediatek,sys_cirq";
 			reg = <0x10204000 0x1000>;
 			interrupts = <GIC_SPI 231 IRQ_TYPE_LEVEL_LOW>;
 			mediatek,cirq_num = <159>;
@@ -1716,6 +1715,21 @@
 								ISP_PIPEM@0x15000000 {
 			compatible = "mediatek,ISP_PIPEM";
 		};
+
+		flashlight_core: flashlight_core {
+			compatible = "mediatek,flashlight_core";
+		};
+
+		flashlights_lm3642: flashlights_lm3642 {
+			compatible = "mediatek,flashlights_lm3642";
+			decouple = <1>;
+			channel@1 {
+				type = <0>;
+				ct = <0>;
+				part = <0>;
+			};
+		};
+
 		SENINF_TOP@0x15008000 {
 			compatible = "mediatek,SENINF_TOP";
 			reg = <0x15008000 0x1000>;
