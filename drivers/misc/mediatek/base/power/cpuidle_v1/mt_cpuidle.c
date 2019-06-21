@@ -847,7 +847,25 @@ static int mt_cpu_dormant_abort(unsigned long index)
 
 	return 0;
 }
+#if defined(CONFIG_MACH_MT6735M)
+int mt_cpu_dormant_psci(unsigned long flags)
+{
+	int ret = 1;
+	int cpuid, clusterid;
+	u32 pps = 0x01010005;
 
+	read_id(&cpuid, &clusterid);
+
+	if (psci_ops.cpu_suspend) {
+		DORMANT_LOG(clusterid * MAX_CORES + cpuid, 0x203);
+		ret = psci_ops.cpu_suspend(pps, virt_to_phys(cpu_resume));
+	}
+
+	WARN_ON(1);
+
+	return ret;
+}
+#endif
 int mt_cpu_dormant(unsigned long flags)
 {
 	int ret;
@@ -868,8 +886,10 @@ int mt_cpu_dormant(unsigned long flags)
 	mt_platform_save_context(flags);
 
 	DORMANT_LOG(clusterid * MAX_CORES + cpuid, 0x102);
-
-#if !defined(CONFIG_ARM64) && !(defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
+#if defined(CONFIG_MACH_MT6735M)
+	ret = cpu_suspend(flags, mt_cpu_dormant_psci);
+#elif !defined(CONFIG_ARM64) \
+	&& !(defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
 	ret = arm_cpuidle_suspend(2);
 #elif !(defined(CONFIG_MACH_MT6580) || defined(CONFIG_ARCH_MT6570))
 	ret = cpu_suspend(2);
