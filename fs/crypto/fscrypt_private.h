@@ -16,15 +16,8 @@
 #include <crypto/hash.h>
 
 /* Encryption parameters */
-#define FS_AES_128_ECB_KEY_SIZE		16
-#define FS_AES_128_CBC_KEY_SIZE		16
-#define FS_AES_128_CTS_KEY_SIZE		16
-#define FS_AES_256_GCM_KEY_SIZE		32
-#define FS_AES_256_CBC_KEY_SIZE		32
-#define FS_AES_256_CTS_KEY_SIZE		32
-#define FS_AES_256_XTS_KEY_SIZE		64
 
-#define FS_KEY_DERIVATION_NONCE_SIZE		16
+#define FS_KEY_DERIVATION_NONCE_SIZE	16
 
 /**
  * Encryption context for inode
@@ -116,8 +109,8 @@ static inline bool fscrypt_valid_enc_modes(u32 contents_mode,
 	    filenames_mode == FS_ENCRYPTION_MODE_AES_256_CTS)
 		return true;
 
-	if (contents_mode == FS_ENCRYPTION_MODE_SPECK128_256_XTS &&
-	    filenames_mode == FS_ENCRYPTION_MODE_SPECK128_256_CTS)
+	if (contents_mode == FS_ENCRYPTION_MODE_ADIANTUM &&
+	    filenames_mode == FS_ENCRYPTION_MODE_ADIANTUM)
 		return true;
 
 	if (contents_mode == FS_ENCRYPTION_MODE_ADIANTUM &&
@@ -139,6 +132,16 @@ extern int fscrypt_do_page_crypto(const struct inode *inode,
 				  gfp_t gfp_flags);
 extern struct page *fscrypt_alloc_bounce_page(struct fscrypt_ctx *ctx,
 					      gfp_t gfp_flags);
+extern const struct dentry_operations fscrypt_d_ops;
+
+extern void __printf(3, 4) __cold
+fscrypt_msg(struct super_block *sb, const char *level, const char *fmt, ...);
+
+#define fscrypt_warn(sb, fmt, ...)		\
+	fscrypt_msg(sb, KERN_WARNING, fmt, ##__VA_ARGS__)
+#define fscrypt_err(sb, fmt, ...)		\
+	fscrypt_msg(sb, KERN_ERR, fmt, ##__VA_ARGS__)
+
 #define FSCRYPT_MAX_IV_SIZE	32
 
 union fscrypt_iv {
@@ -163,6 +166,7 @@ extern bool fscrypt_fname_encrypted_size(const struct inode *inode,
 					 u32 *encrypted_len_ret);
 
 /* keyinfo.c */
+
 struct fscrypt_mode {
 	const char *friendly_name;
 	const char *cipher_str;
@@ -171,6 +175,7 @@ struct fscrypt_mode {
 	bool logged_impl_name;
 	bool needs_essiv;
 };
+
 extern void __exit fscrypt_essiv_cleanup(void);
 
 #endif /* _FSCRYPT_PRIVATE_H */

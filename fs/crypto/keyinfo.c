@@ -382,8 +382,9 @@ static int derive_essiv_salt(const u8 *key, int keysize, u8 *salt)
 
 		tfm = crypto_alloc_shash("sha256", 0, 0);
 		if (IS_ERR(tfm)) {
-			pr_warn_ratelimited("fscrypt: error allocating SHA-256 transform: %ld\n",
-					    PTR_ERR(tfm));
+			fscrypt_warn(NULL,
+				     "error allocating SHA-256 transform: %ld",
+				     PTR_ERR(tfm));
 			return PTR_ERR(tfm);
 		}
 		prev_tfm = cmpxchg(&essiv_hash_tfm, NULL, tfm);
@@ -472,7 +473,8 @@ static int setup_crypto_transform(struct fscrypt_info *ci,
 
 		err = init_essiv_generator(ci, raw_key, mode->keysize);
 		if (err) {
-			pr_warn_ratelimited("fscrypt: error initializing ESSIV generator for inode %lu: %d",
+			fscrypt_warn(inode->i_sb,
+				     "error initializing ESSIV generator for inode %lu: %d",
 				     inode->i_ino, err);
 			return err;
 		}
@@ -539,24 +541,23 @@ int fscrypt_get_encryption_info(struct inode *inode)
 	crypt_info->ci_data_mode = ctx.contents_encryption_mode;
 	crypt_info->ci_filename_mode = ctx.filenames_encryption_mode;
 	memcpy(crypt_info->ci_master_key_descriptor, ctx.master_key_descriptor,
-				 FS_KEY_DESCRIPTOR_SIZE);
+	       FS_KEY_DESCRIPTOR_SIZE);
 	memcpy(crypt_info->ci_nonce, ctx.nonce, FS_KEY_DERIVATION_NONCE_SIZE);
 
 	mode = select_encryption_mode(crypt_info, inode);
 	if (IS_ERR(mode)) {
 		res = PTR_ERR(mode);
- 		goto out;
+		goto out;
 	}
-
 	WARN_ON(mode->ivsize > FSCRYPT_MAX_IV_SIZE);
 	crypt_info->ci_mode = mode;
 
 	/*
-	 * This cannot be a stack buffer because it is passed to the scatterlist
-	 * crypto API as part of key derivation.
+	 * This cannot be a stack buffer because it may be passed to the
+	 * scatterlist crypto API as part of key derivation.
 	 */
 	res = -ENOMEM;
-	raw_key = kmalloc(FS_MAX_KEY_SIZE, GFP_NOFS);
+	raw_key = kmalloc(mode->keysize, GFP_NOFS);
 	if (!raw_key)
 		goto out;
 
