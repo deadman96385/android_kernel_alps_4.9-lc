@@ -390,8 +390,10 @@ struct ion_handle *ion_handle_get_by_id_nolock(struct ion_client *client,
 	handle = idr_find(&client->idr, id);
 	if (handle)
 		return ion_handle_get_check_overflow(handle);
+	else
+		IONMSG("%s: can't get handle by id:%d\n", __func__, id);
 
-	return ERR_PTR(-EINVAL);
+	return handle ? handle : ERR_PTR(-EINVAL);
 }
 
 struct ion_handle *ion_handle_get_by_id(struct ion_client *client,
@@ -1804,10 +1806,8 @@ struct ion_handle *ion_drv_get_handle(struct ion_client *client,
 		mutex_unlock(&client->lock);
 	} else {
 		handle = ion_handle_get_by_id(client, user_handle);
-		if (!handle) {
-			IONMSG("%s handle invalid, handle_id=%d\n",
-			       __func__,
-			       user_handle);
+		if (IS_ERR_OR_NULL(handle)) {
+			IONMSG("%s user_handle invalid\n", __func__);
 			return ERR_PTR(-EINVAL);
 		}
 	}
