@@ -131,11 +131,10 @@ int disp_pwm_set_pwmmux(unsigned int clk_req)
 	PWM_MSG("PWM_MUX %x->%x", regsrc, disp_pwm_get_pwmmux());
 
 #else /* Common Clock Framework */
-	int ret = 0;
 	eDDP_CLK_ID clkid = -1;
 
 	clkid = disp_pwm_get_clkid(clk_req);
-	ret = disp_pwm_get_muxbase();
+	disp_pwm_get_muxbase();
 	regsrc = disp_pwm_get_pwmmux();
 
 	PWM_MSG("clk_req=%d clkid=%d", clk_req, clkid);

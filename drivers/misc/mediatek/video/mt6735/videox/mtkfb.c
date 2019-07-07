@@ -918,14 +918,10 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg
 		return r;
 	}
 
+#if defined(MTK_CAPTURE_SUPPORT)
 	case MTKFB_CAPTURE_FRAMEBUFFER:
 	{
-#if 0 /* comment this for iofuzzer security issue */
-#if defined(MTK_NO_CAPTURE_SUPPORT)
-		DISPERR("[FB] no support capture frame buffer\n");
-		return 0;
-#else
-#if defined(CONFIG_MT_ENG_BUILD)
+#if defined(CONFIG_MTK_ENG_BUILD)
 		unsigned long *src_pbuf = 0;
 		unsigned int pixel_bpp = info->var.bits_per_pixel / 8;
 		unsigned int fbsize = DISP_GetScreenHeight() * DISP_GetScreenWidth() * pixel_bpp;
@@ -948,12 +944,8 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg
 		}
 #endif
 		return r;
-#endif
-#endif
-		DISPERR("[FB Driver] MTKFB_CAPTURE_FRAMEBUFFER is not supported \n");
-		return -EINVAL;
 	}
-
+#endif
 	case MTKFB_SLT_AUTO_CAPTURE:
 	{
 #if defined(MTK_NO_CAPTURE_SUPPORT)
@@ -1373,13 +1365,10 @@ static int mtkfb_compat_ioctl(struct fb_info *info, unsigned int cmd, unsigned l
 		pr_debug("MTKFB_GET_POWERSTATE success %d\n", power_state);
 		break;
 	}
+#if defined(MTK_CAPTURE_SUPPORT)
 	case COMPAT_MTKFB_CAPTURE_FRAMEBUFFER:
 	{
-#if defined(MTK_NO_CAPTURE_SUPPORT)
-		DISPERR("[FB] no support capture frame buffer\n");
-		return 0;
-#else
-#if defined(CONFIG_MT_ENG_BUILD)
+#if defined(CONFIG_MTK_ENG_BUILD)
 		compat_ulong_t __user *data32;
 		unsigned long *pbuf;
 		unsigned int pixel_bpp = info->var.bits_per_pixel / 8;
@@ -1406,9 +1395,9 @@ static int mtkfb_compat_ioctl(struct fb_info *info, unsigned int cmd, unsigned l
 			}
 		}
 #endif
-#endif
 		break;
 	}
+#endif
 	case COMPAT_MTKFB_TRIG_OVERLAY_OUT:
 	{
 		arg = (unsigned long)compat_ptr(arg);
