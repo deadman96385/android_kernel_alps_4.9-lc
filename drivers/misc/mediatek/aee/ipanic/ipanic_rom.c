@@ -156,6 +156,7 @@ static u64 show_kaslr(void)
 
 	pr_notice("Kernel Offset: 0x%llx from 0x%lx\n", kaslr_offset,
 			KIMAGE_VADDR);
+	pr_notice("PHYS_OFFSET: 0x%llx\n", PHYS_OFFSET);
 	return kaslr_offset;
 }
 #else
