@@ -679,5 +679,5 @@ void update_rat_bit_map_to_drv(int md_id, unsigned int val);
 int get_md_img_type(int md_id);
 int get_legacy_md_type(int md_id);
 int check_md_type(int data);
-
+void __iomem *ccci_map_phy_addr(phys_addr_t phy_addr, unsigned int size);
 #endif
