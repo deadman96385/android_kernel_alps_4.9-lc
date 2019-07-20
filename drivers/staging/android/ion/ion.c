@@ -732,9 +732,10 @@ static int ion_debug_client_show(struct seq_file *s, void *unused)
 
 	names = kcalloc(ION_NUM_HEAP_IDS, sizeof(char *), GFP_ATOMIC);
 
-	if (!names)
+	if (!names) {
+		kfree(sizes);
 		return -ENOMEM;
-
+	}
 	down_read(&dev->lock);
 	if (!ion_client_validate(dev, client)) {
 		seq_printf(s, "ion_client 0x%pK dead, can't dump its buffers\n",
