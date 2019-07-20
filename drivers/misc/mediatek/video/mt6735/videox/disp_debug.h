@@ -29,6 +29,14 @@
 	(1024 * 16 + LOGGER_BUFFER_SIZE * \
 	(ERROR_BUFFER_COUNT + FENCE_BUFFER_COUNT + DEBUG_BUFFER_COUNT + DUMP_BUFFER_COUNT + STATUS_BUFFER_COUNT))
 
+#if !defined(CONFIG_MTK_ENG_BUILD) || !defined(CONFIG_MTK_GMO_RAM_OPTIMIZE) 
+#define DEBUG_BUFFER_SIZE (4096 + \
+	(ERROR_BUFFER_COUNT + FENCE_BUFFER_COUNT + DEBUG_BUFFER_COUNT + \
+	DUMP_BUFFER_COUNT + STATUS_BUFFER_COUNT) * LOGGER_BUFFER_SIZE)
+#else
+#define DEBUG_BUFFER_SIZE 10240
+#endif
+
 extern unsigned int dvfs_test;
 extern int primary_display_switch_mmsys_clk(int mmsys_clk_old, int mmsys_clk_new);
 

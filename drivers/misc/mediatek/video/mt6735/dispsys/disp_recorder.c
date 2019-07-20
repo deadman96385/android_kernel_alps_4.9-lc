@@ -22,6 +22,8 @@
 #include <stdarg.h>
 #include <linux/slab.h>
 #include <mt-plat/met_drv.h>
+#include <linux/kallsyms.h>
+#include <linux/trace_events.h>
 
 #include "ddp_mmp.h"
 #include "disp_debug.h"
@@ -136,7 +138,7 @@ static MMP_Event dprec_mmp_event_spy(enum DPREC_LOGGER_ENUM l)
 	return 0xffff;
 }
 
-static void dprec_to_mmp(unsigned int type_logsrc, MMP_LogType mmp_log, unsigned int data1,
+static void dprec_to_mmp(unsigned int type_logsrc, enum mmp_log_type mmp_log, unsigned int data1,
 			 unsigned data2)
 {
 	int MMP_Event = dprec_mmp_event_spy(type_logsrc);
