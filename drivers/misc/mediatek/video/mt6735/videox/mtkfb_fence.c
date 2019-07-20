@@ -380,7 +380,7 @@ static size_t mtkfb_ion_phys_mmu_addr(struct ion_client *client, struct ion_hand
 }
 
 static void mtkfb_ion_cache_flush(struct ion_client *client, struct ion_handle *handle,
-				  unsigned long mva, unsigned int size)
+				  unsigned int size)
 {
 	struct ion_sys_data sys_data;
 	void *va = NULL;
@@ -391,9 +391,9 @@ static void mtkfb_ion_cache_flush(struct ion_client *client, struct ion_handle *
 	va = ion_map_kernel(client, handle);
 	sys_data.sys_cmd = ION_SYS_CACHE_SYNC;
 	sys_data.cache_sync_param.kernel_handle = handle;
-	sys_data.cache_sync_param.va = (void *)mva;
+	sys_data.cache_sync_param.va = va;
 	sys_data.cache_sync_param.size = size;
-	sys_data.cache_sync_param.sync_type = ION_CACHE_INVALID_BY_RANGE;
+	sys_data.cache_sync_param.sync_type = ION_CACHE_FLUSH_BY_RANGE;
 
 	if (ion_kernel_ioctl(client, ION_CMD_SYSTEM, (unsigned long)&sys_data))
 		MTKFB_FENCE_ERR("ion cache flush failed!\n");
@@ -430,8 +430,7 @@ unsigned int mtkfb_query_buf_mva(unsigned int session_id, unsigned int layer_id,
 			/* DISPMSG("attention!! we will do ion_cache_flush!!!\n"); */
 
 			dprec_logger_start(DPREC_LOGGER_DISPMGR_CACHE_SYNC, (unsigned long)buf->hnd, buf->mva);
-			mtkfb_ion_cache_flush(ion_client, buf->hnd,
-					      buf->mva, buf->size);
+			mtkfb_ion_cache_flush(ion_client, buf->hnd, buf->size);
 			dprec_logger_done(DPREC_LOGGER_DISPMGR_CACHE_SYNC, (unsigned long)buf->hnd, buf->mva);
 		}
 		MTKFB_FENCE_LOG("query buf mva: layer=%d, idx=%d, mva=0x%08x\n", layer_id, idx,
@@ -1280,8 +1279,7 @@ unsigned int disp_sync_query_buf_info(unsigned int session_id, unsigned int time
 		buf->ts_create = sched_clock();
 		if (buf->cache_sync) {
 			dprec_logger_start(DPREC_LOGGER_DISPMGR_CACHE_SYNC, (unsigned long)buf->hnd, buf->mva);
-			mtkfb_ion_cache_flush(ion_client, buf->hnd,
-					      buf->mva, buf->size);
+			mtkfb_ion_cache_flush(ion_client, buf->hnd, buf->size);
 			dprec_logger_done(DPREC_LOGGER_DISPMGR_CACHE_SYNC, (unsigned long)buf->hnd, buf->mva);
 		}
 		MTKFB_FENCE_LOG("query buf mva: layer=%d, idx=%d, mva=0x%lx\n", timeline_id, idx,
