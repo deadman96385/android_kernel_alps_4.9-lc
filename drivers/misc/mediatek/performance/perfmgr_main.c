@@ -90,7 +90,8 @@ static int __init init_perfmgr(void)
 	pr_debug("MTK_TOUCH_BOOST function init_perfmgr_touch\n");
 	init_tchbst(perfmgr_root);
 
-	init_perfctl(perfmgr_root);
+	/* remove redundant flow */
+	/*init_perfctl(perfmgr_root);*/
 
 	init_boostctrl(perfmgr_root);
 

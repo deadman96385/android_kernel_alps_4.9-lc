@@ -14,10 +14,11 @@ subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/performance/perf_ioctl/ \
 		    -I$(srctree)/drivers/misc/mediatek/performance/include/ \
 		    -I$(srctree)/drivers/misc/mediatek/base/power/include/ \
 
-
+obj-y += fliper/
 obj-y += perfmgr_main.o
 obj-y += base/
 obj-y += cpu_loading/
+obj-y += legacy_controller/
 
 ifeq (,$(findstring mt8,$(CONFIG_MTK_PLATFORM)))
 	obj-$(CONFIG_MTK_BASE_POWER) += boost_ctrl/

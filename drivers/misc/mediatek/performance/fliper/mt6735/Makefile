@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2017 MediaTek Inc.
+# Copyright (C) 2015 MediaTek Inc.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,8 +11,9 @@
 # GNU General Public License for more details.
 #
 
+obj-y += fliper.o
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/dramc/$(MTK_PLATFORM)/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/emi_mbw/$(MTK_PLATFORM)/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include/
-
-obj-y += perf_ioctl.o
-obj-y += $(CONFIG_MTK_PLATFORM)/
-
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/mt6735/

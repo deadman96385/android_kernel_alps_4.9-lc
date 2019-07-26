@@ -11,8 +11,7 @@
 # GNU General Public License for more details.
 #
 
-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include/
+obj-y += perfmgr_boost.o \
 
-obj-y += perf_ioctl.o
-obj-y += $(CONFIG_MTK_PLATFORM)/
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/$(MTK_PLATFORM)/
 

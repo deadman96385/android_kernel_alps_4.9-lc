@@ -11,8 +11,4 @@
 # GNU General Public License for more details.
 #
 
-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include/
-
-obj-y += perf_ioctl.o
-obj-y += $(CONFIG_MTK_PLATFORM)/
-
+obj-y += legacy_controller.o
