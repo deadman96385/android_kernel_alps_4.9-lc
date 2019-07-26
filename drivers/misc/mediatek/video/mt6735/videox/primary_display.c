@@ -163,6 +163,7 @@ unsigned long round_corner_mask_mva;
 #define MMDVFS_PROFILE_D3 (8)
 #define MMDVFS_PROFILE_E1 (9)
 
+static unsigned long long mutex_time_start;
 static int g_is_inited;
 
 void enqueue_buffer(struct display_primary_path_context *ctx, struct list_head *head,
@@ -297,13 +298,36 @@ static void _primary_path_lock(const char *caller)
 {
 	dprec_logger_start(DPREC_LOGGER_PRIMARY_MUTEX, 0, 0);
 	disp_sw_mutex_lock(&(pgc->lock));
+	mutex_time_start = sched_clock();
 	pgc->mutex_locker = (char *)caller;
 }
 
 static void _primary_path_unlock(const char *caller)
 {
+	unsigned long long mutex_time_end;
+	unsigned long long mutex_time_end1;
+	long long mutex_time_period;
+	long long mutex_time_period1;
+
 	pgc->mutex_locker = NULL;
+	mutex_time_end = sched_clock();
+	mutex_time_period = mutex_time_end - mutex_time_start;
+	if (mutex_time_period > 100000000) {
+		DISPMSG("mutex_release_timeout1 <%lld ns>\n",
+			  mutex_time_period);
+		dump_stack();
+	}
 	disp_sw_mutex_unlock(&(pgc->lock));
+
+	mutex_time_end1 = sched_clock();
+	mutex_time_period1 = mutex_time_end1 - mutex_time_start;
+	if ((mutex_time_period < 100000000 && mutex_time_period1 > 100000000) ||
+	   (mutex_time_period < 100000000 && mutex_time_period1 < 0)) {
+		DISPMSG("mutex_release_timeout2 <%lld ns>,<%lld ns>\n",
+			mutex_time_period1, mutex_time_period);
+		dump_stack();
+	}
+
 	dprec_logger_done(DPREC_LOGGER_PRIMARY_MUTEX, 0, 0);
 }
 
