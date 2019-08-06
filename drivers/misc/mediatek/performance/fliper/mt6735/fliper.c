@@ -178,14 +178,14 @@ static void mt_power_pef_transfer_work(void)
 	/*Get EMI*/
 	if (fliper_debug == 1) {
 		t1 = sched_clock();
-#if 0
+#ifdef CONFIG_MTK_EMI_MBW
 		emi_bw = get_mem_bw();
 #else
 		emi_bw = 100;
 #endif
 		t2 = sched_clock();
 	} else
-#if 0
+#ifdef CONFIG_MTK_EMI_MBW
 		emi_bw = get_mem_bw();
 #else
 		emi_bw = 100;
