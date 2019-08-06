@@ -474,6 +474,10 @@ struct LCM_DRIVER *lcm_driver_list[] = {
 	&hx8392a_dsi_cmd_qhd_lcm_drv,
 #endif
 
+#if defined(HX8392A_DSI_CMD_HDPLUS)
+	&hx8392a_dsi_cmd_hdplus_lcm_drv,
+#endif
+
 #if defined(HX8392A_DSI_VDO)
 	&hx8392a_dsi_vdo_lcm_drv,
 #endif

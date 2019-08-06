@@ -428,7 +428,7 @@ static unsigned int lcm_getpwm(unsigned int divider)
 	return pwm_clk;
 }*/
 
-struct LCM_DRIVER hx8392a_dsi_cmd_qhd_lcm_drv = {
+struct LCM_DRIVER hx8392a_dsi_cmd_hdplus_lcm_drv = {
 
 	.name = "hx8392a_dsi_cmd_hdplus",
 	.set_util_funcs = lcm_set_util_funcs,
