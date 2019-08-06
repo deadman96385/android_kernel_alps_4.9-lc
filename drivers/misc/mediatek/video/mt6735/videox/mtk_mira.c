@@ -53,12 +53,6 @@ static int disp_flush(struct file *file, fl_owner_t a_id)
 	return 0;
 }
 
-/* remap register to user space */
-static int disp_mmap(struct file *file, struct vm_area_struct *a_pstVMArea)
-{
-	return 0;
-}
-
 #ifdef CONFIG_COMPAT
 static long disp_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
@@ -87,8 +81,7 @@ static const struct file_operations disp_fops = {
 	.open = disp_open,
 	.release = disp_release,
 	.flush = disp_flush,
-	.read = disp_read,
-	.mmap = disp_mmap
+	.read = disp_read
 };
 
 static int __init disp_init(void)
