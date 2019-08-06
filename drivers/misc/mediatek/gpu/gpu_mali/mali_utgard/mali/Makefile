@@ -1,1 +1,1 @@
-obj-y += mali_r9p0-01rel0/
+obj-y += mali_r10p0-01dev0/
