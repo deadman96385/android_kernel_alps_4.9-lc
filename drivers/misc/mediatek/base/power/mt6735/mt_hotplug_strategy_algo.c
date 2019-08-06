@@ -23,7 +23,15 @@
 /*
  * hps algo - hmp
  */
+static void mark_cpu_offline(int cpu, bool state)
+{
+	struct device *dev = get_cpu_device(cpu);
 
+	if (!dev)
+		return;
+	dev->offline = state;
+
+}
 static void algo_hmp_limit(
 		struct cpumask *little_online_cpumask,
 		struct cpumask *big_online_cpumask,
@@ -46,6 +54,7 @@ static void algo_hmp_limit(
 
 			cpu_down(cpu);
 			cpumask_clear_cpu(cpu, big_online_cpumask);
+			mark_cpu_offline(cpu, true);
 			--big_num_online;
 			if (--val == 0)
 				break;
@@ -63,6 +72,7 @@ static void algo_hmp_limit(
 
 			cpu_down(cpu);
 			cpumask_clear_cpu(cpu, little_online_cpumask);
+			mark_cpu_offline(cpu, true);
 			--little_num_online;
 			if (--val == 0)
 				break;
@@ -98,6 +108,7 @@ static void algo_hmp_base(
 
 			cpu_up(cpu);
 			cpumask_set_cpu(cpu, big_online_cpumask);
+			mark_cpu_offline(cpu, false);
 			++bo;
 			if (--val == 0)
 				break;
@@ -119,6 +130,7 @@ static void algo_hmp_base(
 
 			cpu_up(cpu);
 			cpumask_set_cpu(cpu, little_online_cpumask);
+			mark_cpu_offline(cpu, false);
 			++lo;
 			if (--val == 0)
 				break;
@@ -168,6 +180,7 @@ static void algo_hmp_rush_boost(
 
 			cpu_up(cpu);
 			cpumask_set_cpu(cpu, little_online_cpumask);
+			mark_cpu_offline(cpu, false);
 			++little_num_online;
 			if (--val == 0)
 				break;
@@ -182,6 +195,7 @@ static void algo_hmp_rush_boost(
 
 			cpu_up(cpu);
 			cpumask_set_cpu(cpu, big_online_cpumask);
+			mark_cpu_offline(cpu, false);
 			++big_num_online;
 			if (--val == 0)
 				break;
@@ -240,6 +254,7 @@ static void algo_hmp_up(
 			if (!cpumask_test_cpu(cpu, little_online_cpumask)) {
 				cpu_up(cpu);
 				cpumask_set_cpu(cpu, little_online_cpumask);
+				mark_cpu_offline(cpu, false);
 				++little_num_online;
 				break;
 			}
@@ -252,6 +267,7 @@ static void algo_hmp_up(
 			if (!cpumask_test_cpu(cpu, big_online_cpumask)) {
 				cpu_up(cpu);
 				cpumask_set_cpu(cpu, big_online_cpumask);
+				mark_cpu_offline(cpu, false);
 				++big_num_online;
 				break;
 			}
@@ -316,6 +332,7 @@ static void algo_hmp_down(
 
 			cpu_down(cpu);
 			cpumask_clear_cpu(cpu, big_online_cpumask);
+			mark_cpu_offline(cpu, true);
 			--big_num_online;
 			if (--val == 0)
 				break;
@@ -330,6 +347,7 @@ static void algo_hmp_down(
 
 			cpu_down(cpu);
 			cpumask_clear_cpu(cpu, little_online_cpumask);
+			mark_cpu_offline(cpu, true);
 			--little_num_online;
 			if (--val == 0)
 				break;
@@ -383,6 +401,7 @@ static void algo_hmp_big_to_little(
 
 		cpu_up(cpu);
 		cpumask_set_cpu(cpu, little_online_cpumask);
+		mark_cpu_offline(cpu, false);
 		++little_num_online;
 		break;
 	}
@@ -390,6 +409,7 @@ static void algo_hmp_big_to_little(
 	/* down 1 big */
 	cpu_down(val);
 	cpumask_clear_cpu(cpu, big_online_cpumask);
+	mark_cpu_offline(val, true);
 	--big_num_online;
 	hps_ctxt.action |= BIT(ACTION_BIG_TO_LITTLE);
 }
@@ -626,6 +646,7 @@ static void algo_smp_limit(
 
 		cpu_down(cpu);
 		cpumask_clear_cpu(cpu, little_online_cpumask);
+		mark_cpu_offline(cpu, true);
 		--little_num_online;
 
 		if (--val == 0)
@@ -659,6 +680,7 @@ static void algo_smp_base(
 
 		cpu_up(cpu);
 		cpumask_set_cpu(cpu, little_online_cpumask);
+		mark_cpu_offline(cpu, false);
 		++little_num_online;
 
 		if (--val == 0)
@@ -708,6 +730,7 @@ static void algo_smp_rush_boost(
 
 		cpu_up(cpu);
 		cpumask_set_cpu(cpu, little_online_cpumask);
+		mark_cpu_offline(cpu, false);
 		++little_num_online;
 
 		if (--val == 0)
@@ -766,6 +789,7 @@ static void algo_smp_up(
 
 		cpu_up(cpu);
 		cpumask_set_cpu(cpu, little_online_cpumask);
+		mark_cpu_offline(cpu, false);
 		++little_num_online;
 		break;
 	}
@@ -826,6 +850,7 @@ static void algo_smp_down(
 
 		cpu_down(cpu);
 		cpumask_clear_cpu(cpu, little_online_cpumask);
+		mark_cpu_offline(cpu, true);
 		--little_num_online;
 
 		if (--val == 0)
