@@ -194,6 +194,9 @@ static int smi_disable_clock(const unsigned int reg_indx, char *user_name)
 int smi_bus_prepare_enable(const unsigned int reg_indx,
 	char *user_name, const bool mtcmos)
 {
+#if IS_ENABLED(CONFIG_MACH_MT6580) || IS_ENABLED(CONFIG_MACH_MT6735M)
+	return smi_enable_clock(reg_indx, user_name);
+#else
 	int ref_cnt = -1, ret = 0;
 
 	if (reg_indx > SMI_LARB_NUM) {
@@ -201,9 +204,7 @@ int smi_bus_prepare_enable(const unsigned int reg_indx,
 			reg_indx, SMI_LARB_NUM);
 		return -EINVAL;
 	}
-#if IS_ENABLED(CONFIG_MACH_MT6580) || IS_ENABLED(CONFIG_MACH_MT6735M)
-	return smi_enable_clock(reg_indx, user_name);
-#endif
+
 	/* COMMON */
 	if (mtcmos)
 		ret = clk_prepare_enable(common->clks[0]);
@@ -243,6 +244,7 @@ int smi_bus_prepare_enable(const unsigned int reg_indx,
 	 * user_name, mtcmos, reg_indx, ref_cnt);
 	 */
 	return ret;
+#endif
 }
 EXPORT_SYMBOL_GPL(smi_bus_prepare_enable);
 
@@ -255,6 +257,9 @@ EXPORT_SYMBOL_GPL(smi_bus_prepare_enable);
 int smi_bus_disable_unprepare(const unsigned int reg_indx,
 	char *user_name, const bool mtcmos)
 {
+#if IS_ENABLED(CONFIG_MACH_MT6580) || IS_ENABLED(CONFIG_MACH_MT6735M)
+	return smi_disable_clock(reg_indx, user_name);
+#else
 	int ref_cnt = -1, ret = 0;
 
 	if (reg_indx > SMI_LARB_NUM) {
@@ -262,9 +267,7 @@ int smi_bus_disable_unprepare(const unsigned int reg_indx,
 			reg_indx, SMI_LARB_NUM);
 		return -EINVAL;
 	}
-#if IS_ENABLED(CONFIG_MACH_MT6580) || IS_ENABLED(CONFIG_MACH_MT6735M)
-	return smi_disable_clock(reg_indx, user_name);
-#endif
+
 	/* LARB */
 	if (reg_indx < SMI_LARB_NUM) {
 		struct mtk_smi_dev *larb = larbs[reg_indx];
@@ -295,12 +298,16 @@ int smi_bus_disable_unprepare(const unsigned int reg_indx,
 	 * reg_indx, user_name, mtcmos, ref_cnt);
 	 */
 	return ret;
+#endif
 }
 EXPORT_SYMBOL_GPL(smi_bus_disable_unprepare);
 
 static int smi_larb_cmd_grp_enable(void)
 {
 	int i, j;
+
+	if (!SMI_LARB_CMD_GP_EN_LARB_NUM)
+		return 0;
 
 	for (i = 0; i < SMI_LARB_CMD_GP_EN_LARB_NUM; i++) {
 		struct mtk_smi_dev *smi = larbs[i];
