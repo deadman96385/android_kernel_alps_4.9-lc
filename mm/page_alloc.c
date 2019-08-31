@@ -6609,7 +6609,7 @@ void __init mem_init_print_info(const char *str)
 		kernel_reserve_meminfo.init = init_data_size + init_code_size;
 		kernel_reserve_meminfo.bss = bss_size;
 		kernel_reserve_meminfo.reserved =
-			(physpages - totalram_pages) << PAGE_SHIFT;
+			(unsigned long long)(physpages - totalram_pages) << PAGE_SHIFT;
 #ifdef CONFIG_HIGHMEM
 		kernel_reserve_meminfo.highmem = totalhigh_pages << PAGE_SHIFT;
 #endif
