@@ -1309,6 +1309,7 @@ int vdec_suspend_before_mmsysclk_switch(void)
 	/* Waiting for the frame done and suspend vdec jobs*/
 	struct VAL_HW_LOCK_T rLock;
 
+	memset(&rLock, 0, sizeof(rLock));
 	rLock.eDriverType = VAL_DRIVER_TYPE_MMDVFS;
 	/* kenel VA won't overlap with any PA, still unique key */
 	rLock.pvHandle = &gMMDVFSHandle;
@@ -1322,6 +1323,7 @@ int vdec_resume_after_mmsysclk_switch(void)
 	/* Waiting for the frame done and suspend vdec jobs*/
 	struct VAL_HW_LOCK_T rLock;
 
+	memset(&rLock, 0, sizeof(rLock));
 	rLock.eDriverType = VAL_DRIVER_TYPE_MMDVFS;
 	/* kenel VA won't overlap with any PA, still unique key */
 	rLock.pvHandle = &gMMDVFSHandle;
