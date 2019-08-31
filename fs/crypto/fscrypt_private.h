@@ -113,11 +113,6 @@ static inline bool fscrypt_valid_enc_modes(u32 contents_mode,
 	    filenames_mode == FS_ENCRYPTION_MODE_ADIANTUM)
 		return true;
 
-	if (contents_mode == FS_ENCRYPTION_MODE_ADIANTUM &&
-			filenames_mode == FS_ENCRYPTION_MODE_ADIANTUM)
-		return true;
-
-
 	return false;
 }
 
