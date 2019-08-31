@@ -804,7 +804,7 @@ static ssize_t driver_flag_set(struct device_driver *drv,
 	p_token = strsep(&p_buf, p_delimiter);
 	if (p_token != NULL) {
 		result = kstrtol(p_token, 16, &x);
-		BTIF_INFO_FUNC("x = 0x%08x\n\r", x);
+		BTIF_INFO_FUNC("x = 0x%08lx\n\r", x);
 	} else
 		x = 0;
 /*	x = (NULL != p_token) ? kstrtol(p_token, 16, NULL) : 0;*/
@@ -812,7 +812,7 @@ static ssize_t driver_flag_set(struct device_driver *drv,
 	p_token = strsep(&p_buf, "\t\n ");
 	if (p_token != NULL) {
 		result = kstrtol(p_token, 16, &y);
-		BTIF_INFO_FUNC("y = 0x%08x\n\r", y);
+		BTIF_INFO_FUNC("y = 0x%08lx\n\r", y);
 	} else
 		y = 0;
 
@@ -822,7 +822,7 @@ static ssize_t driver_flag_set(struct device_driver *drv,
 	else
 		z = 0;
 
-	BTIF_INFO_FUNC("x(0x%08x), y(0x%08x), z(0x%08x)\n\r", x, y, z);
+	BTIF_INFO_FUNC("x(0x%08lx), y(0x%08lx), z(0x%08lx)\n\r", x, y, z);
 
 	switch (x) {
 	case 1:
@@ -1223,7 +1223,7 @@ int _btif_controller_tx_setup(struct _mtk_btif_ *p_btif)
 	if (p_btif->tx_mode == BTIF_MODE_DMA) {
 		i_ret = _btif_tx_dma_setup(p_btif);
 		if (i_ret) {
-			BTIF_ERR_FUNC("_btif_tx_dma_setup failed,i_ret(%d),",
+			BTIF_ERR_FUNC("_btif_tx_dma_setup failed,i_ret(%d),"
 				"set tx to PIO mode\n", i_ret);
 			i_ret = _btif_tx_pio_setup(p_btif);
 		}
@@ -1257,7 +1257,7 @@ int _btif_controller_rx_setup(struct _mtk_btif_ *p_btif)
 	if (p_btif->rx_mode == BTIF_MODE_DMA) {
 		i_ret = _btif_rx_dma_setup(p_btif);
 		if (i_ret) {
-			BTIF_ERR_FUNC("_btif_tx_dma_setup failed, i_ret(%d),",
+			BTIF_ERR_FUNC("_btif_tx_dma_setup failed, i_ret(%d),"
 				"set tx to PIO mode\n", i_ret);
 			i_ret = _btif_rx_pio_setup(p_btif);
 		}
@@ -1339,7 +1339,7 @@ int _btif_rx_dma_setup(struct _mtk_btif_ *p_btif)
 /*DMA controller enable*/
 	i_ret = hal_btif_dma_ctrl(p_dma_info, DMA_CTRL_ENABLE);
 	if (i_ret) {
-		BTIF_ERR_FUNC("hal_btif_dma_ctrl failed, i_ret(%d),",
+		BTIF_ERR_FUNC("hal_btif_dma_ctrl failed, i_ret(%d),"
 			"set rx to pio mode\n", i_ret);
 		hal_btif_dma_clk_ctrl(p_dma_info, CLK_OUT_DISABLE);
 /*DMA control failed set Rx to PIO mode*/
@@ -1394,7 +1394,7 @@ int _btif_tx_dma_setup(struct _mtk_btif_ *p_btif)
 /*DMA HW Enable*/
 	i_ret = hal_btif_dma_ctrl(p_dma_info, DMA_CTRL_ENABLE);
 	if (i_ret) {
-		BTIF_ERR_FUNC("hal_btif_dma_ctrl failed, i_ret(%d),",
+		BTIF_ERR_FUNC("hal_btif_dma_ctrl failed, i_ret(%d),"
 			"set tx to pio mode\n", i_ret);
 
 #if !(MTK_BTIF_ENABLE_CLK_REF_COUNTER)
@@ -1780,9 +1780,11 @@ int _btif_enter_dpidle_from_on(struct _mtk_btif_ *p_btif)
 
 	while ((!_btif_is_tx_complete(p_btif)) && (retry < max_retry)) {
 		do_gettimeofday(&timer_now);
-		if ((MAX_WAIT_TIME_MS/1000) <= (timer_now.tv_sec - timer_start.tv_sec)) {
-			BTIF_WARN_FUNC("max retry timer expired, timer_start.tv_sec:%d, timer_now.tv_sec:%d,",
-				"retry:%d\n", timer_start.tv_sec, timer_now.tv_sec, retry);
+		if ((MAX_WAIT_TIME_MS/1000) <=
+				(timer_now.tv_sec - timer_start.tv_sec)) {
+			BTIF_WARN_FUNC("expired start:%ld,now:%ld,retry:%d\n",
+					timer_start.tv_sec, timer_now.tv_sec,
+					retry);
 			break;
 		}
 		msleep(wait_period);
@@ -2219,7 +2221,7 @@ static int mtk_btif_rxd_be_blocked_by_timer(void)
 	do_gettimeofday(&now);
 
 	for (i = 0; i < MAX_BTIF_RXD_TIME_REC; i++) {
-		BTIF_INFO_FUNC("btif_rxd_time_stamp[%d]=%d.%d\n", i,
+		BTIF_INFO_FUNC("btif_rxd_time_stamp[%d]=%ld.%ld\n", i,
 			btif_rxd_time_stamp[i].tv_sec, btif_rxd_time_stamp[i].tv_usec);
 		if (now.tv_sec >= btif_rxd_time_stamp[i].tv_sec) {
 			time_gap[i] = now.tv_sec - btif_rxd_time_stamp[i].tv_sec;
@@ -2234,7 +2236,7 @@ static int mtk_btif_rxd_be_blocked_by_timer(void)
 			BTIF_INFO_FUNC("time_gap[%d]=%d,counter:%d\n", i, time_gap[i], counter);
 		} else {
 			time_gap[i] = 0;
-			BTIF_ERR_FUNC("abnormal case now:%d < time_stamp[%d]:%d\n", now.tv_sec,
+			BTIF_ERR_FUNC("!!!now[%ld]<time_stamp[%d]:%ld\n", now.tv_sec,
 							i, btif_rxd_time_stamp[i].tv_usec);
 		}
 	}
@@ -2637,7 +2639,7 @@ static int _btif_rx_btm_deinit(struct _mtk_btif_ *p_btif)
 void btif_dump_bbs_str(unsigned char *p_str, struct _btif_buf_str_ *p_bbs)
 {
 	BTIF_INFO_FUNC
-	    ("%s UBS:0x%p\n  Size:0x%p\n  read:0x%08x\n  write:0x%08x\n",
+	    ("%s UBS:%p\n  Size:%d\n  read:0x%08x\n  write:0x%08x\n",
 	     p_str, p_bbs, p_bbs->size, p_bbs->rd_idx, p_bbs->wr_idx);
 }
 
@@ -3036,8 +3038,8 @@ int btif_log_buf_dmp_in(struct _btif_log_queue_t_ *p_log_que,
 	BTIF_DBG_FUNC("++\n");
 
 	if ((p_log_que == NULL) || (p_buf == NULL) || (len == 0)) {
-		BTIF_ERR_FUNC("invalid parameter, p_log_que(0x%x), buf(0x%x), ",
-			"len(%d)\n", p_log_que, p_buf, len);
+		BTIF_ERR_FUNC("invalid para, p_log_que(%p), buf(%p), len(%d)\n",
+		p_log_que, p_buf, len);
 		return 0;
 	}
 	if (!(p_log_que->enable))
