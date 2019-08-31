@@ -3398,8 +3398,9 @@ void PMIC_EINT_SETTING(void)
 
 	node = of_find_compatible_node(NULL, NULL, "mediatek, pmic-eint");
 	if (node) {
-		of_property_read_u32_array(node, "debounce", ints, ARRAY_SIZE(ints));
-		mt_gpio_set_debounce(ints[0], ints[1]);
+		ret = of_property_read_u32_array(node, "debounce", ints, ARRAY_SIZE(ints));
+		if (ret == 0)
+			mt_gpio_set_debounce(ints[0], ints[1]);
 
 		g_pmic_irq = irq_of_parse_and_map(node, 0);
 		ret = request_irq(g_pmic_irq, (irq_handler_t) mt_pmic_eint_irq,
