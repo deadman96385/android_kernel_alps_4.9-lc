@@ -97,7 +97,9 @@
 #include <mali_kbase_tlstream.h>
 /* MTK */
 #include "platform/mtk_platform_common.h"
-
+#ifdef ENABLE_COMMON_DVFS
+#include <mali_kbase_pm_internal.h>
+#endif
 
 #include <mali_kbase_as_fault_debugfs.h>
 
@@ -112,6 +114,29 @@ static DEFINE_MUTEX(kbase_dev_list_lock);
 static LIST_HEAD(kbase_dev_list);
 
 #define KERNEL_SIDE_DDK_VERSION_STRING "K:" MALI_RELEASE_NAME "(GPL)"
+
+#ifdef ENABLE_COMMON_DVFS
+static struct kbase_device *gpsMaliData;
+
+struct kbase_device *MaliGetMaliData(void)
+{
+	return gpsMaliData;
+}
+
+void mtk_gpu_dvfs_commit(unsigned long ui32NewFreqID,
+		GED_DVFS_COMMIT_TYPE eCommitType, int *pbCommited) {
+	int ret;
+
+	ret = mtk_set_mt_gpufreq_target(ui32NewFreqID);
+	if (pbCommited) {
+		if (0 == ret) {
+			*pbCommited = true;
+		} else {
+			*pbCommited = false;
+		}
+	}
+}
+#endif
 
 static int kbase_api_handshake(struct kbase_context *kctx,
 			       struct kbase_ioctl_version_check *version)
@@ -4065,10 +4090,17 @@ static int kbase_platform_device_probe(struct platform_device *pdev)
 		return err;
 	}
 
+	/* MTK GPU DVFS Implementation */
+#ifdef ENABLE_COMMON_DVFS
+	gpsMaliData = kbdev;
+	ged_dvfs_cal_gpu_utilization_fp = MTKCalGpuUtilization;
+	ged_dvfs_gpu_freq_commit_fp = mtk_gpu_dvfs_commit;
+#endif
+
 	dev_info(kbdev->dev,
 			"Probed as %s\n", dev_name(kbdev->mdev.this_device));
 			
-		pr_info("[MALI] Midgard r29p0-01rel0 DDK kernel device driver. GPU probe() end.\n");
+	pr_info("[MALI] Midgard r29p0-01rel0 DDK kernel device driver. GPU probe() end.\n");
 			
 	kbase_dev_nr++;
 #endif /* MALI_KBASE_BUILD */

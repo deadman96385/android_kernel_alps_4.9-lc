@@ -1498,6 +1498,12 @@ struct kbase_device {
 	struct list_head        kctx_list;
 	struct mutex            kctx_list_lock;
 
+#ifdef CONFIG_MALI_MIDGARD_DVFS
+#ifdef ENABLE_COMMON_DVFS
+	struct kbasep_pm_metrics last_devfreq_metrics;
+#endif
+#endif
+
 #ifdef CONFIG_MALI_DEVFREQ
 	struct devfreq_dev_profile devfreq_profile;
 	struct devfreq *devfreq;

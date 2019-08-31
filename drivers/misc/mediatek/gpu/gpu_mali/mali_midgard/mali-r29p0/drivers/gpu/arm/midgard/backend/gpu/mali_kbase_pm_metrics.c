@@ -45,6 +45,38 @@
 #define KBASE_PM_TIME_SHIFT			8
 
 #ifdef CONFIG_MALI_MIDGARD_DVFS
+#ifdef ENABLE_COMMON_DVFS
+void MTKCalGpuUtilization(unsigned int *pui32Loading,
+		unsigned int *pui32Block, unsigned int *pui32Idle){
+	struct kbasep_pm_metrics diff;
+	int utilisation;
+
+	struct kbase_device *kbdev = (struct kbase_device *)MaliGetMaliData();
+
+	if (kbdev == NULL) {
+		pr_info("kbdev is null, maybe GPU is not initialized.");
+		return;
+	}
+
+	kbase_pm_get_dvfs_metrics(kbdev, &kbdev->last_devfreq_metrics, &diff);
+	utilisation = (100 * diff.time_busy) / (diff.time_busy + diff.time_idle);
+
+	if (utilisation > 100 || utilisation < 0)
+		pr_err("GPU loading calculation error. loading=%d",
+				utilisation);
+
+	if (pui32Loading)
+		*pui32Loading = utilisation;
+
+	if (pui32Idle)
+		*pui32Idle = 100 - utilisation;
+}
+#endif
+#endif
+
+#ifdef CONFIG_MALI_MIDGARD_DVFS
+#ifndef ENABLE_COMMON_DVFS
+#ifndef CONFIG_MTK_GPU_SPM_DVFS_SUPPORT
 static enum hrtimer_restart dvfs_callback(struct hrtimer *timer)
 {
 	unsigned long flags;
@@ -66,6 +98,8 @@ static enum hrtimer_restart dvfs_callback(struct hrtimer *timer)
 
 	return HRTIMER_NORESTART;
 }
+#endif
+#endif
 #endif /* CONFIG_MALI_MIDGARD_DVFS */
 
 int kbasep_pm_metrics_init(struct kbase_device *kbdev)
@@ -90,6 +124,8 @@ int kbasep_pm_metrics_init(struct kbase_device *kbdev)
 	spin_lock_init(&kbdev->pm.backend.metrics.lock);
 
 #ifdef CONFIG_MALI_MIDGARD_DVFS
+#ifndef ENABLE_COMMON_DVFS
+#ifndef CONFIG_MTK_GPU_SPM_DVFS_SUPPORT
 	kbdev->pm.backend.metrics.timer_active = true;
 	hrtimer_init(&kbdev->pm.backend.metrics.timer, CLOCK_MONOTONIC,
 							HRTIMER_MODE_REL);
@@ -98,6 +134,8 @@ int kbasep_pm_metrics_init(struct kbase_device *kbdev)
 	hrtimer_start(&kbdev->pm.backend.metrics.timer,
 			HR_TIMER_DELAY_MSEC(kbdev->pm.dvfs_period),
 			HRTIMER_MODE_REL);
+#endif
+#endif
 #endif /* CONFIG_MALI_MIDGARD_DVFS */
 
 	return 0;
@@ -203,7 +241,9 @@ void kbase_pm_get_dvfs_action(struct kbase_device *kbdev)
 	util_cl_share[0] = (100 * diff->busy_cl[0]) / busy;
 	util_cl_share[1] = (100 * diff->busy_cl[1]) / busy;
 
+	/*
 	kbase_platform_dvfs_event(kbdev, utilisation, util_gl_share, util_cl_share);
+	*/
 }
 
 bool kbase_pm_metrics_is_active(struct kbase_device *kbdev)

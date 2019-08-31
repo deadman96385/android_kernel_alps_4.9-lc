@@ -621,4 +621,14 @@ extern bool corestack_driver_control;
  */
 extern bool platform_power_down_only;
 
+/*
+ * MTK GPU DVFS
+ * */
+#ifdef ENABLE_COMMON_DVFS
+struct kbase_device *MaliGetMaliData(void);
+void MTKCalGpuUtilization(unsigned int *pui32Loading,
+		unsigned int *pui32Block, unsigned int *pui32Idle);
+unsigned int MTKCalPowerIndex(void);
+#endif
+
 #endif /* _KBASE_BACKEND_PM_INTERNAL_H_ */
