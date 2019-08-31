@@ -2042,6 +2042,7 @@ int ccci_start_modem(int md_id)
 		CCCI_MSG_INF(md_id, "ctl", "ungate_md fail: %d\n", ret);
 
 	atomic_set(&ctl_b->md_reset_on_going, 0);
+	inject_md_status_event(md_id, MD_STA_EV_HS1, NULL);
 
 	CCCI_MSG_INF(md_id, "ctl", "wait for MD_INIT_START_BOOT\n");
 	return 0;
@@ -2104,6 +2105,7 @@ int ccci_stop_modem(int md_id, unsigned int timeout)
 	ret = logic_layer_reset(md_id);
 	CCCI_MSG_INF(md_id, "ctl", "stop modem, delete boot up check timer\n");
 	ccci_stop_bootup_timer(md_id);
+	inject_md_status_event(md_id, MD_STA_EV_STOP, NULL);
 	CCCI_MSG_INF(md_id, "ctl", "md power off end\n");
 	return ret;
 }

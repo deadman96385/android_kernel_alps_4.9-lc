@@ -133,6 +133,22 @@ void ccci_aed(int, unsigned int, char *);
 #define DBG_FLAG_DEBUG		(1<<0)
 #define DBG_FLAG_JTAG		(1<<1)
 
+enum md_bc_event {
+	MD_STA_EV_INVALID = 0,
+	MD_STA_EV_RESET_REQUEST,
+	MD_STA_EV_F_ASSERT_REQUEST,
+	MD_STA_EV_STOP_REQUEST,
+	MD_STA_EV_START_REQUEST,
+	MD_STA_EV_ENTER_FLIGHT_REQUEST,
+	MD_STA_EV_LEAVE_FLIGHT_REQUEST,
+	MD_STA_EV_ENTER_FLIGHT_E_REQUEST,
+	MD_STA_EV_LEAVE_FLIGHT_E_REQUEST,
+	MD_STA_EV_HS1,
+	MD_STA_EV_READY,
+	MD_STA_EV_EXCEPTION,
+	MD_STA_EV_STOP,
+};
+
 enum {
 	MD_DEBUG_REL_INFO_NOT_READY = 0,
 	MD_IS_DEBUG_VERSION,
@@ -469,6 +485,7 @@ void ccci_md_mem_reserve(void);
 
 extern int legacy_boot_md_show(int md_id, char *buf, int size);
 extern int legacy_boot_md_store(int md_id);
+extern void inject_md_status_event(int md_id, int event_type, char reason[]);
 
 int ccci_load_firmware_helper(int md_id, char img_err_str[], int len);/* Platform code export */
 

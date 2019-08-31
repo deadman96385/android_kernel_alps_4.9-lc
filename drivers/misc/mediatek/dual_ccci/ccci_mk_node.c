@@ -29,6 +29,8 @@
 #include <ccci.h>
 #include <mt-plat/mt_ccci_common.h>
 
+static int modem_index;
+
 struct ccci_node_t {
 	char *name;
 	char *type;
@@ -330,7 +332,14 @@ ssize_t ccci_attr_store(struct kobject *kobj, struct attribute *attr,
 void ccci_attr_release(struct kobject *kobj)
 {
 	struct ccci_info_t *ccci_info_temp = container_of(kobj, struct ccci_info_t, kobj);
+	int ret = 0;
 
+	if(!strcmp(kobj->name, "ccci_monitor")) {
+		ret = ccci_stop_modem(modem_index, 0);
+		if (ret)
+			CCCI_ERR("force stop MD fail\n");
+	}
+	CCCI_MSG("port %s is closed\n", kobj->name);
 	kfree(ccci_info_temp);
 	ccci_sys_info = NULL;
 }
@@ -424,6 +433,7 @@ int mk_ccci_dev_node(int md_id)
 	struct ccci_node_t *dev_node;
 	int ret = 0;
 
+	modem_index = md_id;
 	if (md_id == MD_SYS1) {
 		dev_node = ccci1_node_list;
 		num = sizeof(ccci1_node_list) / sizeof(struct ccci_node_t);
