@@ -883,13 +883,13 @@ static ssize_t driver_flag_set(struct device_driver *drv,
 	case 0x10:
 		y = y > G_MAX_PKG_LEN ? G_MAX_PKG_LEN : y;
 		y = y < 1024 ? 1024 : y;
-		BTIF_INFO_FUNC("g_max_pkg_len is set to %d\n", y);
+		BTIF_INFO_FUNC("g_max_pkg_len is set to %ld\n", y);
 		g_max_pkg_len = y;
 		break;
 	case 0x11:
 		y = y > BTIF_RX_BUFFER_SIZE ? BTIF_RX_BUFFER_SIZE : y;
 		y = y < 1024 ? 1024 : y;
-		BTIF_INFO_FUNC("g_max_pding_data_size is set to %d\n", y);
+		BTIF_INFO_FUNC("g_max_pding_data_size is set to %ld\n", y);
 		g_max_pding_data_size = y;
 		break;
 #if BTIF_DBG_SUPPORT
@@ -1325,7 +1325,7 @@ int _btif_rx_dma_setup(struct _mtk_btif_ *p_btif)
 
 	i_ret = hal_btif_dma_clk_ctrl(p_dma_info, CLK_OUT_ENABLE);
 	if (i_ret) {
-		BTIF_ERR_FUNC("hal_btif_dma_clk_ctrl failed, i_ret(%d),",
+		BTIF_ERR_FUNC("hal_btif_dma_clk_ctrl failed, i_ret(%d),"
 			"set rx to pio mode\n", i_ret);
 /*DMA control failed set Rx to PIO mode*/
 		return _btif_rx_pio_setup(p_btif);
