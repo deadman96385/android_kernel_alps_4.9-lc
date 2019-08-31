@@ -14,6 +14,7 @@
 #include "ccci_core.h"
 #include "ccci_modem.h"
 #include "mdee_ctl.h"
+#include "ccci_bm.h"
 
 static void ccci_fsm_finish_command(struct ccci_modem *md, struct ccci_fsm_command *cmd, int result);
 static void ccci_fsm_finish_event(struct ccci_modem *md, struct ccci_fsm_event *event);
@@ -283,6 +284,9 @@ static void ccci_routine_stop(struct ccci_fsm_ctl *ctl, struct ccci_fsm_command 
 	struct ccci_fsm_event *event, *next;
 	struct ccci_fsm_command *ee_cmd = NULL;
 	unsigned long flags;
+	struct ccci_port *port = NULL;
+	struct sk_buff *skb = NULL;
+	struct port_proxy *proxy_p = NULL;
 
 	/* 1. state sanity check */
 	if (ctl->curr_state == CCCI_FSM_GATED)
@@ -315,6 +319,31 @@ static void ccci_routine_stop(struct ccci_fsm_ctl *ctl, struct ccci_fsm_command 
 	spin_unlock_irqrestore(&md->fsm.event_lock, flags);
 	/* 6. always end in stopped state */
 success:
+	/* when MD is stopped, the skb list of ccci_fs should be clean */
+	proxy_p = port_proxy_get_by_md_id(md->index);
+	if (proxy_p) {
+		port = port_proxy_get_port_by_channel(proxy_p, CCCI_FS_RX);
+		if (port && (port->flags & PORT_F_CLEAN)) {
+			CCCI_NORMAL_LOG(md->index, FSM,
+				"clear port:%s skb list data. qlen: %d\n",
+				port->name, port->rx_skb_list.qlen);
+
+			spin_lock_irqsave(&port->rx_skb_list.lock, flags);
+			while ((skb = __skb_dequeue(&port->rx_skb_list)) != NULL)
+				ccci_free_skb(skb);
+			spin_unlock_irqrestore(&port->rx_skb_list.lock, flags);
+
+		} else if (!port)
+			CCCI_NORMAL_LOG(md->index, FSM,
+				"not find port: md_id:%d, ch:CCCI_FS_RX\n",
+				md->index);
+
+	} else
+		CCCI_NORMAL_LOG(md->index, FSM,
+			"not find proxy: md_id:%d\n",
+			md->index);
+
+
 	inject_md_status_event(md->index, MD_STA_EV_STOP, NULL);
 	if (needforcestop)
 		needforcestop = 0;
