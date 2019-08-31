@@ -5509,7 +5509,11 @@ int primary_display_get_info(void *info)
 #ifdef CONFIG_MTK_ROUND_CORNER_SUPPORT
 		dispif_info->maxLayerNum = pgc->max_layer - 1;
 #else
+#ifdef CONFIG_MTK_OVL_REDUCE_SUPPORT
+		dispif_info->maxLayerNum = pgc->max_layer - 1;
+#else
 		dispif_info->maxLayerNum = pgc->max_layer;
+#endif
 #endif
 
 	switch (lcm_param->type) {
