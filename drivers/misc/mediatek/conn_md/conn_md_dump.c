@@ -147,8 +147,7 @@ int conn_md_dmp_out(struct conn_md_dmp_msg_log *p_msg_log,
 
 
 	if (p_msg_log == NULL) {
-		CONN_MD_WARN_FUNC("invalid parameter, p_msg_log is NULL\n",
-				p_msg_log);
+		CONN_MD_WARN_FUNC("invalid parameter, p_msg_log is NULL\n");
 		return CONN_MD_ERR_INVALID_PARAM;
 	}
 	mutex_lock(&p_msg_log->lock);
