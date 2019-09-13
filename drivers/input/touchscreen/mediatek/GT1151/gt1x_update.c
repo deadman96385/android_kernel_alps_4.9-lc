@@ -426,7 +426,7 @@ int gt1x_check_firmware(void)
 int gt1x_update_judge(void)
 {
 	int ret;
-	u8 reg_val[1];
+	u8 reg_val[1] = 0;
 	u8 retry = 3;
 	struct gt1x_version_info ver_info;
 	struct gt1x_version_info fw_ver_info;
