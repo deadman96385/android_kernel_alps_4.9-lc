@@ -948,11 +948,18 @@ static void ccci_rpc_work_helper(struct ccci_port *port, struct rpc_pkt *pkt,
 #if !defined(CONFIG_MTK_LEGACY)
 				u32 vals[CLKBUF_MAX_COUNT] = {0, 0, 0, 0};
 				struct device_node *node;
+				int ret = 0;
 
 				node = of_find_compatible_node(NULL, NULL, "mediatek,rf_clock_buffer");
 				if (node) {
-					of_property_read_u32_array(node, "mediatek,clkbuf-config", vals,
+					ret = of_property_read_u32_array(node, "mediatek,clkbuf-config", vals,
 						CLKBUF_MAX_COUNT);
+
+					if (ret)
+						CCCI_ERROR_LOG(md_id, RPC,
+							"%s get property fail\n",
+							__func__);
+
 				} else {
 					CCCI_ERROR_LOG(md_id, RPC, "%s can't find compatible node\n", __func__);
 				}
