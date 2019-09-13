@@ -688,7 +688,7 @@ void ddp_process_dbg_opt(const char *opt)
 			goto Error;
 		}
 	} else if (0 == strncmp(opt, "aal_dbg:", 8)) {
-		unsigned long int tmp;
+		unsigned long int tmp = 0;
 
 		ret = kstrtoul(opt + 8, 10, &tmp);
 		if (ret)
@@ -779,7 +779,7 @@ void mtkfb_process_dbg_opt(const char *opt)
 		}
 	} else if (0 == strncmp(opt, "dvfs_test:", 10)) {
 		char *p = (char *)opt + 10;
-		unsigned long int val;
+		unsigned long int val = 0;
 
 		ret = kstrtoul(p, 16, &val);
 		if (ret)
@@ -1018,7 +1018,7 @@ void mtkfb_process_dbg_opt(const char *opt)
 	} else if (0 == strncmp(opt, "dump_decouple:", 14)) {
 		if (0 == strncmp(opt + 14, "on", 2)) {
 			char *p = (char *)opt + 17;
-			unsigned long int temp;
+			unsigned long int temp = 0;
 
 			ret = kstrtoul(p, 10, &temp);
 			gCapturePriLayerDownX = (int)temp;

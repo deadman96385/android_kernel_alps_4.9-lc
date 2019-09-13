@@ -4489,7 +4489,7 @@ static int _ovl_ext_fence_release_callback(uint32_t userdata)
 {
 	int i = 0;
 	int ret = 0;
-	int fence_idx, layer;
+	int fence_idx = 0, layer;
 
 	mmprofile_log_ex(ddp_mmp_get_events()->session_release, MMPROFILE_FLAG_START, 1, userdata);
 #ifndef MTK_FB_CMDQ_DISABLE
@@ -4524,7 +4524,7 @@ static int _ovl_fence_release_callback(uint32_t userdata)
 	int i = 0;
 	unsigned int addr = 0;
 	int ret = 0;
-	unsigned int dsi_state[10];
+	unsigned int dsi_state[10] = { 0 };
 	unsigned int rdma_state[50];
 
 	mmprofile_log_ex(ddp_mmp_get_events()->session_release, MMPROFILE_FLAG_START, 1, userdata);
@@ -4596,7 +4596,7 @@ static int _ovl_fence_release_callback(uint32_t userdata)
 
 #ifndef MTK_FB_CMDQ_DISABLE
 	if (userdata == 5) {
-		int fence_idx, subtractor, layer;
+		int fence_idx = 0, subtractor, layer;
 
 		layer = disp_sync_get_output_timeline_id();
 
@@ -4671,7 +4671,7 @@ static int decouple_fence_release_kthread(void *data)
 		if (pgc->session_mode == DISP_SESSION_DECOUPLE_MIRROR_MODE
 		    && pgc->state != DISP_SLEPT) {
 			static cmdqRecHandle cmdq_handle;
-			unsigned int rdma_pitch_sec, rdma_fmt;
+			unsigned int rdma_pitch_sec = 0, rdma_fmt = 0;
 
 			if (cmdq_handle == NULL)
 				ret = cmdqRecCreate(CMDQ_SCENARIO_PRIMARY_DISP, &cmdq_handle);

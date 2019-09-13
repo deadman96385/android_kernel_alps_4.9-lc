@@ -1299,7 +1299,7 @@ static int set_external_buffer(struct disp_session_input_config *input)
 
 		if (input->config[i].layer_enable) {
 			/*which is calculated by pitch and ROI. */
-			unsigned int Bpp, x, y, pitch, hw_fmt;
+			unsigned int Bpp = 0, x, y, pitch, hw_fmt;
 
 			x = input->config[i].src_offset_x;
 			y = input->config[i].src_offset_y;
@@ -1399,7 +1399,7 @@ static int set_primary_buffer(struct disp_session_input_config *input)
 		}
 
 		if (input->config[i].layer_enable) {
-			unsigned int hw_fmt, Bpp, bpp, x, y, pitch;
+			unsigned int hw_fmt, Bpp = 0, bpp, x, y, pitch;
 
 			if (input->config[i].buffer_source == DISP_BUFFER_ALPHA) {
 				fence_msg_len += sprintf(fence_msg_buf + fence_msg_len,
