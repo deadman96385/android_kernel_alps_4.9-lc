@@ -119,6 +119,32 @@ void hps_task_wakeup(void)
 	mutex_unlock(&hps_ctxt.lock);
 }
 
+
+static int device_hotplug_notifier(struct notifier_block *nfb,
+																unsigned long action, void *hcpu)
+{
+	unsigned int cpu = (unsigned long)hcpu;
+	struct device *dev = get_cpu_device(cpu);
+	int ret;
+
+	switch (action & ~CPU_TASKS_FROZEN) {
+		case CPU_ONLINE:
+			dev->offline = false;
+			ret = NOTIFY_OK;
+			break;
+
+		case CPU_DEAD:
+			dev->offline = true;
+			ret = NOTIFY_OK;
+			break;
+
+		default:
+			ret = NOTIFY_DONE;
+			break;
+	}
+	return ret;
+}
+
 /*
  * init
  */
@@ -127,6 +153,8 @@ int hps_core_init(void)
 	int r = 0;
 
 	hps_warn("hps_core_init\n");
+
+	cpu_notifier(device_hotplug_notifier, 0);
 
 	/* init and start task */
 	r = hps_task_start();
