@@ -498,7 +498,7 @@ end:
 
 static int simple_sd_ioctl_set_bootpart(struct msdc_ioctl *msdc_ctl)
 {
-	u8 *l_buf;
+	u8 *l_buf = NULL;
 	struct msdc_host *host_ctl;
 	struct mmc_host *mmc;
 	int ret = 0;
