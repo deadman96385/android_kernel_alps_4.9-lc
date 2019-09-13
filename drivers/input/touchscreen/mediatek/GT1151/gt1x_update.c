@@ -184,7 +184,7 @@ s32 gt1x_check_fs_mounted(char *path_name)
 
 int gt1x_i2c_write_with_readback(u16 addr, u8 *buffer, int length)
 {
-	u8 buf[100] = 0;
+	u8 buf[100] = {0};
 	int ret = gt1x_i2c_write(addr, buffer, length);
 
 	if (ret)
@@ -426,7 +426,7 @@ int gt1x_check_firmware(void)
 int gt1x_update_judge(void)
 {
 	int ret;
-	u8 reg_val[1] = 0;
+	u8 reg_val[1] = {0};
 	u8 retry = 3;
 	struct gt1x_version_info ver_info;
 	struct gt1x_version_info fw_ver_info;
