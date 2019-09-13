@@ -187,6 +187,8 @@ int Is_In_IPOH;
 struct battery_custom_data batt_cust_data;
 int pending_wake_up_bat;
 
+static int is_thread_running = 1;
+
 int cable_in_uevent = 0;
 /* ////////////////////////////////////////////////////////////////////////////// */
 /* Integrate with NVRAM */
@@ -2960,7 +2962,7 @@ int bat_routine_thread(void *x)
 	battery_charging_control(CHARGING_CMD_SW_INIT, NULL);
 #endif
 
-	while (1) {
+	while (is_thread_running) {
 		__pm_stay_awake(&battery_meter_lock);
 		mutex_lock(&bat_mutex);
 
@@ -3014,7 +3016,7 @@ void bat_thread_wakeup(void)
 int bat_update_thread(void *x)
 {
 	/* Run on a process content */
-	while (1) {
+	while (is_thread_running) {
 		mutex_lock(&bat_update_mutex);
 #ifdef USING_SMOOTH_UI_SOC2
 		battery_meter_smooth_uisoc2();
@@ -4218,6 +4220,7 @@ static void battery_shutdown(struct platform_device *dev)
 		battery_log(BAT_LOG_CRTI, "%s: reset TA before shutdown\n",
 			__func__);
 	}
+	is_thread_running = 0;
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////////////// */
