@@ -213,6 +213,7 @@ extern struct LCM_DRIVER r63417_fhd_dsi_cmd_truly_nt50358_lcm_drv;
 extern struct LCM_DRIVER r63417_fhd_dsi_cmd_truly_nt50358_720p_lcm_drv;
 extern struct LCM_DRIVER r63417_fhd_dsi_cmd_truly_nt50358_qhd_lcm_drv;
 extern struct LCM_DRIVER r63417_fhd_dsi_vdo_truly_nt50358_lcm_drv;
+extern struct LCM_DRIVER r63417_fhd_dsi_cmd_truly_nt50358_hdp1600_lcm_drv;
 extern struct LCM_DRIVER r63419_wqhd_truly_phantom_cmd_lcm_drv;
 extern struct LCM_DRIVER r63419_wqhd_truly_phantom_vdo_lcm_drv;
 extern struct LCM_DRIVER r63419_fhd_truly_phantom_lcm_drv;
