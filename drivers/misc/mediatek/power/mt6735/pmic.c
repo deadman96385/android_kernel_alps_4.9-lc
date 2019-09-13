@@ -179,7 +179,7 @@ unsigned int pmic_read_interface(unsigned int RegNum, unsigned int *val, unsigne
 	unsigned int return_value = 0;
 #if defined(CONFIG_PMIC_HW_ACCESS_EN)
 	unsigned int pmic_reg = 0;
-	unsigned int rdata;
+	unsigned int rdata = 0;
 #endif
 	if ((pmic_suspend_state == true) && irqs_disabled())
 		return pmic_read_interface_nolock(RegNum, val, MASK, SHIFT);
@@ -215,7 +215,7 @@ unsigned int pmic_config_interface(unsigned int RegNum, unsigned int val, unsign
 	unsigned int return_value = 0;
 #if defined(CONFIG_PMIC_HW_ACCESS_EN)
 	unsigned int pmic_reg = 0;
-	unsigned int rdata;
+	unsigned int rdata = 0;
 #endif
 	if ((pmic_suspend_state == true) && irqs_disabled())
 		return pmic_config_interface_nolock(RegNum, val, MASK, SHIFT);
@@ -273,7 +273,7 @@ unsigned int pmic_read_interface_nolock(unsigned int RegNum, unsigned int *val, 
 
 #if defined(CONFIG_PMIC_HW_ACCESS_EN)
 	unsigned int pmic_reg = 0;
-	unsigned int rdata;
+	unsigned int rdata = 0;
 
 
 	/*mt_read_byte(RegNum, &pmic_reg); */
@@ -304,7 +304,7 @@ unsigned int pmic_config_interface_nolock(unsigned int RegNum, unsigned int val,
 
 #if defined(CONFIG_PMIC_HW_ACCESS_EN)
 	unsigned int pmic_reg = 0;
-	unsigned int rdata;
+	unsigned int rdata = 0;
 
 	/* pmic wrapper has spinlock protection. pmic do not to do it again */
 
