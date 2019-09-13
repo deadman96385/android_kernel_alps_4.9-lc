@@ -1455,21 +1455,18 @@ static void pwrap_int_test(void)
 	u32 rdata1 = 0;
 	u32 rdata2 = 0;
 
-	while (1) {
-	   #ifdef SLV_6328
+	#ifdef SLV_6328
 		rdata1 = WRAP_RD32(PMIC_WRAP_EINT_STA);
 		pwrap_read(MT6328_INT_STA, &rdata2);
 		PWRAPREG("Pwrap INT status check,PMIC_WRAP_EINT_STA=0x%x", rdata1);
 		PWRAPREG("MT6328_INT_STA[0x01B4]=0x%x\n", rdata2);
-	   #endif
-	   #ifdef SLV_6332
+	#endif
+	#ifdef SLV_6332
 		rdata1 = WRAP_RD32(PMIC_WRAP_EINT_STA);
 		pwrap_read(MT6332_INT_STA, &rdata2);
 		PWRAPREG("Pwrap INT status check,PMIC_WRAP_EINT_STA=0x%x", rdata1);
 		PWRAPREG("MT6332_INT_STA[0x8112]=0x%x\n", rdata2);
-	   #endif
-	   msleep(500);
-	}
+	#endif
 }
 static void pwrap_ut(u32 ut_test)
 {
