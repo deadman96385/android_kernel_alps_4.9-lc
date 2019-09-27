@@ -3073,6 +3073,13 @@ static long ISP_Buf_CTRL_FUNC_FRMB(unsigned long Param)
  * old value and prevent further 'start idx mismatch' error.
  * The FBC will recover after the error slot been enque again.
  */
+					        if ((_DUMMY_MAGIC_ &
+					                deque_buf.data[i].
+					                image.m_num_0) == 0)
+					                deque_buf.data[i].
+					                image.m_num_0 |=
+					                _UNCERTAIN_MAGIC_NUM_FLAG_;
+
 					}else {
 						pstRTBuf_FrmB->ring_buf[
 						rt_dma].data[iBuf + i].
