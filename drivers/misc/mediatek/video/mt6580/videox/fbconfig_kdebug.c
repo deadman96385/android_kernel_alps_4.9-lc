@@ -118,7 +118,7 @@ static struct PM_TOOL_T pm_params = {
 	.pLcm_params = NULL,
 	.pLcm_drv = NULL,
 };
-struct mutex fb_config_lock;
+
 static void *pm_get_handle(void)
 {
 	return (void *)&pm_params;
@@ -165,7 +165,6 @@ void Panel_Master_DDIC_config(void)
 
 	struct list_head *p;
 	struct CONFIG_RECORD_LIST *node;
-	mutex_lock(&fb_config_lock);
 	list_for_each_prev(p, &head_list.list) {
 		node = list_entry(p, struct CONFIG_RECORD_LIST, list);
 		switch (node->record.type) {
@@ -183,7 +182,6 @@ void Panel_Master_DDIC_config(void)
 		}
 
 	}
-	mutex_unlock(&fb_config_lock);
 }
 
 /*static void print_from_head_to_tail(void)
@@ -208,7 +206,6 @@ static void free_list_memory(void)
 {
 	struct list_head *p, *n;
 	struct CONFIG_RECORD_LIST *print;
-	mutex_lock(&fb_config_lock);
 	list_for_each_safe(p, n, &head_list.list) {
 		print = list_entry(p, struct CONFIG_RECORD_LIST, list);
 		list_del(&print->list);
@@ -219,7 +216,6 @@ static void free_list_memory(void)
 		pr_debug("*****list is empty!!\n");
 	else
 		pr_debug("*****list is NOT empty!!\n");
-	mutex_unlock(&fb_config_lock);
 
 }
 
@@ -350,9 +346,7 @@ static long fbconfig_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 			record_tmp_list = NULL;
 			return -EFAULT;
 		}
-		mutex_lock(&fb_config_lock);
 		list_add(&record_tmp_list->list, &head_list.list);
-		mutex_unlock(&fb_config_lock);
 	}
 	break;
 	case DRIVER_IC_CONFIG_DONE:
@@ -1383,13 +1377,10 @@ static const struct file_operations fbconfig_fops = {
 
 void PanelMaster_Init(void)
 {
-#if defined(CONFIG_MT_ENG_BUILD)
 	ConfigPara_dbgfs = debugfs_create_file("fbconfig",
-					       S_IFREG | S_IRUGO, NULL, (void *)0, &fbconfig_fops);
-#endif
+					       S_IFREG | 0444, NULL, (void *)0, &fbconfig_fops);
 
 	INIT_LIST_HEAD(&head_list.list);
-	mutex_init(&fb_config_lock);
 }
 
 void PanelMaster_Deinit(void)
