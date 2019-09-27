@@ -2227,11 +2227,12 @@ static long vcodec_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned 
 			/* TODO: Check if cpu_opp_limit is available */
 			/* ret = cpu_opp_limit
 			   (EVENT_VIDEO, rCpuOppLimit.limited_freq, rCpuOppLimit.limited_cpu, rCpuOppLimit.enable);
-			   // 0: PASS, other: FAIL */
+			   // 0: PASS, other: FAIL
 			if (ret) {
 				pr_debug("[VCODEC][ERROR] cpu_opp_limit failed: %lu\n", ret);
 				return -EFAULT;
 			}
+			*/
 			pr_debug("-VCODEC_SET_CPU_OPP_LIMIT tid = %d, ret = %lu\n", current->pid,
 				 ret);
 			pr_debug("VCODEC_SET_CPU_OPP_LIMIT [EMPTY] - - tid = %d\n", current->pid);
