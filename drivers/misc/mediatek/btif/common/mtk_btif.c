@@ -2875,8 +2875,8 @@ int btif_send_data(struct _mtk_btif_ *p_btif,
 			i_ret = length;
 		} else {
 			i_ret = 0;
-			BTIF_ERR_FUNC("fifo in failed, target len(%d),in len(%d),",
-				"don't schedule btif_tx_worker\n", buf_len, length);
+			BTIF_ERR_FUNC("fifo in failed, target len(%d),in len(%d), don't schedule btif_tx_worker\n",
+				buf_len, length);
 		}
 	} else {
 		BTIF_ERR_FUNC("invalid btif tx context:%d\n", p_btif->tx_ctx);
