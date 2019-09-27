@@ -220,6 +220,8 @@ config MACH_MT6735M
 	select MTK_IRQ_NEW_DESIGN
 	select MTK_POWER_GS
 	select MTK_CPU_STRESS
+	select HW_RANDOM
+	select HW_RANDOM_MT67XX
 	help
 	  This enables support for MediaTek MT6735M
 	  Support for k35mv1
