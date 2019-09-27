@@ -393,7 +393,7 @@ struct ion_handle *ion_handle_get_by_id_nolock(struct ion_client *client,
 	else
 		IONMSG("%s: can't get handle by id:%d\n", __func__, id);
 
-	return handle ? handle : ERR_PTR(-EINVAL);
+	return ERR_PTR(-EINVAL);
 }
 
 struct ion_handle *ion_handle_get_by_id(struct ion_client *client,
