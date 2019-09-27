@@ -33,7 +33,7 @@
 
 #include "m4u_hw.h"
 
-/* #define M4U_FPGAPORTING */
+#define M4U_FPGAPORTING
 #define M4U_PROFILE
 
 #define M4U_DVT 0
@@ -72,7 +72,7 @@ extern void MMProfileStart(int start);
 #define outer_flush_all(...)
 #endif
 
-#ifdef M4U_FPGAPORTING
+#if 0
 #define enable_clock(...)
 #define disable_clock(...)
 #define smp_inner_dcache_flush_all(...)
