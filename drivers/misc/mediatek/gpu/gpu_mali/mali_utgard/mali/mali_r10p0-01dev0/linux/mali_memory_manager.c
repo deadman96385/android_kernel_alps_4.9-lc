@@ -999,6 +999,17 @@ _mali_osk_errcode_t _mali_ukk_mem_resize(_mali_uk_mem_resize_s *args)
 	MALI_DEBUG_PRINT(4, (" mali_mem_resize_memory called! \n"));
 	MALI_DEBUG_ASSERT(0 == args->psize %  MALI_MMU_PAGE_SIZE);
 
+	if ((session) == NULL)
+	{
+		MALI_PRINT_ERROR(("NULL POINT"));
+		return ret;
+	}
+	if (!(0 == args->psize % MALI_MMU_PAGE_SIZE))
+	{
+		MALI_PRINT_ERROR(("SIZE ERROR"));
+                return ret;
+	}
+
 	/* Get the memory backend that need to be resize. */
 	mem_backend = mali_mem_backend_struct_search(session, args->vaddr);
 
