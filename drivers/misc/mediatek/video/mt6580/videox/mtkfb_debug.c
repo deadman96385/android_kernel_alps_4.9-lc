@@ -75,7 +75,7 @@
 /* Global variable declarations */
 /* --------------------------------------------------------------------------- */
 unsigned int g_enable_uart_log = 0;
-unsigned int g_mobilelog = 1;
+unsigned int g_mobilelog = 0;
 unsigned int g_fencelog = 0; /*Fence Log*/
 #ifdef CONFIG_ARCH_MT6570
 unsigned int g_loglevel = 3; /*DISPMSG level is DEFAULT_LEVEL==3*/
