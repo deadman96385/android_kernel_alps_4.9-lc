@@ -3538,6 +3538,8 @@ static int pmic_thread_kthread(void *x)
 			enable_irq(g_pmic_irq);
 #endif
 		schedule();
+		if (g_pmic_irq < 0)
+			break;
 	}
 
 	return 0;
