@@ -3926,8 +3926,6 @@ void testcase_get_task_by_engine(void)
 			engineFlag, task.engineFlag);
 	}
 
-	task.userDebugStr = kzalloc(debug_str_len, GFP_KERNEL);
-
 	cmdq_task_flush_async(handle);
 	status = cmdq_core_get_running_task_by_engine(engineFlag, debug_str_len,
 						      &task);
@@ -3939,9 +3937,6 @@ void testcase_get_task_by_engine(void)
 
 	cmdqCoreSetEvent(CMDQ_SYNC_TOKEN_USER_0);
 	cmdq_task_destroy(handle);
-
-	kfree(task.userDebugStr);
-	task.userDebugStr = NULL;
 
 	CMDQ_MSG("%s end\n", __func__);
 }

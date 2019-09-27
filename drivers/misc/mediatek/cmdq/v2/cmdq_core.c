@@ -9123,15 +9123,6 @@ int32_t cmdq_core_get_running_task_by_engine(uint64_t engineFlag,
 	spin_unlock_irqrestore(&gCmdqThreadLock, flags);
 
 	if (pTargetTask) {
-		uint32_t current_debug_str_len =
-			pTargetTask->userDebugStr
-				? (uint32_t)strlen(pTargetTask->userDebugStr)
-				: 0;
-		uint32_t debug_str_len = userDebugStrLen < current_debug_str_len
-						 ? userDebugStrLen
-						 : current_debug_str_len;
-		char *debug_str_buffer = p_out_task->userDebugStr;
-
 		/* copy content except pointers */
 		memcpy(p_out_task, pTargetTask, sizeof(struct TaskStruct));
 		p_out_task->pCMDEnd = NULL;
@@ -9139,14 +9130,7 @@ int32_t cmdq_core_get_running_task_by_engine(uint64_t engineFlag,
 		p_out_task->secStatus = NULL;
 		p_out_task->profileData = NULL;
 
-		if (debug_str_buffer) {
-			p_out_task->userDebugStr = debug_str_buffer;
-			if (debug_str_len)
-				strncpy(debug_str_buffer,
-					pTargetTask->userDebugStr,
-					debug_str_len);
-		}
-
+		CMDQ_ERR("MDP frame info: %s\n", pTargetTask->userDebugStr);
 		/* mark success */
 		status = 0;
 	}
