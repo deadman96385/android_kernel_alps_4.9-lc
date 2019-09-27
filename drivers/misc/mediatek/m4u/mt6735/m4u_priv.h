@@ -72,6 +72,10 @@ extern void MMProfileStart(int start);
 #define outer_flush_all(...)
 #endif
 
+#ifndef smp_inner_dcache_flush_all
+#define smp_inner_dcache_flush_all(...)
+#endif
+
 #if 0
 #define enable_clock(...)
 #define disable_clock(...)
