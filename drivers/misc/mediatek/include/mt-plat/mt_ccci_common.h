@@ -259,33 +259,38 @@ typedef enum {
 } MD_STATE_FOR_USER;
 
 typedef enum {
-	ID_GET_MD_WAKEUP_SRC = 0,   /* for SPM */
-	ID_CCCI_DORMANCY = 1,	   /* abandoned */
-	ID_LOCK_MD_SLEEP = 2,	   /* abandoned */
-	ID_ACK_MD_SLEEP = 3,		/* abandoned */
-	ID_SSW_SWITCH_MODE = 4,	 /* abandoned */
-	ID_SET_MD_TX_LEVEL = 5,	 /* abandoned */
-	ID_GET_TXPOWER = 6,		 /* for thermal */
-	ID_IPO_H_RESTORE_CB = 7,	/* abandoned */
-	ID_FORCE_MD_ASSERT = 8,	 /* abandoned */
-	ID_PAUSE_LTE = 9,		/* for DVFS */
-	ID_STORE_SIM_SWITCH_MODE = 10,
-	ID_GET_SIM_SWITCH_MODE = 11,
-	ID_GET_MD_STATE = 12,		/* for DVFS */
-	ID_THROTTLING_CFG = 13,		/* For MD SW throughput throttling */
-	ID_RESET_MD = 14,			/* for SVLTE MD3 reset MD1 */
-	ID_DUMP_MD_REG = 15,
-	ID_DUMP_MD_SLEEP_MODE = 16, /* for dump MD debug info from SMEM when AP sleep */
-	ID_PMIC_INTR = 17, /* for PMIC to notify MD buck over current, called from kernel thread context */
-	ID_STOP_MD = 18,
-	ID_START_MD = 19,
-	ID_UPDATE_MD_BOOT_MODE = 20,
-	ID_MD_MPU_ASSERT = 21,
-	ID_ENTER_FLIGHT_MODE = 22,
-	ID_LEAVE_FLIGHT_MODE = 23,
+	ID_GET_MD_WAKEUP_SRC,   /* for SPM */
+	ID_GET_TXPOWER,         /* for thermal */
+	ID_PAUSE_LTE,           /* for DVFS */
+	ID_GET_MD_STATE,        /* for DVFS */
+	ID_THROTTLING_CFG,      /* For MD SW throughput throttling */
+	/* for dump MD debug info from SMEM when AP sleep */
+	ID_DUMP_MD_SLEEP_MODE,
+	/* for PMIC to notify MD buck over current, */
+	/*called from kernel thread context */
+	ID_PMIC_INTR,
+	ID_FORCE_MD_ASSERT,     /* for EMI MPU */
+	ID_MD_MPU_ASSERT,       /* for EMI MPU */
+	ID_RESET_MD,
+	ID_STORE_SIM_SWITCH_MODE,
+	ID_GET_SIM_SWITCH_MODE,
+	ID_STOP_MD,
+	ID_START_MD,
+	ID_UPDATE_MD_BOOT_MODE,
+	ID_ENTER_FLIGHT_MODE,
+	ID_LEAVE_FLIGHT_MODE,
 
-	ID_UPDATE_TX_POWER = 100,   /* for SWTP */
 
+
+	ID_IPO_H_RESTORE_CB,        /* abandoned */
+	ID_CCCI_DORMANCY,	   /* abandoned */
+	ID_LOCK_MD_SLEEP,	   /* abandoned */
+	ID_ACK_MD_SLEEP,		/* abandoned */
+	ID_SSW_SWITCH_MODE,	 /* abandoned */
+	ID_SET_MD_TX_LEVEL,	 /* abandoned */
+	ID_DUMP_MD_REG,
+
+	ID_UPDATE_TX_POWER = 100,     /* for SWTP */
 } KERN_FUNC_ID;
 
 enum {

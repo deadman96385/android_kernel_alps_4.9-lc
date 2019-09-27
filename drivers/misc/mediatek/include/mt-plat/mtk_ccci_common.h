@@ -343,8 +343,6 @@ enum KERN_FUNC_ID {
 	ID_PMIC_INTR,
 	ID_FORCE_MD_ASSERT,	/* for EMI MPU */
 	ID_MD_MPU_ASSERT,	/* for EMI MPU */
-	ID_LWA_CONTROL_MSG,	/* for Wi-Fi driver */
-	ID_UPDATE_TX_POWER,	/* for SWTP */
 	ID_RESET_MD,
 	ID_STORE_SIM_SWITCH_MODE,
 	ID_GET_SIM_SWITCH_MODE,
@@ -353,7 +351,10 @@ enum KERN_FUNC_ID {
 	ID_UPDATE_MD_BOOT_MODE,
 	ID_ENTER_FLIGHT_MODE,
 	ID_LEAVE_FLIGHT_MODE,
-	ID_MD_RF_DESENSE
+	ID_MD_RF_DESENSE,
+	ID_LWA_CONTROL_MSG,     /* for Wi-Fi driver */
+
+	ID_UPDATE_TX_POWER = 100,     /* for SWTP */
 };
 
 /* AP<->MD messages on control or system channel */
