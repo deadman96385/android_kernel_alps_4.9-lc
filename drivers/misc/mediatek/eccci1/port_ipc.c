@@ -417,6 +417,7 @@ static int port_ipc_kernel_init(struct ccci_port *port)
 		struct conn_md_bridge_ops ccci_ipc_conn_ops = {.rx_cb = ccci_ipc_send_ilm_to_md1};
 
 		mtk_conn_md_bridge_reg(MD_MOD_EL1, &ccci_ipc_conn_ops);
+		mtk_conn_md_bridge_reg(MD_MOD_GMMGR, &ccci_ipc_conn_ops);
 #endif
 	}
 	return 0;
