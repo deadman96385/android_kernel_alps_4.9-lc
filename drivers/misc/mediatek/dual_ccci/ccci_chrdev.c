@@ -1224,11 +1224,17 @@ static long ccci_vir_chr_ioctl(struct file *file, unsigned int cmd,
 				     "IOC_RELOAD_MD_TYPE: copy_from_user fail!\n");
 			ret = -EFAULT;
 		} else {
-			CCCI_MSG_INF(md_id, "chr",
-				     "IOC_RELOAD_MD_TYPE: storing md type(0x%x)!\n",
-				     md_type);
-			set_modem_support_cap(md_id, md_type);
-			ccci_set_reload_modem(md_id);
+			if (md_type == 3 || md_type == 4) {
+				CCCI_MSG_INF(md_id, "chr",
+					     "IOC_RELOAD_MD_TYPE: storing md type(0x%x)!\n",
+						md_type);
+				set_modem_support_cap(md_id, md_type);
+				ccci_set_reload_modem(md_id);
+			} else {
+				CCCI_MSG_INF(md_id, "chr", "Invalid MD type %d\n",
+						md_type);
+				return -EFAULT;
+			}
 		}
 		break;
 
