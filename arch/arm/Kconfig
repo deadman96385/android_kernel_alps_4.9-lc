@@ -184,6 +184,7 @@ config MACH_MT6735
 	select MTK_IRQ_NEW_DESIGN_DEBUG
 	select MTK_POWER_GS
 	select MTK_CPU_STRESS
+	select SDCARD_FS
 	help
 	  This enable support for MediaTek MT6735
 
@@ -223,6 +224,7 @@ config MACH_MT6735M
 	select MTK_CPU_STRESS
 	select HW_RANDOM
 	select HW_RANDOM_MT67XX
+	select SDCARD_FS
 	help
 	  This enables support for MediaTek MT6735M
 	  Support for k35mv1
