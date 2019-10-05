@@ -1250,7 +1250,7 @@ int kdCISModulePowerOn(enum CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *curr
 			/* Set PDN Pin Low->high */
 			if (GPIO_CAMERA_INVALID != pinSet[pinSetIdx][IDX_PS_CMPDN]) {
 				mtkcam_gpio_set(pinSetIdx, CAMPDN,
-						pinSet[pinSetIdx][IDX_PS_CMPDN + IDX_PS_ON]);
+						pinSet[pinSetIdx][IDX_PS_CMPDN + IDX_PS_OFF]);
 			}
 			/* Set Reset Pin Low */
 			if (GPIO_CAMERA_INVALID != pinSet[pinSetIdx][IDX_PS_CMRST]) {
