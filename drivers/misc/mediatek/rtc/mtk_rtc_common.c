@@ -717,22 +717,6 @@ static int rtc_ops_ioctl(struct device *dev, unsigned int cmd, unsigned long arg
 {
 	/* dump_stack(); */
 	rtc_xinfo("rtc_ops_ioctl cmd=%d\n", cmd);
-	switch (cmd) {
-	case RTC_AUTOBOOT_ON:
-		{
-			hal_rtc_set_spare_register(RTC_AUTOBOOT, AUTOBOOT_ON);
-			rtc_xinfo("rtc_ops_ioctl cmd=RTC_AUTOBOOT_ON\n");
-			return 0;
-		}
-	case RTC_AUTOBOOT_OFF:	/* IPO shutdown */
-		{
-			hal_rtc_set_spare_register(RTC_AUTOBOOT, AUTOBOOT_OFF);
-			rtc_xinfo("rtc_ops_ioctl cmd=RTC_AUTOBOOT_OFF\n");
-			return 0;
-		}
-	default:
-		break;
-	}
 	return -ENOIOCTLCMD;
 }
 
