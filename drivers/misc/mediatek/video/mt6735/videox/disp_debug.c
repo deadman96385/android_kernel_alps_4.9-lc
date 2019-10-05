@@ -985,7 +985,7 @@ void mtkfb_process_dbg_opt(const char *opt)
 	} else if (0 == strncmp(opt, "dump_layer:", 11)) {
 		if (0 == strncmp(opt + 11, "on", 2)) {
 			char *p = (char *)opt + 14;
-			unsigned long int temp;
+			unsigned long int temp = 0;
 
 			ret = kstrtoul(p, 10, &temp);
 			gCapturePriLayerDownX = (int)temp;
