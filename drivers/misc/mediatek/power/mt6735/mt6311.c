@@ -7073,7 +7073,7 @@ static int pmic_thread_kthread_mt6311(void *x)
 	PMICLOG1("[MT6311_INT] enter\n");
 
 	/* Run on a process content */
-	while (1) {
+	while (!kthread_should_stop()) {
 		mutex_lock(&pmic_mutex_mt6311);
 
 		mt6311_int_handler();
